@@ -1,0 +1,98 @@
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
+using Services.Implementations;
+using Services.Interfaces;
+using Settings.JWT;
+using Settings.VNPay;
+using System.Reflection;
+using System.Text;
+
+namespace API.Configurations
+{
+    public static class AppConfigurations
+    {
+        public static void AddJwt(this IServiceCollection services, IConfiguration configuration)
+        {
+            services.AddOptions();
+            var appsettings = configuration.GetSection("AppSettings");
+            services.Configure<JWTSetting>(appsettings);
+
+
+            var secretKey = configuration["AppSettings:SecretKey"];
+            var secretKeyBytes = Encoding.UTF8.GetBytes(secretKey);
+
+            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                .AddJwtBearer(opt =>
+                {
+                    opt.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        ValidateIssuer = false,
+                        ValidateAudience = false,
+                        ValidateIssuerSigningKey = true,
+                        IssuerSigningKey = new SymmetricSecurityKey(secretKeyBytes),
+                        ClockSkew = TimeSpan.Zero
+                    };
+                });
+        }
+
+        public static void VnPaySettings(this IServiceCollection services, IConfiguration _configuration)
+        {
+            services.AddOptions();
+            var vnpaysettings = _configuration.GetSection("VnPaySettings");
+            services.Configure<VNPaySetting>(vnpaysettings);
+        }
+
+        //public static void MailSettings(this IServiceCollection services, IConfiguration _configuration)
+        //{
+        //    services.AddOptions();
+        //    var mailsettings = _configuration.GetSection("MailSettings");
+        //    services.Configure<MailSettings>(mailsettings);
+        //}
+
+        public static void AddDependenceInjection(this IServiceCollection services)
+        {
+            services.AddScoped<ITransactionService, TransactionService>();
+            services.AddScoped<IWalletService, WalletService>();
+            
+        }
+
+        public static void AddSwagger(this IServiceCollection services)
+        {
+            services.AddSwaggerGen(c =>
+            {
+                c.SwaggerDoc("v1", new OpenApiInfo { Title = "Driving-School Service Interface", Description = "APIs for Driving-School Application", Version = "v1" });
+                c.DescribeAllParametersInCamelCase();
+                c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+                {
+                    Description = "JWT Authorization header using the Bearer scheme. Enter your token below.",
+                    Name = "Authorization",
+                    In = ParameterLocation.Header,
+                    Type = SecuritySchemeType.Http,
+                    Scheme = "bearer"
+                });
+                c.AddSecurityRequirement(new OpenApiSecurityRequirement()
+                  {
+                    {
+                      new OpenApiSecurityScheme
+                      {
+                        Reference = new OpenApiReference
+                          {
+                            Type = ReferenceType.SecurityScheme,
+                            Id = "Bearer"
+                          },
+                          Scheme = "oauth2",
+                          Name = "Bearer",
+                          In = ParameterLocation.Header,
+                        },
+                        new List<string>()
+                      }
+                 });
+
+                var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+                var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+                c.IncludeXmlComments(xmlPath);
+            });
+        }
+    }
+}
