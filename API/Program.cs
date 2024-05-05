@@ -20,7 +20,7 @@ namespace API
             builder.Services.AddDependenceInjection();
             builder.Services.AddHttpContextAccessor();
             builder.Services.VnPaySettings(builder.Configuration);
-
+            builder.Services.MailSettings(builder.Configuration);
             builder.Services.AddJwt(builder.Configuration);
             builder.Services.AddAutoMapper(typeof(GeneralProfile));
             builder.Services.AddCors(options =>

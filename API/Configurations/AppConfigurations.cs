@@ -4,6 +4,7 @@ using Microsoft.OpenApi.Models;
 using Services.Implementations;
 using Services.Interfaces;
 using Settings.JWT;
+using Settings.Mail;
 using Settings.VNPay;
 using System.Reflection;
 using System.Text;
@@ -43,15 +44,16 @@ namespace API.Configurations
             services.Configure<VNPaySetting>(vnpaysettings);
         }
 
-        //public static void MailSettings(this IServiceCollection services, IConfiguration _configuration)
-        //{
-        //    services.AddOptions();
-        //    var mailsettings = _configuration.GetSection("MailSettings");
-        //    services.Configure<MailSettings>(mailsettings);
-        //}
+        public static void MailSettings(this IServiceCollection services, IConfiguration _configuration)
+        {
+            services.AddOptions();
+            var mailsettings = _configuration.GetSection("MailSettings");
+            services.Configure<MailSetting>(mailsettings);
+        }
 
         public static void AddDependenceInjection(this IServiceCollection services)
         {
+            services.AddTransient<ISendMailService, SendMailService>();
             services.AddScoped<ITransactionService, TransactionService>();
             services.AddScoped<IWalletService, WalletService>();
             
@@ -61,7 +63,7 @@ namespace API.Configurations
         {
             services.AddSwaggerGen(c =>
             {
-                c.SwaggerDoc("v1", new OpenApiInfo { Title = "Driving-School Service Interface", Description = "APIs for Driving-School Application", Version = "v1" });
+                c.SwaggerDoc("v1", new OpenApiInfo { Title = "On-Demand Tutor Service Interface", Description = "APIs for ODTutor Application", Version = "v1" });
                 c.DescribeAllParametersInCamelCase();
                 c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
                 {
