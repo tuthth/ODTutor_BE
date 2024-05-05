@@ -1,0 +1,22 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Models.Entities
+{
+    public class TutorCertificate
+    {
+        public Guid TutorCertificateId { get; set; }
+        public Guid TutorId { get; set; }
+        public Guid TutorSubjectId { get; set; }
+        public string ImageUrl { get; set; }
+        public string Title { get; set; }
+        public string Content { get; set; }
+        public DateTime CreatedAt {  get; set; }
+
+        public virtual Tutor? TutorNavigation {  get; set; }
+        public virtual TutorSubject? TutorSubjectNavigation { get; set; }
+    }
+}
