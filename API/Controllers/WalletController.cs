@@ -31,7 +31,7 @@ namespace API.Controllers
             try
             {
                 //var userId = _userService.GetUserId(HttpContext);
-                var wallet = await _walletService.GetWallet(1);
+                var wallet = await _walletService.GetWallet(Guid.Empty);
 
                 if (wallet is StatusCodeResult statusCodeResult)
                 {
@@ -79,7 +79,7 @@ namespace API.Controllers
                     }
                 }
 
-                long orderId = Convert.ToInt64(vnpay.GetResponseData("vnp_TxnRef"));
+                Guid orderId = Guid.Parse(vnpay.GetResponseData("vnp_TxnRef"));
                 long vnp_Amount = Convert.ToInt64(vnpay.GetResponseData("vnp_Amount")) / 100;
                 long vnpayTranId = Convert.ToInt64(vnpay.GetResponseData("vnp_TransactionNo"));
                 string vnp_ResponseCode = vnpay.GetResponseData("vnp_ResponseCode");
@@ -89,7 +89,7 @@ namespace API.Controllers
                 bool checkSignature = vnpay.ValidateSignature(vnp_SecureHash, vnPaySetting.VnPay_HashSecret.ToString());
 
 
-                var trans = await _transactionService.GetTransactionById(orderId);
+                var trans = await _transactionService.GetWalletTransactionById(orderId);
                 if (trans == null) return StatusCode(StatusCodes.Status404NotFound, "Không tìm thấy giao dịch");
 
                 if (checkSignature)
@@ -98,22 +98,22 @@ namespace API.Controllers
                     {
                         if (trans.Amount == vnp_Amount)
                         {
-                            if (trans.Type == VNPayType.PENDING.ToString())
+                            if (trans.Status == (int)VNPayType.PENDING)
                             {
                                 if (vnp_ResponseCode == "00" && vnp_TransactionStatus == "00")
                                 {
-                                    trans.Type = VNPayType.APPROVE.ToString();
-                                    trans.WalletNavigation.Balance += trans.Amount;
+                                    trans.Status = (int)VNPayType.APPROVE;
+                                    trans.WalletNavigation.Amount += trans.Amount;
                                     returnContent = "{\"RspCode\":\"00\",\"Message\":\"Confirm Success\"}";
 
                                 }
                                 else
                                 {
-                                    trans.Type = VNPayType.REJECT.ToString();
+                                    trans.Status = (int)VNPayType.REJECT;
                                     returnContent = "{\"RspCode\":\"02\",\"Message\":\"Order already confirmed\"}";
                                 }
 
-                                await _transactionService.UpdateTransactionInfoInDatabase(trans);
+                                await _transactionService.UpdateWalletTransactionInfoInDatabase(trans);
                             }
                             else
                             {

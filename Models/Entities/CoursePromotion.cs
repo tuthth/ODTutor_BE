@@ -13,6 +13,6 @@ namespace Models.Entities
         public DateTime CreatedAt {  get; set; }
 
         public virtual Course? CourseNavigation { get; set; }
-        public virtual ICollection<Promotion>? PromotionsNavigation {  get; set; }
+        public virtual Promotion? PromotionNavigation { get; set; }
     }
 }

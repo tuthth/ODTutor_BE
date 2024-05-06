@@ -25,7 +25,7 @@ namespace API.Controllers
             try
             {
                 //var userId = _userService.GetUserId(HttpContext);
-                var transaction = await _transactionService.CreateDepositVnPay(transactionCreate, 1);
+                var transaction = await _transactionService.CreateDepositVnPay(transactionCreate, Guid.Empty);
                 if (transaction is StatusCodeResult statusCodeResult)
                 {
                     if (statusCodeResult.StatusCode == 404) { return NotFound("Không tìm thấy ví"); }

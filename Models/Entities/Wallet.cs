@@ -17,6 +17,7 @@ namespace Models.Entities
         public int Status { get; set; }
         public virtual ICollection<BookingTransaction>? BookingTransactionsNavigation { get; set; }
         public virtual ICollection<WalletTransaction>? WalletTransactionsNavigation { get; set; }
+        public virtual ICollection<CourseTransaction>? CourseTransactionsNavigation { get; set; }
         public virtual User? UserNavigation { get; set; }
     }
 }

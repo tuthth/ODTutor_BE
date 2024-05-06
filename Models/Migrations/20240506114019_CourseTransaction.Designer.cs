@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Models.Entities;
 
@@ -11,9 +12,11 @@ using Models.Entities;
 namespace Models.Migrations
 {
     [DbContext(typeof(ODTutorContext))]
-    partial class ODTutorContextModelSnapshot : ModelSnapshot
+    [Migration("20240506114019_CourseTransaction")]
+    partial class CourseTransaction
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -21,6 +24,21 @@ namespace Models.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+
+            modelBuilder.Entity("CoursePromotionPromotion", b =>
+                {
+                    b.Property<Guid>("CoursePromotionsNavigationsPromotionId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("PromotionsNavigationPromotionId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("CoursePromotionsNavigationsPromotionId", "PromotionsNavigationPromotionId");
+
+                    b.HasIndex("PromotionsNavigationPromotionId");
+
+                    b.ToTable("CoursePromotionPromotions", (string)null);
+                });
 
             modelBuilder.Entity("Models.Entities.Booking", b =>
                 {
@@ -160,6 +178,7 @@ namespace Models.Migrations
             modelBuilder.Entity("Models.Entities.CoursePromotion", b =>
                 {
                     b.Property<Guid>("PromotionId")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid>("CourseId")
@@ -168,7 +187,7 @@ namespace Models.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
-                    b.HasKey("PromotionId", "CourseId");
+                    b.HasKey("PromotionId");
 
                     b.HasIndex("CourseId");
 
@@ -665,6 +684,21 @@ namespace Models.Migrations
                     b.ToTable("WalletTransactions");
                 });
 
+            modelBuilder.Entity("CoursePromotionPromotion", b =>
+                {
+                    b.HasOne("Models.Entities.CoursePromotion", null)
+                        .WithMany()
+                        .HasForeignKey("CoursePromotionsNavigationsPromotionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Models.Entities.Promotion", null)
+                        .WithMany()
+                        .HasForeignKey("PromotionsNavigationPromotionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("Models.Entities.Booking", b =>
                 {
                     b.HasOne("Models.Entities.Student", "StudentNavigation")
@@ -733,15 +767,7 @@ namespace Models.Migrations
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.HasOne("Models.Entities.Promotion", "PromotionNavigation")
-                        .WithMany("CoursePromotionsNavigation")
-                        .HasForeignKey("PromotionId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
                     b.Navigation("CourseNavigation");
-
-                    b.Navigation("PromotionNavigation");
                 });
 
             modelBuilder.Entity("Models.Entities.CourseTransaction", b =>
@@ -996,11 +1022,6 @@ namespace Models.Migrations
                     b.Navigation("CourseTransactionNavigation");
 
                     b.Navigation("StudentCoursesNavigation");
-                });
-
-            modelBuilder.Entity("Models.Entities.Promotion", b =>
-                {
-                    b.Navigation("CoursePromotionsNavigation");
                 });
 
             modelBuilder.Entity("Models.Entities.Student", b =>

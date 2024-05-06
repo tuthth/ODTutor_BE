@@ -14,11 +14,11 @@ namespace Models.Entities
         public DateTime CreatedAt { get; set; }
         public TimeSpan Duration { get; set; }
         public DateTime ActualEndTime { get; set; }
-        public string Message { get; set; }
+        public string? Message { get; set; }
         public decimal TotalPrice { get; set; }
         public int Status { get; set; }
-        public string Description { get; set; }
-        public string GoogleMeetUrl { get; set; }
+        public string? Description { get; set; }
+        public string? GoogleMeetUrl { get; set; }
 
         public virtual Student? StudentNavigation {  get; set; }
         public virtual Tutor? TutorNavigation { get; set; }
