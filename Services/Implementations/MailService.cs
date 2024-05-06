@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using MailKit.Security;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using MimeKit;
 using Models.Entities;
@@ -19,7 +20,7 @@ namespace Services.Implementations
     {
         private readonly MailSetting mailSettings;
 
-        public SendMailService(Context context, IMapper mapper, IOptions<MailSetting> _mailSettings) : base(context, mapper)
+        public SendMailService(ODTutorContext context, IMapper mapper, IOptions<MailSetting> _mailSettings) : base(context, mapper)
         {
             mailSettings = _mailSettings.Value;
         }
@@ -38,8 +39,8 @@ namespace Services.Implementations
                 var queryUserAuthentication = _context.Users.Include(u => u.UserAuthenticationNavigation).FirstOrDefault(u => u.Email.Equals(email));
                 queryUserAuthentication.UserAuthenticationNavigation.EmailToken = tokenEmail;
                 queryUserAuthentication.UserAuthenticationNavigation.EmailTokenExpiry = DateTime.Now;
-                _context.UserAuthentication.Update(queryUserAuthentication.UserAuthenticationNavigation);
-                await _context.SaveChanges();
+                _context.UserAuthentications.Update(queryUserAuthentication.UserAuthenticationNavigation);
+                await _context.SaveChangesAsync();
                 await SendMail(new MailContent()
                 {
                     To = email,
@@ -54,15 +55,15 @@ namespace Services.Implementations
                 Active = false,
             };
             _context.Users.Add(user);
-            await _context.SaveChanges();
+            await _context.SaveChangesAsync();
             UserAuthentication userAuthentication = new UserAuthentication
             {
                 UserId = user.Id,
                 EmailToken = tokenEmail,
                 EmailTokenExpiry = DateTime.UtcNow
             };
-            _context.UserAuthentication.Add(userAuthentication);
-            await _context.SaveChanges();
+            _context.UserAuthentications.Add(userAuthentication);
+            await _context.SaveChangesAsync();
             await SendMail(new MailContent()
             {
                 To = email,

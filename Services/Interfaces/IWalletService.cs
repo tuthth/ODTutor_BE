@@ -9,6 +9,6 @@ namespace Services.Interfaces
 {
     public interface IWalletService
     {
-        Task<IActionResult> GetWallet(int userId);
+        Task<IActionResult> GetWallet(Guid userId);
     }
 }

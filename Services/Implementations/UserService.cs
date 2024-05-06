@@ -15,7 +15,7 @@ namespace Services.Implementations
 {
     public class UserService : BaseService, IUserService
     {
-        public UserService(Context context, IMapper mapper) : base(context, mapper)
+        public UserService(ODTutorContext context, IMapper mapper) : base(context, mapper)
         {
         }
 

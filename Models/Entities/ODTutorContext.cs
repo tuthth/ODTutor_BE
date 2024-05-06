@@ -402,7 +402,7 @@ namespace Models.Entities
 
     // WalletTransaction Entity Configuration
     modelBuilder.Entity<WalletTransaction>()
-        .HasKey(wt => wt.WalletId);
+        .HasKey(wt => wt.WalletTransactionId);
 
     modelBuilder.Entity<WalletTransaction>()
         .HasOne(wt => wt.WalletNavigation)

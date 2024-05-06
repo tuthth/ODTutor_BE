@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Models;
+using Models.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,10 +11,10 @@ namespace Services
 {
     public class BaseService
     {
-        protected readonly Context _context;
+        protected readonly ODTutorContext _context;
         protected readonly IMapper _mapper;
 
-        public BaseService(Context context, IMapper mapper)
+        public BaseService(ODTutorContext context, IMapper mapper)
         {
             _context = context;
             _mapper = mapper;

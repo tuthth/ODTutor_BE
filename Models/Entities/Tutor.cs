@@ -12,6 +12,7 @@ namespace Models.Entities
         public Guid UserId { get; set; }
         public string IdentityNumber {  get; set; }
         public string Level { get; set; }
+        public decimal PricePerHour { get; set; }
         public string Description { get; set; }
 
         public virtual User? UserNavigation {  get; set; }

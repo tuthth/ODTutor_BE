@@ -12,6 +12,7 @@ using Services.Interfaces;
 using Models.Models.Requests;
 using Models.Entities;
 using Models.Enumerables;
+using Microsoft.EntityFrameworkCore;
 
 namespace Services.Implementations
 {
@@ -19,27 +20,27 @@ namespace Services.Implementations
     {
         private readonly VNPaySetting _vnPaySetting;
         private readonly IHttpContextAccessor _httpContextAccessor;
-        public TransactionService(Context _context, IMapper mapper, IOptions<VNPaySetting> options, IHttpContextAccessor httpContextAccessor) : base(_context, mapper)
+        public TransactionService(ODTutorContext _context, IMapper mapper, IOptions<VNPaySetting> options, IHttpContextAccessor httpContextAccessor) : base(_context, mapper)
         {
             _vnPaySetting = options.Value;
             _httpContextAccessor = httpContextAccessor;
         }
 
-        public async Task<IActionResult> CreateDepositVnPay(TransactionCreate transactionCreate, int userId)
+        public async Task<IActionResult> CreateDepositVnPay(TransactionCreate transactionCreate, Guid userId)
         {
-            var wallet = _context.Wallets.Include(w => w.Transactions).FirstOrDefault(w => w.StudentId.Equals(userId));
+            var wallet = _context.Wallets.Include(w => w.BookingTransactionsNavigation).FirstOrDefault(w => w.UserId.Equals(userId));
             if (wallet == null)
             {
                 return new StatusCodeResult(404);
             }
-            Transaction transaction = new Transaction()
+            BookingTransaction transaction = new BookingTransaction()
             {
                 Amount = transactionCreate.Amount,
-                WalletId = wallet.Id,
-                Type = VNPayType.PENDING.ToString(),
+                WalletId = wallet.WalletId,
+                Status = (int)VNPayType.PENDING,
             };
-            _context.Transactions.Add(transaction);
-            await _context.SaveChanges();
+            _context.BookingTransactions.Add(transaction);
+            await _context.SaveChangesAsync();
 
             string vnp_Returnurl = transactionCreate.RedirectUrl;
             string vnp_Url = _vnPaySetting.VnPay_Url.ToString();
@@ -57,10 +58,10 @@ namespace Services.Implementations
             vnpay.AddRequestData("vnp_CurrCode", "VND");
             vnpay.AddRequestData("vnp_IpAddr", Utils.GetIpAddress(_httpContextAccessor));
             vnpay.AddRequestData("vnp_Locale", "vn");
-            vnpay.AddRequestData("vnp_OrderInfo", "Thanh toán đơn hàng: " + transaction.Id);
+            vnpay.AddRequestData("vnp_OrderInfo", "Thanh toán đơn hàng: " + transaction.BookingId);
             vnpay.AddRequestData("vnp_OrderType", "other");
             vnpay.AddRequestData("vnp_ReturnUrl", vnp_Returnurl);
-            vnpay.AddRequestData("vnp_TxnRef", transaction.Id.ToString());
+            vnpay.AddRequestData("vnp_TxnRef", transaction.BookingTransactionId.ToString());
 
             string paymentUrl = vnpay.CreateRequestUrl(vnp_Url, vnp_HashSecret);
 
@@ -70,9 +71,9 @@ namespace Services.Implementations
             });
         }
 
-        public async Task<Transaction> GetTransactionById(long transactionId)
+        public async Task<BookingTransaction> GetBookingTransactionById(Guid transactionId)
         {
-            var tran = await _context.Transactions.Include(t => t.WalletNavigation).FirstOrDefaultAsync(t => t.Id == transactionId);
+            var tran = await _context.BookingTransactions.Include(t => t.WalletNavigation).FirstOrDefaultAsync(t => t.BookingTransactionId == transactionId);
             if (tran == null)
             {
                 return null;
@@ -80,9 +81,25 @@ namespace Services.Implementations
             return tran;
         }
 
-        public async Task UpdateTransactionInfoInDatabase(Transaction transaction)
+        public async Task UpdateBookingTransactionInfoInDatabase(BookingTransaction transaction)
         {
-            _context.Transactions.Update(transaction);
+            _context.BookingTransactions.Update(transaction);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task<WalletTransaction> GetWalletTransactionById(Guid transactionId)
+        {
+            var tran = await _context.WalletTransactions.Include(t => t.WalletNavigation).FirstOrDefaultAsync(t => t.WalletTransactionId == transactionId);
+            if (tran == null)
+            {
+                return null;
+            }
+            return tran;
+        }
+
+        public async Task UpdateWalletTransactionInfoInDatabase(WalletTransaction transaction)
+        {
+            _context.WalletTransactions.Update(transaction);
             await _context.SaveChangesAsync();
         }
     }

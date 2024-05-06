@@ -8,6 +8,7 @@ namespace Models.Entities
 {
     public class WalletTransaction
     {
+        public Guid WalletTransactionId { get; set; }
         public Guid WalletId { get; set; }
         public Guid BookingId { get; set; }
         public DateTime CreatedAt { get; set; }
