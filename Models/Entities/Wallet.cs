@@ -15,9 +15,12 @@ namespace Models.Entities
         public decimal? PendingAmount { get; set; }
         public DateTime LastBalanceUpdate { get; set; } = DateTime.Now;
         public int Status { get; set; }
-        public virtual ICollection<BookingTransaction>? BookingTransactionsNavigation { get; set; }
-        public virtual ICollection<WalletTransaction>? WalletTransactionsNavigation { get; set; }
-        public virtual ICollection<CourseTransaction>? CourseTransactionsNavigation { get; set; }
+        public virtual ICollection<BookingTransaction>? SenderBookingTransactionsNavigation { get; set; }
+        public virtual ICollection<BookingTransaction>? ReceiverBookingTransactionsNavigation { get; set; }
+        public virtual ICollection<WalletTransaction>? SenderWalletTransactionsNavigation { get; set; }
+        public virtual ICollection<WalletTransaction>? ReceiverWalletTransactionsNavigation { get; set; }
+        public virtual ICollection<CourseTransaction>? SenderCourseTransactionsNavigation { get; set; }
+        public virtual ICollection<CourseTransaction>? ReceiverCourseTransactionsNavigation { get; set; }
         public virtual User? UserNavigation { get; set; }
     }
 }

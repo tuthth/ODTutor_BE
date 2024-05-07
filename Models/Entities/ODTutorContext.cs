@@ -65,9 +65,13 @@ namespace Models.Entities
                 .HasKey(bt => bt.BookingTransactionId);
 
             modelBuilder.Entity<BookingTransaction>()
-                .HasOne(bt => bt.WalletNavigation)
-                .WithMany(w => w.BookingTransactionsNavigation)
-                .HasForeignKey(bt => bt.WalletId).OnDelete(DeleteBehavior.NoAction);
+                .HasOne(bt => bt.SenderWalletNavigation)
+                .WithMany(w => w.SenderBookingTransactionsNavigation)
+                .HasForeignKey(bt => bt.SenderWalletId).OnDelete(DeleteBehavior.NoAction);
+            modelBuilder.Entity<BookingTransaction>()
+                .HasOne(bt => bt.ReceiverWalletNavigation)
+                .WithMany(w => w.ReceiverBookingTransactionsNavigation)
+                .HasForeignKey(bt => bt.ReceiverWalletId).OnDelete(DeleteBehavior.NoAction);
 
             // Course Entity Configuration
             modelBuilder.Entity<Course>()
@@ -102,9 +106,14 @@ namespace Models.Entities
                 .HasKey(ct => ct.CourseTransactionId);
 
             modelBuilder.Entity<CourseTransaction>()
-                .HasOne(ct => ct.WalletNavigation)
-                .WithMany(w => w.CourseTransactionsNavigation)
-                .HasForeignKey(ct => ct.WalletId).OnDelete(DeleteBehavior.NoAction);
+                .HasOne(ct => ct.SenderWalletNavigation)
+                .WithMany(w => w.SenderCourseTransactionsNavigation)
+                .HasForeignKey(ct => ct.SenderWalletId).OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<CourseTransaction>()
+                .HasOne(ct => ct.ReceiverWalletNavigation)
+                .WithMany(w => w.ReceiverCourseTransactionsNavigation)
+                .HasForeignKey(ct => ct.ReceiverWalletId).OnDelete(DeleteBehavior.NoAction);
 
             // CourseOutline Entity Configuration
             modelBuilder.Entity<CourseOutline>()
@@ -409,23 +418,27 @@ namespace Models.Entities
                 .HasForeignKey<Wallet>(w => w.UserId).OnDelete(DeleteBehavior.NoAction);
 
             modelBuilder.Entity<Wallet>()
-                .HasMany(w => w.BookingTransactionsNavigation)
-                .WithOne(bt => bt.WalletNavigation)
-                .HasForeignKey(bt => bt.WalletId).OnDelete(DeleteBehavior.NoAction);
+                .HasMany(w => w.SenderBookingTransactionsNavigation)
+                .WithOne(bt => bt.SenderWalletNavigation)
+                .HasForeignKey(bt => bt.SenderWalletId).OnDelete(DeleteBehavior.NoAction);
 
             modelBuilder.Entity<Wallet>()
-                .HasMany(w => w.WalletTransactionsNavigation)
-                .WithOne(wt => wt.WalletNavigation)
-                .HasForeignKey(wt => wt.WalletId).OnDelete(DeleteBehavior.NoAction);
+                .HasMany(w => w.ReceiverWalletTransactionsNavigation)
+                .WithOne(wt => wt.ReceiverWalletNavigation)
+                .HasForeignKey(wt => wt.ReceiverWalletId).OnDelete(DeleteBehavior.NoAction);
 
             // WalletTransaction Entity Configuration
             modelBuilder.Entity<WalletTransaction>()
                 .HasKey(wt => wt.WalletTransactionId);
 
             modelBuilder.Entity<WalletTransaction>()
-                .HasOne(wt => wt.WalletNavigation)
-                .WithMany(w => w.WalletTransactionsNavigation)
-                .HasForeignKey(wt => wt.WalletId).OnDelete(DeleteBehavior.NoAction);
+                .HasOne(wt => wt.SenderWalletNavigation)
+                .WithMany(w => w.SenderWalletTransactionsNavigation)
+                .HasForeignKey(wt => wt.SenderWalletId).OnDelete(DeleteBehavior.NoAction);
+            modelBuilder.Entity<WalletTransaction>()
+               .HasOne(wt => wt.ReceiverWalletNavigation)
+               .WithMany(w => w.ReceiverWalletTransactionsNavigation)
+               .HasForeignKey(wt => wt.ReceiverWalletId).OnDelete(DeleteBehavior.NoAction);
         }
 
     }

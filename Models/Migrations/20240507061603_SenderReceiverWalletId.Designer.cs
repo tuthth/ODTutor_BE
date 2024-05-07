@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Models.Entities;
 
@@ -11,9 +12,11 @@ using Models.Entities;
 namespace Models.Migrations
 {
     [DbContext(typeof(ODTutorContext))]
-    partial class ODTutorContextModelSnapshot : ModelSnapshot
+    [Migration("20240507061603_SenderReceiverWalletId")]
+    partial class SenderReceiverWalletId
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -95,8 +98,6 @@ namespace Models.Migrations
 
                     b.HasIndex("BookingId")
                         .IsUnique();
-
-                    b.HasIndex("ReceiverWalletId");
 
                     b.HasIndex("SenderWalletId");
 
@@ -206,8 +207,6 @@ namespace Models.Migrations
                     b.HasKey("CourseTransactionId");
 
                     b.HasIndex("ReceiverWalletId");
-
-                    b.HasIndex("SenderWalletId");
 
                     b.ToTable("CourseTransaction");
                 });
@@ -675,8 +674,6 @@ namespace Models.Migrations
 
                     b.HasIndex("ReceiverWalletId");
 
-                    b.HasIndex("SenderWalletId");
-
                     b.ToTable("WalletTransactions");
                 });
 
@@ -707,23 +704,15 @@ namespace Models.Migrations
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.HasOne("Models.Entities.Wallet", "ReceiverWalletNavigation")
-                        .WithMany("ReceiverBookingTransactionsNavigation")
-                        .HasForeignKey("ReceiverWalletId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.HasOne("Models.Entities.Wallet", "SenderWalletNavigation")
-                        .WithMany("SenderBookingTransactionsNavigation")
+                    b.HasOne("Models.Entities.Wallet", "WalletNavigation")
+                        .WithMany("BookingTransactionsNavigation")
                         .HasForeignKey("SenderWalletId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.Navigation("BookingNavigation");
 
-                    b.Navigation("ReceiverWalletNavigation");
-
-                    b.Navigation("SenderWalletNavigation");
+                    b.Navigation("WalletNavigation");
                 });
 
             modelBuilder.Entity("Models.Entities.Course", b =>
@@ -775,23 +764,15 @@ namespace Models.Migrations
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.HasOne("Models.Entities.Wallet", "ReceiverWalletNavigation")
-                        .WithMany("ReceiverCourseTransactionsNavigation")
+                    b.HasOne("Models.Entities.Wallet", "WalletNavigation")
+                        .WithMany("CourseTransactionsNavigation")
                         .HasForeignKey("ReceiverWalletId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.HasOne("Models.Entities.Wallet", "SenderWalletNavigation")
-                        .WithMany("SenderCourseTransactionsNavigation")
-                        .HasForeignKey("SenderWalletId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.Navigation("CourseNavigation");
 
-                    b.Navigation("ReceiverWalletNavigation");
-
-                    b.Navigation("SenderWalletNavigation");
+                    b.Navigation("WalletNavigation");
                 });
 
             modelBuilder.Entity("Models.Entities.Report", b =>
@@ -1002,21 +983,13 @@ namespace Models.Migrations
 
             modelBuilder.Entity("Models.Entities.WalletTransaction", b =>
                 {
-                    b.HasOne("Models.Entities.Wallet", "ReceiverWalletNavigation")
-                        .WithMany("ReceiverWalletTransactionsNavigation")
+                    b.HasOne("Models.Entities.Wallet", "WalletNavigation")
+                        .WithMany("WalletTransactionsNavigation")
                         .HasForeignKey("ReceiverWalletId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.HasOne("Models.Entities.Wallet", "SenderWalletNavigation")
-                        .WithMany("SenderWalletTransactionsNavigation")
-                        .HasForeignKey("SenderWalletId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.Navigation("ReceiverWalletNavigation");
-
-                    b.Navigation("SenderWalletNavigation");
+                    b.Navigation("WalletNavigation");
                 });
 
             modelBuilder.Entity("Models.Entities.Booking", b =>
@@ -1109,17 +1082,11 @@ namespace Models.Migrations
 
             modelBuilder.Entity("Models.Entities.Wallet", b =>
                 {
-                    b.Navigation("ReceiverBookingTransactionsNavigation");
+                    b.Navigation("BookingTransactionsNavigation");
 
-                    b.Navigation("ReceiverCourseTransactionsNavigation");
+                    b.Navigation("CourseTransactionsNavigation");
 
-                    b.Navigation("ReceiverWalletTransactionsNavigation");
-
-                    b.Navigation("SenderBookingTransactionsNavigation");
-
-                    b.Navigation("SenderCourseTransactionsNavigation");
-
-                    b.Navigation("SenderWalletTransactionsNavigation");
+                    b.Navigation("WalletTransactionsNavigation");
                 });
 #pragma warning restore 612, 618
         }
