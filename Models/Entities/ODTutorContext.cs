@@ -20,16 +20,20 @@ namespace Models.Entities
         public DbSet<Course> Courses { get; set; }
         public DbSet<CourseOutline> CourseOutlines { get; set; }
         public DbSet<CoursePromotion> CoursePromotions { get; set; }
+        public DbSet<CourseTransaction> CourseTransactions { get; set; }
+
         public DbSet<Promotion> Promotions { get; set; }
         public DbSet<Report> Reports { get; set; }
         public DbSet<Schedule> Schedules { get; set; }
         public DbSet<Student> Students { get; set; }
         public DbSet<StudentCourse> StudentCourses { get; set; }
         public DbSet<Subject> Subjects { get; set; }
+        public DbSet<StudentRequest> StudentRequests { get; set; }
         public DbSet<Tutor> Tutors { get; set; }
         public DbSet<TutorCertificate> TutorCertificates { get; set; }
         public DbSet<TutorRating> TutorRatings { get; set; }
         public DbSet<TutorRatingImage> TutorRatingImages { get; set; }
+        public DbSet<TutorSchedule> TutorSchedules { get; set; }
         public DbSet<TutorSubject> TutorSubjects { get; set; }
         public DbSet<User> Users { get; set; }
         public DbSet<UserAuthentication> UserAuthentications { get; set; }
@@ -107,6 +111,7 @@ namespace Models.Entities
                 .WithOne(ct => ct.CourseNavigation)
                 .HasForeignKey<CourseTransaction>(ct => ct.CourseTransactionId).OnDelete(DeleteBehavior.NoAction);
 
+
             //CourseTransaction Entity Configuration
             modelBuilder.Entity<CourseTransaction>()
                 .HasKey(ct => ct.CourseTransactionId);
@@ -134,18 +139,18 @@ namespace Models.Entities
             modelBuilder.Entity<CoursePromotion>()
            .HasKey(cp => new { cp.PromotionId, cp.CourseId });
 
-         
+
             modelBuilder.Entity<CoursePromotion>()
-                .HasOne(cp => cp.CourseNavigation) 
-                .WithMany(c => c.CoursePromotionsNavigation) 
-                .HasForeignKey(cp => cp.CourseId) 
+                .HasOne(cp => cp.CourseNavigation)
+                .WithMany(c => c.CoursePromotionsNavigation)
+                .HasForeignKey(cp => cp.CourseId)
                 .OnDelete(DeleteBehavior.NoAction);
 
-            
+
             modelBuilder.Entity<CoursePromotion>()
                 .HasOne(cp => cp.PromotionNavigation)
-                .WithMany(p => p.CoursePromotionsNavigation) 
-                .HasForeignKey(cp => cp.PromotionId) 
+                .WithMany(p => p.CoursePromotionsNavigation)
+                .HasForeignKey(cp => cp.PromotionId)
                 .OnDelete(DeleteBehavior.NoAction);
 
             // Promotion Entity Configuration
@@ -194,6 +199,7 @@ namespace Models.Entities
                 .HasMany(s => s.TutorRatingsNavigation)
                 .WithOne(tr => tr.StudentNavigation)
                 .HasForeignKey(tr => tr.StudentId).OnDelete(DeleteBehavior.NoAction);
+
 
             // StudentCourse Entity Configuration
             modelBuilder.Entity<StudentCourse>()
@@ -261,6 +267,11 @@ namespace Models.Entities
                 .HasMany(t => t.BookingsNavigation)
                 .WithOne(b => b.TutorNavigation)
                 .HasForeignKey(b => b.TutorId).OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<Tutor>()
+                .HasMany(t => t.TutorSchedulesNavigation)
+                .WithOne(ts => ts.TutorNavigation)
+                .HasForeignKey(ts => ts.TutorId).OnDelete(DeleteBehavior.NoAction);
 
             // TutorCertificate Entity Configuration
             modelBuilder.Entity<TutorCertificate>()
@@ -445,6 +456,30 @@ namespace Models.Entities
                .HasOne(wt => wt.ReceiverWalletNavigation)
                .WithMany(w => w.ReceiverWalletTransactionsNavigation)
                .HasForeignKey(wt => wt.ReceiverWalletId).OnDelete(DeleteBehavior.NoAction);
+
+            // Configure TutorSchedule entity
+            modelBuilder.Entity<TutorSchedule>()
+                .HasKey(ts => ts.TutorScheduleId);
+
+            modelBuilder.Entity<TutorSchedule>()
+                .HasOne(ts => ts.TutorNavigation)
+                .WithMany(t => t.TutorSchedulesNavigation)
+                .HasForeignKey(ts => ts.TutorId).OnDelete(DeleteBehavior.NoAction);
+
+            //Configure StudentRequest entity
+
+            modelBuilder.Entity<StudentRequest>()
+                .HasKey(sr => sr.StudentRequestId);
+
+            modelBuilder.Entity<StudentRequest>()
+                .HasOne(sr => sr.StudentNavigation)
+                .WithMany(s => s.StudentRequestsNavigation)
+                .HasForeignKey(sr => sr.StudentId).OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<StudentRequest>()
+                .HasOne(sr => sr.SubjectNavigation)
+                .WithMany(s => s.StudentRequestsNavigation)
+                .HasForeignKey(subj => subj.SubjectId).OnDelete(DeleteBehavior.NoAction);
         }
 
     }

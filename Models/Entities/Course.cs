@@ -18,6 +18,7 @@ namespace Models.Entities
         public int Status { get; set; }
 
         public virtual Tutor? TutorNavigation { get; set; }
+        
         public virtual ICollection<StudentCourse>? StudentCoursesNavigation { get; set; }
         public virtual ICollection<CourseOutline>? CourseOutlinesNavigation { get; set; }
         public virtual ICollection<CoursePromotion>? CoursePromotionsNavigation { get; set; }

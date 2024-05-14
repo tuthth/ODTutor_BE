@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Models.Entities;
 
@@ -11,9 +12,11 @@ using Models.Entities;
 namespace Models.Migrations
 {
     [DbContext(typeof(ODTutorContext))]
-    partial class ODTutorContextModelSnapshot : ModelSnapshot
+    [Migration("20240514060729_StudentRequest_and_PrivateCourse")]
+    partial class StudentRequest_and_PrivateCourse
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -210,6 +213,27 @@ namespace Models.Migrations
                     b.HasIndex("SenderWalletId");
 
                     b.ToTable("CourseTransactions");
+                });
+
+            modelBuilder.Entity("Models.Entities.PrivateCourse", b =>
+                {
+                    b.Property<Guid>("PrivateCourseId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("CourseId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("StudentId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("PrivateCourseId");
+
+                    b.HasIndex("CourseId");
+
+                    b.HasIndex("StudentId");
+
+                    b.ToTable("PrivateCourses");
                 });
 
             modelBuilder.Entity("Models.Entities.Promotion", b =>
@@ -514,31 +538,6 @@ namespace Models.Migrations
                     b.HasIndex("TutorRatingId");
 
                     b.ToTable("TutorRatingImages");
-                });
-
-            modelBuilder.Entity("Models.Entities.TutorSchedule", b =>
-                {
-                    b.Property<Guid>("TutorScheduleId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("ActualEndTime")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime>("StartTime")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("Status")
-                        .HasColumnType("int");
-
-                    b.Property<Guid>("TutorId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("TutorScheduleId");
-
-                    b.HasIndex("TutorId");
-
-                    b.ToTable("TutorSchedules");
                 });
 
             modelBuilder.Entity("Models.Entities.TutorSubject", b =>
@@ -849,6 +848,25 @@ namespace Models.Migrations
                     b.Navigation("SenderWalletNavigation");
                 });
 
+            modelBuilder.Entity("Models.Entities.PrivateCourse", b =>
+                {
+                    b.HasOne("Models.Entities.Course", "CourseNavigation")
+                        .WithMany("PrivateCoursesNavigation")
+                        .HasForeignKey("CourseId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("Models.Entities.Student", "StudentNavigation")
+                        .WithMany("PrivateCoursesNavigation")
+                        .HasForeignKey("StudentId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("CourseNavigation");
+
+                    b.Navigation("StudentNavigation");
+                });
+
             modelBuilder.Entity("Models.Entities.Report", b =>
                 {
                     b.HasOne("Models.Entities.User", "UserNavigation")
@@ -996,17 +1014,6 @@ namespace Models.Migrations
                     b.Navigation("TutorRatingNavigation");
                 });
 
-            modelBuilder.Entity("Models.Entities.TutorSchedule", b =>
-                {
-                    b.HasOne("Models.Entities.Tutor", "TutorNavigation")
-                        .WithMany("TutorSchedulesNavigation")
-                        .HasForeignKey("TutorId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.Navigation("TutorNavigation");
-                });
-
             modelBuilder.Entity("Models.Entities.TutorSubject", b =>
                 {
                     b.HasOne("Models.Entities.Subject", "SubjectNavigation")
@@ -1119,6 +1126,8 @@ namespace Models.Migrations
 
                     b.Navigation("CourseTransactionNavigation");
 
+                    b.Navigation("PrivateCoursesNavigation");
+
                     b.Navigation("StudentCoursesNavigation");
                 });
 
@@ -1130,6 +1139,8 @@ namespace Models.Migrations
             modelBuilder.Entity("Models.Entities.Student", b =>
                 {
                     b.Navigation("BookingsNavigation");
+
+                    b.Navigation("PrivateCoursesNavigation");
 
                     b.Navigation("StudentCoursesNavigation");
 
@@ -1161,8 +1172,6 @@ namespace Models.Migrations
                     b.Navigation("TutorRatingsImagesNavigation");
 
                     b.Navigation("TutorRatingsNavigation");
-
-                    b.Navigation("TutorSchedulesNavigation");
 
                     b.Navigation("TutorSubjectsNavigation");
                 });
