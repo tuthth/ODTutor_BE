@@ -19,13 +19,13 @@ namespace API.Controllers
         }
 
         [HttpPost("deposit/vnpay")]
-        [Authorize(Roles = "Student")]
+        //[Authorize(Roles = "Student")]
         public async Task<IActionResult> DepositVnpay([FromBody] TransactionCreate transactionCreate)
         {
             try
             {
                 //var userId = _userService.GetUserId(HttpContext);
-                var transaction = await _transactionService.CreateDepositVnPay(transactionCreate, Guid.Empty);
+                var transaction = await _transactionService.CreateDepositVnPay(transactionCreate, Guid.NewGuid(), Guid.NewGuid());
                 if (transaction is StatusCodeResult statusCodeResult)
                 {
                     if (statusCodeResult.StatusCode == 404) { return NotFound("Không tìm thấy ví"); }

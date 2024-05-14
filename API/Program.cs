@@ -1,5 +1,7 @@
 
 using API.Configurations;
+using Microsoft.EntityFrameworkCore;
+using Models.Entities;
 using Models.Mappings;
 
 namespace API
@@ -16,7 +18,10 @@ namespace API
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
-
+            builder.Services.AddDbContext<ODTutorContext>(options =>
+            {
+                options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
+            });
             builder.Services.AddDependenceInjection();
             builder.Services.AddHttpContextAccessor();
             builder.Services.VnPaySettings(builder.Configuration);
@@ -41,19 +46,13 @@ namespace API
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
             {
+                app.UseSwagger();
+                app.UseSwaggerUI();
             }
             app.UseCors("AllowAll");
             app.UseHttpsRedirection();
 
-            app.UseSwagger(c =>
-            {
-                c.RouteTemplate = "/api/swagger/{documentName}/swagger.json";
-            });
-            app.UseSwaggerUI(c =>
-            {
-                c.SwaggerEndpoint("/api/swagger/v1/swagger.json", "production");
-                c.RoutePrefix = "api/swagger";
-            });
+         
             app.UseAuthentication();
             app.UseAuthorization();
 

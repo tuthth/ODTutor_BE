@@ -11,10 +11,10 @@ namespace Services.Interfaces
 {
     public interface ITransactionService
     {
-        //Task<IActionResult> CreateDepositVnPay(TransactionCreate transactionCreate, Guid userId);
-        //Task<BookingTransaction> GetBookingTransactionById(Guid transactionId);
-        //Task UpdateBookingTransactionInfoInDatabase(BookingTransaction transaction);
-        //Task<WalletTransaction> GetWalletTransactionById(Guid transactionId);
-        //Task UpdateWalletTransactionInfoInDatabase(WalletTransaction transaction);
+        Task<IActionResult> CreateDepositVnPay(TransactionCreate transactionCreate, Guid userId, Guid userId2);
+        Task<BookingTransaction> GetBookingTransactionById(Guid transactionId);
+        Task UpdateBookingTransactionInfoInDatabase(BookingTransaction transaction);
+        Task<WalletTransaction> GetWalletTransactionById(Guid transactionId);
+        Task UpdateWalletTransactionInfoInDatabase(WalletTransaction transaction);
     }
 }

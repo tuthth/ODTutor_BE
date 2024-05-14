@@ -90,10 +90,6 @@ namespace API.Configurations
                         new List<string>()
                       }
                  });
-
-                var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
-                var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
-                c.IncludeXmlComments(xmlPath);
             });
         }
     }

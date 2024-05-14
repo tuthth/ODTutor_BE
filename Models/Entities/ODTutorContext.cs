@@ -9,6 +9,12 @@ namespace Models.Entities
 {
     public class ODTutorContext : DbContext
     {
+        public ODTutorContext()
+        {
+        }
+        public ODTutorContext(DbContextOptions options) : base(options)
+        {
+        }
         public DbSet<Booking> Bookings { get; set; }
         public DbSet<BookingTransaction> BookingTransactions { get; set; }
         public DbSet<Course> Courses { get; set; }

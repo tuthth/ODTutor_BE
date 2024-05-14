@@ -103,7 +103,7 @@ namespace API.Controllers
                                 if (vnp_ResponseCode == "00" && vnp_TransactionStatus == "00")
                                 {
                                     trans.Status = (int)VNPayType.APPROVE;
-                                    trans.WalletNavigation.Amount += trans.Amount;
+                                    trans.ReceiverWalletNavigation.Amount += trans.Amount;
                                     returnContent = "{\"RspCode\":\"00\",\"Message\":\"Confirm Success\"}";
 
                                 }

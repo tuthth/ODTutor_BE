@@ -26,81 +26,90 @@ namespace Services.Implementations
             _httpContextAccessor = httpContextAccessor;
         }
 
-        //public async Task<IActionResult> CreateDepositVnPay(TransactionCreate transactionCreate, Guid userId)
-        //{
-        //    var wallet = _context.Wallets.Include(w => w.BookingTransactionsNavigation).FirstOrDefault(w => w.UserId.Equals(userId));
-        //    if (wallet == null)
-        //    {
-        //        return new StatusCodeResult(404);
-        //    }
-        //    BookingTransaction transaction = new BookingTransaction()
-        //    {
-        //        Amount = transactionCreate.Amount,
-        //        WalletId = wallet.WalletId,
-        //        Status = (int)VNPayType.PENDING,
-        //    };
-        //    _context.BookingTransactions.Add(transaction);
-        //    await _context.SaveChangesAsync();
 
-        //    string vnp_Returnurl = transactionCreate.RedirectUrl;
-        //    string vnp_Url = _vnPaySetting.VnPay_Url.ToString();
-        //    string vnp_TmnCode = _vnPaySetting.VnPay_TmnCode.ToString();
-        //    string vnp_HashSecret = _vnPaySetting.VnPay_HashSecret.ToString();
+        public async Task<IActionResult> CreateDepositVnPay(TransactionCreate transactionCreate, Guid sendUserId, Guid receiverUserId)
+        {
+            var senderWallet = _context.Wallets.Include(w => w.SenderCourseTransactionsNavigation.FirstOrDefault(w => w.SenderWalletId.Equals(sendUserId)));
+            var receiverWallet = _context.Wallets.Include(w => w.ReceiverCourseTransactionsNavigation.FirstOrDefault(w => w.ReceiverWalletId.Equals(receiverUserId)));
+            if (senderWallet == null || receiverWallet == null)
+            {
+                return new StatusCodeResult(404);
+            }
 
-        //    VnPayLibrary vnpay = new VnPayLibrary();
+            BookingTransaction transaction = new BookingTransaction
+            {
+                BookingTransactionId = Guid.NewGuid(),
+                SenderWalletId = sendUserId,
+                ReceiverWalletId = receiverUserId,
+                BookingId = Guid.NewGuid(), // You might want to replace this with the actual BookingId
+                CreatedAt = DateTime.UtcNow,
+                Amount = transactionCreate.Amount,
+                Status = (int)VNPayType.PENDING,
+            };
 
-        //    vnpay.AddRequestData("vnp_Version", VnPayLibrary.VERSION);
-        //    vnpay.AddRequestData("vnp_Command", "pay");
-        //    vnpay.AddRequestData("vnp_TmnCode", vnp_TmnCode);
-        //    vnpay.AddRequestData("vnp_Amount", Math.Floor(decimal.Parse(transactionCreate.Amount.ToString()) * 100).ToString());
-        //    vnpay.AddRequestData("vnp_BankCode", "VNBANK");
-        //    vnpay.AddRequestData("vnp_CreateDate", DateTime.Now.ToString("yyyyMMddHHmmss"));
-        //    vnpay.AddRequestData("vnp_CurrCode", "VND");
-        //    vnpay.AddRequestData("vnp_IpAddr", Utils.GetIpAddress(_httpContextAccessor));
-        //    vnpay.AddRequestData("vnp_Locale", "vn");
-        //    vnpay.AddRequestData("vnp_OrderInfo", "Thanh toán đơn hàng: " + transaction.BookingId);
-        //    vnpay.AddRequestData("vnp_OrderType", "other");
-        //    vnpay.AddRequestData("vnp_ReturnUrl", vnp_Returnurl);
-        //    vnpay.AddRequestData("vnp_TxnRef", transaction.BookingTransactionId.ToString());
+            _context.BookingTransactions.Add(transaction);
+            await _context.SaveChangesAsync();
 
-        //    string paymentUrl = vnpay.CreateRequestUrl(vnp_Url, vnp_HashSecret);
+            string vnp_Returnurl = transactionCreate.RedirectUrl;
+            string vnp_Url = _vnPaySetting.VnPay_Url.ToString();
+            string vnp_TmnCode = _vnPaySetting.VnPay_TmnCode.ToString();
+            string vnp_HashSecret = _vnPaySetting.VnPay_HashSecret.ToString();
 
-        //    return new JsonResult(new
-        //    {
-        //        PaymentUrl = paymentUrl
-        //    });
-        //}
+            VnPayLibrary vnpay = new VnPayLibrary();
 
-        //public async Task<BookingTransaction> GetBookingTransactionById(Guid transactionId)
-        //{
-        //    var tran = await _context.BookingTransactions.Include(t => t.WalletNavigation).FirstOrDefaultAsync(t => t.BookingTransactionId == transactionId);
-        //    if (tran == null)
-        //    {
-        //        return null;
-        //    }
-        //    return tran;
-        //}
+            vnpay.AddRequestData("vnp_Version", VnPayLibrary.VERSION);
+            vnpay.AddRequestData("vnp_Command", "pay");
+            vnpay.AddRequestData("vnp_TmnCode", vnp_TmnCode);
+            vnpay.AddRequestData("vnp_Amount", Math.Floor(decimal.Parse(transactionCreate.Amount.ToString()) * 100).ToString());
+            vnpay.AddRequestData("vnp_BankCode", "VNBANK");
+            vnpay.AddRequestData("vnp_CreateDate", DateTime.Now.ToString("yyyyMMddHHmmss"));
+            vnpay.AddRequestData("vnp_CurrCode", "VND");
+            vnpay.AddRequestData("vnp_IpAddr", Utils.GetIpAddress(_httpContextAccessor));
+            vnpay.AddRequestData("vnp_Locale", "vn");
+            vnpay.AddRequestData("vnp_OrderInfo", "Thanh toán đơn hàng: " + transaction.BookingId);
+            vnpay.AddRequestData("vnp_OrderType", "other");
+            vnpay.AddRequestData("vnp_ReturnUrl", vnp_Returnurl);
+            vnpay.AddRequestData("vnp_TxnRef", transaction.BookingTransactionId.ToString());
 
-        //public async Task UpdateBookingTransactionInfoInDatabase(BookingTransaction transaction)
-        //{
-        //    _context.BookingTransactions.Update(transaction);
-        //    await _context.SaveChangesAsync();
-        //}
+            string paymentUrl = vnpay.CreateRequestUrl(vnp_Url, vnp_HashSecret);
 
-        //public async Task<WalletTransaction> GetWalletTransactionById(Guid transactionId)
-        //{
-        //    var tran = await _context.WalletTransactions.Include(t => t.WalletNavigation).FirstOrDefaultAsync(t => t.WalletTransactionId == transactionId);
-        //    if (tran == null)
-        //    {
-        //        return null;
-        //    }
-        //    return tran;
-        //}
+            return new JsonResult(new
+            {
+                PaymentUrl = paymentUrl
+            });
+        }
 
-        //public async Task UpdateWalletTransactionInfoInDatabase(WalletTransaction transaction)
-        //{
-        //    _context.WalletTransactions.Update(transaction);
-        //    await _context.SaveChangesAsync();
-        //}
+
+        public async Task<BookingTransaction> GetBookingTransactionById(Guid transactionId)
+        {
+            var tran = await _context.BookingTransactions.Include(t => t.SenderWalletNavigation).FirstOrDefaultAsync(t => t.BookingTransactionId == transactionId);
+            if (tran == null)
+            {
+                return null;
+            }
+            return tran;
+        }
+
+        public async Task UpdateBookingTransactionInfoInDatabase(BookingTransaction transaction)
+        {
+            _context.BookingTransactions.Update(transaction);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task<WalletTransaction> GetWalletTransactionById(Guid transactionId)
+        {
+            var tran = await _context.WalletTransactions.Include(t => t.SenderWalletNavigation).FirstOrDefaultAsync(t => t.WalletTransactionId == transactionId);
+            if (tran == null)
+            {
+                return null;
+            }
+            return tran;
+        }
+
+        public async Task UpdateWalletTransactionInfoInDatabase(WalletTransaction transaction)
+        {
+            _context.WalletTransactions.Update(transaction);
+            await _context.SaveChangesAsync();
+        }
     }
 }
