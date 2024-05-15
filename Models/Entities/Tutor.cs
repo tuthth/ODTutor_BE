@@ -21,7 +21,7 @@ namespace Models.Entities
         public virtual ICollection<TutorCertificate>? TutorCertificatesNavigation { get; set; }
         public virtual ICollection<TutorSubject>? TutorSubjectsNavigation { get; set; }
         public virtual ICollection<TutorRating>? TutorRatingsNavigation { get; set; }
-        public virtual ICollection<TutorRatingImage>? TutorRatingsImagesNavigation { get; set; }
+        //public virtual ICollection<TutorRatingImage>? TutorRatingsImagesNavigation { get; set; }
         public virtual ICollection<Booking>? BookingsNavigation { get; set; }
     }
 }

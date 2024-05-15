@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Models.Entities;
 
@@ -11,9 +12,11 @@ using Models.Entities;
 namespace Models.Migrations
 {
     [DbContext(typeof(ODTutorContext))]
-    partial class ODTutorContextModelSnapshot : ModelSnapshot
+    [Migration("20240515023649_removeRatingImage_With_Tutor")]
+    partial class removeRatingImage_With_Tutor
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -501,10 +504,15 @@ namespace Models.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<Guid>("TutorId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<Guid>("TutorRatingId")
                         .HasColumnType("uniqueidentifier");
 
                     b.HasKey("TutorRatingImageId");
+
+                    b.HasIndex("TutorId");
 
                     b.HasIndex("TutorRatingId");
 
@@ -974,6 +982,12 @@ namespace Models.Migrations
 
             modelBuilder.Entity("Models.Entities.TutorRatingImage", b =>
                 {
+                    b.HasOne("Models.Entities.Tutor", null)
+                        .WithMany("TutorRatingsImagesNavigation")
+                        .HasForeignKey("TutorId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("Models.Entities.TutorRating", "TutorRatingNavigation")
                         .WithMany("TutorRatingImagesNavigation")
                         .HasForeignKey("TutorRatingId")
@@ -1144,6 +1158,8 @@ namespace Models.Migrations
                     b.Navigation("CoursesNavigation");
 
                     b.Navigation("TutorCertificatesNavigation");
+
+                    b.Navigation("TutorRatingsImagesNavigation");
 
                     b.Navigation("TutorRatingsNavigation");
 

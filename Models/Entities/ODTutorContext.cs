@@ -45,7 +45,7 @@ namespace Models.Entities
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             // Use your preferred connection string here
-            optionsBuilder.UseSqlServer("server=(local);user=sa;password=12345;database=ODTutor;Trusted_Connection=True;TrustServerCertificate=True");
+            optionsBuilder.UseSqlServer("server=(local);user=sa;password=123456;database=ODTutor;Trusted_Connection=True;TrustServerCertificate=True");
         }
 
         // Configure entity relationships and constraints
@@ -258,10 +258,10 @@ namespace Models.Entities
                 .WithOne(tr => tr.TutorNavigation)
                 .HasForeignKey(tr => tr.TutorId).OnDelete(DeleteBehavior.NoAction);
 
-            modelBuilder.Entity<Tutor>()
+/*            modelBuilder.Entity<Tutor>()
                 .HasMany(t => t.TutorRatingsImagesNavigation)
                 .WithOne(tri => tri.TutorNavigation)
-                .HasForeignKey(tri => tri.TutorId).OnDelete(DeleteBehavior.NoAction);
+                .HasForeignKey(tri => tri.TutorId).OnDelete(DeleteBehavior.NoAction);*/
 
             modelBuilder.Entity<Tutor>()
                 .HasMany(t => t.BookingsNavigation)
@@ -315,10 +315,10 @@ namespace Models.Entities
             modelBuilder.Entity<TutorRatingImage>()
                 .HasKey(tri => tri.TutorRatingImageId);
 
-            modelBuilder.Entity<TutorRatingImage>()
+/*            modelBuilder.Entity<TutorRatingImage>()
                 .HasOne(tri => tri.TutorNavigation)
                 .WithMany(t => t.TutorRatingsImagesNavigation)
-                .HasForeignKey(tri => tri.TutorId).OnDelete(DeleteBehavior.NoAction);
+                .HasForeignKey(tri => tri.TutorId).OnDelete(DeleteBehavior.NoAction);*/
 
             modelBuilder.Entity<TutorRatingImage>()
                 .HasOne(tri => tri.TutorRatingNavigation)
