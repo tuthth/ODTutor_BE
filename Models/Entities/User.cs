@@ -19,6 +19,7 @@ namespace Models.Entities
         public int Status { get; set; }
         public Boolean Active { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public Boolean IsPremium { get; set; }
         public Boolean Banned { get; set; }
         public DateTime BanExpiredAt { get; set; }
         public virtual UserAuthentication? UserAuthenticationNavigation { get; set; }
