@@ -12,7 +12,7 @@ namespace Models.Entities
         public Guid StudentCourseId { get; set; }
         public DateTime StartAt { get; set; }
         public DateTime EndAt { get; set; }
-
+        public int Status { get; set; }
         public virtual StudentCourse? StudentCourseNavigation { get; set; }
     }
 }

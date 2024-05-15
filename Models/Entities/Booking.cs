@@ -18,7 +18,7 @@ namespace Models.Entities
         public decimal TotalPrice { get; set; }
         public int Status { get; set; }
         public string? Description { get; set; }
-        public string? GoogleMeetUrl { get; set; }
+        public string? GoogleMeetUrl {get; set;}
 
         public virtual Student? StudentNavigation {  get; set; }
         public virtual Tutor? TutorNavigation { get; set; }
