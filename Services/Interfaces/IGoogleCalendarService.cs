@@ -10,6 +10,6 @@ namespace Services.Interfaces
 {
     public interface IGoogleCalendarService
     {
-        Task<IActionResult> CreateCalendarEvent(GGCalendarEventSetting setting, List<GGCalendarEventAttendee> attendees);
+        Task<IActionResult> CreateCalendarEvent(GGCalendarEventSetting setting);
     }
 }

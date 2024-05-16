@@ -13,5 +13,6 @@ namespace Settings.Google.Calendar
         public DateTime Start { get; set; }
         public DateTime End { get; set; }
         public string TimeZone { get; set; }
+        public List<GGCalendarEventAttendee> Attendees { get; set; }
     }
 }
