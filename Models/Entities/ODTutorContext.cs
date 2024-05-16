@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,7 +22,6 @@ namespace Models.Entities
         public DbSet<CourseOutline> CourseOutlines { get; set; }
         public DbSet<CoursePromotion> CoursePromotions { get; set; }
         public DbSet<CourseTransaction> CourseTransactions { get; set; }
-
         public DbSet<Promotion> Promotions { get; set; }
         public DbSet<Report> Reports { get; set; }
         public DbSet<Schedule> Schedules { get; set; }
@@ -45,7 +45,15 @@ namespace Models.Entities
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             // Use your preferred connection string here
-            optionsBuilder.UseSqlServer("server=(local);user=sa;password=123456;database=ODTutor;Trusted_Connection=True;TrustServerCertificate=True");
+            optionsBuilder.UseSqlServer(GetConnectionStrings()).EnableSensitiveDataLogging();
+        }
+        private string GetConnectionStrings()
+        {
+            var config = new ConfigurationBuilder()
+                .AddJsonFile("appsettings.json", true, true)
+                .SetBasePath(Directory.GetCurrentDirectory())
+                .Build();
+            return config.GetConnectionString("DefaultDB");
         }
 
         // Configure entity relationships and constraints
@@ -258,10 +266,10 @@ namespace Models.Entities
                 .WithOne(tr => tr.TutorNavigation)
                 .HasForeignKey(tr => tr.TutorId).OnDelete(DeleteBehavior.NoAction);
 
-/*            modelBuilder.Entity<Tutor>()
-                .HasMany(t => t.TutorRatingsImagesNavigation)
-                .WithOne(tri => tri.TutorNavigation)
-                .HasForeignKey(tri => tri.TutorId).OnDelete(DeleteBehavior.NoAction);*/
+            /*            modelBuilder.Entity<Tutor>()
+                            .HasMany(t => t.TutorRatingsImagesNavigation)
+                            .WithOne(tri => tri.TutorNavigation)
+                            .HasForeignKey(tri => tri.TutorId).OnDelete(DeleteBehavior.NoAction);*/
 
             modelBuilder.Entity<Tutor>()
                 .HasMany(t => t.BookingsNavigation)
@@ -315,10 +323,10 @@ namespace Models.Entities
             modelBuilder.Entity<TutorRatingImage>()
                 .HasKey(tri => tri.TutorRatingImageId);
 
-/*            modelBuilder.Entity<TutorRatingImage>()
-                .HasOne(tri => tri.TutorNavigation)
-                .WithMany(t => t.TutorRatingsImagesNavigation)
-                .HasForeignKey(tri => tri.TutorId).OnDelete(DeleteBehavior.NoAction);*/
+            /*            modelBuilder.Entity<TutorRatingImage>()
+                            .HasOne(tri => tri.TutorNavigation)
+                            .WithMany(t => t.TutorRatingsImagesNavigation)
+                            .HasForeignKey(tri => tri.TutorId).OnDelete(DeleteBehavior.NoAction);*/
 
             modelBuilder.Entity<TutorRatingImage>()
                 .HasOne(tri => tri.TutorRatingNavigation)

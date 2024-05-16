@@ -54,6 +54,7 @@ namespace API.Configurations
         public static void AddDependenceInjection(this IServiceCollection services)
         {
             services.AddTransient<ISendMailService, SendMailService>();
+            services.AddTransient<IGoogleCalendarService, GoogleCalendarService>();
             services.AddScoped<ITransactionService, TransactionService>();
             services.AddScoped<IWalletService, WalletService>();
             
