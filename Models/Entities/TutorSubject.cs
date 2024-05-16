@@ -16,6 +16,6 @@ namespace Models.Entities
 
         public virtual Tutor? TutorNavigation {  get; set; }
         public virtual Subject? SubjectNavigation {  get; set; }
-        public virtual TutorCertificate? TutorCertificateNavigation { get; set; }
+/*        public virtual TutorCertificate? TutorCertificateNavigation { get; set; }*/
     }
 }

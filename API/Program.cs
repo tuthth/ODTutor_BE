@@ -3,6 +3,8 @@ using API.Configurations;
 using Microsoft.EntityFrameworkCore;
 using Models.Entities;
 using Models.Mappings;
+using Services.Implementations;
+using Services.Interfaces;
 
 namespace API
 {
@@ -22,6 +24,9 @@ namespace API
             {
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
             });
+            // Add Scope
+            builder.Services.AddScoped<ITutorRegisterService, TutorRegisterService>();
+            //
             builder.Services.AddDependenceInjection();
             builder.Services.AddHttpContextAccessor();
             builder.Services.VnPaySettings(builder.Configuration);

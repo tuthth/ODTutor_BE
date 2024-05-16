@@ -15,7 +15,7 @@ namespace API.Controllers
             _googleCalendarService = googleCalendarService;
         }
 
-        [HttpPost("event/create")]
+       /* [HttpPost("event/create")]
         public async Task<IActionResult> CreateCalendarEvent([FromBody]GGCalendarEventSetting setting, [FromBody]List<GGCalendarEventAttendee> attendees)
         {
             try
@@ -32,6 +32,6 @@ namespace API.Controllers
             {
                 return BadRequest(ex.Message);
             }
-        }
+        }*/
     }
 }

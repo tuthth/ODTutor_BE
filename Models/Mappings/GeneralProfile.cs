@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Models.Entities;
+using Models.Models.Requests;
 using Models.Models.Views;
 using System;
 using System.Collections.Generic;
@@ -15,6 +16,7 @@ namespace Models.Mappings
         public GeneralProfile()
         {
             CreateMap<Wallet, WalletView>();
+            CreateMap<TutorInformationRequest, Tutor>();
         }
     }
 }

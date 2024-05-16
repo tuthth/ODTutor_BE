@@ -45,7 +45,10 @@ namespace Models.Entities
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             // Use your preferred connection string here
-            optionsBuilder.UseSqlServer(GetConnectionStrings()).EnableSensitiveDataLogging();
+            //optionsBuilder.UseSqlServer(GetConnectionStrings()).EnableSensitiveDataLogging();
+            optionsBuilder.UseSqlServer("server = (local);user=sa;password = 12345; database = ODTutor; Trusted_Connection = True; TrustServerCertificate = True;");
+
+            
         }
         private string GetConnectionStrings()
         {
@@ -53,7 +56,7 @@ namespace Models.Entities
                 .AddJsonFile("appsettings.json", true, true)
                 .SetBasePath(Directory.GetCurrentDirectory())
                 .Build();
-            return config.GetConnectionString("DefaultDB");
+            return config.GetConnectionString("DefaultConnection");
         }
 
         // Configure entity relationships and constraints
@@ -290,11 +293,11 @@ namespace Models.Entities
                 .WithMany(t => t.TutorCertificatesNavigation)
                 .HasForeignKey(tc => tc.TutorId).OnDelete(DeleteBehavior.NoAction);
 
-            modelBuilder.Entity<TutorCertificate>()
+/*            modelBuilder.Entity<TutorCertificate>()
                 .HasOne(tc => tc.TutorSubjectNavigation)
                 .WithOne(ts => ts.TutorCertificateNavigation)
                 .HasForeignKey<TutorCertificate>(tc => tc.TutorSubjectId).OnDelete(DeleteBehavior.NoAction);
-
+*/
             // TutorRating Entity Configuration
             modelBuilder.Entity<TutorRating>()
                 .HasKey(tr => tr.TutorRatingId);
