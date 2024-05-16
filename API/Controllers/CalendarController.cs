@@ -15,12 +15,12 @@ namespace API.Controllers
             _googleCalendarService = googleCalendarService;
         }
 
-       /* [HttpPost("event/create")]
-        public async Task<IActionResult> CreateCalendarEvent([FromBody]GGCalendarEventSetting setting, [FromBody]List<GGCalendarEventAttendee> attendees)
+        [HttpPost("event/create")]
+        public async Task<IActionResult> CreateCalendarEvent(GGCalendarEventSetting setting)
         {
             try
             {
-                var checkCreateEvent = await _googleCalendarService.CreateCalendarEvent(setting, attendees);
+                var checkCreateEvent = await _googleCalendarService.CreateCalendarEvent(setting);
                 if (checkCreateEvent is StatusCodeResult statusCodeResult)
                 {
                     if (statusCodeResult.StatusCode == 201) { return Ok("Tạo sự kiện thành công"); }

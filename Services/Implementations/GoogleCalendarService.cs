@@ -20,10 +20,11 @@ namespace Services.Implementations
         public GoogleCalendarService(ODTutorContext context, IMapper mapper) : base(context, mapper)
         {
         }
-        public async Task<IActionResult> CreateCalendarEvent(GGCalendarEventSetting setting, List<GGCalendarEventAttendee> attendees)
+        public async Task<IActionResult> CreateCalendarEvent(GGCalendarEventSetting setting)
         {
             string[] scopes = { CalendarService.Scope.Calendar };
-            string credPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "credentials.json");
+            string projectDirectory = Directory.GetParent(AppDomain.CurrentDomain.BaseDirectory).Parent.Parent.Parent.FullName;
+            string credPath = Path.Combine(projectDirectory, "Properties", "credentials.json");
 
             var clientSecrets = await GoogleClientSecrets.FromFileAsync(credPath);
             var credential = await GoogleWebAuthorizationBroker.AuthorizeAsync(
@@ -36,11 +37,13 @@ namespace Services.Implementations
             {
                 HttpClientInitializer = credential
             });
-
-            List<EventAttendee> eventAttendees = new List<EventAttendee>();
-            foreach (var attendee in attendees)
+            List<EventAttendee> attendees = new List<EventAttendee>();
+            foreach(var attendee in setting.Attendees)
             {
-                eventAttendees.Add(new EventAttendee() { Email = attendee.Email });
+                attendees.Add(new EventAttendee()
+                {
+                    Email = attendee.Email
+                });
             }
 
             Event calendarEvent = new Event()
@@ -73,7 +76,7 @@ namespace Services.Implementations
                 GuestsCanModify = false,
                 GuestsCanSeeOtherGuests = false,
 
-                Attendees = eventAttendees
+                Attendees = attendees
             };
             
             EventsResource.InsertRequest request = service.Events.Insert(calendarEvent, "67d3c524db000823b1aae5943497649be3bd8485682e5f45dff9aaaac995c07e@group.calendar.google.com");
