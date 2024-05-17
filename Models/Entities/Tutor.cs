@@ -13,8 +13,8 @@ namespace Models.Entities
         public string IdentityNumber {  get; set; }
         public string Level { get; set; }
         public decimal PricePerHour { get; set; }
-        public string Description { get; set; }
-        public int Status { get; set; }
+        public string Description { get; set;}
+        public int Status {get; set;}
         public virtual User? UserNavigation {  get; set; }
         public virtual ICollection<Course>? CoursesNavigation { get; set; }
         public virtual ICollection<TutorSchedule>? TutorSchedulesNavigation { get; set; }

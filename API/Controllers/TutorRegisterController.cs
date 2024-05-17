@@ -60,6 +60,28 @@ namespace API.Controllers
             }
         }
 
+        // Get All Tutor Register Information
+        [HttpGet("getTutorRegisterInformation")]
+        public async Task<IActionResult> getAllTutorRegisterInformation(Guid tutorID)
+        {
+            try
+            {
+                var tutorRegister = await _tutorRegisterService.GetTutorRegisterInformtaion(tutorID);
+                if (tutorRegister != null)
+                {
+                    return Ok(tutorRegister);
+                }
+                else
+                {
+                    return BadRequest("Không tìm thấy thông tin đăng ký của gia sư");
+                }
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
 
     }
 }

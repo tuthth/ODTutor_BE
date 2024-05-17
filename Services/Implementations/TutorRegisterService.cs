@@ -1,9 +1,11 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Models.Entities;
 using Models.Models.Requests;
+using Models.Models.Views;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Services.Interfaces;
@@ -27,6 +29,7 @@ namespace Services.Implementations
             _mapper = mapper;
             _cf = cf;
         }
+
         // Register Tutor Information
         public async Task<Tutor> RegisterTutorInformation(TutorInformationRequest tutorRequest)
         {
@@ -50,6 +53,7 @@ namespace Services.Implementations
                 throw new Exception(ex.Message);
             }
         }
+
         // Register Tutor Subject
         public async Task<List<TutorSubject>> RegisterTutorSubject(Guid tutorID, List<Guid> subjectIDs)
         {
@@ -110,6 +114,8 @@ namespace Services.Implementations
                             TutorCertificate certificate = new TutorCertificate();
                             certificate.TutorId = tutorID;
                             certificate.ImageUrl = urlLink;
+                            _odContext.TutorCertificates.Add(certificate);
+                            _odContext.SaveChanges();
                             tutorCertificateList.Add(certificate);
                         }
                     }
@@ -121,5 +127,74 @@ namespace Services.Implementations
                 throw new Exception(ex.Message);
             }
         }
+
+        // Get Tutor Register Information
+        /*Đây là phần để lấy thông tin để admin hay moderator có thể hiểu và kiểm tra*/
+        public async Task<TutorRegisterReponse> GetTutorRegisterInformtaion(Guid tutorID)
+        {
+            TutorRegisterReponse response = new TutorRegisterReponse();
+            List<string> subjectList = await getAllSubjectOfTutor(tutorID);
+            List<string> imagesUrlList = await getAllImagesUrlOfTutor(tutorID);
+            try
+            {
+                Tutor tutor = await _odContext.Tutors.Where(x => x.TutorId == tutorID).FirstOrDefaultAsync();
+                User user = await _odContext.Tutors.Where(x => x.TutorId == tutorID).Select(x => x.UserNavigation).FirstOrDefaultAsync();
+                if ( tutor == null)
+                {
+                    return null;
+                }
+                else
+                {
+                    response.IdentityNumber = tutor.IdentityNumber;
+                    response.Level = tutor.Level;
+                    response.Description = tutor.Description;
+                    response.PricePerHour = tutor.PricePerHour;
+                    response.Email = user.Email;
+                    response.Username = user.Username;
+                    response.ImageUrl = user.ImageUrl;
+                    response.Name = user.Name;
+                    response.Subjects = subjectList;
+                    response.ImagesCertificateUrl = imagesUrlList;
+                }
+                return response;
+            } catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
+        // Get All Tutor Subject List
+        private async Task<List<string>> getAllSubjectOfTutor(Guid TutorId)
+        {
+            List<string> subjectlist = new List<string>();
+            try
+            {
+                subjectlist = _odContext.TutorSubjects.Where( x => x.TutorId == TutorId).Select(x => x.SubjectNavigation.Title).ToList();
+            } catch(Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }   
+            return subjectlist;
+        }
+
+        // Get All Certificate Image Url
+        private async Task<List<string>> getAllImagesUrlOfTutor( Guid TutorId)
+        {
+            List<string> imagesUrlList = new List<string>();
+            try
+            {
+                imagesUrlList = _odContext.Users.Where(x => x.TutorNavigation.TutorId == TutorId)
+                                .Select( x => x.TutorNavigation.TutorCertificatesNavigation
+                                .Select(x => x.ImageUrl).ToList()).FirstOrDefault();
+            } catch(Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+            return imagesUrlList;
+        }
+
+        // Accept Tutor + Notification
+
+        // Deny Tutor + Notification
     }
 }
