@@ -9,6 +9,6 @@ namespace Models.Models.Requests
 {
     public class TutorCertificateImagesRequest
     {
-        List<IFormFile> Images { get; set; }
+        List<IFormFile>Images { get; set; }
     }
 }

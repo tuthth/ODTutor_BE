@@ -21,7 +21,7 @@ namespace Models.Entities
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public Boolean IsPremium { get; set; }
         public Boolean Banned { get; set; }
-        public DateTime BanExpiredAt { get; set; }
+        public DateTime? BanExpiredAt { get; set; }
         public virtual UserAuthentication? UserAuthenticationNavigation { get; set; }
         public virtual ICollection<UserBlock>? CreateUserBlockNavigation {  get; set; }
         public virtual ICollection<UserBlock>? TargetUserBlockNavigation { get; set; }

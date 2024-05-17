@@ -26,6 +26,7 @@ namespace API
             });
             // Add Scope
             builder.Services.AddScoped<ITutorRegisterService, TutorRegisterService>();
+            builder.Services.AddScoped<IAccountService, AccountService>();
             //
             builder.Services.AddDependenceInjection();
             builder.Services.AddHttpContextAccessor();
