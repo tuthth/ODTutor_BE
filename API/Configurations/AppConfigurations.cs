@@ -56,8 +56,9 @@ namespace API.Configurations
             services.AddTransient<ISendMailService, SendMailService>();
             services.AddTransient<IGoogleCalendarService, GoogleCalendarService>();
             services.AddScoped<ITransactionService, TransactionService>();
+            services.AddScoped<IUserService, UserService>();
             services.AddScoped<IWalletService, WalletService>();
-            
+            services.AddScoped<ITutorRegisterService, TutorRegisterService>();
         }
 
         public static void AddSwagger(this IServiceCollection services)
