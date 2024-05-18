@@ -46,7 +46,7 @@ namespace Models.Entities
         {
             // Use your preferred connection string here
             //optionsBuilder.UseSqlServer(GetConnectionStrings()).EnableSensitiveDataLogging();
-            optionsBuilder.UseSqlServer("server = (local);user=sa;password = 12345; database = ODTutor; Trusted_Connection = True; TrustServerCertificate = True;");
+            optionsBuilder.UseSqlServer("Server=database.monoinfinity.net;uid=sa;pwd=1234567890Aa;Database=ODTutor;Encrypt=false;TrustServerCertificate=true;");
 
             
         }
