@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Models.Models.Requests;
 using Services.Interfaces;
 
@@ -42,11 +43,11 @@ namespace API.Controllers
         }
 
         [HttpPost("confirm")]
-        public async Task<IActionResult> ConfirmEmail(string email, string otp)
+        public async Task<IActionResult> ConfirmEmail([FromBody]ConfirmEmailRequest confirmEmailRequest)
         {
             try
             {
-                var checkConfirm = await _userService.ConfirmOTP(email, otp);
+                var checkConfirm = await _userService.ConfirmOTP(confirmEmailRequest.Email, confirmEmailRequest.OTP);
                 if (checkConfirm is StatusCodeResult statusCodeResult)
                 {
                     if (statusCodeResult.StatusCode == 404) { return NotFound("Tài khoản không tồn tại, hoặc không có yêu cầu gửi OTP trước đó"); }
@@ -57,6 +58,25 @@ namespace API.Controllers
                     else { return BadRequest("Xác thực email thất bại"); }
                 }
                 else { return BadRequest("Xác thực email thất bại"); }
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+        [Authorize]
+        [HttpPost("remove-expire")]
+        public async Task<IActionResult> RemoveExpiredOTP() {
+            try
+            {
+                var checkRemove = await _userService.RemoveExpiredOTP();
+                if (checkRemove is StatusCodeResult statusCodeResult)
+                {
+                    if (statusCodeResult.StatusCode == 200) { return Ok("Xóa mã OTP hết hạn thành công"); }
+                    else if(statusCodeResult.StatusCode == 404) { return NotFound("Không có mã OTP hết hạn"); }
+                    else { return BadRequest("Xóa mã OTP hết hạn thất bại"); }
+                }
+                else { return BadRequest("Xóa mã OTP hết hạn thất bại"); }
             }
             catch (Exception ex)
             {

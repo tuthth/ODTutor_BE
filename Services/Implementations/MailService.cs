@@ -24,23 +24,28 @@ namespace Services.Implementations
         {
             mailSettings = _mailSettings.Value;
         }
-        //tao user trang, khong co thong tin gi
+        
         public async Task<IActionResult> SendEmailTokenAsync(string email)
         {
-            var checkEmail = _context.Users.Any(u => u.Email.Equals(email) && u.EmailConfirmed == true);
+            var checkEmail = _context.Users.FirstOrDefault(u => u.Email.Equals(email));
 
-            if (checkEmail)
+            if (checkEmail == null|| checkEmail.EmailConfirmed == true)
             {
                 return new StatusCodeResult(409);
             }
             var tokenEmail = GenerateRandomOTP();
             var checkEmailDefaulr = _context.Users.Any(u => u.Email.Equals(email) && u.EmailConfirmed == false);
+
             if (checkEmailDefaulr)
             {
-                var queryUserAuthentication = _context.Users.Include(u => u.UserAuthenticationNavigation).FirstOrDefault(u => u.Email.Equals(email));
-                queryUserAuthentication.UserAuthenticationNavigation.EmailToken = tokenEmail;
-                queryUserAuthentication.UserAuthenticationNavigation.EmailTokenExpiry = DateTime.Now;
-                _context.UserAuthentications.Update(queryUserAuthentication.UserAuthenticationNavigation);
+                UserAuthentication userAuthentication = new UserAuthentication
+                {
+                    UserId = checkEmail.Id,
+                    EmailToken = tokenEmail,
+                    EmailTokenExpiry = DateTime.UtcNow.AddMinutes(15)
+                };
+
+                _context.UserAuthentications.Add(userAuthentication);
                 await _context.SaveChangesAsync();
                 try
                 {
@@ -48,7 +53,7 @@ namespace Services.Implementations
                     {
                         To = email,
                         Subject = "[ODTutor] Mã xác thực OTP",
-                        Body = "Đây là mã xác thực OTP của bạn: " + tokenEmail
+                        Body = "Đây là mã xác thực OTP của bạn: " + tokenEmail + ".\n Mã này sẽ hết hạn vào " + userAuthentication.EmailTokenExpiry
                     });
                     return new StatusCodeResult(200);
                 }
@@ -59,37 +64,7 @@ namespace Services.Implementations
                     return new StatusCodeResult(500); // Return a 500 Internal Server Error status code
                 }
             }
-            User user = new User
-            {
-                Email = email,
-                Active = false,
-            };
-            _context.Users.Add(user);
-            await _context.SaveChangesAsync();
-            UserAuthentication userAuthentication = new UserAuthentication
-            {
-                UserId = user.Id,
-                EmailToken = tokenEmail,
-                EmailTokenExpiry = DateTime.UtcNow.AddMinutes(15)
-            };
-            _context.UserAuthentications.Add(userAuthentication);
-            await _context.SaveChangesAsync();
-            try
-            {
-                await SendMail(new MailContent()
-                {
-                    To = email,
-                    Subject = "[ODTutor] Mã xác thực OTP",
-                    Body = "Đây là mã xác thực OTP của bạn: " + tokenEmail
-                });
-                return new StatusCodeResult(200);
-            }
-            catch (Exception ex)
-            {
-                // Handle the error here, for example log the error message
-                Console.WriteLine(ex.Message);
-                return new StatusCodeResult(500); // Return a 500 Internal Server Error status code
-            }
+            return new StatusCodeResult(500);
         }
         private string GenerateRandomOTP()
         {

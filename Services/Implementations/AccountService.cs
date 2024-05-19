@@ -26,6 +26,7 @@ namespace Services.Implementations
         }
 
         //RegisterAccount
+        //cai nay dc moi student a` Chuong
         public async Task<AccountResponse> createAccount(AccountRegisterRequest accountRegisterRequest)
         {
             try
@@ -48,7 +49,7 @@ namespace Services.Implementations
                 CreateHashPassword(accountRegisterRequest.Password, out byte[] passwordHash);
                 account.Password = Convert.ToBase64String(passwordHash);
                 account.Name = accountRegisterRequest.FullName;
-                account.Active = true;
+                account.Active = false; // Default is false
                 account.EmailConfirmed = false;
                 account.DateOfBirth = null;
                 account.PhoneNumber = "";

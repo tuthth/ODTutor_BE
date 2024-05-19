@@ -42,7 +42,7 @@ namespace Services.Implementations
         {
             var user = _context.Users.FirstOrDefault(u => (u.Email == loginRequest.Email || u.Username == loginRequest.Username) && u.Password.Equals(loginRequest.Password));
             if(user == null) return new StatusCodeResult(404);
-            if(user.Active == true) return new StatusCodeResult(409); //user is active in system
+            if(user.Active == false) return new StatusCodeResult(409); //user is not active in system
             if(user.Banned == true) return new StatusCodeResult(403); //user is banned
 
             if (user != null)
@@ -115,7 +115,17 @@ namespace Services.Implementations
             if (userAuthentication.EmailToken != otp) return new StatusCodeResult(400); //wrong OTP
             if (userAuthentication.EmailTokenExpiry < DateTime.UtcNow) return new StatusCodeResult(408); //OTP expired
             user.Active = true;
+            user.EmailConfirmed = true;
             _context.Users.Update(user);
+            _context.UserAuthentications.Remove(userAuthentication); //remove OTP request after confirmed
+            await _context.SaveChangesAsync();
+            return new StatusCodeResult(200);
+        }
+        public async Task<IActionResult> RemoveExpiredOTP()
+        {
+            var expiredOTP = _context.UserAuthentications.Where(ua => ua.EmailTokenExpiry < DateTime.UtcNow);
+            if(expiredOTP.Count() == 0) return new StatusCodeResult(404); //no expired OTP found
+            _context.UserAuthentications.RemoveRange(expiredOTP);
             await _context.SaveChangesAsync();
             return new StatusCodeResult(200);
         }

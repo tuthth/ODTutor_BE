@@ -16,5 +16,6 @@ namespace Services.Interfaces
         Task<IActionResult> Login(LoginRequest loginRequest, int role);
         Task<IActionResult> GenerateJwtToken(User user, int role);
         Task<IActionResult> ConfirmOTP(string email, string otp);
+        Task<IActionResult> RemoveExpiredOTP();
     }
 }
