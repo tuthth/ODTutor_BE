@@ -11,8 +11,6 @@ namespace Services.Interfaces
     public interface ISendMailService
     {
         Task<IActionResult> SendMail(MailContent mailContent);
-
-        Task SendEmailAsync(string email, string subject, string htmlMessage);
         Task<IActionResult> SendEmailTokenAsync(string email);
     }
 }

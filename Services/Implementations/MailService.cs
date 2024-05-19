@@ -53,7 +53,8 @@ namespace Services.Implementations
                     {
                         To = email,
                         Subject = "[ODTutor] Mã xác thực OTP",
-                        Body = "Đây là mã xác thực OTP của bạn: " + tokenEmail + ".\n Mã này sẽ hết hạn vào " + userAuthentication.EmailTokenExpiry
+                        Body = "Đây là mã xác thực OTP của bạn" + ".\n Mã này sẽ hết hạn vào " + userAuthentication.EmailTokenExpiry,
+                        OTP = tokenEmail
                     });
                     return new StatusCodeResult(200);
                 }
@@ -74,17 +75,6 @@ namespace Services.Implementations
             return otpValue.ToString("D6"); // Định dạng để luôn có 6 chữ số
         }
 
-
-        public async Task SendEmailAsync(string email, string subject, string htmlMessage)
-        {
-            await SendMail(new MailContent()
-            {
-                To = email,
-                Subject = subject,
-                Body = htmlMessage
-            });
-        }
-
         public async Task<IActionResult> SendMail(MailContent mailContent)
         {
             var email = new MimeMessage();
@@ -93,9 +83,13 @@ namespace Services.Implementations
             email.To.Add(MailboxAddress.Parse(mailContent.To));
             email.Subject = mailContent.Subject;
 
-
+            string projectDirectory = Directory.GetParent(AppDomain.CurrentDomain.BaseDirectory).Parent.Parent.Parent.FullName;
+            string OTPSamplePath = Path.Combine(projectDirectory, "Template", "template.html");
+            string htmlContent = System.IO.File.ReadAllText(OTPSamplePath);
+            htmlContent = htmlContent.Replace("{Body}", mailContent.Body);
+            htmlContent = htmlContent.Replace("{OTP}", mailContent.OTP);
             var builder = new BodyBuilder();
-            builder.HtmlBody = mailContent.Body;
+            builder.HtmlBody = htmlContent;
             email.Body = builder.ToMessageBody();
 
             // dùng SmtpClient của MailKit
