@@ -53,7 +53,7 @@ namespace Services.Implementations
                     {
                         To = email,
                         Subject = "[ODTutor] Mã xác thực OTP",
-                        Body = "Đây là mã xác thực OTP của bạn" + ".\n Mã này sẽ hết hạn vào " + userAuthentication.EmailTokenExpiry,
+                        Body = "Đây là mã xác thực OTP của bạn" + ".\n Mã này sẽ hết hạn vào " + userAuthentication.EmailTokenExpiry + " GMT +0",
                         OTP = tokenEmail
                     });
                     return new StatusCodeResult(200);
