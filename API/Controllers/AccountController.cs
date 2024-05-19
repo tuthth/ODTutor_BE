@@ -15,11 +15,20 @@ namespace API.Controllers
             _accountService = accountService;
         }
 
-        [HttpPost("register")]
+        // Đăng kí tài khoản
+        [HttpPost("register-account")]
         public async Task<ActionResult<AccountResponse>> registerAccount([FromBody] AccountRegisterRequest accountRegisterRequest)
         {
                 var rs = await _accountService.createAccount(accountRegisterRequest);
                 return Ok(rs);
+        }
+
+        // Tìm theo StudentID
+        [HttpGet("get-user-information")]
+        public async Task<ActionResult<AccountResponse>> getUserInfo([FromQuery] Guid userID)
+        {
+            var rs = await _accountService.GetStudentInformation(userID);
+            return Ok(rs);
         }
     }
 }

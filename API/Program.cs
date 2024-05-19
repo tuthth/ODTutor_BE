@@ -3,6 +3,7 @@ using API.Configurations;
 using Microsoft.EntityFrameworkCore;
 using Models.Entities;
 using Models.Mappings;
+using Services;
 using Services.Implementations;
 using Services.Interfaces;
 
@@ -54,6 +55,7 @@ namespace API
                 app.UseSwaggerUI();
             // }
             app.UseCors("AllowAll");
+            app.UseMiddleware(typeof(ProcessCrudExceptions));
             app.UseHttpsRedirection();
 
          

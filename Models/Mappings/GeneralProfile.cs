@@ -17,6 +17,8 @@ namespace Models.Mappings
         {
             CreateMap<Wallet, WalletView>();
             CreateMap<TutorInformationRequest, Tutor>();
+            CreateMap<AccountRegisterRequest, User>();
+            CreateMap<User, AccountResponse>();
         }
     }
 }

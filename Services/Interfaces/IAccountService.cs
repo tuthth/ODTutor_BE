@@ -11,5 +11,6 @@ namespace Services.Interfaces
     public interface IAccountService
     {
         Task<AccountResponse> createAccount(AccountRegisterRequest accountRegisterRequest);
+        Task<AccountResponse> GetStudentInformation(Guid studentID);
     }
 }
