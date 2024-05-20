@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Models.Entities;
@@ -45,7 +46,7 @@ namespace Services.Implementations
                 CreateHashPassword(accountRegisterRequest.Password, out byte[] passwordHash);
                 account.Password = Convert.ToBase64String(passwordHash);
                 account.Name = accountRegisterRequest.FullName;
-                account.Active = false; // Default is false
+                account.Active = true; // Default is true
                 account.EmailConfirmed = false;
                 account.DateOfBirth = null;
                 account.PhoneNumber = "";
@@ -114,6 +115,64 @@ namespace Services.Implementations
             }
         }
         /*public async Task<> getStudentInformation (Guid studentId)*/
+
+        // Update User Account
+        public async Task<UserAccountResponse> updateUserAccount(Guid UserID, UpdateAccountRequest request)
+        {   
+            try
+            {
+                User user = FindUserById(UserID);
+                if (user == null)
+                {
+                    throw new CrudException(HttpStatusCode.NotFound, "User not found", "");
+                }
+                user.Name = request.FullName;
+                user.Username = request.Username;
+                user.ImageUrl = request.ImageUrl;
+                user.PhoneNumber = request.PhoneNumber;
+                user.DateOfBirth = request.DateOfBirth;
+                UserAccountResponse response = _mapper.Map<UserAccountResponse>(user);
+                return response;
+            } catch(CrudException ex)
+            {
+                throw ex;
+            }
+            catch (Exception ex)
+            {
+                throw new CrudException(HttpStatusCode.InternalServerError, ex.Message, "");
+            }
+        }
+
+        // Get All User 
+        public async Task<List<UserAccountResponse>> GetAllUser()
+        {
+            try
+            {
+                List<UserAccountResponse> response = new List<UserAccountResponse>();
+                response = _context.Users.Select(s => new UserAccountResponse
+                {
+                    UserID = s.Id,
+                    Email = s.Email,
+                    FullName = s.Name,
+                    ImageUrl = s.ImageUrl,
+                    PhoneNumber = s.PhoneNumber,
+                    DateOfBirth = s.DateOfBirth,
+                    EmailConfirmed = s.EmailConfirmed,
+                    Active = s.Active,
+                    Banned = s.Banned,
+                    Status = s.Status
+                }).ToList();
+                return response;
+            } catch(CrudException ex)
+            {
+                throw ex;
+            }
+            catch (Exception ex)
+            {
+                throw new CrudException(HttpStatusCode.InternalServerError, ex.Message, "");
+            }
+        }
+
         // Create Hash Password
         private void CreateHashPassword(string password, out byte[] passwordHash)
         {
@@ -121,6 +180,12 @@ namespace Services.Implementations
             {
                 passwordHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(password));
             }
+        }
+
+        // Find User By ID 
+        private User FindUserById(Guid UserID)
+        {
+            return _context.Users.FirstOrDefault(s => s.Id.Equals(UserID));
         }
     }
 }
