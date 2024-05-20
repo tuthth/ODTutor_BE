@@ -20,13 +20,10 @@ namespace Services.Implementations
 {
     public class TutorRegisterService : BaseService, ITutorRegisterService
     {
-        private readonly ODTutorContext _odContext;
-        private readonly IMapper _mapper;
+        
         private readonly IConfiguration _cf;
         public TutorRegisterService(ODTutorContext odContext, IMapper mapper, IConfiguration cf) : base(odContext, mapper)
         {
-            _odContext = odContext;
-            _mapper = mapper;
             _cf = cf;
         }
 
@@ -43,8 +40,8 @@ namespace Services.Implementations
                 }
                 else
                 {
-                    _odContext.Tutors.Add(tutor);
-                    await _odContext.SaveChangesAsync();
+                    _context.Tutors.Add(tutor);
+                    await _context.SaveChangesAsync();
                     return tutor;
                 }
             }
@@ -75,8 +72,8 @@ namespace Services.Implementations
                 }
                 else
                 {
-                    _odContext.TutorSubjects.AddRange(tutorSubjects);
-                    await _odContext.SaveChangesAsync();
+                    _context.TutorSubjects.AddRange(tutorSubjects);
+                    await _context.SaveChangesAsync();
                     return tutorSubjects;
                 }
             }
@@ -114,8 +111,8 @@ namespace Services.Implementations
                             TutorCertificate certificate = new TutorCertificate();
                             certificate.TutorId = tutorID;
                             certificate.ImageUrl = urlLink;
-                            _odContext.TutorCertificates.Add(certificate);
-                            _odContext.SaveChanges();
+                            _context.TutorCertificates.Add(certificate);
+                            await _context.SaveChangesAsync();
                             tutorCertificateList.Add(certificate);
                         }
                     }
@@ -137,8 +134,8 @@ namespace Services.Implementations
             List<string> imagesUrlList = await getAllImagesUrlOfTutor(tutorID);
             try
             {
-                Tutor tutor = await _odContext.Tutors.Where(x => x.TutorId == tutorID).FirstOrDefaultAsync();
-                User user = await _odContext.Tutors.Where(x => x.TutorId == tutorID).Select(x => x.UserNavigation).FirstOrDefaultAsync();
+                Tutor tutor = await _context.Tutors.Where(x => x.TutorId == tutorID).FirstOrDefaultAsync();
+                User user = await _context.Tutors.Where(x => x.TutorId == tutorID).Select(x => x.UserNavigation).FirstOrDefaultAsync();
                 if ( tutor == null)
                 {
                     return null;
@@ -169,7 +166,7 @@ namespace Services.Implementations
             List<string> subjectlist = new List<string>();
             try
             {
-                subjectlist = _odContext.TutorSubjects.Where( x => x.TutorId == TutorId).Select(x => x.SubjectNavigation.Title).ToList();
+                subjectlist = _context.TutorSubjects.Where( x => x.TutorId == TutorId).Select(x => x.SubjectNavigation.Title).ToList();
             } catch(Exception ex)
             {
                 throw new Exception(ex.Message);
@@ -183,7 +180,7 @@ namespace Services.Implementations
             List<string> imagesUrlList = new List<string>();
             try
             {
-                imagesUrlList = _odContext.Users.Where(x => x.TutorNavigation.TutorId == TutorId)
+                imagesUrlList = _context.Users.Where(x => x.TutorNavigation.TutorId == TutorId)
                                 .Select( x => x.TutorNavigation.TutorCertificatesNavigation
                                 .Select(x => x.ImageUrl).ToList()).FirstOrDefault();
             } catch(Exception ex)

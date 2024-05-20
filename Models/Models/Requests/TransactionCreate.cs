@@ -15,4 +15,14 @@ namespace Models.Models.Requests
         [Required]
         public string RedirectUrl { get; set; } = null!;
     }
+    public class BookingTransactionCreate : TransactionCreate
+    {
+        [Required]
+        public Guid BookingId { get; set; }
+    }
+    public class CourseTransactionCreate : TransactionCreate
+    {
+        [Required]
+        public Guid CourseId { get; set; }
+    }
 }

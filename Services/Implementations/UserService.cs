@@ -1,14 +1,19 @@
 ﻿using AutoMapper;
+using MailKit.Security;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages.Manage;
+using MimeKit;
 using Models.Entities;
 using Models.Enumerables;
+using Models.Models.Emails;
 using Models.Models.Requests;
 using Services.Interfaces;
 using Settings.JWT;
+using Settings.Mail;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -24,9 +29,11 @@ namespace Services.Implementations
     {
         private readonly IConfiguration _configuration;
         private readonly JWTSetting _jwtSetting;
-        public UserService(ODTutorContext context, IMapper mapper, IOptions<JWTSetting> options) : base(context, mapper)
+        private readonly MailSetting mailSettings;
+        public UserService(ODTutorContext context, IMapper mapper, IOptions<JWTSetting> options, IOptions<MailSetting> mailOptions) : base(context, mapper)
         {
             _jwtSetting = options.Value;
+            mailSettings = mailOptions.Value;
         }
 
         public Guid GetUserId(HttpContext httpContext)
@@ -67,7 +74,7 @@ namespace Services.Implementations
                 {
                     Subject = new ClaimsIdentity(new[]
                 {
-                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+                new Claim("UserId", user.Id.ToString()),
                 new Claim("StudentId", student.StudentId.ToString()),
                 new Claim(ClaimTypes.Name, user.Username ?? string.Empty),
                 new Claim(ClaimTypes.Email, user.Email ?? string.Empty),
@@ -84,7 +91,7 @@ namespace Services.Implementations
                 {
                     Subject = new ClaimsIdentity(new[]
                     {
-                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+                new Claim("UserId", user.Id.ToString()),
                 new Claim("TutorId", tutor.TutorId.ToString()),
                 new Claim(ClaimTypes.Name, user.Username ?? string.Empty),
                 new Claim(ClaimTypes.Email, user.Email ?? string.Empty),
@@ -127,6 +134,73 @@ namespace Services.Implementations
             if(expiredOTP.Count() == 0) return new StatusCodeResult(404); //no expired OTP found
             _context.UserAuthentications.RemoveRange(expiredOTP);
             await _context.SaveChangesAsync();
+            return new StatusCodeResult(200);
+        }
+        public async Task<IActionResult> BanAccount(Guid userId)
+        {
+            var user = _context.Users.FirstOrDefault(u => u.Id == userId);
+            if (user == null) return new StatusCodeResult(404); //user not found
+            if(user.Banned == true) return new StatusCodeResult(409); //user is already banned
+            user.Banned = true;
+            user.BanExpiredAt = DateTime.UtcNow.AddYears(30); //ban for 24 hours
+            _context.Users.Update(user);
+            await _context.SaveChangesAsync();
+            try
+            {
+                await SendMailConfirmBanned(new MailContent()
+                {
+                    To = user.Email,
+                    Subject = "[ODTutor] Thông báo đình chỉ tài khoản",
+                    Body = "Tài khoản của bạn bị đình chỉ do vi phạm chính sách sử dụng của ODTutor. Để mở khóa trước thời hạn, vui lòng liên hệ lại email này. \nTài khoản sẽ được tự động mở khóa vào lúc " + DateTime.UtcNow.AddYears(30) + " GMT+0",
+
+                });
+                return new StatusCodeResult(200);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return new StatusCodeResult(500);
+            }
+        }
+        public async Task<IActionResult> SendMailConfirmBanned(MailContent mailContent)
+        {
+            var email = new MimeMessage();
+            email.Sender = new MailboxAddress(mailSettings.DisplayName, mailSettings.Mail);
+            email.From.Add(new MailboxAddress(mailSettings.DisplayName, mailSettings.Mail));
+            email.To.Add(MailboxAddress.Parse(mailContent.To));
+            email.Subject = mailContent.Subject;
+
+            //string projectDirectory = Directory.GetParent(AppDomain.CurrentDomain.BaseDirectory).Parent.Parent.Parent.FullName;
+            //string OTPSamplePath = Path.Combine(projectDirectory, "Template", "template.html");
+            //string htmlContent = System.IO.File.ReadAllText(OTPSamplePath);
+            //htmlContent = htmlContent.Replace("{Body}", mailContent.Body);
+            //htmlContent = htmlContent.Replace("{OTP}", mailContent.OTP);
+            var builder = new BodyBuilder();
+            builder.HtmlBody = mailContent.Body;
+            //builder.HtmlBody = htmlContent;
+            email.Body = builder.ToMessageBody();
+
+            // dùng SmtpClient của MailKit
+            using var smtp = new MailKit.Net.Smtp.SmtpClient();
+
+            try
+            {
+                smtp.Connect(mailSettings.Host, mailSettings.Port, SecureSocketOptions.StartTls);
+                smtp.Authenticate(mailSettings.Mail, mailSettings.Password);
+                await smtp.SendAsync(email);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+
+                // Gửi mail thất bại, nội dung email sẽ lưu vào thư mục mailssave
+                System.IO.Directory.CreateDirectory("mailssave");
+                var emailsavefile = string.Format(@"mailssave/{0}.eml", Guid.NewGuid());
+                await email.WriteToAsync(emailsavefile);
+                throw;
+            }
+
+            smtp.Disconnect(true);
             return new StatusCodeResult(200);
         }
     }

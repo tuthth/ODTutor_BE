@@ -15,14 +15,10 @@ using System.Threading.Tasks;
 
 namespace Services.Implementations
 {
-    public class AccountService : IAccountService
+    public class AccountService : BaseService, IAccountService
     {
-        private readonly ODTutorContext _odtcontext;
-        private readonly IMapper _mapper;
-        public AccountService(ODTutorContext odtcontext, IMapper mapper)
+        public AccountService(ODTutorContext context, IMapper mapper) : base(context, mapper)
         {
-            _odtcontext = odtcontext;
-            _mapper = mapper;
         }
 
         //RegisterAccount
@@ -36,7 +32,7 @@ namespace Services.Implementations
                     || accountRegisterRequest.Email == "" || accountRegisterRequest.Password == ""
                     || accountRegisterRequest.ConfirmPassword == "")
                     throw new CrudException(HttpStatusCode.BadRequest, "Information is not empty", "");
-                var s = _odtcontext.Users.FirstOrDefault(a => a.Email.Equals(accountRegisterRequest.Email.ToUpper().Trim()));
+                var s = _context.Users.FirstOrDefault(a => a.Email.Equals(accountRegisterRequest.Email.ToUpper().Trim()));
                 if (s != null)
                 {
                     throw new CrudException(HttpStatusCode.BadRequest, "Email is already exist", "");
@@ -57,13 +53,25 @@ namespace Services.Implementations
                 account.Banned = false;
                 account.ImageUrl = "https://firebasestorage.googleapis.com/v0/b/capstone-c0906.appspot.com/o/defaultAva%2FDefaultAva.png?alt=media&token=7f4275d1-05c3-41ca-9ec4-091800bb5895&fbclid=IwZXh0bgNhZW0CMTAAAR1hdvcHNcUznHSgIdEFztHYFX2i1Pij9mEoDLqPBNHaSvbaNJYBdCcqox8_aem_AY0mhUEaiU6HcPLEIXQs3nX8vbFyboGsM08NUkK3knIHfrChNERi9W7lt1cxDwx6-gmGX5jX1yh-14x27xQA1TjF";
                 account.Id = new Guid();
-                _odtcontext.Users.Add(account);
-                _odtcontext.Students.Add(new Student
+                _context.Users.Add(account);
+                _context.Students.Add(new Student
                 {
                     StudentId = new Guid(),
                     UserId = account.Id
                 });
-                await _odtcontext.SaveChangesAsync();
+                await _context.SaveChangesAsync();
+                //create base wallet for new account
+                Wallet wallet = new Wallet
+                {
+                    WalletId = new Guid(),
+                    UserId = account.Id,
+                    Amount = 0,
+                    AvalaibleAmount = 0,
+                    PendingAmount = 0,
+                    LastBalanceUpdate = DateTime.UtcNow
+                };
+                _context.Wallets.Add(wallet);
+                await _context.SaveChangesAsync();
                 var accountResponse = _mapper.Map<AccountResponse>(account);
                 // Return information of account
                 return accountResponse;
@@ -84,7 +92,7 @@ namespace Services.Implementations
             try
             {
                 var response = new AccountResponse();
-                var userInfo = _odtcontext.Users
+                var userInfo = _context.Users
                     .FirstOrDefault(s => s.Id.Equals(UserID));
 
                     response.Status = userInfo.Status;
