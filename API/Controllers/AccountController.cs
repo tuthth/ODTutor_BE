@@ -30,5 +30,12 @@ namespace API.Controllers
             var rs = await _accountService.GetStudentInformation(userID);
             return Ok(rs);
         }
+
+        [HttpPost("google")]
+        public async Task<ActionResult<AccountResponse>> registerAccount([FromBody] string idToken)
+        {
+            var rs = await _accountService.GoogleLoginOrRegister(idToken);
+            return Ok(rs);
+        }
     }
 }

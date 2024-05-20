@@ -1,6 +1,9 @@
 ﻿using AutoMapper;
+using Google.Apis.Auth;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages.Manage;
 using Models.Entities;
 using Models.Models.Requests;
 using Models.Models.Views;
@@ -17,8 +20,10 @@ namespace Services.Implementations
 {
     public class AccountService : BaseService, IAccountService
     {
-        public AccountService(ODTutorContext context, IMapper mapper) : base(context, mapper)
+        private readonly IUserService _userService;
+        public AccountService(ODTutorContext context, IMapper mapper, IUserService userService) : base(context, mapper)
         {
+            _userService = userService;
         }
 
         //RegisterAccount
@@ -86,6 +91,42 @@ namespace Services.Implementations
             }
         }
 
+        public async Task<IActionResult> GoogleLoginOrRegister(string idToken)
+        {
+            try
+            {
+                var payload = await GoogleJsonWebSignature.ValidateAsync(idToken, new GoogleJsonWebSignature.ValidationSettings());
+
+                var user = _context.Users.FirstOrDefault(u => u.Email == payload.Email);
+                if (user == null)
+                {
+                    var registerRequest = new AccountRegisterRequest
+                    {
+                        FullName = payload.Name,
+                        Email = payload.Email,
+                        Password = "", // Google không cung cấp mật khẩu, bạn cần xử lý phần này
+                        ConfirmPassword = "", // Google không cung cấp mật khẩu, bạn cần xử lý phần này
+                        DateOfBirth = DateTime.Now, // Google không cung cấp ngày sinh, bạn cần xử lý phần này
+                        PhoneNumber = "" // Google không cung cấp số điện thoại, bạn cần xử lý phần này
+                    };
+                    return (IActionResult)await createAccount(registerRequest);
+                }
+                else
+                {
+                    var loginRequest = new LoginRequest
+                    {
+                        Email = user.Email,
+                        Password = user.Password
+                    };
+                    return await _userService.Login(loginRequest, 1); // Giả sử rằng role là 1
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new CrudException(HttpStatusCode.InternalServerError, ex.Message, "");
+            }
+        }
+
         // Get Student Information
         public async Task<AccountResponse> GetStudentInformation(Guid UserID)
         {
@@ -95,18 +136,18 @@ namespace Services.Implementations
                 var userInfo = _context.Users
                     .FirstOrDefault(s => s.Id.Equals(UserID));
 
-                    response.Status = userInfo.Status;
-                    response.Email = userInfo.Email;
-                    response.FullName = userInfo.Name;
-                    response.ImageUrl = userInfo.ImageUrl;
-                    response.PhoneNumber = userInfo.PhoneNumber;
-                    response.DateOfBirth = userInfo.DateOfBirth;
-                    response.EmailConfirmed = userInfo.EmailConfirmed;
-                    response.Active = userInfo.Active;
-                    response.Banned = userInfo.Banned;
-                    response.Status = userInfo.Status;
-                    response.EmailConfirmed = userInfo.EmailConfirmed;
-                    return response;
+                response.Status = userInfo.Status;
+                response.Email = userInfo.Email;
+                response.FullName = userInfo.Name;
+                response.ImageUrl = userInfo.ImageUrl;
+                response.PhoneNumber = userInfo.PhoneNumber;
+                response.DateOfBirth = userInfo.DateOfBirth;
+                response.EmailConfirmed = userInfo.EmailConfirmed;
+                response.Active = userInfo.Active;
+                response.Banned = userInfo.Banned;
+                response.Status = userInfo.Status;
+                response.EmailConfirmed = userInfo.EmailConfirmed;
+                return response;
             }
             catch (Exception ex)
             {

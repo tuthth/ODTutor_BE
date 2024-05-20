@@ -1,4 +1,4 @@
-
+using Microsoft.AspNetCore.Authentication.Google;
 using API.Configurations;
 using Microsoft.EntityFrameworkCore;
 using Models.Entities;
@@ -41,6 +41,11 @@ namespace API
                            .AllowAnyMethod()
                            .AllowAnyHeader();
                 });
+            });
+            builder.Services.AddAuthentication().AddGoogle(options =>
+            {
+                options.ClientId = builder.Configuration["Google:ClientId"];
+                options.ClientSecret = builder.Configuration["Google:ClientSecret"];
             });
 
 
