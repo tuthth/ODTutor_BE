@@ -117,7 +117,7 @@ namespace Services.Implementations
             if (user == null) return new StatusCodeResult(404); //user not found
             if(user.Active == true) return new StatusCodeResult(409); //user is active in system
             if(user.Banned == true) return new StatusCodeResult(403); //user is banned
-            var userAuthentication = _context.UserAuthentications.FirstOrDefault(ua => ua.UserId == user.Id);
+            var userAuthentication = _context.UserAuthentications.FirstOrDefault(ua => ((ua.UserId == user.Id) && ua.EmailTokenExpiry.Value.Date < DateTime.UtcNow.Date));
             if (userAuthentication == null) return new StatusCodeResult(404); //no OTP request found
             if (userAuthentication.EmailToken != otp) return new StatusCodeResult(400); //wrong OTP
             if (userAuthentication.EmailTokenExpiry < DateTime.UtcNow) return new StatusCodeResult(408); //OTP expired
