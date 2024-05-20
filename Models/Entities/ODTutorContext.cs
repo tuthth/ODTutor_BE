@@ -356,9 +356,9 @@ namespace Models.Entities
                 .HasKey(u => u.Id);
 
             modelBuilder.Entity<User>()
-                .HasOne(u => u.UserAuthenticationNavigation)
+                .HasMany(u => u.UserAuthenticationNavigation)
                 .WithOne(ua => ua.UserNavigation)
-                .HasForeignKey<UserAuthentication>(ua => ua.UserId).OnDelete(DeleteBehavior.NoAction);
+                .HasForeignKey(ua => ua.UserId).OnDelete(DeleteBehavior.NoAction);
 
             modelBuilder.Entity<User>()
                 .HasMany(u => u.CreateUserBlockNavigation)
@@ -406,8 +406,8 @@ namespace Models.Entities
 
             modelBuilder.Entity<UserAuthentication>()
                 .HasOne(ua => ua.UserNavigation)
-                .WithOne(u => u.UserAuthenticationNavigation)
-                .HasForeignKey<UserAuthentication>(ua => ua.UserId).OnDelete(DeleteBehavior.NoAction);
+                .WithMany(u => u.UserAuthenticationNavigation)
+                .HasForeignKey(ua => ua.UserId).OnDelete(DeleteBehavior.NoAction);
 
             // UserBlock Entity Configuration
             modelBuilder.Entity<UserBlock>()
