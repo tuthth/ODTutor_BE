@@ -96,18 +96,18 @@ namespace Services.Implementations
                 var userInfo = _context.Users
                     .FirstOrDefault(s => s.Id.Equals(UserID));
 
-                    response.Status = userInfo.Status;
-                    response.Email = userInfo.Email;
-                    response.FullName = userInfo.Name;
-                    response.ImageUrl = userInfo.ImageUrl;
-                    response.PhoneNumber = userInfo.PhoneNumber;
-                    response.DateOfBirth = userInfo.DateOfBirth;
-                    response.EmailConfirmed = userInfo.EmailConfirmed;
-                    response.Active = userInfo.Active;
-                    response.Banned = userInfo.Banned;
-                    response.Status = userInfo.Status;
-                    response.EmailConfirmed = userInfo.EmailConfirmed;
-                    return response;
+                response.Status = userInfo.Status;
+                response.Email = userInfo.Email;
+                response.FullName = userInfo.Name;
+                response.ImageUrl = userInfo.ImageUrl;
+                response.PhoneNumber = userInfo.PhoneNumber != null ? userInfo.PhoneNumber : "";
+                response.DateOfBirth = userInfo.DateOfBirth != null ? userInfo.DateOfBirth : DateTime.Now;
+                response.EmailConfirmed = userInfo.EmailConfirmed;
+                response.Active = userInfo.Active;
+                response.Banned = userInfo.Banned;
+                response.Status = userInfo.Status;
+                response.EmailConfirmed = userInfo.EmailConfirmed;
+                return response;
             }
             catch (Exception ex)
             {
@@ -118,7 +118,7 @@ namespace Services.Implementations
 
         // Update User Account
         public async Task<UserAccountResponse> updateUserAccount(Guid UserID, UpdateAccountRequest request)
-        {   
+        {
             try
             {
                 User user = FindUserById(UserID);
@@ -130,10 +130,12 @@ namespace Services.Implementations
                 user.Username = request.Username;
                 user.ImageUrl = request.ImageUrl;
                 user.PhoneNumber = request.PhoneNumber;
-                user.DateOfBirth = request.DateOfBirth;
+                user.DateOfBirth = request.DateOfBirth ?? DateTime.MinValue;
                 UserAccountResponse response = _mapper.Map<UserAccountResponse>(user);
+                response.UserID = user.Id;
                 return response;
-            } catch(CrudException ex)
+            }
+            catch (CrudException ex)
             {
                 throw ex;
             }
@@ -163,7 +165,8 @@ namespace Services.Implementations
                     Status = s.Status
                 }).ToList();
                 return response;
-            } catch(CrudException ex)
+            }
+            catch (CrudException ex)
             {
                 throw ex;
             }
