@@ -40,6 +40,7 @@ namespace Services.Implementations
             {
                 UserAuthentication userAuthentication = new UserAuthentication
                 {
+                    Id = Guid.NewGuid(),
                     UserId = checkEmail.Id,
                     EmailToken = tokenEmail,
                     EmailTokenExpiry = DateTime.UtcNow.AddMinutes(15)

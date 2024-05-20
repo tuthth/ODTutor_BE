@@ -48,8 +48,8 @@ namespace Services.Implementations
                 account.Name = accountRegisterRequest.FullName;
                 account.Active = true; // Default is true
                 account.EmailConfirmed = false;
-                account.DateOfBirth = null;
-                account.PhoneNumber = "";
+                account.DateOfBirth = accountRegisterRequest.DateOfBirth;
+                account.PhoneNumber = accountRegisterRequest.PhoneNumber;
                 account.Status = 1;
                 account.Banned = false;
                 account.ImageUrl = "https://firebasestorage.googleapis.com/v0/b/capstone-c0906.appspot.com/o/defaultAva%2FDefaultAva.png?alt=media&token=7f4275d1-05c3-41ca-9ec4-091800bb5895&fbclid=IwZXh0bgNhZW0CMTAAAR1hdvcHNcUznHSgIdEFztHYFX2i1Pij9mEoDLqPBNHaSvbaNJYBdCcqox8_aem_AY0mhUEaiU6HcPLEIXQs3nX8vbFyboGsM08NUkK3knIHfrChNERi9W7lt1cxDwx6-gmGX5jX1yh-14x27xQA1TjF";

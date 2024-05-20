@@ -26,6 +26,124 @@ namespace Services.Implementations
             _httpContextAccessor = httpContextAccessor;
         }
 
+        public async Task<IActionResult> CreateDepositToAccount(WalletTransactionCreate transactionCreate)
+        {
+            var user = _httpContextAccessor.HttpContext.User?.Claims?.FirstOrDefault(c => c.Type == "UserId")?.Value;
+            var findUser = _context.Users.FirstOrDefault(u => u.Id == Guid.Parse(user));
+            if (findUser == null)
+            {
+                return new StatusCodeResult(404);
+            }
+            if(transactionCreate.Choice == (Int32)VNPayTransactionType.Deposit)
+            {
+                var receiverWallet = _context.Wallets.Include(w => w.ReceiverWalletTransactionsNavigation.FirstOrDefault(w => w.ReceiverWalletId.Equals(transactionCreate.TargetId)));
+                if(receiverWallet == null)
+                {
+                    return new StatusCodeResult(404);
+                }
+                WalletTransaction transaction = new WalletTransaction
+                {
+                    WalletTransactionId = Guid.NewGuid(),
+                    SenderWalletId = new Guid(),
+                    ReceiverWalletId = transactionCreate.TargetId,
+                    CreatedAt = DateTime.UtcNow,
+                    Amount = transactionCreate.Amount,
+                    Status = (int)VNPayType.APPROVE,
+                };
+                var receiveWallet = _context.Wallets.FirstOrDefault(w => w.WalletId == transactionCreate.TargetId);
+                receiveWallet.PendingAmount += transactionCreate.Amount;
+
+                _context.WalletTransactions.Add(transaction);
+                await _context.SaveChangesAsync();
+
+                string vnp_Returnurl = transactionCreate.RedirectUrl;
+                string vnp_Url = _vnPaySetting.VnPay_Url.ToString();
+                string vnp_TmnCode = _vnPaySetting.VnPay_TmnCode.ToString();
+                string vnp_HashSecret = _vnPaySetting.VnPay_HashSecret.ToString();
+
+                VnPayLibrary vnpay = new VnPayLibrary();
+
+                vnpay.AddRequestData("vnp_Version", VnPayLibrary.VERSION);
+                vnpay.AddRequestData("vnp_Command", "pay");
+                vnpay.AddRequestData("vnp_TmnCode", vnp_TmnCode);
+                vnpay.AddRequestData("vnp_Amount", Math.Floor(decimal.Parse(transactionCreate.Amount.ToString()) * 100).ToString());
+                vnpay.AddRequestData("vnp_BankCode", "VNBANK");
+                vnpay.AddRequestData("vnp_CreateDate", DateTime.UtcNow.ToString("yyyyMMddHHmmss"));
+                vnpay.AddRequestData("vnp_CurrCode", "VND");
+                vnpay.AddRequestData("vnp_IpAddr", Utils.GetIpAddress(_httpContextAccessor));
+                vnpay.AddRequestData("vnp_Locale", "vn");
+                vnpay.AddRequestData("vnp_OrderInfo", "Thanh toán đơn hàng: " + transaction.WalletTransactionId);
+                vnpay.AddRequestData("vnp_OrderType", "other");
+                vnpay.AddRequestData("vnp_ReturnUrl", vnp_Returnurl);
+                vnpay.AddRequestData("vnp_TxnRef", transaction.WalletTransactionId.ToString());
+
+                string paymentUrl = vnpay.CreateRequestUrl(vnp_Url, vnp_HashSecret);
+
+                return new JsonResult(new
+                {
+                    PaymentUrl = paymentUrl
+                });
+            }
+            else if(transactionCreate.Choice == (Int32)VNPayTransactionType.Withdraw)
+            {
+                var senderWallet = _context.Wallets.Include(w => w.SenderWalletTransactionsNavigation.FirstOrDefault(w => w.SenderWalletId.Equals(transactionCreate.TargetId)));
+                if (senderWallet == null)
+                {
+                    return new StatusCodeResult(404);
+                }
+                WalletTransaction transaction = new WalletTransaction
+                {
+                    WalletTransactionId = Guid.NewGuid(),
+                    SenderWalletId = transactionCreate.TargetId,
+                    ReceiverWalletId = new Guid(),
+                    CreatedAt = DateTime.UtcNow,
+                    Amount = transactionCreate.Amount,
+                    Status = (int)VNPayType.APPROVE,
+                };
+                var sendWallet = _context.Wallets.FirstOrDefault(w => w.WalletId == transactionCreate.TargetId);
+                if(sendWallet.Amount < transactionCreate.Amount)
+                {
+                    return new StatusCodeResult(409);
+                }
+                sendWallet.PendingAmount -= transactionCreate.Amount;
+
+                _context.WalletTransactions.Add(transaction);
+                await _context.SaveChangesAsync();
+
+                string vnp_Returnurl = transactionCreate.RedirectUrl;
+                string vnp_Url = _vnPaySetting.VnPay_Url.ToString();
+                string vnp_TmnCode = _vnPaySetting.VnPay_TmnCode.ToString();
+                string vnp_HashSecret = _vnPaySetting.VnPay_HashSecret.ToString();
+
+                VnPayLibrary vnpay = new VnPayLibrary();
+
+                vnpay.AddRequestData("vnp_Version", VnPayLibrary.VERSION);
+                vnpay.AddRequestData("vnp_Command", "pay");
+                vnpay.AddRequestData("vnp_TmnCode", vnp_TmnCode);
+                vnpay.AddRequestData("vnp_Amount", Math.Floor(decimal.Parse(transactionCreate.Amount.ToString()) * 100).ToString());
+                vnpay.AddRequestData("vnp_BankCode", "VNBANK");
+                vnpay.AddRequestData("vnp_CreateDate", DateTime.UtcNow.ToString("yyyyMMddHHmmss"));
+                vnpay.AddRequestData("vnp_CurrCode", "VND");
+                vnpay.AddRequestData("vnp_IpAddr", Utils.GetIpAddress(_httpContextAccessor));
+                vnpay.AddRequestData("vnp_Locale", "vn");
+                vnpay.AddRequestData("vnp_OrderInfo", "Thanh toán đơn hàng: " + transaction.WalletTransactionId);
+                vnpay.AddRequestData("vnp_OrderType", "other");
+                vnpay.AddRequestData("vnp_ReturnUrl", vnp_Returnurl);
+                vnpay.AddRequestData("vnp_TxnRef", transaction.WalletTransactionId.ToString());
+
+                string paymentUrl = vnpay.CreateRequestUrl(vnp_Url, vnp_HashSecret);
+
+                return new JsonResult(new
+                {
+                    PaymentUrl = paymentUrl
+                });
+            }
+            else if(transactionCreate.Choice == (Int32)VNPayTransactionType.Unknown)
+            {
+                return new StatusCodeResult(406);
+            }
+            return new StatusCodeResult(500);
+        }
 
         public async Task<IActionResult> CreateDepositVnPayBooking(BookingTransactionCreate transactionCreate, Guid sendUserId, Guid receiverUserId)
         {
@@ -33,7 +151,7 @@ namespace Services.Implementations
             var findUser = _context.Users.FirstOrDefault(u => u.Id == Guid.Parse(user));
             if(findUser == null)
             {
-                return new StatusCodeResult(405);
+                return new StatusCodeResult(404);
             }
             var senderWallet = _context.Wallets.Include(w => w.SenderCourseTransactionsNavigation.FirstOrDefault(w => w.SenderWalletId.Equals(sendUserId)));
             var receiverWallet = _context.Wallets.Include(w => w.ReceiverCourseTransactionsNavigation.FirstOrDefault(w => w.ReceiverWalletId.Equals(receiverUserId)));
@@ -74,34 +192,7 @@ namespace Services.Implementations
             _context.BookingTransactions.Add(transaction);
             _context.WalletTransactions.Add(senderTransaction);
             await _context.SaveChangesAsync();
-
-            string vnp_Returnurl = transactionCreate.RedirectUrl;
-            string vnp_Url = _vnPaySetting.VnPay_Url.ToString();
-            string vnp_TmnCode = _vnPaySetting.VnPay_TmnCode.ToString();
-            string vnp_HashSecret = _vnPaySetting.VnPay_HashSecret.ToString();
-
-            VnPayLibrary vnpay = new VnPayLibrary();
-
-            vnpay.AddRequestData("vnp_Version", VnPayLibrary.VERSION);
-            vnpay.AddRequestData("vnp_Command", "pay");
-            vnpay.AddRequestData("vnp_TmnCode", vnp_TmnCode);
-            vnpay.AddRequestData("vnp_Amount", Math.Floor(decimal.Parse(transactionCreate.Amount.ToString()) * 100).ToString());
-            vnpay.AddRequestData("vnp_BankCode", "VNBANK");
-            vnpay.AddRequestData("vnp_CreateDate", DateTime.UtcNow.ToString("yyyyMMddHHmmss"));
-            vnpay.AddRequestData("vnp_CurrCode", "VND");
-            vnpay.AddRequestData("vnp_IpAddr", Utils.GetIpAddress(_httpContextAccessor));
-            vnpay.AddRequestData("vnp_Locale", "vn");
-            vnpay.AddRequestData("vnp_OrderInfo", "Thanh toán đơn hàng: " + transaction.BookingId);
-            vnpay.AddRequestData("vnp_OrderType", "other");
-            vnpay.AddRequestData("vnp_ReturnUrl", vnp_Returnurl);
-            vnpay.AddRequestData("vnp_TxnRef", transaction.BookingTransactionId.ToString());
-
-            string paymentUrl = vnpay.CreateRequestUrl(vnp_Url, vnp_HashSecret);
-
-            return new JsonResult(new
-            {
-                PaymentUrl = paymentUrl
-            });
+            return new StatusCodeResult(201);
         }
         public async Task<IActionResult> CreateDepositVnPayCourse(CourseTransactionCreate transactionCreate, Guid sendUserId, Guid receiverUserId)
         {
@@ -109,7 +200,7 @@ namespace Services.Implementations
             var findUser = _context.Users.FirstOrDefault(u => u.Id == Guid.Parse(user));
             if (findUser == null)
             {
-                return new StatusCodeResult(405);
+                return new StatusCodeResult(404);
             }
             var senderWallet = _context.Wallets.Include(w => w.SenderCourseTransactionsNavigation.FirstOrDefault(w => w.SenderWalletId.Equals(sendUserId)));
             var receiverWallet = _context.Wallets.Include(w => w.ReceiverCourseTransactionsNavigation.FirstOrDefault(w => w.ReceiverWalletId.Equals(receiverUserId)));
@@ -150,34 +241,7 @@ namespace Services.Implementations
             _context.CourseTransactions.Add(transaction);
             _context.WalletTransactions.Add(senderTransaction);
             await _context.SaveChangesAsync();
-
-            string vnp_Returnurl = transactionCreate.RedirectUrl;
-            string vnp_Url = _vnPaySetting.VnPay_Url.ToString();
-            string vnp_TmnCode = _vnPaySetting.VnPay_TmnCode.ToString();
-            string vnp_HashSecret = _vnPaySetting.VnPay_HashSecret.ToString();
-
-            VnPayLibrary vnpay = new VnPayLibrary();
-
-            vnpay.AddRequestData("vnp_Version", VnPayLibrary.VERSION);
-            vnpay.AddRequestData("vnp_Command", "pay");
-            vnpay.AddRequestData("vnp_TmnCode", vnp_TmnCode);
-            vnpay.AddRequestData("vnp_Amount", Math.Floor(decimal.Parse(transactionCreate.Amount.ToString()) * 100).ToString());
-            vnpay.AddRequestData("vnp_BankCode", "VNBANK");
-            vnpay.AddRequestData("vnp_CreateDate", DateTime.UtcNow.ToString("yyyyMMddHHmmss"));
-            vnpay.AddRequestData("vnp_CurrCode", "VND");
-            vnpay.AddRequestData("vnp_IpAddr", Utils.GetIpAddress(_httpContextAccessor));
-            vnpay.AddRequestData("vnp_Locale", "vn");
-            vnpay.AddRequestData("vnp_OrderInfo", "Thanh toán đơn hàng: " + transaction.CourseId);
-            vnpay.AddRequestData("vnp_OrderType", "other");
-            vnpay.AddRequestData("vnp_ReturnUrl", vnp_Returnurl);
-            vnpay.AddRequestData("vnp_TxnRef", transaction.CourseTransactionId.ToString());
-
-            string paymentUrl = vnpay.CreateRequestUrl(vnp_Url, vnp_HashSecret);
-
-            return new JsonResult(new
-            {
-                PaymentUrl = paymentUrl
-            });
+            return new StatusCodeResult(201);
         }
 
 

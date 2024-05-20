@@ -18,5 +18,7 @@ namespace Models.Models.Requests
         [RegularExpression("^(?=.*\\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{8,12}$", ErrorMessage = "Password is invalid.")]
         public string Password { get; set; }
         public string ConfirmPassword { get; set; }
+        public DateTime DateOfBirth { get; set; }
+        public string? PhoneNumber { get; set; }
     }
 }
