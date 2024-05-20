@@ -17,10 +17,10 @@ namespace API.Controllers
 
         // Đăng kí tài khoản
         [HttpPost("register-account")]
-        public async Task<ActionResult<AccountResponse>> registerAccount([FromBody] AccountRegisterRequest accountRegisterRequest)
+        public async Task<IActionResult> registerAccount([FromBody] AccountRegisterRequest accountRegisterRequest)
         {
                 var rs = await _accountService.createAccount(accountRegisterRequest);
-                return Ok(rs);
+                return Ok();
         }
 
         // Tìm theo StudentID
@@ -28,13 +28,6 @@ namespace API.Controllers
         public async Task<ActionResult<AccountResponse>> getUserInfo([FromQuery] Guid userID)
         {
             var rs = await _accountService.GetStudentInformation(userID);
-            return Ok(rs);
-        }
-
-        [HttpPost("google")]
-        public async Task<ActionResult<AccountResponse>> registerAccount([FromBody] string idToken)
-        {
-            var rs = await _accountService.GoogleLoginOrRegister(idToken);
             return Ok(rs);
         }
     }
