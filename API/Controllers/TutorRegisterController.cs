@@ -6,9 +6,9 @@ using Services.Interfaces;
 namespace API.Controllers
 {
     [ApiController]
-    [Route("api/v1/[controller]")]
+    [Route("api/[controller]")]
     // [Authorize]
-    public class TutorRegisterController : Controller
+    public class TutorRegisterController : ControllerBase
     {
         private readonly ITutorRegisterService _tutorRegisterService;
         public TutorRegisterController(ITutorRegisterService tutorRegisterService)

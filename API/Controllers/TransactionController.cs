@@ -19,8 +19,33 @@ namespace API.Controllers
             _transactionService = transactionService;
             //_userService = userService;
         }
-
-        [HttpPost("deposit/vnpay/booking")]
+        [HttpPost("wallet")]
+        //[Authorize(Roles = "Student")]
+        public async Task<IActionResult> DepositVnpayBooking([FromBody] WalletTransactionCreate transactionCreate)
+        {
+            try
+            {
+                //var userId = _userService.GetUserId(HttpContext);
+                var transaction = await _transactionService.CreateDepositToAccount(transactionCreate);
+                if (transaction is StatusCodeResult statusCodeResult)
+                {
+                    if (statusCodeResult.StatusCode == 404) { return NotFound("Không tìm thấy ví"); }
+                    else if(statusCodeResult.StatusCode == 406) { return StatusCode(StatusCodes.Status406NotAcceptable, "Giao dịch không rõ trạng thái"); }
+                    else if (statusCodeResult.StatusCode == 409) { return Conflict("Số dư tài khoản không đủ thực hiện giao dịch"); }
+                    else if(statusCodeResult.StatusCode == 500) { return StatusCode(StatusCodes.Status500InternalServerError, "Lỗi hệ thống"); }
+                }
+                else if (transaction is JsonResult okObjectResult)
+                {
+                    return Ok(okObjectResult.Value);
+                }
+                return BadRequest("Lấy thông tin thanh toán thất bại");
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+        [HttpPost("booking")]
         //[Authorize(Roles = "Student")]
         public async Task<IActionResult> DepositVnpayBooking([FromBody] BookingTransactionCreate transactionCreate)
         {
@@ -44,7 +69,7 @@ namespace API.Controllers
                 return BadRequest(ex.Message);
             }
         }
-        [HttpPost("deposit/vnpay/course")]
+        [HttpPost("course")]
         //[Authorize(Roles = "Student")]
         public async Task<IActionResult> DepositVnpayCourse([FromBody] CourseTransactionCreate transactionCreate)
         {

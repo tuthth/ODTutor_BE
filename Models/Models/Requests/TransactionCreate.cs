@@ -25,4 +25,9 @@ namespace Models.Models.Requests
         [Required]
         public Guid CourseId { get; set; }
     }
+    public class WalletTransactionCreate : TransactionCreate
+    {
+        public Guid TargetId { get; set; }
+        public int Choice { get; set; }
+    }
 }

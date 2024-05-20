@@ -11,7 +11,6 @@ namespace Models.Entities
         public Guid WalletTransactionId { get; set; }
         public Guid SenderWalletId { get; set; }
         public Guid ReceiverWalletId { get; set; }
-        public Guid BookingId { get; set; }
         public DateTime CreatedAt { get; set; }
         public decimal Amount { get; set; }
         public int Status { get; set; }
