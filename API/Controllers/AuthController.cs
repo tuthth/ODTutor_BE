@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Models.Models.Requests;
+using Models.Models.Views;
 using Services.Interfaces;
 
 namespace API.Controllers
@@ -16,7 +17,7 @@ namespace API.Controllers
             _userService = userService;
         }
 
-        [HttpPost("login")]
+/*        [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginRequest loginRequest, [FromQuery] int role)
         {
             try
@@ -40,8 +41,17 @@ namespace API.Controllers
             {
                 return BadRequest(ex.Message);
             }
+        }*/
+
+        // Login V2
+        [HttpPost("login-v2")]
+        public async Task<LoginAccountResponse> LoginV2([FromBody] LoginRequest user)
+        {   
+            LoginAccountResponse response = await _userService.LoginV2(user);
+            return (response);
         }
 
+        // Confirm Email
         [HttpPost("confirm")]
         public async Task<IActionResult> ConfirmEmail([FromBody]ConfirmEmailRequest confirmEmailRequest)
         {

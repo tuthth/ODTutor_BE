@@ -11,6 +11,8 @@ using Models.Entities;
 using Models.Enumerables;
 using Models.Models.Emails;
 using Models.Models.Requests;
+using Models.Models.Views;
+using NuGet.Common;
 using Services.Interfaces;
 using Settings.JWT;
 using Settings.Mail;
@@ -19,7 +21,9 @@ using System.Collections.Generic;
 using System.Data;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
+using System.Net;
 using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -30,10 +34,11 @@ namespace Services.Implementations
         private readonly IConfiguration _configuration;
         private readonly JWTSetting _jwtSetting;
         private readonly MailSetting mailSettings;
-        public UserService(ODTutorContext context, IMapper mapper, IOptions<JWTSetting> options, IOptions<MailSetting> mailOptions) : base(context, mapper)
+        public UserService(ODTutorContext context, IConfiguration configuration, IMapper mapper, IOptions<JWTSetting> options, IOptions<MailSetting> mailOptions) : base(context, mapper)
         {
             _jwtSetting = options.Value;
             mailSettings = mailOptions.Value;
+            _configuration = configuration;
         }
 
         public Guid GetUserId(HttpContext httpContext)
@@ -45,23 +50,61 @@ namespace Services.Implementations
             }
             return Guid.Empty;
         }
-        public async Task<IActionResult> Login(LoginRequest loginRequest, int role)
-        {
-            var user = _context.Users.FirstOrDefault(u => (u.Email == loginRequest.Email || u.Username == loginRequest.Username) && u.Password.Equals(loginRequest.Password));
-            if(user == null) return new StatusCodeResult(404);
-            if(user.Active == false) return new StatusCodeResult(409); //user is not active in system
-            if(user.Banned == true) return new StatusCodeResult(403); //user is banned
+        // Login Version 1
+        /* public async Task<IActionResult> Login(LoginRequest loginRequest, int role)
+         {
+             var user = _context.Users.FirstOrDefault(u => (u.Email == loginRequest.Email || u.Username == loginRequest.Username) && u.Password.Equals(loginRequest.Password));
+             if (user == null) return new StatusCodeResult(404);
+             if (user.Active == false) return new StatusCodeResult(409); //user is not active in system
+             if (user.Banned == true) return new StatusCodeResult(403); //user is banned
 
-            if (user != null)
+             if (user != null)
+             {
+                 return await GenerateJwtToken(user, role);
+             }
+             else
+             {
+                 return new StatusCodeResult(400);
+             }
+         }*/
+
+        // Login Version 2
+        public async Task<LoginAccountResponse> LoginV2(LoginRequest loginRequest)
+        {
+            try
             {
-                return await GenerateJwtToken(user, role);
+                var user = _context.Users.FirstOrDefault(u => (u.Email == loginRequest.Email));
+                if (user == null)
+                {
+                    throw new CrudException(HttpStatusCode.NotFound, "User not found", "");
+                }
+                if (user.Active == false)
+                {
+                    throw new CrudException(HttpStatusCode.Conflict, "User is not active in system", "");
+                }
+                if (user.Banned == true)
+                {
+                    throw new CrudException(HttpStatusCode.Forbidden, "User is banned", "");
+                }
+                if (!VerifyPasswordHash(loginRequest.Password.Trim(), user.Password))
+                {
+                    throw new CrudException(HttpStatusCode.BadRequest, "Incorrect Password!", "");
+                }
+                var response = GenerateJwtTokenV2(user);
+                response.studentID = user.StudentNavigation.StudentId;
+                return response;
             }
-            else
+            catch (CrudException ex)
             {
-                return new StatusCodeResult(400);
+                throw ex;
+            }
+            catch (Exception ex)
+            {
+                throw new CrudException(HttpStatusCode.InternalServerError, ex.Message, "");
             }
         }
-        public async Task<IActionResult> GenerateJwtToken(User user, int role)
+        // V1 - tạm thời khóa
+        /*public async Task<IActionResult> GenerateJwtToken(User user, int role)
         {
             var key = Encoding.ASCII.GetBytes(_configuration["AppSettings:SecretKey"]); // Lấy khóa bí mật từ cấu hình
             var tokenHandler = new JwtSecurityTokenHandler();
@@ -110,13 +153,15 @@ namespace Services.Implementations
             {
                 AccessToken = accessToken
             });
-        }
+        }*/
+
+        // Confirm OTP
         public async Task<IActionResult> ConfirmOTP(string email, string otp)
         {
             var user = _context.Users.FirstOrDefault(u => u.Email == email);
             if (user == null) return new StatusCodeResult(404); //user not found
-            if(user.Active == true) return new StatusCodeResult(409); //user is active in system
-            if(user.Banned == true) return new StatusCodeResult(403); //user is banned
+            if (user.Active == true) return new StatusCodeResult(409); //user is active in system
+            if (user.Banned == true) return new StatusCodeResult(403); //user is banned
             var userAuthentication = _context.UserAuthentications.FirstOrDefault(ua => ((ua.UserId == user.Id) && ua.EmailTokenExpiry.Value.Date < DateTime.UtcNow.Date));
             if (userAuthentication == null) return new StatusCodeResult(404); //no OTP request found
             if (userAuthentication.EmailToken != otp) return new StatusCodeResult(400); //wrong OTP
@@ -128,19 +173,23 @@ namespace Services.Implementations
             await _context.SaveChangesAsync();
             return new StatusCodeResult(200);
         }
+
+        //Remove Expired
         public async Task<IActionResult> RemoveExpiredOTP()
         {
             var expiredOTP = _context.UserAuthentications.Where(ua => ua.EmailTokenExpiry < DateTime.UtcNow);
-            if(expiredOTP.Count() == 0) return new StatusCodeResult(404); //no expired OTP found
+            if (expiredOTP.Count() == 0) return new StatusCodeResult(404); //no expired OTP found
             _context.UserAuthentications.RemoveRange(expiredOTP);
             await _context.SaveChangesAsync();
             return new StatusCodeResult(200);
         }
+
+        // Ban Account
         public async Task<IActionResult> BanAccount(Guid userId)
         {
             var user = _context.Users.FirstOrDefault(u => u.Id == userId);
             if (user == null) return new StatusCodeResult(404); //user not found
-            if(user.Banned == true) return new StatusCodeResult(409); //user is already banned
+            if (user.Banned == true) return new StatusCodeResult(409); //user is already banned
             user.Banned = true;
             user.BanExpiredAt = DateTime.UtcNow.AddYears(30); //ban for 24 hours
             _context.Users.Update(user);
@@ -162,6 +211,8 @@ namespace Services.Implementations
                 return new StatusCodeResult(500);
             }
         }
+
+        // Send Mail Confirm Banned
         public async Task<IActionResult> SendMailConfirmBanned(MailContent mailContent)
         {
             var email = new MimeMessage();
@@ -202,6 +253,110 @@ namespace Services.Implementations
 
             smtp.Disconnect(true);
             return new StatusCodeResult(200);
+        }
+
+
+
+
+
+        /*========== Internal Site ==========*/
+
+        // Find Admin Id Based on User Id
+        public Tutor findTutor(Guid userId)
+        {
+            return _context.Tutors.FirstOrDefault(t => t.UserId == userId);
+        }
+
+        // Generate Token
+        private LoginAccountResponse GenerateJwtTokenV2(User user)
+        {
+            if (user == null)
+            {
+                throw new CrudException(HttpStatusCode.NotFound, "User not found", "");
+            }
+            var key = Encoding.ASCII.GetBytes(_configuration["AppSettings:SecretKey"]); // Lấy khóa bí mật từ cấu hình
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var secretKeyBytes = Encoding.UTF8.GetBytes(_jwtSetting.SecretKey);
+            var tokenDescriptor = new SecurityTokenDescriptor();
+            var tutor = findTutor(user.Id);
+            var student = _context.Students.FirstOrDefault(s => s.UserId == user.Id);
+            if (tutor == null)
+            {
+                var studentInfo = _context.Students.FirstOrDefault(s => s.UserId == user.Id);
+                tokenDescriptor = new SecurityTokenDescriptor
+                {
+                    Subject = new ClaimsIdentity(new[]
+                {
+                new Claim("UserId", user.Id.ToString()),
+                new Claim("StudentId", student.StudentId.ToString()),
+                new Claim(ClaimTypes.Name, user.Username ?? string.Empty),
+                new Claim(ClaimTypes.Email, user.Email ?? string.Empty),
+                new Claim(ClaimTypes.Role,"Student")
+            }),
+                    Expires = DateTime.UtcNow.AddHours(1),
+                    SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
+                };
+            }
+            else
+            {
+                var tutorInfo = _context.Tutors.FirstOrDefault(t => t.UserId == user.Id);
+                tokenDescriptor = new SecurityTokenDescriptor
+                {
+                    Subject = new ClaimsIdentity(new[]
+                    {
+                new Claim("UserId", user.Id.ToString()),
+                new Claim("TutorId", tutor.TutorId.ToString()),
+                new Claim(ClaimTypes.Name, user.Username ?? string.Empty),
+                new Claim(ClaimTypes.Email, user.Email ?? string.Empty),
+                new Claim(ClaimTypes.Role, "Tutor")
+            }),
+                    Expires = DateTime.UtcNow.AddHours(1),
+                    SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
+                };
+            }
+
+
+            var token = tokenHandler.CreateToken(tokenDescriptor);
+            var accessToken = tokenHandler.WriteToken(token);
+            LoginAccountResponse response = new LoginAccountResponse
+            {
+                accessToken = accessToken,
+                userId = user.Id,
+                role = tutor == null ? "Student" : "Tutor",
+                tutorID = tutor == null ? null : tutor.TutorId
+
+            };
+            return response;
+        }
+
+        // HashPassword
+        private string HashPassword(string password)
+        {
+            using (var sha512 = SHA512.Create())
+            {
+                // Băm mật khẩu thành một mảng byte
+                byte[] passwordBytes = Encoding.UTF8.GetBytes(password);
+                byte[] hashedBytes = sha512.ComputeHash(passwordBytes);
+
+                // Chuyển đổi mảng byte thành chuỗi hex
+                StringBuilder builder = new StringBuilder();
+                foreach (byte b in hashedBytes)
+                {
+                    builder.Append(b.ToString("X2"));
+                }
+
+                return builder.ToString();
+            }
+        }
+
+        // Verify password Hash
+        public bool VerifyPasswordHash(string password, string passwordHash)
+        {
+            // Băm mật khẩu nhập vào
+            string hashedPassword = HashPassword(password);
+
+            // So sánh mật khẩu băm tính toán được với mật khẩu đã lưu trữ
+            return hashedPassword.Equals(passwordHash, StringComparison.OrdinalIgnoreCase);
         }
     }
 }

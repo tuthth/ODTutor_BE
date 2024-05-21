@@ -26,8 +26,9 @@ namespace Services.Implementations
             _userService = userService;
         }
 
+        /*============External Site===========*/
+
         //RegisterAccount
-        //cai nay dc moi student a` Chuong
         public async Task<AccountResponse> createAccount(AccountRegisterRequest accountRegisterRequest)
         {
             try
@@ -47,8 +48,8 @@ namespace Services.Implementations
                     throw new CrudException(HttpStatusCode.BadRequest, "Password and Confirm Password are not the same", "");
                 }
                 var account = _mapper.Map<User>(accountRegisterRequest);
-                CreateHashPassword(accountRegisterRequest.Password, out byte[] passwordHash);
-                account.Password = Convert.ToBase64String(passwordHash);
+                
+                account.Password = CreateHashPassword(accountRegisterRequest.Password);
                 account.Name = accountRegisterRequest.FullName;
                 account.Active = true; // Default is true
                 account.EmailConfirmed = false;
@@ -91,34 +92,40 @@ namespace Services.Implementations
             }
         }
 
-        public async Task<IActionResult> GoogleLoginOrRegister(string idToken)
+        // Google Login
+        public async Task<LoginAccountResponse> GoogleLoginOrRegister(string idToken)
         {
             try
             {
                 var payload = await GoogleJsonWebSignature.ValidateAsync(idToken, new GoogleJsonWebSignature.ValidationSettings());
-
                 var user = _context.Users.FirstOrDefault(u => u.Email == payload.Email);
+                string passwordTemplate = GeneratePassword();
                 if (user == null)
                 {
                     var registerRequest = new AccountRegisterRequest
                     {
                         FullName = payload.Name,
                         Email = payload.Email,
-                        Password = "", // Google không cung cấp mật khẩu, bạn cần xử lý phần này
-                        ConfirmPassword = "", // Google không cung cấp mật khẩu, bạn cần xử lý phần này
+                        Password = passwordTemplate, // Google không cung cấp mật khẩu, bạn cần xử lý phần này
+                        ConfirmPassword = passwordTemplate, // Google không cung cấp mật khẩu, bạn cần xử lý phần này
                         DateOfBirth = DateTime.Now, // Google không cung cấp ngày sinh, bạn cần xử lý phần này
-                        PhoneNumber = "" // Google không cung cấp số điện thoại, bạn cần xử lý phần này
+                        PhoneNumber = "00000" // Google không cung cấp số điện thoại, bạn cần xử lý phần này
                     };
-                    return (IActionResult)await createAccount(registerRequest);
+                    await createAccount(registerRequest);
+                    return await _userService.LoginV2(new LoginRequest
+                    {
+                        Email = payload.Email,
+                        Password = passwordTemplate
+                    });
                 }
                 else
                 {
-                    var loginRequest = new LoginRequest
+                    LoginRequest loginRequest = new LoginRequest
                     {
                         Email = user.Email,
                         Password = user.Password
                     };
-                    return await _userService.Login(loginRequest, 1); // Giả sử rằng role là 1
+                    return await _userService.LoginV2(loginRequest);
                 }
             }
             catch (Exception ex)
@@ -154,7 +161,6 @@ namespace Services.Implementations
                 throw new CrudException(HttpStatusCode.InternalServerError, ex.Message, "");
             }
         }
-        /*public async Task<> getStudentInformation (Guid studentId)*/
 
         // Update User Account
         public async Task<UserAccountResponse> updateUserAccount(Guid UserID, UpdateAccountRequest request)
@@ -216,12 +222,25 @@ namespace Services.Implementations
             }
         }
 
+        /*========== Internal Site ==========*/
+
         // Create Hash Password
-        private void CreateHashPassword(string password, out byte[] passwordHash)
+        private string CreateHashPassword(string password)
         {
-            using (var hmac = new HMACSHA512())
+            using (var sha512 = SHA512.Create())
             {
-                passwordHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(password));
+                // Băm mật khẩu thành một mảng byte
+                byte[] passwordBytes = Encoding.UTF8.GetBytes(password);
+                byte[] hashedBytes = sha512.ComputeHash(passwordBytes);
+
+                // Chuyển đổi mảng byte thành chuỗi hex
+                StringBuilder builder = new StringBuilder();
+                foreach (byte b in hashedBytes)
+                {
+                    builder.Append(b.ToString("X2"));
+                }
+
+                return builder.ToString();
             }
         }
 
@@ -229,6 +248,25 @@ namespace Services.Implementations
         private User FindUserById(Guid UserID)
         {
             return _context.Users.FirstOrDefault(s => s.Id.Equals(UserID));
+        }
+
+        // Generate Passord For User Who using gg login
+        private string GeneratePassword()
+        {
+            const string validChars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789*&^%$#@";
+            Random random = new Random();
+            StringBuilder password = new StringBuilder();
+            // Thêm một ký tự chữ thường, một ký tự chữ in hoa và một chữ số vào mật khẩu
+            password.Append(validChars[random.Next(validChars.Length)]);
+            password.Append(validChars[random.Next(26, 52)]); // Chữ in hoa
+            password.Append(validChars[random.Next(52, 62)]); // Số
+
+            int requiredLength = random.Next(8, 13);
+            while(password.Length < requiredLength)
+            {
+                password.Append(validChars[random.Next(validChars.Length)]);
+            }
+            return password.ToString();
         }
     }
 }
