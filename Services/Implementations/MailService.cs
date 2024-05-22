@@ -27,45 +27,53 @@ namespace Services.Implementations
         
         public async Task<IActionResult> SendEmailTokenAsync(string email)
         {
-            var checkEmail = _context.Users.FirstOrDefault(u => u.Email.Equals(email));
-
-            if (checkEmail == null|| checkEmail.EmailConfirmed == true)
+            try
             {
-                return new StatusCodeResult(409);
-            }
-            var tokenEmail = GenerateRandomOTP();
-            var checkEmailDefaulr = _context.Users.Any(u => u.Email.Equals(email) && u.EmailConfirmed == false);
+                var checkEmail = _context.Users.FirstOrDefault(u => u.Email.Equals(email));
 
-            if (checkEmailDefaulr)
-            {
-                UserAuthentication userAuthentication = new UserAuthentication
+                if (checkEmail == null || checkEmail.EmailConfirmed == true)
                 {
-                    Id = Guid.NewGuid(),
-                    UserId = checkEmail.Id,
-                    EmailToken = tokenEmail,
-                    EmailTokenExpiry = DateTime.UtcNow.AddMinutes(15)
-                };
-
-                _context.UserAuthentications.Add(userAuthentication);
-                await _context.SaveChangesAsync();
-                try
-                {
-                    await SendMail(new MailContent()
-                    {
-                        To = email,
-                        Subject = "[ODTutor] Mã xác thực OTP",
-                        Body = "Đây là mã xác thực OTP của bạn" + ".\n Mã này sẽ hết hạn vào " + userAuthentication.EmailTokenExpiry + " GMT +0",
-                        OTP = tokenEmail
-                    });
-                    return new StatusCodeResult(201);
+                    return new StatusCodeResult(409);
                 }
-                catch (Exception ex)
+                var tokenEmail = GenerateRandomOTP();
+                var checkEmailDefaulr = _context.Users.Any(u => u.Email.Equals(email) && u.EmailConfirmed == false);
+
+                if (checkEmailDefaulr)
                 {
-                    // Handle the error here, for example log the error message
-                    throw new Exception(ex.Message); // Return a 500 Internal Server Error status code
-                }  
+                    UserAuthentication userAuthentication = new UserAuthentication
+                    {
+                        Id = Guid.NewGuid(),
+                        UserId = checkEmail.Id,
+                        EmailToken = tokenEmail,
+                        EmailTokenExpiry = DateTime.UtcNow.AddMinutes(15)
+                    };
+
+                    _context.UserAuthentications.Add(userAuthentication);
+                    await _context.SaveChangesAsync();
+                    try
+                    {
+                        await SendMail(new MailContent()
+                        {
+                            To = email,
+                            Subject = "[ODTutor] Mã xác thực OTP",
+                            Body = "Đây là mã xác thực OTP của bạn" + ".\n Mã này sẽ hết hạn vào " + userAuthentication.EmailTokenExpiry + " GMT +0",
+                            OTP = tokenEmail
+                        });
+                        return new StatusCodeResult(201);
+                    }
+                    catch (Exception ex)
+                    {
+                        // Handle the error here, for example log the error message
+                        throw new Exception(ex.Message); // Return a 500 Internal Server Error status code
+                    }
+                }
+                return new StatusCodeResult(204);
             }
-            return new StatusCodeResult(204);
+            catch (Exception ex)
+            {
+
+                throw new Exception(ex.Message);
+            }
         }
         private string GenerateRandomOTP()
         {

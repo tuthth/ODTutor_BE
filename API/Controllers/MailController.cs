@@ -19,6 +19,7 @@ namespace API.Controllers
         [HttpPost("otp/email")]
         public async Task<IActionResult> SendMail([FromBody] SendOTPRequest sendOTPRequest)
         {
+            string test = null;
             try
             {
                 var checkEmail = await _sendMailService.SendEmailTokenAsync(sendOTPRequest.Email.Trim());
@@ -29,7 +30,10 @@ namespace API.Controllers
                     else if(statusCodeResult.StatusCode == 204) { return NoContent(); }
                     else { return StatusCode(StatusCodes.Status500InternalServerError, "Xảy ra lỗi ở server"); }
                 }
-                else { return BadRequest(checkEmail.ToString()); }
+                if (checkEmail is Exception ex) {
+                    test = ex.Message;
+                    return BadRequest(ex.Message); }
+                else throw new Exception(test);
             }
             catch (Exception ex)
             {
