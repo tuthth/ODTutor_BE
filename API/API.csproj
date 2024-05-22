@@ -14,6 +14,7 @@
     <None Include="Properties\credentials.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="wwwroot\template.html" />
   </ItemGroup>
 
   <ItemGroup>
