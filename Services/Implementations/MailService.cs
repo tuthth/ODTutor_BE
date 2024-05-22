@@ -61,10 +61,10 @@ namespace Services.Implementations
                 catch (Exception ex)
                 {
                     // Handle the error here, for example log the error message
-                    return new StatusCodeResult(500); // Return a 500 Internal Server Error status code
+                    throw new Exception(ex.Message); // Return a 500 Internal Server Error status code
                 }  
             }
-            return new StatusCodeResult(200);
+            return new StatusCodeResult(201);
         }
         private string GenerateRandomOTP()
         {
