@@ -92,7 +92,7 @@ namespace Services.Implementations
             email.Subject = mailContent.Subject;
 
             string projectDirectory = Directory.GetCurrentDirectory();
-            string OTPSamplePath = Path.Combine(projectDirectory, "Template", "template.html");
+            string OTPSamplePath = Path.Combine(projectDirectory, "Properties/Template", "template.html");
             string htmlContent = System.IO.File.ReadAllText(OTPSamplePath);
             htmlContent = htmlContent.Replace("{Body}", mailContent.Body);
             htmlContent = htmlContent.Replace("{OTP}", mailContent.OTP);
