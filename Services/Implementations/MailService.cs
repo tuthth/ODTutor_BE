@@ -57,16 +57,14 @@ namespace Services.Implementations
                         Body = "Đây là mã xác thực OTP của bạn" + ".\n Mã này sẽ hết hạn vào " + userAuthentication.EmailTokenExpiry + " GMT +0",
                         OTP = tokenEmail
                     });
-                    return new StatusCodeResult(200);
                 }
                 catch (Exception ex)
                 {
                     // Handle the error here, for example log the error message
-                    Console.WriteLine(ex.Message);
                     return new StatusCodeResult(500); // Return a 500 Internal Server Error status code
-                }
+                }  
             }
-            return new StatusCodeResult(500);
+            return new StatusCodeResult(200);
         }
         private string GenerateRandomOTP()
         {
