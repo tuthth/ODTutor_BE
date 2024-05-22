@@ -19,11 +19,6 @@ namespace API.Controllers
         public async Task<string> BaseDirectory() => AppContext.BaseDirectory;
         [HttpGet("current")]
         public async Task<string> DynamicDirectory() => Directory.GetCurrentDirectory();
-        [HttpGet("template")]
-        public async Task<string> TemplateDirectory()
-        {
-            string projectDirectory = Directory.GetCurrentDirectory();
-            return Path.Combine(projectDirectory, "Properties\\Template");
-        }
+        
     }
 }

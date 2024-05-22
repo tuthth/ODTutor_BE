@@ -23,7 +23,7 @@ namespace Services.Implementations
         public async Task<IActionResult> CreateCalendarEvent(GGCalendarEventSetting setting)
         {
             string[] scopes = { CalendarService.Scope.Calendar };
-            string projectDirectory = Directory.GetParent(AppDomain.CurrentDomain.BaseDirectory).Parent.Parent.Parent.FullName;
+            string projectDirectory = Directory.GetCurrentDirectory();
             string credPath = Path.Combine(projectDirectory, "Properties", "credentials.json");
 
             var clientSecrets = await GoogleClientSecrets.FromFileAsync(credPath);
