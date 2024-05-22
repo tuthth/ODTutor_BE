@@ -64,7 +64,7 @@ namespace Services.Implementations
                     catch (Exception ex)
                     {
                         // Handle the error here, for example log the error message
-                        throw new Exception(ex.Message); // Return a 500 Internal Server Error status code
+                        throw new Exception(ex.ToString()); // Return a 500 Internal Server Error status code
                     }
                 }
                 return new StatusCodeResult(204);

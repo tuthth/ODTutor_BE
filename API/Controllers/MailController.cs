@@ -31,13 +31,13 @@ namespace API.Controllers
                     else { return StatusCode(StatusCodes.Status500InternalServerError, "Xảy ra lỗi ở server"); }
                 }
                 if (checkEmail is Exception ex) {
-                    test = ex.Message;
-                    return BadRequest(ex.Message); }
+                    test = ex.ToString();
+                    return BadRequest(ex.ToString()); }
                 else throw new Exception(test);
             }
             catch (Exception ex)
             {
-                return BadRequest(ex.Message);
+                return BadRequest(ex.ToString());
             }
         }
     }
