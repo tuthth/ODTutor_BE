@@ -24,18 +24,15 @@ namespace API.Controllers
                 if (checkEmail is StatusCodeResult statusCodeResult)
                 {
                     if (statusCodeResult.StatusCode == 409) { return Conflict("Email đã được xác thực trước đó"); }
-                    else if (statusCodeResult.StatusCode == 201) { return StatusCode(StatusCodes.Status201Created,"Gửi mã xác thực thành công"); }
+                    else if (statusCodeResult.StatusCode == 200) { return Ok("Gửi mã xác thực thành công"); }
+                    else { return StatusCode(StatusCodes.Status500InternalServerError, "Xảy ra lỗi ở server"); }
                 }
-                else if(checkEmail is Exception ex)
-                {
-                    return BadRequest(ex.Message);
-                }
+                else { return BadRequest("Gửi mã xác thực thất bại"); }
             }
             catch (Exception ex)
             {
                 return BadRequest(ex.Message);
             }
-            return BadRequest("Lỗi không rõ nguyên nhân");
         }
     }
 }
