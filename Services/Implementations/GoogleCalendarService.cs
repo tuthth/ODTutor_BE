@@ -22,71 +22,80 @@ namespace Services.Implementations
         }
         public async Task<IActionResult> CreateCalendarEvent(GGCalendarEventSetting setting)
         {
-            string[] scopes = { CalendarService.Scope.Calendar };
-            string projectDirectory = Directory.GetCurrentDirectory();
-            string credPath = Path.Combine(projectDirectory, "Properties", "credentials.json");
-
-            var clientSecrets = await GoogleClientSecrets.FromFileAsync(credPath);
-            var credential = await GoogleWebAuthorizationBroker.AuthorizeAsync(
-                clientSecrets.Secrets,
-                scopes,
-                "user",
-                CancellationToken.None);
-
-            var service = new CalendarService(new BaseClientService.Initializer()
+            try
             {
-                HttpClientInitializer = credential
-            });
-            List<EventAttendee> attendees = new List<EventAttendee>();
-            foreach(var attendee in setting.Attendees)
-            {
-                attendees.Add(new EventAttendee()
+                string[] scopes = { CalendarService.Scope.Calendar };
+                string projectDirectory = Directory.GetCurrentDirectory();
+                string credPath = Path.Combine(projectDirectory, "Properties", "credentials.json");
+
+                var clientSecrets = await GoogleClientSecrets.FromFileAsync(credPath);
+                var credential = await GoogleWebAuthorizationBroker.AuthorizeAsync(
+                    clientSecrets.Secrets,
+                    scopes,
+                    "user",
+                    CancellationToken.None);
+
+                var service = new CalendarService(new BaseClientService.Initializer()
                 {
-                    Email = attendee.Email
+                    HttpClientInitializer = credential
                 });
-            }
-
-            Event calendarEvent = new Event()
-            {
-                Summary = setting.Summary,
-                Location = "Google Meet",
-                Description = setting.Description,
-                Start = new EventDateTime()
+                List<EventAttendee> attendees = new List<EventAttendee>();
+                foreach (var attendee in setting.Attendees)
                 {
-                    DateTime = setting.Start,
-                    TimeZone = setting.TimeZone
-                },
-                End = new EventDateTime()
-                {
-                    DateTime = setting.End,
-                    TimeZone = setting.TimeZone
-                },
-                ConferenceData = new ConferenceData()
-                {
-                    CreateRequest = new CreateConferenceRequest()
+                    attendees.Add(new EventAttendee()
                     {
-                        RequestId = "1234abcdef",
-                        ConferenceSolutionKey = new ConferenceSolutionKey()
+                        Email = attendee.Email
+                    });
+                }
+
+                Event calendarEvent = new Event()
+                {
+                    Summary = setting.Summary,
+                    Location = "Google Meet",
+                    Description = setting.Description,
+                    Start = new EventDateTime()
+                    {
+                        DateTime = setting.Start,
+                        TimeZone = setting.TimeZone
+                    },
+                    End = new EventDateTime()
+                    {
+                        DateTime = setting.End,
+                        TimeZone = setting.TimeZone
+                    },
+                    ConferenceData = new ConferenceData()
+                    {
+                        CreateRequest = new CreateConferenceRequest()
                         {
-                            Type = "hangoutsMeet"
+                            RequestId = "1234abcdef",
+                            ConferenceSolutionKey = new ConferenceSolutionKey()
+                            {
+                                Type = "hangoutsMeet"
+                            }
                         }
-                    }
-                },
-                GuestsCanInviteOthers = false,
-                GuestsCanModify = false,
-                GuestsCanSeeOtherGuests = false,
+                    },
+                    GuestsCanInviteOthers = false,
+                    GuestsCanModify = false,
+                    GuestsCanSeeOtherGuests = false,
 
-                Attendees = attendees
-            };
-            
-            EventsResource.InsertRequest request = service.Events.Insert(calendarEvent, "67d3c524db000823b1aae5943497649be3bd8485682e5f45dff9aaaac995c07e@group.calendar.google.com");
-            request.ConferenceDataVersion = 1;
-            Event createdEvent = await request.ExecuteAsync();
+                    Attendees = attendees
+                };
 
-            Console.WriteLine("Event created: {0}", createdEvent.HtmlLink);
-            Console.WriteLine("Meet link created: {0}", createdEvent.HangoutLink);
+                EventsResource.InsertRequest request = service.Events.Insert(calendarEvent, "67d3c524db000823b1aae5943497649be3bd8485682e5f45dff9aaaac995c07e@group.calendar.google.com");
+                request.ConferenceDataVersion = 1;
+                Event createdEvent = await request.ExecuteAsync();
 
-            return new StatusCodeResult(201);
+                Console.WriteLine("Event created: {0}", createdEvent.HtmlLink);
+                Console.WriteLine("Meet link created: {0}", createdEvent.HangoutLink);
+
+                return new StatusCodeResult(201);
+            }
+            catch (Exception ex)
+            {
+
+                throw new Exception(ex.ToString());
+            }
+           
         }
     }
    

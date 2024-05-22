@@ -26,11 +26,13 @@ namespace API.Controllers
                     if (statusCodeResult.StatusCode == 201) { return Ok("Tạo sự kiện thành công"); }
                     else { return BadRequest("Tạo sự kiện thất bại"); }
                 }
+                if(checkCreateEvent is Exception ex)
+                { return BadRequest(ex.ToString()); }
                 else { return BadRequest("Tạo sự kiện thất bại"); }
             }
             catch (Exception ex)
             {
-                return BadRequest(ex.Message);
+                return BadRequest(ex.ToString());
             }
         }
     }

@@ -72,7 +72,7 @@ namespace Services.Implementations
             catch (Exception ex)
             {
 
-                throw new Exception(ex.Message);
+                throw new Exception(ex.ToString());
             }
         }
         private string GenerateRandomOTP()
@@ -85,43 +85,51 @@ namespace Services.Implementations
 
         public async Task<IActionResult> SendMail(MailContent mailContent)
         {
-            var email = new MimeMessage();
-            email.Sender = new MailboxAddress(mailSettings.DisplayName, mailSettings.Mail);
-            email.From.Add(new MailboxAddress(mailSettings.DisplayName, mailSettings.Mail));
-            email.To.Add(MailboxAddress.Parse(mailContent.To));
-            email.Subject = mailContent.Subject;
-
-            string projectDirectory = Directory.GetCurrentDirectory();
-            string OTPSamplePath = Path.Combine(projectDirectory, "wwwroot", "template.html");
-            string htmlContent = System.IO.File.ReadAllText(OTPSamplePath);
-            htmlContent = htmlContent.Replace("{Body}", mailContent.Body);
-            htmlContent = htmlContent.Replace("{OTP}", mailContent.OTP);
-            var builder = new BodyBuilder();
-            builder.HtmlBody = htmlContent;
-            email.Body = builder.ToMessageBody();
-
-            // dùng SmtpClient của MailKit
-            using var smtp = new MailKit.Net.Smtp.SmtpClient();
-
             try
             {
-                smtp.Connect(mailSettings.Host, mailSettings.Port, SecureSocketOptions.StartTls);
-                smtp.Authenticate(mailSettings.Mail, mailSettings.Password);
-                await smtp.SendAsync(email);
+                var email = new MimeMessage();
+                email.Sender = new MailboxAddress(mailSettings.DisplayName, mailSettings.Mail);
+                email.From.Add(new MailboxAddress(mailSettings.DisplayName, mailSettings.Mail));
+                email.To.Add(MailboxAddress.Parse(mailContent.To));
+                email.Subject = mailContent.Subject;
+
+                string projectDirectory = Directory.GetCurrentDirectory();
+                string OTPSamplePath = Path.Combine(projectDirectory, "wwwroot", "template.html");
+                string htmlContent = System.IO.File.ReadAllText(OTPSamplePath);
+                htmlContent = htmlContent.Replace("{Body}", mailContent.Body);
+                htmlContent = htmlContent.Replace("{OTP}", mailContent.OTP);
+                var builder = new BodyBuilder();
+                builder.HtmlBody = htmlContent;
+                email.Body = builder.ToMessageBody();
+
+                // dùng SmtpClient của MailKit
+                using var smtp = new MailKit.Net.Smtp.SmtpClient();
+
+                try
+                {
+                    smtp.Connect(mailSettings.Host, mailSettings.Port, SecureSocketOptions.StartTls);
+                    smtp.Authenticate(mailSettings.Mail, mailSettings.Password);
+                    await smtp.SendAsync(email);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.ToString());
+
+                    // Gửi mail thất bại, nội dung email sẽ lưu vào thư mục mailssave
+                    System.IO.Directory.CreateDirectory("mailssave");
+                    var emailsavefile = string.Format(@"mailssave/{0}.eml", Guid.NewGuid());
+                    await email.WriteToAsync(emailsavefile);
+                    throw new Exception(ex.ToString());
+                }
+
+                smtp.Disconnect(true);
+                return new StatusCodeResult(200);
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
-
-                // Gửi mail thất bại, nội dung email sẽ lưu vào thư mục mailssave
-                System.IO.Directory.CreateDirectory("mailssave");
-                var emailsavefile = string.Format(@"mailssave/{0}.eml", Guid.NewGuid());
-                await email.WriteToAsync(emailsavefile);
-                throw;
+                throw new Exception(ex.ToString());
             }
-
-            smtp.Disconnect(true);
-            return new StatusCodeResult(200);
+            
         }
     }
 }
