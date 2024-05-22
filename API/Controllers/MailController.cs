@@ -18,7 +18,6 @@ namespace API.Controllers
         [HttpPost("otp/email")]
         public async Task<IActionResult> SendMail([FromBody][Required][EmailAddress] string email)
         {
-            Exception ex = new Exception();
             try
             {
                 var checkEmail = await _sendMailService.SendEmailTokenAsync(email.Trim());
@@ -27,16 +26,16 @@ namespace API.Controllers
                     if (statusCodeResult.StatusCode == 409) { return Conflict("Email đã được xác thực trước đó"); }
                     else if (statusCodeResult.StatusCode == 201) { return StatusCode(StatusCodes.Status201Created,"Gửi mã xác thực thành công"); }
                 }
-                if(checkEmail is Exception)
+                else if(checkEmail is Exception ex)
                 {
-                    throw new Exception(ex.Message);
+                    return BadRequest(ex.Message);
                 }
-                else { return BadRequest(ex.Message); }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 return BadRequest(ex.Message);
             }
+            return BadRequest("Lỗi không rõ nguyên nhân");
         }
     }
 }
