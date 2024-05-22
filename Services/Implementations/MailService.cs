@@ -57,6 +57,7 @@ namespace Services.Implementations
                         Body = "Đây là mã xác thực OTP của bạn" + ".\n Mã này sẽ hết hạn vào " + userAuthentication.EmailTokenExpiry + " GMT +0",
                         OTP = tokenEmail
                     });
+                    return new StatusCodeResult(201);
                 }
                 catch (Exception ex)
                 {
@@ -64,7 +65,7 @@ namespace Services.Implementations
                     throw new Exception(ex.Message); // Return a 500 Internal Server Error status code
                 }  
             }
-            return new StatusCodeResult(201);
+            return new StatusCodeResult(204);
         }
         private string GenerateRandomOTP()
         {
