@@ -20,12 +20,12 @@ namespace API.Controllers
         {
             try
             {
-                var checkEmail = await _sendMailService.SendEmailTokenAsync(email);
+                var checkEmail = await _sendMailService.SendEmailTokenAsync(email.Trim());
                 if (checkEmail is StatusCodeResult statusCodeResult)
                 {
                     if (statusCodeResult.StatusCode == 409) { return Conflict("Email đã được xác thực trước đó"); }
                     else if (statusCodeResult.StatusCode == 200) { return Ok("Gửi mã xác thực thành công"); }
-                    else { return BadRequest("Gửi mã xác thực thất bại"); }
+                    else { return StatusCode(StatusCodes.Status500InternalServerError, "Xảy ra lỗi ở server"); }
                 }
                 else { return BadRequest("Gửi mã xác thực thất bại"); }
             }
