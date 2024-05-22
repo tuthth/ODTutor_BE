@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Models.Models.Requests;
 using Services.Interfaces;
 using System.ComponentModel.DataAnnotations;
 
@@ -16,11 +17,11 @@ namespace API.Controllers
         }
 
         [HttpPost("otp/email")]
-        public async Task<IActionResult> SendMail([FromBody][Required][EmailAddress] string email)
+        public async Task<IActionResult> SendMail([FromBody] SendOTPRequest sendOTPRequest)
         {
             try
             {
-                var checkEmail = await _sendMailService.SendEmailTokenAsync(email.Trim());
+                var checkEmail = await _sendMailService.SendEmailTokenAsync(sendOTPRequest.Email.Trim());
                 if (checkEmail is StatusCodeResult statusCodeResult)
                 {
                     if (statusCodeResult.StatusCode == 409) { return Conflict("Email đã được xác thực trước đó"); }
