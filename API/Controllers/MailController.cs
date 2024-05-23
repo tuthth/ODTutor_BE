@@ -25,7 +25,7 @@ namespace API.Controllers
                 var checkEmail = await _sendMailService.SendEmailTokenAsync(sendOTPRequest.Email.Trim());
                 if (checkEmail is StatusCodeResult statusCodeResult)
                 {
-                    if (statusCodeResult.StatusCode == 409) { return Conflict("Email đã được xác thực trước đó"); }
+                    if (statusCodeResult.StatusCode == 409) { return Conflict("Email đã được xác thực trước đó hoặc tài khoản không tồn tại"); }
                     else if (statusCodeResult.StatusCode == 201) { return StatusCode(StatusCodes.Status201Created,"Gửi mã xác thực thành công"); }
                     else if(statusCodeResult.StatusCode == 204) { return NoContent(); }
                     else { return StatusCode(StatusCodes.Status500InternalServerError, "Xảy ra lỗi ở server"); }
