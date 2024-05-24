@@ -60,6 +60,7 @@ namespace API.Configurations
             services.AddScoped<IWalletService, WalletService>();
             services.AddScoped<ITutorRegisterService, TutorRegisterService>();
             services.AddScoped<IAccountService, AccountService>();
+            services.AddScoped<ITutorDataService, TutorDataService>();
         }
 
         public static void AddSwagger(this IServiceCollection services)
