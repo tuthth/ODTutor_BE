@@ -13,9 +13,9 @@ namespace Services.Interfaces
 {
     public interface ITutorRegisterService
     {
-        Task<Tutor> RegisterTutorInformation(TutorInformationRequest tutorRequest);
-        Task<List<TutorSubject>> RegisterTutorSubject(Guid tutorID, List<Guid> subjectIDs);
-        Task<List<TutorCertificate>> TutorCertificatesRegister(Guid tutorID, List<IFormFile> certificateImages);
-        Task<TutorRegisterReponse> GetTutorRegisterInformtaion(Guid tutorID);
+        Task<IActionResult> RegisterTutorInformation(TutorInformationRequest tutorRequest);
+        Task<IActionResult> RegisterTutorSubject(Guid tutorID, List<Guid> subjectIDs);
+        Task<IActionResult> TutorCertificatesRegister(Guid tutorID, List<IFormFile> certificateImages);
+        Task<ActionResult<TutorRegisterReponse>> GetTutorRegisterInformtaion(Guid tutorID);
     }   
 }

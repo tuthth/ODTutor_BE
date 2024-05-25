@@ -9,6 +9,7 @@ namespace Models.Models.Requests
 {
     public class UpdateAccountRequest
     {
+        public Guid Id { get; set; }
         public string FullName { get; set;  }
         public string? Username { get; set; }
         public string? ImageUrl { get; set; }

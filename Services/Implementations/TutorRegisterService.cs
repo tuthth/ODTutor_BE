@@ -28,7 +28,7 @@ namespace Services.Implementations
         }
 
         // Register Tutor Information
-        public async Task<Tutor> RegisterTutorInformation(TutorInformationRequest tutorRequest)
+        public async Task<IActionResult> RegisterTutorInformation(TutorInformationRequest tutorRequest)
         {
             try
             {
@@ -36,24 +36,26 @@ namespace Services.Implementations
                 tutor.Status = 0; // "0" is Pending
                 if (tutor == null)
                 {
-                    return null;
+                    return new StatusCodeResult(404);
                 }
                 else
                 {
                     _context.Tutors.Add(tutor);
                     await _context.SaveChangesAsync();
-                    return tutor;
+                    return new StatusCodeResult(200);
                 }
             }
             catch (Exception ex)
             {
-                throw new Exception(ex.Message);
+                throw new Exception(ex.ToString());
             }
         }
 
         // Register Tutor Subject
-        public async Task<List<TutorSubject>> RegisterTutorSubject(Guid tutorID, List<Guid> subjectIDs)
+        public async Task<IActionResult> RegisterTutorSubject(Guid tutorID, List<Guid> subjectIDs)
         {
+            var tutor = await _context.Tutors.Where(x => x.TutorId == tutorID).FirstOrDefaultAsync();
+            if (tutor == null) return new StatusCodeResult(404);
             List<TutorSubject> tutorSubjects = new List<TutorSubject>();
             try
             {
@@ -68,24 +70,26 @@ namespace Services.Implementations
 
                 if (tutorSubjects.Count < 0)
                 {
-                    throw new Exception("BadRequest");
+                    return new StatusCodeResult(400);
                 }
                 else
                 {
                     _context.TutorSubjects.AddRange(tutorSubjects);
                     await _context.SaveChangesAsync();
-                    return tutorSubjects;
+                    return new StatusCodeResult(201);
                 }
             }
             catch (Exception ex)
             {
-                throw new Exception(ex.Message); // Replace 'StatusCodeResult' with 'BadRequestResult'
+                throw new Exception(ex.ToString()); // Replace 'StatusCodeResult' with 'BadRequestResult'
             }
         }
 
         // Register Tutor Certificate
-        public async Task<List<TutorCertificate>> TutorCertificatesRegister(Guid tutorID, List<IFormFile> certificateImages)
+        public async Task<IActionResult> TutorCertificatesRegister(Guid tutorID, List<IFormFile> certificateImages)
         {
+            var tutor = await _context.Tutors.Where(x => x.TutorId == tutorID).FirstOrDefaultAsync();
+            if (tutor == null) return new StatusCodeResult(404);
             try
             {   
                 var tutorCertificateList = new List<TutorCertificate>();
@@ -117,17 +121,17 @@ namespace Services.Implementations
                         }
                     }
                 }
-                return tutorCertificateList;
+                return new StatusCodeResult(201);
             }
             catch (Exception ex)
             {
-                throw new Exception(ex.Message);
+                throw new Exception(ex.ToString());
             }
         }
 
         // Get Tutor Register Information
         /*Đây là phần để lấy thông tin để admin hay moderator có thể hiểu và kiểm tra*/
-        public async Task<TutorRegisterReponse> GetTutorRegisterInformtaion(Guid tutorID)
+        public async Task<ActionResult<TutorRegisterReponse>> GetTutorRegisterInformtaion(Guid tutorID)
         {
             TutorRegisterReponse response = new TutorRegisterReponse();
             List<string> subjectList = await getAllSubjectOfTutor(tutorID);

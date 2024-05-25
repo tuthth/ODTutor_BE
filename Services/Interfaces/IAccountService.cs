@@ -11,10 +11,10 @@ namespace Services.Interfaces
 {
     public interface IAccountService
     {
-        Task<AccountResponse> createAccount(AccountRegisterRequest accountRegisterRequest);
+        Task<IActionResult> createAccount(AccountRegisterRequest accountRegisterRequest);
         /*Task<IActionResult> GoogleLoginOrRegister(string idToken);*/
-        Task<AccountResponse> GetStudentInformation(Guid studentID);
+        Task<ActionResult<AccountResponse>> GetStudentInformation(Guid studentID);
         Task<List<UserAccountResponse>> GetAllUser();
-        Task<UserAccountResponse> updateUserAccount(Guid UserID, UpdateAccountRequest request);
+        Task<IActionResult> updateUserAccount(UpdateAccountRequest request);
     }
 }
