@@ -39,12 +39,14 @@ namespace API.Controllers
         {
 
             var rs = await _accountService.GetStudentInformation(userID);
-            if (rs is ActionResult<AccountResponse> accountResponse) return Ok(accountResponse);
-            if (rs.Result is StatusCodeResult statusCodeResult)
-            {
-                if (statusCodeResult.StatusCode == 404) { return NotFound("Không tìm thấy tài khoản"); }
-            }
-            if((IActionResult)rs.Result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, exception.ToString());
+            if (rs is ActionResult<AccountResponse> accountResponse) {
+                if (rs.Result is StatusCodeResult statusCodeResult)
+                {
+                    if (statusCodeResult.StatusCode == 404) { return NotFound("Không tìm thấy tài khoản"); }
+                }
+                if ((IActionResult)rs.Result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, exception.ToString());
+                return Ok(accountResponse);
+            } 
             throw new Exception("Lỗi không xác định");
         }
         [HttpPut("update")]
