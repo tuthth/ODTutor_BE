@@ -10,18 +10,23 @@ namespace Models.Entities
     {
         public Guid TutorId { get; set; }
         public Guid UserId { get; set; }
+        public Guid ModeratorId { get; set; }
         public string IdentityNumber {  get; set; }
         public string Level { get; set; }
         public decimal PricePerHour { get; set; }
         public string Description { get; set;}
         public int Status {get; set;}
-        public virtual User? UserNavigation {  get; set; }
+        public DateTime CreateAt {get;set;}
+        public DateTime UpdateAt {get; set;}
+        public string? VideoUrl { get; set; }
+        public virtual User? UserNavigation {get; set;}
         public virtual ICollection<Course>? CoursesNavigation { get; set; }
         public virtual ICollection<TutorSchedule>? TutorSchedulesNavigation { get; set; }
         public virtual ICollection<TutorCertificate>? TutorCertificatesNavigation { get; set; }
         public virtual ICollection<TutorSubject>? TutorSubjectsNavigation { get; set; }
         public virtual ICollection<TutorRating>? TutorRatingsNavigation { get; set; }
+        public virtual ICollection<TutorAction>? TutorActionsNavigation { get; set; }
         //public virtual ICollection<TutorRatingImage>? TutorRatingsImagesNavigation { get; set; }
-        public virtual ICollection<Booking>? BookingsNavigation { get; set; }
+        public virtual ICollection<Booking>? BookingsNavigation {get; set;}
     }
 }

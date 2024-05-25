@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Models.Entities;
 
@@ -11,9 +12,11 @@ using Models.Entities;
 namespace Models.Migrations
 {
     [DbContext(typeof(ODTutorContext))]
-    partial class ODTutorContextModelSnapshot : ModelSnapshot
+    [Migration("20240525061632_Add_Link_Between_Moderator_User")]
+    partial class Add_Link_Between_Moderator_User
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -452,6 +455,14 @@ namespace Models.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("IdentityCardBack")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("IdentityCardFront")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("IdentityNumber")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -474,9 +485,6 @@ namespace Models.Migrations
 
                     b.Property<Guid>("UserId")
                         .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("VideoUrl")
-                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("TutorId");
 
@@ -505,9 +513,6 @@ namespace Models.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("MeetingLink")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<Guid>("ModeratorId")
                         .HasColumnType("uniqueidentifier");
 
@@ -521,10 +526,6 @@ namespace Models.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.HasKey("TutorActionId");
-
-                    b.HasIndex("ModeratorId");
-
-                    b.HasIndex("TutorId");
 
                     b.ToTable("TutorAction");
                 });
@@ -1074,25 +1075,6 @@ namespace Models.Migrations
                     b.Navigation("UserNavigation");
                 });
 
-            modelBuilder.Entity("Models.Entities.TutorAction", b =>
-                {
-                    b.HasOne("Models.Entities.Moderator", "ModeratorNavigation")
-                        .WithMany("TutorActionsNavigation")
-                        .HasForeignKey("ModeratorId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.HasOne("Models.Entities.Tutor", "TutorNavigation")
-                        .WithMany("TutorActionsNavigation")
-                        .HasForeignKey("TutorId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.Navigation("ModeratorNavigation");
-
-                    b.Navigation("TutorNavigation");
-                });
-
             modelBuilder.Entity("Models.Entities.TutorCertificate", b =>
                 {
                     b.HasOne("Models.Entities.Tutor", "TutorNavigation")
@@ -1268,11 +1250,6 @@ namespace Models.Migrations
                     b.Navigation("StudentCoursesNavigation");
                 });
 
-            modelBuilder.Entity("Models.Entities.Moderator", b =>
-                {
-                    b.Navigation("TutorActionsNavigation");
-                });
-
             modelBuilder.Entity("Models.Entities.Promotion", b =>
                 {
                     b.Navigation("CoursePromotionsNavigation");
@@ -1306,8 +1283,6 @@ namespace Models.Migrations
                     b.Navigation("BookingsNavigation");
 
                     b.Navigation("CoursesNavigation");
-
-                    b.Navigation("TutorActionsNavigation");
 
                     b.Navigation("TutorCertificatesNavigation");
 

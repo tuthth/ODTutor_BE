@@ -30,8 +30,10 @@ namespace Models.Entities
         public virtual ICollection<UserFollow>? CreateUserFollowNavigation {  get; set; }
         public virtual ICollection<UserFollow>? TargetUserFollowNavigation { get; set; }
         public virtual ICollection<Report>? SenderUserReportNavigation {  get; set; }
+        public virtual ICollection<Notification>? NotificationNavigation { get; set; }
         public virtual Student? StudentNavigation {  get; set; }
         public virtual Tutor? TutorNavigation { get; set; }
+        public virtual Moderator? ModeratorNavigation { get; set; }
 
         public virtual Wallet? WalletNavigation { get; set; }
     }

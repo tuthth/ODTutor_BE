@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Models.Entities;
 
@@ -11,9 +12,11 @@ using Models.Entities;
 namespace Models.Migrations
 {
     [DbContext(typeof(ODTutorContext))]
-    partial class ODTutorContextModelSnapshot : ModelSnapshot
+    [Migration("20240524070718_AddNew_Notification_Moderator_TutorExperience_Attribute")]
+    partial class AddNew_Notification_Moderator_TutorExperience_Attribute
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -223,9 +226,6 @@ namespace Models.Migrations
 
                     b.HasKey("ModeratorId");
 
-                    b.HasIndex("UserId")
-                        .IsUnique();
-
                     b.ToTable("Moderators");
                 });
 
@@ -253,8 +253,6 @@ namespace Models.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.HasKey("NotificationId");
-
-                    b.HasIndex("UserId");
 
                     b.ToTable("Notifications");
                 });
@@ -452,6 +450,14 @@ namespace Models.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("IdentityCardBack")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("IdentityCardFront")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("IdentityNumber")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -475,58 +481,12 @@ namespace Models.Migrations
                     b.Property<Guid>("UserId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("VideoUrl")
-                        .HasColumnType("nvarchar(max)");
-
                     b.HasKey("TutorId");
 
                     b.HasIndex("UserId")
                         .IsUnique();
 
                     b.ToTable("Tutors");
-                });
-
-            modelBuilder.Entity("Models.Entities.TutorAction", b =>
-                {
-                    b.Property<Guid>("TutorActionId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<int>("ActionType")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("CreateAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("MeetingLink")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<Guid>("ModeratorId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime?>("ReponseDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("Status")
-                        .HasColumnType("int");
-
-                    b.Property<Guid>("TutorId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("TutorActionId");
-
-                    b.HasIndex("ModeratorId");
-
-                    b.HasIndex("TutorId");
-
-                    b.ToTable("TutorAction");
                 });
 
             modelBuilder.Entity("Models.Entities.TutorCertificate", b =>
@@ -563,9 +523,6 @@ namespace Models.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<Guid>("SubjectId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("TutorId")
                         .HasColumnType("uniqueidentifier");
 
                     b.HasKey("TutorExperienceId");
@@ -970,28 +927,6 @@ namespace Models.Migrations
                     b.Navigation("SenderWalletNavigation");
                 });
 
-            modelBuilder.Entity("Models.Entities.Moderator", b =>
-                {
-                    b.HasOne("Models.Entities.User", "UserNavigation")
-                        .WithOne("ModeratorNavigation")
-                        .HasForeignKey("Models.Entities.Moderator", "UserId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.Navigation("UserNavigation");
-                });
-
-            modelBuilder.Entity("Models.Entities.Notification", b =>
-                {
-                    b.HasOne("Models.Entities.User", "UserNavigation")
-                        .WithMany("NotificationNavigation")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.Navigation("UserNavigation");
-                });
-
             modelBuilder.Entity("Models.Entities.Report", b =>
                 {
                     b.HasOne("Models.Entities.User", "UserNavigation")
@@ -1072,25 +1007,6 @@ namespace Models.Migrations
                         .IsRequired();
 
                     b.Navigation("UserNavigation");
-                });
-
-            modelBuilder.Entity("Models.Entities.TutorAction", b =>
-                {
-                    b.HasOne("Models.Entities.Moderator", "ModeratorNavigation")
-                        .WithMany("TutorActionsNavigation")
-                        .HasForeignKey("ModeratorId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.HasOne("Models.Entities.Tutor", "TutorNavigation")
-                        .WithMany("TutorActionsNavigation")
-                        .HasForeignKey("TutorId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.Navigation("ModeratorNavigation");
-
-                    b.Navigation("TutorNavigation");
                 });
 
             modelBuilder.Entity("Models.Entities.TutorCertificate", b =>
@@ -1268,11 +1184,6 @@ namespace Models.Migrations
                     b.Navigation("StudentCoursesNavigation");
                 });
 
-            modelBuilder.Entity("Models.Entities.Moderator", b =>
-                {
-                    b.Navigation("TutorActionsNavigation");
-                });
-
             modelBuilder.Entity("Models.Entities.Promotion", b =>
                 {
                     b.Navigation("CoursePromotionsNavigation");
@@ -1307,8 +1218,6 @@ namespace Models.Migrations
 
                     b.Navigation("CoursesNavigation");
 
-                    b.Navigation("TutorActionsNavigation");
-
                     b.Navigation("TutorCertificatesNavigation");
 
                     b.Navigation("TutorRatingsNavigation");
@@ -1328,10 +1237,6 @@ namespace Models.Migrations
                     b.Navigation("CreateUserBlockNavigation");
 
                     b.Navigation("CreateUserFollowNavigation");
-
-                    b.Navigation("ModeratorNavigation");
-
-                    b.Navigation("NotificationNavigation");
 
                     b.Navigation("SenderUserReportNavigation");
 

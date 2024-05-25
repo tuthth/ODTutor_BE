@@ -1,7 +1,12 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Emgu.CV.Structure;
+using Emgu.CV;
+using Microsoft.AspNetCore.Mvc;
 using Models.Entities;
 using Models.Models.Requests;
 using Services.Interfaces;
+using Emgu.CV.CvEnum;
+using Emgu.CV.Util;
+using System.Drawing;
 
 namespace API.Controllers
 {
@@ -44,7 +49,7 @@ namespace API.Controllers
         {
             try
             {
-                var tutorEvidence = await _tutorRegisterService.TutorCertificatesRegister(tutorID,tutorRequest);
+                var tutorEvidence = await _tutorRegisterService.TutorCertificatesRegister(tutorID, tutorRequest);
                 if (tutorEvidence != null)
                 {
                     return Ok("Bạn đã thêm thành công giấy chứng nhận");
@@ -82,6 +87,8 @@ namespace API.Controllers
             }
         }
 
-
+       
     }
+
 }
+

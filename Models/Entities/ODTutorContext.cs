@@ -41,6 +41,8 @@ namespace Models.Entities
         public DbSet<UserFollow> UserFollows { get; set; }
         public DbSet<Wallet> Wallets { get; set; }
         public DbSet<WalletTransaction> WalletTransactions { get; set; }
+        public DbSet<Moderator> Moderators { get; set; }
+        public DbSet<Notification> Notifications { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -270,11 +272,6 @@ namespace Models.Entities
                 .WithOne(tr => tr.TutorNavigation)
                 .HasForeignKey(tr => tr.TutorId).OnDelete(DeleteBehavior.NoAction);
 
-            /*            modelBuilder.Entity<Tutor>()
-                            .HasMany(t => t.TutorRatingsImagesNavigation)
-                            .WithOne(tri => tri.TutorNavigation)
-                            .HasForeignKey(tri => tri.TutorId).OnDelete(DeleteBehavior.NoAction);*/
-
             modelBuilder.Entity<Tutor>()
                 .HasMany(t => t.BookingsNavigation)
                 .WithOne(b => b.TutorNavigation)
@@ -284,7 +281,6 @@ namespace Models.Entities
                 .HasMany(t => t.TutorSchedulesNavigation)
                 .WithOne(ts => ts.TutorNavigation)
                 .HasForeignKey(ts => ts.TutorId).OnDelete(DeleteBehavior.NoAction);
-
             // TutorCertificate Entity Configuration
             modelBuilder.Entity<TutorCertificate>()
                 .HasKey(tc => tc.TutorCertificateId);
@@ -294,11 +290,6 @@ namespace Models.Entities
                 .WithMany(t => t.TutorCertificatesNavigation)
                 .HasForeignKey(tc => tc.TutorId).OnDelete(DeleteBehavior.NoAction);
 
-/*            modelBuilder.Entity<TutorCertificate>()
-                .HasOne(tc => tc.TutorSubjectNavigation)
-                .WithOne(ts => ts.TutorCertificateNavigation)
-                .HasForeignKey<TutorCertificate>(tc => tc.TutorSubjectId).OnDelete(DeleteBehavior.NoAction);
-*/
             // TutorRating Entity Configuration
             modelBuilder.Entity<TutorRating>()
                 .HasKey(tr => tr.TutorRatingId);
@@ -492,6 +483,46 @@ namespace Models.Entities
                 .HasOne(sr => sr.SubjectNavigation)
                 .WithMany(s => s.StudentRequestsNavigation)
                 .HasForeignKey(subj => subj.SubjectId).OnDelete(DeleteBehavior.NoAction);
+
+            // Configure Notification entity
+            modelBuilder.Entity<Notification>()
+                .HasKey(n => n.NotificationId);
+
+            modelBuilder.Entity<Notification>()
+                .HasOne(n => n.UserNavigation)
+                .WithMany(u => u.NotificationNavigation)
+                .HasForeignKey(n => n.UserId).OnDelete(DeleteBehavior.NoAction);
+
+            // Configure Moderator entity
+            modelBuilder.Entity<Moderator>()
+                .HasKey(m => m.ModeratorId);
+
+            modelBuilder.Entity<Moderator>()
+                .HasOne(m => m.UserNavigation)
+                .WithOne(u => u.ModeratorNavigation)
+                .HasForeignKey<Moderator>(m => m.UserId).OnDelete(DeleteBehavior.NoAction);
+
+
+
+            // Configure TutorExperience entity
+            modelBuilder.Entity<TutorExperience>()
+                .HasKey(te => te.TutorExperienceId);
+
+            // Configure TutorAction entity
+            modelBuilder.Entity<TutorAction>()
+                .HasKey(ta => ta.TutorActionId);
+
+            modelBuilder.Entity<TutorAction>()
+                .HasOne(ta => ta.ModeratorNavigation)
+                .WithMany(m => m.TutorActionsNavigation)
+                .HasForeignKey(ta => ta.ModeratorId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<TutorAction>()
+                .HasOne(ta => ta.TutorNavigation)
+                .WithMany(t => t.TutorActionsNavigation)
+                .HasForeignKey(ta => ta.TutorId)
+                .OnDelete(DeleteBehavior.NoAction);
         }
 
     }

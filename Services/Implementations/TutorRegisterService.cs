@@ -27,7 +27,8 @@ namespace Services.Implementations
             _cf = cf;
         }
 
-        // Register Tutor Information
+        // Register Tutor Personal-Information
+        // Get from the User
         public async Task<Tutor> RegisterTutorInformation(TutorInformationRequest tutorRequest)
         {
             try
