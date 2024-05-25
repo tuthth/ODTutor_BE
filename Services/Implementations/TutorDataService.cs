@@ -28,6 +28,7 @@ namespace Services.Implementations
            PricePerHour = t.PricePerHour,
            Description = t.Description,
            Status = t.Status,
+           VideoUrl = t.VideoUrl,
            Courses = t.CoursesNavigation.Select(c => new Course
            {
                CourseId = c.CourseId
@@ -61,6 +62,7 @@ namespace Services.Implementations
           PricePerHour = t.PricePerHour,
           Description = t.Description,
           Status = t.Status,
+          VideoUrl = t.VideoUrl,
           Courses = t.CoursesNavigation.Select(c => new Course
           {
               CourseId = c.CourseId

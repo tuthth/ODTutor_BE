@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Models.Entities;
+using Models.Models.Requests;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,19 +19,11 @@ namespace Services.Interfaces
         Task<ActionResult<Tutor>> GetTutor(Guid id);
         Task<ActionResult<List<Subject>>> GetAllSubjects();
         Task<ActionResult<Subject>> GetSubject(Guid id);
-        Task<ActionResult<List<Course>>> GetAllCourses();
-        Task<ActionResult<Course>> GetCourse(Guid id);
-        Task<ActionResult<List<CourseOutline>>> GetAllCourseOutlines();
-        Task<ActionResult<CourseOutline>> GetCourseOutline(Guid id);
-        Task<ActionResult<List<CoursePromotion>>> GetAllCoursePromotions();
-        Task<ActionResult<CoursePromotion>> GetCoursePromotion(Guid id);
         Task<ActionResult<List<CourseTransaction>>> GetAllCourseTransactions();
         Task<ActionResult<CourseTransaction>> GetCourseTransaction(Guid id);
         Task<ActionResult<List<CourseTransaction>>> GetCourseTransactionsBySenderId(Guid id);
         Task<ActionResult<List<CourseTransaction>>> GetCourseTransactionsByReceiverId(Guid id);
         Task<ActionResult<List<CourseTransaction>>> GetCourseTransactionsByCourseId(Guid id);
-        Task<ActionResult<List<Promotion>>> GetAllPromotions();
-        Task<ActionResult<Promotion>> GetPromotion(Guid id);
         Task<ActionResult<List<Report>>> GetAllReports();
         Task<ActionResult<Report>> GetReport(Guid id);
         Task<ActionResult<List<Report>>> GetReportsByUserId(Guid id);
@@ -49,6 +42,7 @@ namespace Services.Interfaces
         Task<ActionResult<List<TutorCertificate>>> GetAllTutorCertificates();
         Task<ActionResult<TutorCertificate>> GetTutorCertificate(Guid id);
         Task<ActionResult<List<TutorCertificate>>> GetTutorCertificatesByTutorId(Guid id);
+        Task<ActionResult<List<TutorCertificate>>> GetTutorCertificatesBySubjectId(Guid id);
         Task<ActionResult<List<TutorSubject>>> GetAllTutorSubjects();
         Task<ActionResult<TutorSubject>> GetTutorSubject(Guid id);
         Task<ActionResult<List<TutorSubject>>> GetTutorSubjectsByTutorId(Guid id);
@@ -83,5 +77,9 @@ namespace Services.Interfaces
         Task<ActionResult<List<WalletTransaction>>> GetWalletTransactionsByWalletTransactionId(Guid id);
         Task<ActionResult<List<WalletTransaction>>> GetWalletTransactionsBySenderId(Guid id);
         Task<ActionResult<List<WalletTransaction>>> GetWalletTransactionsByReceiverId(Guid id);
+        Task<ActionResult<List<Moderator>>> GetModerators();
+        Task<ActionResult<Moderator>> GetModeratorById(Guid id);
+        Task<ActionResult<List<Notification>>> GetNotifications();
+        Task<ActionResult<List<Notification>>> GetNotificationsByUserId(Guid id);
     }
 }

@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Models.Entities;
+using Models.Models.Requests;
 using Services.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -146,102 +147,6 @@ namespace Services.Implementations
                 throw new Exception(ex.ToString());
             }
         }
-        public async Task<ActionResult<List<Course>>> GetAllCourses()
-        {
-            try
-            {
-                var courses = await _context.Courses.ToListAsync();
-                if (courses == null)
-                {
-                    return new StatusCodeResult(404);
-                }
-                return courses;
-            }
-            catch (Exception ex)
-            {
-                throw new Exception(ex.ToString());
-            }
-        }
-        public async Task<ActionResult<Course>> GetCourse(Guid id)
-        {
-            try
-            {
-                var course = await _context.Courses.FirstOrDefaultAsync(c => c.CourseId == id);
-                if (course == null)
-                {
-                    return new StatusCodeResult(404);
-                }
-                return course;
-            }
-            catch (Exception ex)
-            {
-                throw new Exception(ex.ToString());
-            }
-        }
-        public async Task<ActionResult<List<CourseOutline>>> GetAllCourseOutlines()
-        {
-            try
-            {
-                var courseOutlines = await _context.CourseOutlines.ToListAsync();
-                if (courseOutlines == null)
-                {
-                    return new StatusCodeResult(404);
-                }
-                return courseOutlines;
-            }
-            catch (Exception ex)
-            {
-                throw new Exception(ex.ToString());
-            }
-        }
-        public async Task<ActionResult<CourseOutline>> GetCourseOutline(Guid id)
-        {
-            try
-            {
-                var courseOutline = await _context.CourseOutlines.FirstOrDefaultAsync(c => c.CourseOutlineId == id);
-                if (courseOutline == null)
-                {
-                    return new StatusCodeResult(404);
-                }
-                return courseOutline;
-            }
-            catch (Exception ex)
-            {
-                throw new Exception(ex.ToString());
-            }
-        }
-        public async Task<ActionResult<List<CoursePromotion>>> GetAllCoursePromotions()
-        {
-            try
-            {
-                var coursePromotions = await _context.CoursePromotions.ToListAsync();
-                if (coursePromotions == null)
-                {
-                    return new StatusCodeResult(404);
-                }
-                return coursePromotions;
-            }
-            catch (Exception ex)
-            {
-                throw new Exception(ex.ToString());
-            }
-        }
-        public async Task<ActionResult<CoursePromotion>> GetCoursePromotion(Guid id)
-        {
-            try
-            {
-                var coursePromotion = await _context.CoursePromotions.FirstOrDefaultAsync(c => c.CourseId == id || c.PromotionId == id);
-                if (coursePromotion == null)
-                {
-                    return new StatusCodeResult(404);
-                }
-                return coursePromotion;
-            }
-            catch (Exception ex)
-            {
-                throw new Exception(ex.ToString());
-            }
-        }
         public async Task<ActionResult<List<CourseTransaction>>> GetAllCourseTransactions()
         {
             try
@@ -316,38 +221,6 @@ namespace Services.Implementations
                     return new StatusCodeResult(404);
                 }
                 return courseTransactions;
-            }
-            catch (Exception ex)
-            {
-                throw new Exception(ex.ToString());
-            }
-        }
-        public async Task<ActionResult<List<Promotion>>> GetAllPromotions()
-        {
-            try
-            {
-                var promotions = await _context.Promotions.ToListAsync();
-                if (promotions == null)
-                {
-                    return new StatusCodeResult(404);
-                }
-                return promotions;
-            }
-            catch (Exception ex)
-            {
-                throw new Exception(ex.ToString());
-            }
-        }
-        public async Task<ActionResult<Promotion>> GetPromotion(Guid id)
-        {
-            try
-            {
-                var promotion = await _context.Promotions.FirstOrDefaultAsync(c => c.PromotionId == id);
-                if (promotion == null)
-                {
-                    return new StatusCodeResult(404);
-                }
-                return promotion;
             }
             catch (Exception ex)
             {
@@ -631,6 +504,22 @@ namespace Services.Implementations
             try
             {
                 var tutorCertificates = await _context.TutorCertificates.Where(c => c.TutorId == id).ToListAsync();
+                if (tutorCertificates == null)
+                {
+                    return new StatusCodeResult(404);
+                }
+                return tutorCertificates;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.ToString());
+            }
+        }
+        public async Task<ActionResult<List<TutorCertificate>>> GetTutorCertificatesBySubjectId(Guid id)
+        {
+            try
+            {
+                var tutorCertificates = await _context.TutorCertificates.Where(c => c.SubjectId == id).ToListAsync();
                 if (tutorCertificates == null)
                 {
                     return new StatusCodeResult(404);
@@ -1186,5 +1075,70 @@ namespace Services.Implementations
                 throw new Exception(ex.ToString());
             }
         }
+        public async Task<ActionResult<List<Moderator>>> GetModerators()
+        {
+            try
+            {
+                var moderators = await _context.Moderators.ToListAsync();
+                if (moderators == null)
+                {
+                    return new StatusCodeResult(404);
+                }
+                return moderators;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.ToString());
+            }
+        }
+        public async Task<ActionResult<Moderator>> GetModeratorById(Guid id)
+        {
+            try
+            {
+                var moderator = await _context.Moderators.FirstOrDefaultAsync(c => c.ModeratorId == id || c.UserId == id );
+                if (moderator == null)
+                {
+                    return new StatusCodeResult(404);
+                }
+                return moderator;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.ToString());
+            }
+        }
+        public async Task<ActionResult<List<Notification>>> GetNotifications()
+        {
+            try
+            {
+                var notifications = await _context.Notifications.ToListAsync();
+                if (notifications == null)
+                {
+                    return new StatusCodeResult(404);
+                }
+                return notifications;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.ToString());
+            }
+        }
+        public async Task<ActionResult<List<Notification>>> GetNotificationsByUserId(Guid id)
+        {
+            try
+            {
+                var notifications = await _context.Notifications.Where(c => c.UserId == id).ToListAsync();
+                if (notifications == null)
+                {
+                    return new StatusCodeResult(404);
+                }
+                return notifications;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.ToString());
+            }
+        }
+       
     }
 }

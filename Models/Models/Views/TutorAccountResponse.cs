@@ -14,6 +14,7 @@ namespace Models.Models.Views
         public decimal PricePerHour { get; set; }
         public string Description { get; set; }
         public int Status { get; set; }
+        public string? VideoUrl { get; set; }
         public List<Course> Courses { get; set; }
         public List<TutorCertificate> TutorCertificates { get; set; }
         public List<TutorSubject> Subjects { get; set; }
