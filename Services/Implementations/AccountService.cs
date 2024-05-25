@@ -29,7 +29,7 @@ namespace Services.Implementations
         /*============External Site===========*/
 
         //RegisterAccount
-        public async Task<AccountResponse> createAccount(AccountRegisterRequest accountRegisterRequest)
+        public async Task<IActionResult> createAccount(AccountRegisterRequest accountRegisterRequest)
         {
             try
             {
@@ -37,15 +37,15 @@ namespace Services.Implementations
                     || accountRegisterRequest.ConfirmPassword == null || accountRegisterRequest.FullName == ""
                     || accountRegisterRequest.Email == "" || accountRegisterRequest.Password == ""
                     || accountRegisterRequest.ConfirmPassword == "")
-                    throw new CrudException(HttpStatusCode.BadRequest, "Information is not empty", "");
+                    return new StatusCodeResult(400);
                 var s = _context.Users.FirstOrDefault(a => a.Email.Equals(accountRegisterRequest.Email.ToUpper().Trim()));
                 if (s != null)
                 {
-                    throw new CrudException(HttpStatusCode.BadRequest, "Email is already exist", "");
+                    return new StatusCodeResult(409);
                 }
                 if (accountRegisterRequest.Password != accountRegisterRequest.ConfirmPassword)
                 {
-                    throw new CrudException(HttpStatusCode.BadRequest, "Password and Confirm Password are not the same", "");
+                    return new StatusCodeResult(400);
                 }
                 var account = _mapper.Map<User>(accountRegisterRequest);
                 
@@ -80,15 +80,11 @@ namespace Services.Implementations
                 await _context.SaveChangesAsync();
                 var accountResponse = _mapper.Map<AccountResponse>(account);
                 // Return information of account
-                return accountResponse;
-            }
-            catch (CrudException ex)
-            {
-                throw ex;
+                return new StatusCodeResult(201);
             }
             catch (Exception ex)
             {
-                throw new CrudException(HttpStatusCode.InternalServerError, ex.Message, "");
+                return new StatusCodeResult(500);
             }
         }
 
@@ -135,13 +131,14 @@ namespace Services.Implementations
         }
 
         // Get Student Information
-        public async Task<AccountResponse> GetStudentInformation(Guid UserID)
+        public async Task<ActionResult<AccountResponse>> GetStudentInformation(Guid UserID)
         {
             try
             {
                 var response = new AccountResponse();
                 var userInfo = _context.Users
                     .FirstOrDefault(s => s.Id.Equals(UserID));
+                if (userInfo == null) return new StatusCodeResult(404);
 
                     response.Status = userInfo.Status;
                     response.Email = userInfo.Email;
@@ -158,36 +155,30 @@ namespace Services.Implementations
             }
             catch (Exception ex)
             {
-                throw new CrudException(HttpStatusCode.InternalServerError, ex.Message, "");
+                throw new Exception(ex.ToString());
             }
         }
 
         // Update User Account
-        public async Task<UserAccountResponse> updateUserAccount(Guid UserID, UpdateAccountRequest request)
+        public async Task<IActionResult> updateUserAccount(UpdateAccountRequest request)
         {
             try
             {
-                User user = FindUserById(UserID);
+                User user = FindUserById(request.Id);
                 if (user == null)
                 {
-                    throw new CrudException(HttpStatusCode.NotFound, "User not found", "");
+                    return new StatusCodeResult(404);
                 }
                 user.Name = request.FullName;
                 user.Username = request.Username;
                 user.ImageUrl = request.ImageUrl;
                 user.PhoneNumber = request.PhoneNumber;
                 user.DateOfBirth = request.DateOfBirth ?? DateTime.MinValue;
-                UserAccountResponse response = _mapper.Map<UserAccountResponse>(user);
-                response.UserID = user.Id;
-                return response;
-            }
-            catch (CrudException ex)
-            {
-                throw ex;
+                return new StatusCodeResult(200);
             }
             catch (Exception ex)
             {
-                throw new CrudException(HttpStatusCode.InternalServerError, ex.Message, "");
+                throw new Exception(ex.ToString());
             }
         }
 
