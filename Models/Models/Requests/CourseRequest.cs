@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -38,6 +39,7 @@ namespace Models.Models.Requests
     public class CreatePromotion
     {
         public string? PromotionCode { get; set; }
+        [Range(0.01, 100, ErrorMessage = "Khuyển mãi phải nằm trong khoảng từ trên 0% đến 100% ")]
         public decimal Percentage { get; set; }
     }
     public class UpdatePromotion : CreatePromotion

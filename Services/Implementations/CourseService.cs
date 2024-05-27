@@ -38,7 +38,7 @@ namespace Services.Implementations
                 TotalMoney = courseRequest.TotalMoney,
                 TotalSlots = courseRequest.TotalSlots,
                 Note = courseRequest.Note,
-                Status = courseRequest.Status
+                Status = (Int32)CourseEnum.Active
             };
             _context.Courses.Add(course);
             await _context.SaveChangesAsync();
@@ -52,6 +52,7 @@ namespace Services.Implementations
             {
                 return new StatusCodeResult(404);
             }
+            if(course.Status == (Int32)CourseEnum.Deleted) return new StatusCodeResult(409);
             if (courseRequest.TotalMoney < 0 || courseRequest.TotalSlots < 0)
             {
                 return new StatusCodeResult(400);
@@ -94,42 +95,59 @@ namespace Services.Implementations
                 {
                     if (course.Status != (Int32)CourseEnum.Deleted)
                     {
-                        course.Status = (Int32)CourseEnum.Inactive;
+                        course.Status = (Int32)CourseEnum.Deleted;
                         _context.Courses.Update(course);
                         var courseOutlines = await _context.CourseOutlines.Where(c => c.CourseId == id).ToListAsync();
                         foreach (var courseOutline in courseOutlines)
                         {
-                            courseOutline.Status = (Int32)CourseEnum.Inactive;
+                            courseOutline.Status = (Int32)CourseEnum.Deleted;
                             _context.CourseOutlines.Update(courseOutline);
                         }
-                        await _context.SaveChangesAsync();
-                        return new StatusCodeResult(200);
-                    }
-                    else
-                    {
-                        _context.Courses.Remove(course);
                         var coursePromotions = await _context.CoursePromotions.Where(c => c.CourseId == id).ToListAsync();
                         foreach (var coursePromotion in coursePromotions)
                         {
                             _context.CoursePromotions.Remove(coursePromotion);
                         }
-                        var courseOutlines = await _context.CourseOutlines.Where(c => c.CourseId == id).ToListAsync();
-                        foreach (var courseOutline in courseOutlines)
-                        {
-                            _context.CourseOutlines.Remove(courseOutline);
-                        }
                         var studentCourses = await _context.StudentCourses.Where(c => c.CourseId == id).ToListAsync();
                         foreach (var studentCourse in studentCourses)
                         {
                             var schedules = await _context.Schedules.Where(c => c.StudentCourseId == studentCourse.StudentCourseId).ToListAsync();
-                            _context.Schedules.RemoveRange(schedules);
-                            _context.StudentCourses.Remove(studentCourse);
+                            foreach (var schedule in schedules)
+                            {
+                                schedule.Status = (Int32)CourseEnum.Deleted;
+                                _context.Schedules.Update(schedule);
+                            }
+                            studentCourse.Status = (Int32)CourseEnum.Deleted;
+                            _context.StudentCourses.Update(studentCourse);
                         }
                         await _context.SaveChangesAsync();
-                        return new StatusCodeResult(204);
+                        return new StatusCodeResult(200);
                     }
+                    else return new StatusCodeResult(409);
                 }
-                else return new StatusCodeResult(409);
+                else
+                {
+                    _context.Courses.Remove(course);
+                    var coursePromotions = await _context.CoursePromotions.Where(c => c.CourseId == id).ToListAsync();
+                    foreach (var coursePromotion in coursePromotions)
+                    {
+                        _context.CoursePromotions.Remove(coursePromotion);
+                    }
+                    var courseOutlines = await _context.CourseOutlines.Where(c => c.CourseId == id).ToListAsync();
+                    foreach (var courseOutline in courseOutlines)
+                    {
+                        _context.CourseOutlines.Remove(courseOutline);
+                    }
+                    var studentCourses = await _context.StudentCourses.Where(c => c.CourseId == id).ToListAsync();
+                    foreach (var studentCourse in studentCourses)
+                    {
+                        var schedules = await _context.Schedules.Where(c => c.StudentCourseId == studentCourse.StudentCourseId).ToListAsync();
+                        _context.Schedules.RemoveRange(schedules);
+                        _context.StudentCourses.Remove(studentCourse);
+                    }
+                    await _context.SaveChangesAsync();
+                    return new StatusCodeResult(204);
+                }
 
 
             }
@@ -137,7 +155,6 @@ namespace Services.Implementations
             {
                 throw new Exception(ex.ToString());
             }
-            return new StatusCodeResult(500);
         }
         public async Task<IActionResult> CreateCourseOutline(CourseOutlineRequest courseOutlineRequest)
         {
@@ -152,7 +169,7 @@ namespace Services.Implementations
                 CourseId = courseOutlineRequest.CourseId,
                 Description = courseOutlineRequest.Description,
                 Title = courseOutlineRequest.Title,
-                Status = courseOutlineRequest.Status
+                Status = (Int32)CourseEnum.Active
             };
             _context.CourseOutlines.Add(courseOutline);
             await _context.SaveChangesAsync();
@@ -166,6 +183,7 @@ namespace Services.Implementations
             {
                 return new StatusCodeResult(404);
             }
+            if(course.Status == (Int32)CourseEnum.Deleted) return new StatusCodeResult(409);
             if (courseOutlineRequest.Description != null)
             {
                 courseOutline.Description = courseOutlineRequest.Description;
@@ -185,30 +203,33 @@ namespace Services.Implementations
         public async Task<IActionResult> DeleteCourseOutline(Guid id)
         {
             var courseOutline = await _context.CourseOutlines.FirstOrDefaultAsync(c => c.CourseOutlineId == id);
-            var course = await _context.Courses.FirstOrDefaultAsync(c => c.CourseId == courseOutline.CourseId && c.Status != (Int32)CourseEnum.Active);
-            if(course != null)
-            {
-                return new StatusCodeResult(409);
-            }
-            if (courseOutline == null)
+            var course = await _context.Courses.FirstOrDefaultAsync(c => c.CourseId == courseOutline.CourseId);
+            var transactions = await _context.CourseTransactions.AnyAsync(c => c.CourseId == id);
+            if (courseOutline == null || course == null)
             {
                 return new StatusCodeResult(404);
             }
-            if(course.Status == (Int32)CourseEnum.Deleted)
+            if (transactions == true)
             {
-                courseOutline.Status = (Int32)CourseEnum.Deleted;
-                _context.CourseOutlines.Update(courseOutline);
-                await _context.SaveChangesAsync();
-                return new StatusCodeResult(200);
+                if (course.Status == (Int32)CourseEnum.Deleted)
+                {
+                    return new StatusCodeResult(409);
+                }
+                else
+                {
+                    courseOutline.Status = (Int32)CourseEnum.Deleted;
+                    _context.CourseOutlines.Update(courseOutline);
+                    await _context.SaveChangesAsync();
+                    return new StatusCodeResult(200);
+                }
             }
             else
             {
-                courseOutline.Status = (Int32)CourseEnum.Inactive;
-                _context.CourseOutlines.Update(courseOutline);
+                _context.CourseOutlines.Remove(courseOutline);
                 await _context.SaveChangesAsync();
-                return new StatusCodeResult(200);
+                return new StatusCodeResult(204);
             }
-            
+
         }
         public async Task<IActionResult> CreateCoursePromotion(CoursePromotionRequest coursePromotionRequest)
         {

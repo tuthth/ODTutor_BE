@@ -38,6 +38,7 @@ namespace API.Controllers
                 if (statusCodeResult.StatusCode == 200) return Ok("Cập nhật khóa học thành công");
                 if (statusCodeResult.StatusCode == 400) return BadRequest("Dữ liệu không hợp lệ");
                 if (statusCodeResult.StatusCode == 404) return NotFound("Không tìm thấy khóa học");
+                if (statusCodeResult.StatusCode == 409) return Conflict("Khoá học đã được gỡ khỏi tìm kiếm trước đó");
                 if (statusCodeResult.StatusCode == 500) return StatusCode(StatusCodes.Status500InternalServerError, "Lỗi không xác định");
             }
             if (result is Exception exception)
@@ -52,11 +53,11 @@ namespace API.Controllers
             var result = await _courseService.DeleteCourse(ID);
             if (result is StatusCodeResult statusCodeResult)
             {
-                if (statusCodeResult.StatusCode == 204) return StatusCode(StatusCodes.Status204NoContent,"Xóa khóa học thành công");
-                if(statusCodeResult.StatusCode == 200) return Ok("Khóa học được xóa khỏi tìm kiếm");
+                if (statusCodeResult.StatusCode == 204) return StatusCode(StatusCodes.Status204NoContent, "Xóa khóa học và các thông tin liên quan thành công");
+                if (statusCodeResult.StatusCode == 200) return Ok("Khóa học được xóa khỏi tìm kiếm. Các mã giảm giá liên quan được xóa. Lịch học liên quan đến khóa học đã được hủy");
                 if (statusCodeResult.StatusCode == 400) return BadRequest("Dữ liệu không hợp lệ");
                 if (statusCodeResult.StatusCode == 404) return NotFound("Không tìm thấy khóa học");
-                if (statusCodeResult.StatusCode == 409) return Conflict("Khóa học có giao dịch, không thể xóa");
+                if (statusCodeResult.StatusCode == 409) return Conflict("Khóa học có giao dịch và đã được gỡ khỏi tìm kiếm trước đó");
                 if (statusCodeResult.StatusCode == 500) return StatusCode(StatusCodes.Status500InternalServerError, "Lỗi không xác định");
             }
             if (result is Exception exception)
@@ -73,7 +74,7 @@ namespace API.Controllers
             {
                 if (statusCodeResult.StatusCode == 201) return StatusCode(StatusCodes.Status201Created, "Tạo đề cương khóa học thành công");
                 if (statusCodeResult.StatusCode == 400) return BadRequest("Dữ liệu không hợp lệ");
-                if (statusCodeResult.StatusCode == 404) return NotFound("Không tìm thấy khóa học");
+                if (statusCodeResult.StatusCode == 404) return NotFound("Không tìm thấy khóa học đang hoạt động");
                 if (statusCodeResult.StatusCode == 500) return StatusCode(StatusCodes.Status500InternalServerError, "Lỗi không xác định");
             }
             if (result is Exception exception)
@@ -89,6 +90,7 @@ namespace API.Controllers
             if (result is StatusCodeResult statusCodeResult)
             {
                 if (statusCodeResult.StatusCode == 200) return Ok("Cập nhật đề cương khóa học thành công");
+                if (statusCodeResult.StatusCode == 409) return Conflict("Đề cương khóa học đã được gỡ khỏi tìm kiếm trước đó, không thể cập nhật");
                 if (statusCodeResult.StatusCode == 400) return BadRequest("Dữ liệu không hợp lệ");
                 if (statusCodeResult.StatusCode == 404) return NotFound("Không tìm thấy khóa học");
                 if (statusCodeResult.StatusCode == 500) return StatusCode(StatusCodes.Status500InternalServerError, "Lỗi không xác định");
@@ -106,9 +108,10 @@ namespace API.Controllers
             if (result is StatusCodeResult statusCodeResult)
             {
                 if (statusCodeResult.StatusCode == 204) return StatusCode(StatusCodes.Status204NoContent, "Xóa đề cương khóa học thành công");
-                if (statusCodeResult.StatusCode == 200) return Ok("Đề cương khóa học được xóa khỏi tìm kiếm");
+                if (statusCodeResult.StatusCode == 200) return Ok("Đề cương khóa học được xóa khỏi tìm kiếm, những tài khoản đã lưu tài liệu vẫn có thể download");
+                if (statusCodeResult.StatusCode == 409) return Conflict("Khóa học liên quan đã được gỡ khỏi tìm kiếm trước đó");
                 if (statusCodeResult.StatusCode == 400) return BadRequest("Dữ liệu không hợp lệ");
-                if (statusCodeResult.StatusCode == 404) return NotFound("Không tìm thấy khóa học");
+                if (statusCodeResult.StatusCode == 404) return NotFound("Không tìm thấy đề cương khóa học");
                 if (statusCodeResult.StatusCode == 500) return StatusCode(StatusCodes.Status500InternalServerError, "Lỗi không xác định");
             }
             if (result is Exception exception)
@@ -141,7 +144,6 @@ namespace API.Controllers
             if (result is StatusCodeResult statusCodeResult)
             {
                 if (statusCodeResult.StatusCode == 204) return StatusCode(StatusCodes.Status204NoContent, "Xóa khuyến mãi khóa học thành công");
-                if (statusCodeResult.StatusCode == 200) return Ok("Khuyến mãi khóa học được xóa khỏi tìm kiếm");
                 if (statusCodeResult.StatusCode == 400) return BadRequest("Dữ liệu không hợp lệ");
                 if (statusCodeResult.StatusCode == 404) return NotFound("Không tìm thấy khóa học");
                 if (statusCodeResult.StatusCode == 500) return StatusCode(StatusCodes.Status500InternalServerError, "Lỗi không xác định");
