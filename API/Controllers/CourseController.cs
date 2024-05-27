@@ -56,6 +56,7 @@ namespace API.Controllers
                 if(statusCodeResult.StatusCode == 200) return Ok("Khóa học được xóa khỏi tìm kiếm");
                 if (statusCodeResult.StatusCode == 400) return BadRequest("Dữ liệu không hợp lệ");
                 if (statusCodeResult.StatusCode == 404) return NotFound("Không tìm thấy khóa học");
+                if (statusCodeResult.StatusCode == 409) return Conflict("Khóa học có giao dịch, không thể xóa");
                 if (statusCodeResult.StatusCode == 500) return StatusCode(StatusCodes.Status500InternalServerError, "Lỗi không xác định");
             }
             if (result is Exception exception)

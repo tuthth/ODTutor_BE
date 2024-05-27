@@ -89,10 +89,10 @@ namespace Services.Implementations
                 {
                     return new StatusCodeResult(404);
                 }
-                if (course.Status != (Int32)CourseEnum.Deleted)
+                var courseTransactions = await _context.CourseTransactions.AnyAsync(c => c.CourseId == id);
+                if (courseTransactions == true)
                 {
-                    var courseTransactions = await _context.CourseTransactions.AnyAsync(c => c.CourseId == id);
-                    if (courseTransactions == true)
+                    if (course.Status != (Int32)CourseEnum.Deleted)
                     {
                         course.Status = (Int32)CourseEnum.Inactive;
                         _context.Courses.Update(course);
@@ -105,30 +105,32 @@ namespace Services.Implementations
                         await _context.SaveChangesAsync();
                         return new StatusCodeResult(200);
                     }
+                    else
+                    {
+                        _context.Courses.Remove(course);
+                        var coursePromotions = await _context.CoursePromotions.Where(c => c.CourseId == id).ToListAsync();
+                        foreach (var coursePromotion in coursePromotions)
+                        {
+                            _context.CoursePromotions.Remove(coursePromotion);
+                        }
+                        var courseOutlines = await _context.CourseOutlines.Where(c => c.CourseId == id).ToListAsync();
+                        foreach (var courseOutline in courseOutlines)
+                        {
+                            _context.CourseOutlines.Remove(courseOutline);
+                        }
+                        var studentCourses = await _context.StudentCourses.Where(c => c.CourseId == id).ToListAsync();
+                        foreach (var studentCourse in studentCourses)
+                        {
+                            var schedules = await _context.Schedules.Where(c => c.StudentCourseId == studentCourse.StudentCourseId).ToListAsync();
+                            _context.Schedules.RemoveRange(schedules);
+                            _context.StudentCourses.Remove(studentCourse);
+                        }
+                        await _context.SaveChangesAsync();
+                        return new StatusCodeResult(204);
+                    }
                 }
-                else
-                {
-                    _context.Courses.Remove(course);
-                    var coursePromotions = await _context.CoursePromotions.Where(c => c.CourseId == id).ToListAsync();
-                    foreach (var coursePromotion in coursePromotions)
-                    {
-                        _context.CoursePromotions.Remove(coursePromotion);
-                    }
-                    var courseOutlines = await _context.CourseOutlines.Where(c => c.CourseId == id).ToListAsync();
-                    foreach (var courseOutline in courseOutlines)
-                    {
-                        _context.CourseOutlines.Remove(courseOutline);
-                    }
-                    var studentCourses = await _context.StudentCourses.Where(c => c.CourseId == id).ToListAsync();
-                    foreach (var studentCourse in studentCourses)
-                    {
-                        var schedules = await _context.Schedules.Where(c => c.StudentCourseId == studentCourse.StudentCourseId).ToListAsync();
-                        _context.Schedules.RemoveRange(schedules);
-                        _context.StudentCourses.Remove(studentCourse);
-                    }
-                    await _context.SaveChangesAsync();
-                    return new StatusCodeResult(204);
-                }
+                else return new StatusCodeResult(409);
+
 
             }
             catch (Exception ex)
