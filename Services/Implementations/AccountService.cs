@@ -174,6 +174,8 @@ namespace Services.Implementations
                 user.ImageUrl = request.ImageUrl;
                 user.PhoneNumber = request.PhoneNumber;
                 user.DateOfBirth = request.DateOfBirth ?? DateTime.MinValue;
+                _context.Users.Update(user);
+                await _context.SaveChangesAsync();
                 return new StatusCodeResult(200);
             }
             catch (Exception ex)
