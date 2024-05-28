@@ -10,9 +10,9 @@ namespace Models.Entities
     {
         public Guid TutorCertificateId { get; set; }
         public Guid TutorId { get; set; }
-        public Guid SubjectId { get;set; }
         public string ImageUrl { get; set; }
 
         public virtual Tutor? TutorNavigation {  get; set; }
+        public TutorSubject? TutorSubjectNavigation { get; set; }
     }
 }

@@ -26,15 +26,15 @@ namespace API.Controllers
         [HttpPost("register")]
         public async Task<IActionResult> addRegisterInformationOfTutor([FromBody] TutorInformationRequest tutorRequest)
         {
-            
-                var result = await _tutorRegisterService.RegisterTutorInformation(tutorRequest);
-                if(result is StatusCodeResult statusCodeResult)
-                {
-                    if(statusCodeResult.StatusCode == 200){return Ok("Đăng ký thông tin gia sư thành công");}
-                    else if(statusCodeResult.StatusCode == 404){return BadRequest("Đăng ký thông tin gia sư thất bại");}
-                }
-                if(result is Exception exception)return StatusCode(StatusCodes.Status500InternalServerError, exception.ToString());
-                throw new Exception("Xảy ra lỗi không xác định");
+
+            var result = await _tutorRegisterService.RegisterTutorInformation(tutorRequest);
+            if (result is StatusCodeResult statusCodeResult)
+            {
+                if (statusCodeResult.StatusCode == 200) { return Ok("Đăng ký thông tin gia sư thành công"); }
+                else if (statusCodeResult.StatusCode == 404) { return BadRequest("Đăng ký thông tin gia sư thất bại"); }
+            }
+            if (result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, exception.ToString());
+            throw new Exception("Xảy ra lỗi không xác định");
         }
 
         // Add Certificate
@@ -42,7 +42,7 @@ namespace API.Controllers
         public async Task<IActionResult> addRegisterCertificateOfTutor(Guid tutorID, List<IFormFile> tutorRequest)
         {
             var result = await _tutorRegisterService.TutorCertificatesRegister(tutorID, tutorRequest);
-            if(result is StatusCodeResult statusCodeResult)
+            if (result is StatusCodeResult statusCodeResult)
             {
                 var tutorEvidence = await _tutorRegisterService.TutorCertificatesRegister(tutorID, tutorRequest);
                 if (tutorEvidence != null)
@@ -53,12 +53,14 @@ namespace API.Controllers
                 {
                     return BadRequest("Đăng ký bằng cấp gia sư thất bại");
                 }
-                if(statusCodeResult.StatusCode == 201) { return StatusCode(StatusCodes.Status201Created,"Đăng ký chứng chỉ gia sư thành công");}
-                else if(statusCodeResult.StatusCode == 404) { return NotFound("Không tìm thấy thông tin gia sư"); }
+                if (statusCodeResult.StatusCode == 201) { return StatusCode(StatusCodes.Status201Created, "Đăng ký chứng chỉ gia sư thành công"); }
+                else if (statusCodeResult.StatusCode == 404) { return NotFound("Không tìm thấy thông tin gia sư"); }
             }
-            if(result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, exception.ToString());
+            if (result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, exception.ToString());
             throw new Exception("Xảy ra lỗi không xác định");
         }
+
+        // Add Subject
         [HttpPost("register/subjects/{tutorID}")]
         public async Task<IActionResult> addRegisterSubjectOfTutor(Guid tutorID, List<Guid> subjectIDs)
         {
@@ -72,22 +74,35 @@ namespace API.Controllers
             if (result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, exception.ToString());
             throw new Exception("Xảy ra lỗi không xác định");
         }
-
+        // Add Experience
+/*        [HttpPost("register/experiences/{tutorID}")]
+        public async Task<IActionResult> addRegisterExperienceOfTutor(Guid tutorID, List<TutorExperience> tutorExperiences)
+        {
+            var result = await _tutorRegisterService.RegisterTutorExperience(tutorID, tutorExperiences);
+            if (result is StatusCodeResult statusCodeResult)
+            {
+                if (statusCodeResult.StatusCode == 201) { return StatusCode(StatusCodes.Status201Created, "Đăng ký kinh nghiệm gia sư thành công"); }
+                else if (statusCodeResult.StatusCode == 404) { return NotFound("Không tìm thấy thông tin gia sư"); }
+                else if (statusCodeResult.StatusCode == 400) { return BadRequest("Đăng ký kinh nghiệm gia sư thất bại"); }
+            }
+            if (result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, exception.ToString());
+            throw new Exception("Xảy ra lỗi không xác định");
+        }*/
         // Get All Tutor Register Information
         [HttpGet("get/tutor-register/{tutorID}")]
         public async Task<ActionResult<TutorRegisterReponse>> getAllTutorRegisterInformation(Guid tutorID)
         {
-           var result = await _tutorRegisterService.GetTutorRegisterInformtaion(tutorID);
+            var result = await _tutorRegisterService.GetTutorRegisterInformtaion(tutorID);
             if (result is ActionResult<TutorRegisterReponse> tutorRegisterReponse)
             {
                 if (tutorRegisterReponse.Value == null) return NotFound("Không tìm thấy thông tin gia sư");
                 return Ok(tutorRegisterReponse.Value);
             }
-            if((IActionResult)result.Result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, exception.ToString());
+            if ((IActionResult)result.Result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, exception.ToString());
             throw new Exception("Xảy ra lỗi không xác định");
         }
 
-       
+
     }
 
 }

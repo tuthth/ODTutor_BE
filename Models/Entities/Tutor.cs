@@ -10,7 +10,6 @@ namespace Models.Entities
     {
         public Guid TutorId { get; set; }
         public Guid UserId { get; set; }
-        public Guid ModeratorId { get; set; }
         public string IdentityNumber {  get; set; }
         public string Level { get; set; }
         public decimal PricePerHour { get; set; }
@@ -26,6 +25,7 @@ namespace Models.Entities
         public virtual ICollection<TutorSubject>? TutorSubjectsNavigation { get; set; }
         public virtual ICollection<TutorRating>? TutorRatingsNavigation { get; set; }
         public virtual ICollection<TutorAction>? TutorActionsNavigation { get; set; }
+        public virtual ICollection<TutorExperience>? TutorExperiencesNavigation { get; set; }
         //public virtual ICollection<TutorRatingImage>? TutorRatingsImagesNavigation { get; set; }
         public virtual ICollection<Booking>? BookingsNavigation {get; set;}
     }

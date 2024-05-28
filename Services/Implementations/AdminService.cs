@@ -519,7 +519,7 @@ namespace Services.Implementations
         {
             try
             {
-                var tutorCertificates = await _context.TutorCertificates.Where(c => c.SubjectId == id).ToListAsync();
+                var tutorCertificates = await _context.TutorCertificates.Where(c => c.TutorId == id).ToListAsync();
                 if (tutorCertificates == null)
                 {
                     return new StatusCodeResult(404);

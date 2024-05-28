@@ -261,10 +261,16 @@ namespace Services.Implementations
 
         /*========== Internal Site ==========*/
 
-        // Find Admin Id Based on User Id
+        // Find Tutor Id Based on User Id
         public Tutor findTutor(Guid userId)
         {
             return _context.Tutors.FirstOrDefault(t => t.UserId == userId);
+        }
+
+        // Find Moderator Id Based on User Id
+        private Moderator findModerator(Guid userId)
+        {
+            return _context.Moderators.FirstOrDefault(m => m.UserId == userId);
         }
 
         // Generate Token
@@ -279,8 +285,9 @@ namespace Services.Implementations
             var secretKeyBytes = Encoding.UTF8.GetBytes(_jwtSetting.SecretKey);
             var tokenDescriptor = new SecurityTokenDescriptor();
             var tutor = findTutor(user.Id);
+            var moderator = findModerator(user.Id);
             var student = _context.Students.FirstOrDefault(s => s.UserId == user.Id);
-            if (tutor == null)
+            if (tutor == null && moderator == null)
             {
                 var studentInfo = _context.Students.FirstOrDefault(s => s.UserId == user.Id);
                 tokenDescriptor = new SecurityTokenDescriptor
@@ -292,6 +299,23 @@ namespace Services.Implementations
                 new Claim(ClaimTypes.Name, user.Username ?? string.Empty),
                 new Claim(ClaimTypes.Email, user.Email ?? string.Empty),
                 new Claim(ClaimTypes.Role,"Student")
+            }),
+                    Expires = DateTime.UtcNow.AddHours(1),
+                    SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
+                };
+            }
+            else if ( moderator != null)
+            {
+                var moderatorInfo = _context.Moderators.FirstOrDefault(t => t.UserId == user.Id);
+                tokenDescriptor = new SecurityTokenDescriptor
+                {
+                    Subject = new ClaimsIdentity(new[]
+                    {
+                new Claim("UserId", user.Id.ToString()),
+                new Claim("ModeratorId", moderator.ModeratorId.ToString()),
+                new Claim(ClaimTypes.Name, user.Username ?? string.Empty),
+                new Claim(ClaimTypes.Email, user.Email ?? string.Empty),
+                new Claim(ClaimTypes.Role, "Moderator")
             }),
                     Expires = DateTime.UtcNow.AddHours(1),
                     SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
@@ -322,13 +346,28 @@ namespace Services.Implementations
             {
                 accessToken = accessToken,
                 userId = user.Id,
-                role = tutor == null ? "Student" : "Tutor",
+                role = GetRoleName(tutor,moderator),
                 tutorID = tutor == null ? null : tutor.TutorId
 
             };
             return response;
         }
-
+        // Get Role 
+        private string GetRoleName( Tutor tutor, Moderator moderator)
+        {
+            if (tutor != null)
+            {
+                return "Tutor";
+            }
+            else if (moderator != null)
+            {
+                return "Moderator";
+            }
+            else
+            {
+                return "Student";
+            }
+        }
         // HashPassword
         private string HashPassword(string password)
         {
@@ -350,7 +389,7 @@ namespace Services.Implementations
         }
 
         // Verify password Hash
-        public bool VerifyPasswordHash(string password, string passwordHash)
+        private bool VerifyPasswordHash(string password, string passwordHash)
         {
             // Băm mật khẩu nhập vào
             string hashedPassword = HashPassword(password);

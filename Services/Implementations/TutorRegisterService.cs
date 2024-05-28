@@ -1,5 +1,9 @@
 ﻿using AutoMapper;
+using Emgu.CV;
+using Emgu.CV.Structure;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -11,7 +15,9 @@ using Newtonsoft.Json.Linq;
 using Services.Interfaces;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
+using System.Net;
 using System.Runtime.ConstrainedExecution;
 using System.Text;
 using System.Threading.Tasks;
@@ -22,9 +28,11 @@ namespace Services.Implementations
     {
         
         private readonly IConfiguration _cf;
-        public TutorRegisterService(ODTutorContext odContext, IMapper mapper, IConfiguration cf) : base(odContext, mapper)
+        private readonly IWebHostEnvironment _env;
+        public TutorRegisterService(ODTutorContext odContext,IWebHostEnvironment env, IMapper mapper, IConfiguration cf) : base(odContext, mapper)
         {
             _cf = cf;
+            _env = env;
         }
 
         // Register Tutor Information
@@ -33,6 +41,7 @@ namespace Services.Implementations
             try
             {
                 Tutor tutor = _mapper.Map<Tutor>(tutorRequest);
+                tutor.TutorId = new Guid();
                 tutor.Status = 0; // "0" is Pending
                 if (tutor == null)
                 {
@@ -129,6 +138,36 @@ namespace Services.Implementations
             }
         }
 
+        // Register Tutor Experience
+        public async Task<IActionResult> RegisterTutorExperience(Guid tutorID, List<TutorExperienceRequest> tutorExperienceRegistList)
+        {
+            var tutor = await _context.Tutors.Where(x => x.TutorId == tutorID).FirstOrDefaultAsync();
+            if (tutor == null)
+            {
+                throw new CrudException( HttpStatusCode.NotFound, "Tutor not found", "");
+            }
+            try
+            {
+                foreach(var tutorExperienceRegist in tutorExperienceRegistList)
+                {
+                    TutorExperience tutorExperience = _mapper.Map<TutorExperience>(tutorExperienceRegist);
+                    tutorExperience.TutorExperienceId = new Guid();
+                    tutorExperience.TutorId = tutorID;
+                    _context.TutorExperiences.Add(tutorExperience);
+                }
+                await _context.SaveChangesAsync();
+                throw new CrudException(HttpStatusCode.Created, "Tutor Experience Created", "");
+            }
+            catch(CrudException ex)
+            {
+                throw ex;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.ToString());
+            }
+        }   
+
         // Get Tutor Register Information
         /*Đây là phần để lấy thông tin để admin hay moderator có thể hiểu và kiểm tra*/
         public async Task<ActionResult<TutorRegisterReponse>> GetTutorRegisterInformtaion(Guid tutorID)
@@ -164,6 +203,7 @@ namespace Services.Implementations
             }
         }
 
+        /*-------Internal Site---------*/
         // Get All Tutor Subject List
         private async Task<List<string>> getAllSubjectOfTutor(Guid TutorId)
         {
@@ -194,6 +234,45 @@ namespace Services.Implementations
             return imagesUrlList;
         }
 
+        // Check the Photo of Account
+        private async Task<IActionResult> checkPhotoAvatar( IFormFile photo)
+        {
+            if (photo == null || photo.Length == 0)
+            {
+                throw new CrudException(HttpStatusCode.BadRequest, "Photo is required", "");
+            }
+            using (var ms = new MemoryStream())
+            {
+                photo.CopyTo(ms);
+                var fileBytes = ms.ToArray();
+                string s = Convert.ToBase64String(fileBytes);
+                if (s.Length > 5 * 1024 * 1024)
+                {
+                    throw new CrudException(HttpStatusCode.BadRequest, "Photo is too large", "");
+                }
+                using (var ms2 = new MemoryStream(fileBytes))
+                {
+                    Bitmap bitmap = new Bitmap(ms2);
+                    Image<Bgr, byte> image = bitmap.ToImage<Bgr,byte>();
+                    string facePath = Path.Combine(_env.WebRootPath, "haarcascade_frontalface_default.xml");
+                    if(!System.IO.File.Exists(facePath))
+                    {
+                        throw new CrudException(HttpStatusCode.InternalServerError, "Face detection file not found", "");
+                    }
+                    var faceCascade = new CascadeClassifier(facePath);
+                    var grayImage = image.Convert<Gray, byte>();
+                    var faces = faceCascade.DetectMultiScale(grayImage, 1.1, 10, Size.Empty);
+                    if(faces.Length > 0)
+                    {
+                        return new OkObjectResult(new { message = "Face detected" });
+                    }
+                    else
+                    {
+                        throw new CrudException(HttpStatusCode.BadRequest, "No face detected", "");
+                    }
+                }
+            }
+        }
         // Accept Tutor + Notification
 
         // Deny Tutor + Notification

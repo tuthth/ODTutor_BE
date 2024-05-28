@@ -20,6 +20,7 @@ namespace Models.Mappings
             CreateMap<AccountRegisterRequest, User>();
             CreateMap<User, AccountResponse>();
             CreateMap<User, UserAccountResponse>();
+            CreateMap<TutorExperienceRequest,TutorExperience>();
         }
     }
 }
