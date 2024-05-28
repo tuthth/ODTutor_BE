@@ -49,7 +49,7 @@ namespace Services.Implementations
                 }
                 var account = _mapper.Map<User>(accountRegisterRequest);
                 
-                account.Password = CreateHashPassword(accountRegisterRequest.Password);
+                account.Password = _appExtension.CreateHashPassword(accountRegisterRequest.Password);
                 account.Name = accountRegisterRequest.FullName;
                 account.Active = true; // Default is true
                 account.EmailConfirmed = false;
@@ -95,7 +95,7 @@ namespace Services.Implementations
             {
                 var payload = await GoogleJsonWebSignature.ValidateAsync(idToken, new GoogleJsonWebSignature.ValidationSettings());
                 var user = _context.Users.FirstOrDefault(u => u.Email == payload.Email);
-                string passwordTemplate = GeneratePassword();
+                string passwordTemplate = _appExtension.GeneratePassword();
                 if (user == null)
                 {
                     var registerRequest = new AccountRegisterRequest
@@ -217,49 +217,10 @@ namespace Services.Implementations
 
         /*========== Internal Site ==========*/
 
-        // Create Hash Password
-        private string CreateHashPassword(string password)
-        {
-            using (var sha512 = SHA512.Create())
-            {
-                // Băm mật khẩu thành một mảng byte
-                byte[] passwordBytes = Encoding.UTF8.GetBytes(password);
-                byte[] hashedBytes = sha512.ComputeHash(passwordBytes);
-
-                // Chuyển đổi mảng byte thành chuỗi hex
-                StringBuilder builder = new StringBuilder();
-                foreach (byte b in hashedBytes)
-                {
-                    builder.Append(b.ToString("X2"));
-                }
-
-                return builder.ToString();
-            }
-        }
-
         // Find User By ID 
         private User FindUserById(Guid UserID)
         {
             return _context.Users.FirstOrDefault(s => s.Id.Equals(UserID));
-        }
-
-        // Generate Passord For User Who using gg login
-        private string GeneratePassword()
-        {
-            const string validChars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789*&^%$#@";
-            Random random = new Random();
-            StringBuilder password = new StringBuilder();
-            // Thêm một ký tự chữ thường, một ký tự chữ in hoa và một chữ số vào mật khẩu
-            password.Append(validChars[random.Next(validChars.Length)]);
-            password.Append(validChars[random.Next(26, 52)]); // Chữ in hoa
-            password.Append(validChars[random.Next(52, 62)]); // Số
-
-            int requiredLength = random.Next(8, 13);
-            while(password.Length < requiredLength)
-            {
-                password.Append(validChars[random.Next(validChars.Length)]);
-            }
-            return password.ToString();
         }
     }
 }

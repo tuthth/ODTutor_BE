@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.Extensions.Configuration;
 using Models;
 using Models.Entities;
 using System;
@@ -13,11 +14,13 @@ namespace Services
     {
         protected readonly ODTutorContext _context;
         protected readonly IMapper _mapper;
-
+        protected readonly AppExtension _appExtension;
+        protected readonly IConfiguration _configuration;
         public BaseService(ODTutorContext context, IMapper mapper)
         {
             _context = context;
             _mapper = mapper;
+            _appExtension = new AppExtension(_configuration);
         }
     }
 }

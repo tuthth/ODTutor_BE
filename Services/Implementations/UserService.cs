@@ -86,7 +86,7 @@ namespace Services.Implementations
                 {
                     throw new CrudException(HttpStatusCode.Forbidden, "User is banned", "");
                 }
-                if (!VerifyPasswordHash(loginRequest.Password.Trim(), user.Password))
+                if (!_appExtension.VerifyPasswordHash(loginRequest.Password.Trim(), user.Password))
                 {
                     throw new CrudException(HttpStatusCode.BadRequest, "Incorrect Password!", "");
                 }
@@ -327,36 +327,6 @@ namespace Services.Implementations
 
             };
             return response;
-        }
-
-        // HashPassword
-        private string HashPassword(string password)
-        {
-            using (var sha512 = SHA512.Create())
-            {
-                // Băm mật khẩu thành một mảng byte
-                byte[] passwordBytes = Encoding.UTF8.GetBytes(password);
-                byte[] hashedBytes = sha512.ComputeHash(passwordBytes);
-
-                // Chuyển đổi mảng byte thành chuỗi hex
-                StringBuilder builder = new StringBuilder();
-                foreach (byte b in hashedBytes)
-                {
-                    builder.Append(b.ToString("X2"));
-                }
-
-                return builder.ToString();
-            }
-        }
-
-        // Verify password Hash
-        public bool VerifyPasswordHash(string password, string passwordHash)
-        {
-            // Băm mật khẩu nhập vào
-            string hashedPassword = HashPassword(password);
-
-            // So sánh mật khẩu băm tính toán được với mật khẩu đã lưu trữ
-            return hashedPassword.Equals(passwordHash, StringComparison.OrdinalIgnoreCase);
         }
     }
 }
