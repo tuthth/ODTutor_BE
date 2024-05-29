@@ -74,19 +74,23 @@ namespace API.Controllers
             if (result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, exception.ToString());
             throw new Exception("Xảy ra lỗi không xác định");
         }
+        
         // Add Experience
-        /// <summary>
-        /// Dang ky kinh nghiem
-        /// </summary>
-        /// <param name="tutorID"></param>
-        /// <param name="tutorExperiences"></param>
-        /// <returns></returns>
         [HttpPost("register/experiences/{tutorID}")]
         public async Task<IActionResult> addRegisterExperienceOfTutor(Guid tutorID, List<TutorExperienceRequest> tutorExperiences)
         {
             var result = await _tutorRegisterService.RegisterTutorExperience(tutorID, tutorExperiences);
             return result;
         }
+
+        // Confirm and Create Notification
+        [HttpPost("confirm/{tutorID}")]
+        public async Task<IActionResult> confirmRegisterFormAndCreateNoti(Guid tutorID)
+        {
+            var response = await _tutorRegisterService.CheckConfirmTutorInformationAndSendNotification(tutorID);
+            return response;
+        }
+
         // Get All Tutor Register Information
         [HttpGet("get/tutor-register/{tutorID}")]
         public async Task<ActionResult<TutorRegisterReponse>> getAllTutorRegisterInformation(Guid tutorID)

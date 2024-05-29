@@ -13,6 +13,5 @@ namespace Models.Entities
         public string ImageUrl { get; set; }
 
         public virtual Tutor? TutorNavigation {  get; set; }
-        public TutorSubject? TutorSubjectNavigation { get; set; }
     }
 }
