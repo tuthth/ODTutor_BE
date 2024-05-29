@@ -39,7 +39,18 @@ namespace Services.Implementations
         public async Task<IActionResult> RegisterTutorInformation(TutorInformationRequest tutorRequest)
         {
             try
-            {
+            {   
+                var user = findUserByUserID(tutorRequest.UserId);
+                if (user == null)
+                {
+                    throw new CrudException(HttpStatusCode.NotFound, "User not found", "");
+                }
+                // check the avatar photo
+                if (!await checkPhotoAvatar(user.ImageUrl))
+                {
+                    throw new CrudException(HttpStatusCode.BadRequest, "Photo do not have human face", "");
+                }
+                //Map and save tutor information
                 Tutor tutor = _mapper.Map<Tutor>(tutorRequest);
                 tutor.TutorId = new Guid();
                 tutor.Status = 0; // "0" is Pending
@@ -53,6 +64,10 @@ namespace Services.Implementations
                     await _context.SaveChangesAsync();
                     return new StatusCodeResult(200);
                 }
+            }
+            catch(CrudException ex)
+            {
+                throw ex;
             }
             catch (Exception ex)
             {
@@ -100,35 +115,19 @@ namespace Services.Implementations
             var tutor = await _context.Tutors.Where(x => x.TutorId == tutorID).FirstOrDefaultAsync();
             if (tutor == null) return new StatusCodeResult(404);
             try
-            {   
+            {
                 var tutorCertificateList = new List<TutorCertificate>();
-                string apikey = _cf.GetValue<string>("ImgbbSettings:ApiKey");
-                var client = new HttpClient();
-                client.DefaultRequestHeaders.Add("Authorization", apikey);
-                var certificateList = new List<string>();
+
+                var certificateList = await _appExtension.UploadImagesToImgBB(certificateImages);
                 // List all of certificate images
-                foreach (var image in certificateImages)
+                foreach (var urlLink in certificateList)
                 {
-                    using (var stream = image.OpenReadStream())
-                    {
-                        var content = new MultipartFormDataContent();
-                        content.Add(new StreamContent(stream), "image", image.FileName);
-                        var response = await client.PostAsync("https://api.imgbb.com/1/upload?key=" + apikey, content);
-                        response.EnsureSuccessStatusCode();
-                        var responseString = await response.Content.ReadAsStringAsync();
-                        var jsonData = JsonConvert.DeserializeObject<dynamic>(responseString);
-                        var imageUrl = (string)jsonData.data.url;
-                        certificateList.Add(imageUrl);
-                        foreach (var urlLink in certificateList)
-                        {
-                            TutorCertificate certificate = new TutorCertificate();
-                            certificate.TutorId = tutorID;
-                            certificate.ImageUrl = urlLink;
-                            _context.TutorCertificates.Add(certificate);
-                            await _context.SaveChangesAsync();
-                            tutorCertificateList.Add(certificate);
-                        }
-                    }
+                    TutorCertificate certificate = new TutorCertificate();
+                    certificate.TutorId = tutorID;
+                    certificate.ImageUrl = urlLink;
+                    _context.TutorCertificates.Add(certificate);
+                    await _context.SaveChangesAsync();
+                    tutorCertificateList.Add(certificate);
                 }
                 return new StatusCodeResult(201);
             }
@@ -179,7 +178,7 @@ namespace Services.Implementations
             {
                 Tutor tutor = await _context.Tutors.Where(x => x.TutorId == tutorID).FirstOrDefaultAsync();
                 User user = await _context.Tutors.Where(x => x.TutorId == tutorID).Select(x => x.UserNavigation).FirstOrDefaultAsync();
-                if ( tutor == null)
+                if (tutor == null)
                 {
                     return null;
                 }
@@ -197,37 +196,41 @@ namespace Services.Implementations
                     response.ImagesCertificateUrl = imagesUrlList;
                 }
                 return response;
-            } catch (Exception ex)
+            }
+            catch (Exception ex)
             {
                 throw new Exception(ex.Message);
             }
         }
 
         /*-------Internal Site---------*/
+
         // Get All Tutor Subject List
         private async Task<List<string>> getAllSubjectOfTutor(Guid TutorId)
         {
             List<string> subjectlist = new List<string>();
             try
             {
-                subjectlist = _context.TutorSubjects.Where( x => x.TutorId == TutorId).Select(x => x.SubjectNavigation.Title).ToList();
-            } catch(Exception ex)
+                subjectlist = _context.TutorSubjects.Where(x => x.TutorId == TutorId).Select(x => x.SubjectNavigation.Title).ToList();
+            }
+            catch (Exception ex)
             {
                 throw new Exception(ex.Message);
-            }   
+            }
             return subjectlist;
         }
 
         // Get All Certificate Image Url
-        private async Task<List<string>> getAllImagesUrlOfTutor( Guid TutorId)
+        private async Task<List<string>> getAllImagesUrlOfTutor(Guid TutorId)
         {
             List<string> imagesUrlList = new List<string>();
             try
             {
                 imagesUrlList = _context.Users.Where(x => x.TutorNavigation.TutorId == TutorId)
-                                .Select( x => x.TutorNavigation.TutorCertificatesNavigation
+                                .Select(x => x.TutorNavigation.TutorCertificatesNavigation
                                 .Select(x => x.ImageUrl).ToList()).FirstOrDefault();
-            } catch(Exception ex)
+            }
+            catch (Exception ex)
             {
                 throw new Exception(ex.Message);
             }
@@ -235,44 +238,57 @@ namespace Services.Implementations
         }
 
         // Check the Photo of Account
-        private async Task<IActionResult> checkPhotoAvatar( IFormFile photo)
+        private async Task<bool> checkPhotoAvatar(string base64Photo)
         {
-            if (photo == null || photo.Length == 0)
+            if (string.IsNullOrEmpty(base64Photo))
             {
                 throw new CrudException(HttpStatusCode.BadRequest, "Photo is required", "");
             }
-            using (var ms = new MemoryStream())
+            // Chuyển đổi chuỗi base64 thành mảng byte
+            byte[] fileBytes;
+            try
             {
-                photo.CopyTo(ms);
-                var fileBytes = ms.ToArray();
-                string s = Convert.ToBase64String(fileBytes);
-                if (s.Length > 5 * 1024 * 1024)
+                using (var httpClient = new HttpClient())
                 {
-                    throw new CrudException(HttpStatusCode.BadRequest, "Photo is too large", "");
-                }
-                using (var ms2 = new MemoryStream(fileBytes))
-                {
-                    Bitmap bitmap = new Bitmap(ms2);
-                    Image<Bgr, byte> image = bitmap.ToImage<Bgr,byte>();
-                    string facePath = Path.Combine(_env.WebRootPath, "haarcascade_frontalface_default.xml");
-                    if(!System.IO.File.Exists(facePath))
-                    {
-                        throw new CrudException(HttpStatusCode.InternalServerError, "Face detection file not found", "");
-                    }
-                    var faceCascade = new CascadeClassifier(facePath);
-                    var grayImage = image.Convert<Gray, byte>();
-                    var faces = faceCascade.DetectMultiScale(grayImage, 1.1, 10, Size.Empty);
-                    if(faces.Length > 0)
-                    {
-                        return new OkObjectResult(new { message = "Face detected" });
-                    }
-                    else
-                    {
-                        throw new CrudException(HttpStatusCode.BadRequest, "No face detected", "");
-                    }
+                    fileBytes = await httpClient.GetByteArrayAsync(base64Photo);
                 }
             }
+            catch (FormatException)
+            {
+                throw new CrudException(HttpStatusCode.BadRequest, "Invalid base64 string", "");
+            }
+
+            if (fileBytes.Length > 5 * 1024 * 1024)
+            {
+                throw new CrudException(HttpStatusCode.BadRequest, "Photo is too large", "");
+            }
+
+            using (var ms = new MemoryStream(fileBytes))
+            {
+                Bitmap bitmap = new Bitmap(ms);
+                Image<Bgr, byte> image = bitmap.ToImage<Bgr, byte>();
+                string facePath = Path.Combine(_env.WebRootPath, "haarcascade_frontalface_default.xml");
+
+                if (!System.IO.File.Exists(facePath))
+                {
+                    throw new CrudException(HttpStatusCode.InternalServerError, "Face detection file not found", "");
+                }
+
+                var faceCascade = new CascadeClassifier(facePath);
+                var grayImage = image.Convert<Gray, byte>();
+                var faces = faceCascade.DetectMultiScale(grayImage, 1.1, 10, Size.Empty);
+                return faces.Length > 0;
+            }
         }
+
+        // Find User By UserID 
+        private User findUserByUserID(Guid userID)
+        {
+            User user = _context.Users
+                .FirstOrDefault(x => x.Id == userID);
+            return user;
+        }
+
         // Accept Tutor + Notification
 
         // Deny Tutor + Notification

@@ -13,5 +13,6 @@ namespace Models.Models.Views
         public Guid userId { get; set; }
         public Guid ? studentID { get; set; }
         public Guid? tutorID { get;set; }
+        public Guid? moderatorID { get; set;}
     }
 }

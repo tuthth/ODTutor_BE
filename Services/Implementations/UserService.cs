@@ -86,7 +86,7 @@ namespace Services.Implementations
                 {
                     throw new CrudException(HttpStatusCode.Forbidden, "User is banned", "");
                 }
-                if (!VerifyPasswordHash(loginRequest.Password.Trim(), user.Password))
+                if (!_appExtension.VerifyPasswordHash(loginRequest.Password.Trim(), user.Password))
                 {
                     throw new CrudException(HttpStatusCode.BadRequest, "Incorrect Password!", "");
                 }
@@ -347,7 +347,9 @@ namespace Services.Implementations
                 accessToken = accessToken,
                 userId = user.Id,
                 role = GetRoleName(tutor,moderator),
-                tutorID = tutor == null ? null : tutor.TutorId
+                tutorID = tutor?.TutorId,
+                moderatorID = moderator?.ModeratorId,
+                studentID = student?.StudentId
 
             };
             return response;

@@ -75,19 +75,18 @@ namespace API.Controllers
             throw new Exception("Xảy ra lỗi không xác định");
         }
         // Add Experience
-/*        [HttpPost("register/experiences/{tutorID}")]
-        public async Task<IActionResult> addRegisterExperienceOfTutor(Guid tutorID, List<TutorExperience> tutorExperiences)
+        /// <summary>
+        /// Dang ky kinh nghiem
+        /// </summary>
+        /// <param name="tutorID"></param>
+        /// <param name="tutorExperiences"></param>
+        /// <returns></returns>
+        [HttpPost("register/experiences/{tutorID}")]
+        public async Task<IActionResult> addRegisterExperienceOfTutor(Guid tutorID, List<TutorExperienceRequest> tutorExperiences)
         {
             var result = await _tutorRegisterService.RegisterTutorExperience(tutorID, tutorExperiences);
-            if (result is StatusCodeResult statusCodeResult)
-            {
-                if (statusCodeResult.StatusCode == 201) { return StatusCode(StatusCodes.Status201Created, "Đăng ký kinh nghiệm gia sư thành công"); }
-                else if (statusCodeResult.StatusCode == 404) { return NotFound("Không tìm thấy thông tin gia sư"); }
-                else if (statusCodeResult.StatusCode == 400) { return BadRequest("Đăng ký kinh nghiệm gia sư thất bại"); }
-            }
-            if (result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, exception.ToString());
-            throw new Exception("Xảy ra lỗi không xác định");
-        }*/
+            return result;
+        }
         // Get All Tutor Register Information
         [HttpGet("get/tutor-register/{tutorID}")]
         public async Task<ActionResult<TutorRegisterReponse>> getAllTutorRegisterInformation(Guid tutorID)
