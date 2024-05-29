@@ -17,6 +17,7 @@ namespace Services.Interfaces
         Task<IActionResult> RegisterTutorSubject(Guid tutorID, List<Guid> subjectIDs);
         Task<IActionResult> TutorCertificatesRegister(Guid tutorID, List<IFormFile> certificateImages);
         Task<IActionResult> RegisterTutorExperience(Guid tutorID, List<TutorExperienceRequest> tutorExperienceRegistList);
+        Task<IActionResult> CheckConfirmTutorInformationAndSendNotification(Guid tutorID);
         Task<ActionResult<TutorRegisterReponse>> GetTutorRegisterInformtaion(Guid tutorID);
     }   
 }

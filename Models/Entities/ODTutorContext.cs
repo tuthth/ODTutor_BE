@@ -51,9 +51,6 @@ namespace Models.Entities
             //optionsBuilder.UseSqlServer(GetConnectionStrings()).EnableSensitiveDataLogging();
             //optionsBuilder.UseSqlServer("Server=database.monoinfinity.net;uid=sa;pwd=1234567890Aa;Database=ODTutor;Encrypt=false;TrustServerCertificate=true;");
             optionsBuilder.UseSqlServer(GetConnectionStrings());
-     
-
-
 
         }
         private string GetConnectionStrings()

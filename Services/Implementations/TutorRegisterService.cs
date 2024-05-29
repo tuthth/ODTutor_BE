@@ -26,20 +26,22 @@ namespace Services.Implementations
 {
     public class TutorRegisterService : BaseService, ITutorRegisterService
     {
-        
+
         private readonly IConfiguration _cf;
         private readonly IWebHostEnvironment _env;
-        public TutorRegisterService(ODTutorContext odContext,IWebHostEnvironment env, IMapper mapper, IConfiguration cf) : base(odContext, mapper)
+        public TutorRegisterService(ODTutorContext odContext, IWebHostEnvironment env, IMapper mapper, IConfiguration cf) : base(odContext, mapper)
         {
             _cf = cf;
             _env = env;
         }
 
+        /*Register Tutor Step By Step*/
         // Register Tutor Information
+        // Step 1 : Get Information
         public async Task<IActionResult> RegisterTutorInformation(TutorInformationRequest tutorRequest)
         {
             try
-            {   
+            {
                 var user = findUserByUserID(tutorRequest.UserId);
                 if (user == null)
                 {
@@ -65,7 +67,7 @@ namespace Services.Implementations
                     return new StatusCodeResult(200);
                 }
             }
-            catch(CrudException ex)
+            catch (CrudException ex)
             {
                 throw ex;
             }
@@ -76,6 +78,7 @@ namespace Services.Implementations
         }
 
         // Register Tutor Subject
+        // Step 2:  Get Subject
         public async Task<IActionResult> RegisterTutorSubject(Guid tutorID, List<Guid> subjectIDs)
         {
             var tutor = await _context.Tutors.Where(x => x.TutorId == tutorID).FirstOrDefaultAsync();
@@ -110,6 +113,7 @@ namespace Services.Implementations
         }
 
         // Register Tutor Certificate
+        // Step 3 : Get Certificate
         public async Task<IActionResult> TutorCertificatesRegister(Guid tutorID, List<IFormFile> certificateImages)
         {
             var tutor = await _context.Tutors.Where(x => x.TutorId == tutorID).FirstOrDefaultAsync();
@@ -138,16 +142,17 @@ namespace Services.Implementations
         }
 
         // Register Tutor Experience
+        // Step 4 : Get Experience
         public async Task<IActionResult> RegisterTutorExperience(Guid tutorID, List<TutorExperienceRequest> tutorExperienceRegistList)
         {
             var tutor = await _context.Tutors.Where(x => x.TutorId == tutorID).FirstOrDefaultAsync();
             if (tutor == null)
             {
-                throw new CrudException( HttpStatusCode.NotFound, "Tutor not found", "");
+                throw new CrudException(HttpStatusCode.NotFound, "Tutor not found", "");
             }
             try
             {
-                foreach(var tutorExperienceRegist in tutorExperienceRegistList)
+                foreach (var tutorExperienceRegist in tutorExperienceRegistList)
                 {
                     TutorExperience tutorExperience = _mapper.Map<TutorExperience>(tutorExperienceRegist);
                     tutorExperience.TutorExperienceId = new Guid();
@@ -157,7 +162,7 @@ namespace Services.Implementations
                 await _context.SaveChangesAsync();
                 throw new CrudException(HttpStatusCode.Created, "Tutor Experience Created", "");
             }
-            catch(CrudException ex)
+            catch (CrudException ex)
             {
                 throw ex;
             }
@@ -165,7 +170,41 @@ namespace Services.Implementations
             {
                 throw new Exception(ex.ToString());
             }
-        }   
+        }
+
+        // Check, Confirm and Send Notification
+        // Step 5: Check, Confirm and Send Notification
+        public async Task<IActionResult> CheckConfirmTutorInformationAndSendNotification(Guid tutorID)
+        {       
+            try
+            {   
+                var tutor = await _context.Tutors.Where(x => x.TutorId == tutorID).FirstOrDefaultAsync();
+                if (!await checkTutorCertificate(tutorID))
+                {
+                    throw new CrudException(HttpStatusCode.BadRequest, "Tutor Certificate is required", "");
+                }
+                if (!await checkTutorSubject(tutorID))
+                {
+                    throw new CrudException (HttpStatusCode.BadRequest, "Tutor Subject is required", "");
+                }
+                Notification notification = new Notification();
+                notification.NotificationId = new Guid();
+                notification.UserId = tutor.UserId;
+                notification.Title =  "Yêu cầu xét duyệt thành gia sư đã được gửi";
+                notification.Content = "Yêu cầu của bạn đã được gửi. Vui lòng đợi phản hồi qua email hoặc thông báo của hệ thống";
+                notification.CreatedAt = DateTime.Now;
+                notification.Status = 1; // "1" is sent
+                await _context.Notifications.AddAsync(notification);
+                await _context.SaveChangesAsync();
+                throw new CrudException (HttpStatusCode.Created, "Register Sent", "");
+            } catch(CrudException ex)
+            {
+                throw ex;
+            } catch (Exception ex)
+            {
+                throw new CrudException(HttpStatusCode.InternalServerError, ex.Message, "");
+            }
+        }
 
         // Get Tutor Register Information
         /*Đây là phần để lấy thông tin để admin hay moderator có thể hiểu và kiểm tra*/
@@ -287,6 +326,43 @@ namespace Services.Implementations
             User user = _context.Users
                 .FirstOrDefault(x => x.Id == userID);
             return user;
+        }
+
+        // Check the Tutor Information 
+
+        // Check the Tutor Subject 
+        private async Task<bool> checkTutorSubject(Guid tutorId)
+        {   
+            List<TutorSubject> list = new List<TutorSubject>();
+            try
+            {
+                list = await _context.TutorSubjects.Where( ts => ts.TutorId == tutorId).ToListAsync();
+                return list.Any();
+            }
+            catch (CrudException ex)
+            {
+                throw ex;
+            }
+            catch (Exception ex)
+            {
+                throw new CrudException(HttpStatusCode.InternalServerError, ex.Message, "");
+            }
+        }
+        // Check the Tutor Certificate 
+        private async Task<bool> checkTutorCertificate (Guid tutorId)
+        {   
+            List<TutorCertificate>list = new List<TutorCertificate>();
+            try
+            {
+                list = _context.TutorCertificates.Where(tc => tc.TutorId == tutorId).ToList();
+                return list.Any();
+            } catch(CrudException ex)
+            {
+                throw ex;
+            } catch (Exception ex)
+            {
+                throw new CrudException(HttpStatusCode.InternalServerError, ex.Message, "");
+            }
         }
 
         // Accept Tutor + Notification
