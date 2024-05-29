@@ -19,6 +19,7 @@ namespace Models.Entities
         public DateTime UpdateAt {get; set;}
         public string? VideoUrl { get; set; }
         public virtual User? UserNavigation {get; set;}
+        public virtual ICollection<Promotion> PromotionsNavigation { get; set; }
         public virtual ICollection<Course>? CoursesNavigation { get; set; }
         public virtual ICollection<TutorSchedule>? TutorSchedulesNavigation { get; set; }
         public virtual ICollection<TutorCertificate>? TutorCertificatesNavigation { get; set; }

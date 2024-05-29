@@ -1,8 +1,10 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages.Manage;
 using Models.Entities;
 using Models.Enumerables;
+using Models.Models.Emails;
 using Models.Models.Requests;
 using Services.Interfaces;
 using System;
@@ -42,6 +44,12 @@ namespace Services.Implementations
             };
             _context.Courses.Add(course);
             await _context.SaveChangesAsync();
+            await _appExtension.SendMail(new MailContent()
+            {
+                To = tutor.UserNavigation.Email,
+                Subject = "[ODTutor] Tạo khóa học thành công",
+                Body = "Chúc mừng bạn đã tạo khóa học thành công. Bạn có thể sử dụng tài khoản của mình để kiểm tra thông tin khóa học."
+            });
             return new StatusCodeResult(201);
         }
         public async Task<IActionResult> UpdateCourse(UpdateCourseRequest courseRequest)
@@ -79,6 +87,12 @@ namespace Services.Implementations
             }
             _context.Courses.Update(course);
             await _context.SaveChangesAsync();
+            await _appExtension.SendMail(new MailContent()
+            {
+                To = tutor.UserNavigation.Email,
+                Subject = "[ODTutor] Cập nhật khóa học thành công",
+                Body = "Chúc mừng bạn đã cập nhật khóa học thành công. Bạn có thể sử dụng tài khoản của mình để kiểm tra thông tin khóa học."
+            });
             return new StatusCodeResult(200);
         }
         public async Task<IActionResult> DeleteCourse(Guid id)
@@ -121,6 +135,12 @@ namespace Services.Implementations
                             _context.StudentCourses.Update(studentCourse);
                         }
                         await _context.SaveChangesAsync();
+                        await _appExtension.SendMail(new MailContent()
+                        {
+                            To = course.TutorNavigation.UserNavigation.Email,
+                            Subject = "[ODTutor] Xóa khóa học khỏi tìm kiếm thành công",
+                            Body = "Khóa học đã được xóa khỏi tìm kiếm. Bạn có thể sử dụng tài khoản của mình để kiểm tra thông tin khóa. Học viên đã từng đăng ký vẫn có thể truy cập để lấy tài liệu."
+                        });
                         return new StatusCodeResult(200);
                     }
                     else return new StatusCodeResult(409);
@@ -146,6 +166,12 @@ namespace Services.Implementations
                         _context.StudentCourses.Remove(studentCourse);
                     }
                     await _context.SaveChangesAsync();
+                    await _appExtension.SendMail(new MailContent()
+                    {
+                        To = course.TutorNavigation.UserNavigation.Email,
+                        Subject = "[ODTutor] Xóa khóa học thành công",
+                        Body = "Khóa học và toàn bộ thông tin liên quan đã được xóa thành công."
+                    });
                     return new StatusCodeResult(204);
                 }
 
@@ -173,6 +199,12 @@ namespace Services.Implementations
             };
             _context.CourseOutlines.Add(courseOutline);
             await _context.SaveChangesAsync();
+            await _appExtension.SendMail(new MailContent()
+            {
+                To = course.TutorNavigation.UserNavigation.Email,
+                Subject = "[ODTutor] Tạo đề cương khóa học thành công",
+                Body = "Đề cương được tạo thành công. Vui lòng kiểm tra thông tin đề cương tại mục Khóa học."
+            });
             return new StatusCodeResult(201);
         }
         public async Task<IActionResult> UpdateCourseOutline(UpdateCourseOutlineRequest courseOutlineRequest)
@@ -198,6 +230,12 @@ namespace Services.Implementations
             }
             _context.CourseOutlines.Update(courseOutline);
             await _context.SaveChangesAsync();
+            await _appExtension.SendMail(new MailContent()
+            {
+                To = course.TutorNavigation.UserNavigation.Email,
+                Subject = "[ODTutor] Cập nhật đề cương khóa học thành công",
+                Body = "Đề cương được cập nhật thành công. Vui lòng kiểm tra thông tin đề cương tại mục Khóa học."
+            });
             return new StatusCodeResult(200);
         }
         public async Task<IActionResult> DeleteCourseOutline(Guid id)
@@ -220,6 +258,12 @@ namespace Services.Implementations
                     courseOutline.Status = (Int32)CourseEnum.Deleted;
                     _context.CourseOutlines.Update(courseOutline);
                     await _context.SaveChangesAsync();
+                    await _appExtension.SendMail(new MailContent()
+                    {
+                        To = course.TutorNavigation.UserNavigation.Email,
+                        Subject = "[ODTutor] Xóa đề cương khóa học khỏi tìm kiếm thành công",
+                        Body = "Đề cương được xóa khỏi tìm kiếm thành công. Các tài khoản đã đăng kí khóa học vẫn có thể truy cập vào nguồn tài liệu."
+                    });
                     return new StatusCodeResult(200);
                 }
             }
@@ -227,6 +271,12 @@ namespace Services.Implementations
             {
                 _context.CourseOutlines.Remove(courseOutline);
                 await _context.SaveChangesAsync();
+                await _appExtension.SendMail(new MailContent()
+                {
+                    To = course.TutorNavigation.UserNavigation.Email,
+                    Subject = "[ODTutor] Xóa đề cương khóa học thành công",
+                    Body = "Đề cương được xóa khỏi hệ thống thành công."
+                });
                 return new StatusCodeResult(204);
             }
 
@@ -246,6 +296,12 @@ namespace Services.Implementations
             };
             _context.CoursePromotions.Add(coursePromotion);
             await _context.SaveChangesAsync();
+            await _appExtension.SendMail(new MailContent()
+            {
+                To = course.TutorNavigation.UserNavigation.Email,
+                Subject = "[ODTutor] Tạo mã giảm giá cho khóa học thành công",
+                Body = "Mã giảm giá được tạo thành công. Vui lòng kiểm tra thông tin tại mục Mã giảm giá."
+            });
             return new StatusCodeResult(201);
         }
         public async Task<IActionResult> DeleteCoursePromotion(CoursePromotionRequest coursePromotionRequest)
@@ -257,6 +313,12 @@ namespace Services.Implementations
             }
             _context.CoursePromotions.Remove(coursePromotion);
             await _context.SaveChangesAsync();
+            await _appExtension.SendMail(new MailContent()
+            {
+                To = coursePromotion.CourseNavigation.TutorNavigation.UserNavigation.Email,
+                Subject = "[ODTutor] Xóa mã giảm giá khóa học thành công",
+                Body = "Mã giảm giá được xóa thành công."
+            });
             return new StatusCodeResult(204);
         }
         public async Task<IActionResult> UpdateCoursePromotion(CoursePromotionRequest coursePromotionRequest)
@@ -269,6 +331,12 @@ namespace Services.Implementations
             coursePromotion.PromotionId = coursePromotionRequest.PromotionId;
             _context.CoursePromotions.Update(coursePromotion);
             await _context.SaveChangesAsync();
+            await _appExtension.SendMail(new MailContent()
+            {
+                To = coursePromotion.CourseNavigation.TutorNavigation.UserNavigation.Email,
+                Subject = "[ODTutor] Cập nhật mã giảm giá khóa học thành công",
+                Body = "Mã giảm giá được cập nhật thành công. Vui lòng kiểm tra thông tin tại mục Mã giảm giá."
+            });
             return new StatusCodeResult(200);
         }
         public async Task<IActionResult> CreatePromotion(CreatePromotion createPromotion)
@@ -280,6 +348,7 @@ namespace Services.Implementations
             }
             var promotion = new Promotion
             {
+                TutorId = createPromotion.TutorId,
                 PromotionId = Guid.NewGuid(),
                 PromotionCode = createPromotion.PromotionCode.ToUpper(),
                 Percentage = createPromotion.Percentage,
@@ -287,6 +356,12 @@ namespace Services.Implementations
             };
             _context.Promotions.Add(promotion);
             await _context.SaveChangesAsync();
+            await _appExtension.SendMail(new MailContent()
+            {
+                To = promotion.TutorNavigation.UserNavigation.Email,
+                Subject = "[ODTutor] Tạo mã giảm giá thành công",
+                Body = "Mã giảm giá được tạo thành công. Vui lòng kiểm tra thông tin tại mục Mã giảm giá."
+            });
             return new StatusCodeResult(201);
         }
         public async Task<IActionResult> UpdatePromotion(UpdatePromotion updatePromotion)
@@ -300,6 +375,12 @@ namespace Services.Implementations
             promotion.Percentage = updatePromotion.Percentage;
             _context.Promotions.Update(promotion);
             await _context.SaveChangesAsync();
+            await _appExtension.SendMail(new MailContent()
+            {
+                To = promotion.TutorNavigation.UserNavigation.Email,
+                Subject = "[ODTutor] Cập nhật mã giảm giá thành công",
+                Body = "Mã giảm giá được cập nhật thành công. Vui lòng kiểm tra thông tin tại mục Mã giảm giá."
+            });
             return new StatusCodeResult(200);
         }
         public async Task<IActionResult> DeletePromotion(Guid id)
@@ -311,6 +392,12 @@ namespace Services.Implementations
             }
             _context.Promotions.Remove(promotion);
             await _context.SaveChangesAsync();
+            await _appExtension.SendMail(new MailContent()
+            {
+                To = promotion.TutorNavigation.UserNavigation.Email,
+                Subject = "[ODTutor] Xóa mã giảm giá thành công",
+                Body = "Mã giảm giá được xóa thành công."
+            });
             return new StatusCodeResult(204);
         }
         public async Task<ActionResult<List<Course>>> GetAllCourses()

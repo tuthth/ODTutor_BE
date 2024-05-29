@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Models.Entities;
+using Models.Models.Emails;
 using Models.Models.Requests;
 using Models.Models.Views;
 using Newtonsoft.Json;
@@ -54,7 +55,7 @@ namespace Services.Implementations
                 }
                 //Map and save tutor information
                 Tutor tutor = _mapper.Map<Tutor>(tutorRequest);
-                tutor.TutorId = new Guid();
+                tutor.TutorId = Guid.NewGuid();
                 tutor.Status = 0; // "0" is Pending
                 if (tutor == null)
                 {
@@ -64,6 +65,12 @@ namespace Services.Implementations
                 {
                     _context.Tutors.Add(tutor);
                     await _context.SaveChangesAsync();
+                    await _appExtension.SendMail(new MailContent()
+                    {
+                        To = user.Email,
+                        Subject = "Yêu cầu xét duyệt trở thành gia sư",
+                        Body = "Yêu cầu của bạn đã được gửi. Vui lòng đợi phản hồi qua email hoặc thông báo của hệ thống"
+                    });
                     return new StatusCodeResult(200);
                 }
             }
@@ -103,6 +110,12 @@ namespace Services.Implementations
                 {
                     _context.TutorSubjects.AddRange(tutorSubjects);
                     await _context.SaveChangesAsync();
+                    await _appExtension.SendMail(new MailContent()
+                    {
+                        To = tutor.UserNavigation.Email,
+                        Subject = "Yêu cầu xét duyệt môn học trở thành gia sư",
+                        Body = "Yêu cầu của bạn đã được gửi. Vui lòng đợi phản hồi qua email hoặc thông báo của hệ thống"
+                    });
                     return new StatusCodeResult(201);
                 }
             }
@@ -133,6 +146,12 @@ namespace Services.Implementations
                     await _context.SaveChangesAsync();
                     tutorCertificateList.Add(certificate);
                 }
+                await _appExtension.SendMail(new MailContent()
+                {
+                    To = tutor.UserNavigation.Email,
+                    Subject = "Yêu cầu xét duyệt chứng chỉ trở thành gia sư",
+                    Body = "Yêu cầu của bạn đã được gửi. Vui lòng đợi phản hồi qua email hoặc thông báo của hệ thống"
+                });
                 return new StatusCodeResult(201);
             }
             catch (Exception ex)
@@ -160,6 +179,12 @@ namespace Services.Implementations
                     _context.TutorExperiences.Add(tutorExperience);
                 }
                 await _context.SaveChangesAsync();
+                await _appExtension.SendMail(new MailContent()
+                {
+                    To = tutor.UserNavigation.Email,
+                    Subject = "Yêu cầu xét duyệt kinh nghiệm dạy môn học trở thành gia sư",
+                    Body = "Yêu cầu của bạn đã được gửi. Vui lòng đợi phản hồi qua email hoặc thông báo của hệ thống"
+                });
                 throw new CrudException(HttpStatusCode.Created, "Tutor Experience Created", "");
             }
             catch (CrudException ex)

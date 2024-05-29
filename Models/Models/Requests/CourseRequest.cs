@@ -38,6 +38,7 @@ namespace Models.Models.Requests
     }
     public class CreatePromotion
     {
+        public Guid TutorId { get; set; }
         public string? PromotionCode { get; set; }
         [Range(0.01, 100, ErrorMessage = "Khuyển mãi phải nằm trong khoảng từ trên 0% đến 100% ")]
         public decimal Percentage { get; set; }

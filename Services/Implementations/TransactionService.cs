@@ -13,6 +13,7 @@ using Models.Models.Requests;
 using Models.Entities;
 using Models.Enumerables;
 using Microsoft.EntityFrameworkCore;
+using Models.Models.Emails;
 
 namespace Services.Implementations
 {
@@ -78,7 +79,12 @@ namespace Services.Implementations
                 vnpay.AddRequestData("vnp_TxnRef", transaction.WalletTransactionId.ToString());
 
                 string paymentUrl = vnpay.CreateRequestUrl(vnp_Url, vnp_HashSecret);
-
+                await _appExtension.SendMail(new MailContent()
+                {
+                    To = findUser.Email,
+                    Subject = "Xác nhận giao dịch",
+                    Body = "Bạn đã tạo giao dịch nạp tiền vào tài khoản với số tiền là " + transactionCreate.Amount + " VND. Vui lòng xác nhận giao dịch tại đây: " + paymentUrl
+                });
                 return new JsonResult(new
                 {
                     PaymentUrl = paymentUrl
@@ -132,6 +138,12 @@ namespace Services.Implementations
                 vnpay.AddRequestData("vnp_TxnRef", transaction.WalletTransactionId.ToString());
 
                 string paymentUrl = vnpay.CreateRequestUrl(vnp_Url, vnp_HashSecret);
+                await _appExtension.SendMail(new MailContent()
+                {
+                    To = findUser.Email,
+                    Subject = "Xác nhận giao dịch",
+                    Body = "Bạn đã tạo giao dịch rút tiền từ tài khoản với số tiền là " + transactionCreate.Amount + " VND. Vui lòng xác nhận giao dịch tại đây: " + paymentUrl
+                });
 
                 return new JsonResult(new
                 {
@@ -142,6 +154,12 @@ namespace Services.Implementations
             {
                 return new StatusCodeResult(406);
             }
+            await _appExtension.SendMail(new MailContent()
+            {
+                To = findUser.Email,
+                Subject = "Xác nhận giao dịch",
+                Body = "Giao dịch không hợp lệ, vui lòng kiểm tra lại thông tin."
+            });
             return new StatusCodeResult(500);
         }
 
@@ -184,6 +202,12 @@ namespace Services.Implementations
             var receiveWallet = _context.Wallets.FirstOrDefault(w => w.WalletId == receiverUserId);
             if(sendWallet.Amount < transactionCreate.Amount)
             {
+                await _appExtension.SendMail(new MailContent()
+                {
+                    To = findUser.Email,
+                    Subject = "Xác nhận giao dịch",
+                    Body = "Giao dịch booking không hợp lệ, vui lòng kiểm tra lại thông tin."
+                });
                 return new StatusCodeResult(409);
             }
             sendWallet.PendingAmount -= transactionCreate.Amount;
@@ -192,6 +216,12 @@ namespace Services.Implementations
             _context.BookingTransactions.Add(transaction);
             _context.WalletTransactions.Add(senderTransaction);
             await _context.SaveChangesAsync();
+            await _appExtension.SendMail(new MailContent()
+            {
+                To = findUser.Email,
+                Subject = "Xác nhận giao dịch",
+                Body = "Bạn đã tạo giao dịch booking với số tiền là " + transactionCreate.Amount + " VND. Vui lòng xác nhận giao dịch tại đây: " + transactionCreate.RedirectUrl
+            });
             return new StatusCodeResult(201);
         }
         public async Task<IActionResult> CreateDepositVnPayCourse(CourseTransactionCreate transactionCreate, Guid sendUserId, Guid receiverUserId)
@@ -233,6 +263,12 @@ namespace Services.Implementations
             var receiveWallet = _context.Wallets.FirstOrDefault(w => w.WalletId == receiverUserId);
             if (sendWallet.Amount < transactionCreate.Amount)
             {
+                await _appExtension.SendMail(new MailContent()
+                {
+                    To = findUser.Email,
+                    Subject = "Xác nhận giao dịch",
+                    Body = "Giao dịch course không hợp lệ, vui lòng kiểm tra lại thông tin."
+                });
                 return new StatusCodeResult(409);
             }
             sendWallet.PendingAmount -= transactionCreate.Amount;
@@ -241,6 +277,12 @@ namespace Services.Implementations
             _context.CourseTransactions.Add(transaction);
             _context.WalletTransactions.Add(senderTransaction);
             await _context.SaveChangesAsync();
+            await _appExtension.SendMail(new MailContent()
+            {
+                To = findUser.Email,
+                Subject = "Xác nhận giao dịch",
+                Body = "Bạn đã tạo giao dịch course với số tiền là " + transactionCreate.Amount + " VND. Vui lòng xác nhận giao dịch tại đây: " + transactionCreate.RedirectUrl
+            });
             return new StatusCodeResult(201);
         }
 
@@ -341,6 +383,18 @@ namespace Services.Implementations
 
                     _context.BookingTransactions.Update(booking);
                     _context.WalletTransactions.Update(wallet);
+                    await _appExtension.SendMail(new MailContent()
+                    {
+                        To = wallet.SenderWalletNavigation.UserNavigation.Email,
+                        Subject = "Xác nhận giao dịch",
+                        Body = "Giao dịch booking của bạn đã được xác nhận. Mã giao dịch: " + wallet.WalletTransactionId
+                    });
+                    await _appExtension.SendMail(new MailContent()
+                    {
+                        To = wallet.ReceiverWalletNavigation.UserNavigation.Email,
+                        Subject = "Xác nhận giao dịch",
+                        Body = "Giao dịch booking của bạn đã được xác nhận. Mã giao dịch: " + wallet.WalletTransactionId
+                    });
                 }
                 else if (choice == (Int32)UpdateTransactionType.Course)
                 {
@@ -361,11 +415,35 @@ namespace Services.Implementations
 
                     _context.CourseTransactions.Update(course);
                     _context.WalletTransactions.Update(wallet);
+                    await _appExtension.SendMail(new MailContent()
+                    {
+                        To = wallet.SenderWalletNavigation.UserNavigation.Email,
+                        Subject = "Xác nhận giao dịch",
+                        Body = "Giao dịch course của bạn đã được xác nhận. Mã giao dịch: " + wallet.WalletTransactionId
+                    });
+                    await _appExtension.SendMail(new MailContent()
+                    {
+                        To = wallet.ReceiverWalletNavigation.UserNavigation.Email,
+                        Subject = "Xác nhận giao dịch",
+                        Body = "Giao dịch course của bạn đã được xác nhận. Mã giao dịch: " + wallet.WalletTransactionId
+                    });
                 }
                 else if (choice == (Int32)UpdateTransactionType.Wallet)
                 {
                     wallet.Status = (int)VNPayType.APPROVE;
                     _context.WalletTransactions.Update(wallet);
+                    await _appExtension.SendMail(new MailContent()
+                    {
+                        To = wallet.SenderWalletNavigation.UserNavigation.Email,
+                        Subject = "Xác nhận giao dịch",
+                        Body = "Giao dịch ví của bạn đã được xác nhận. Mã giao dịch: " + wallet.WalletTransactionId
+                    });
+                    await _appExtension.SendMail(new MailContent()
+                    {
+                        To = wallet.ReceiverWalletNavigation.UserNavigation.Email,
+                        Subject = "Xác nhận giao dịch",
+                        Body = "Giao dịch ví của bạn đã được xác nhận. Mã giao dịch: " + wallet.WalletTransactionId
+                    });
                 }
                 else if (choice == (Int32)UpdateTransactionType.Unknown) { return new StatusCodeResult(406); }
             }
@@ -386,6 +464,18 @@ namespace Services.Implementations
 
                     _context.BookingTransactions.Update(booking);
                     _context.WalletTransactions.Update(wallet);
+                    await _appExtension.SendMail(new MailContent()
+                    {
+                        To = wallet.SenderWalletNavigation.UserNavigation.Email,
+                        Subject = "Xác nhận giao dịch",
+                        Body = "Giao dịch booking của bạn đã được hủy bỏ. Mã giao dịch: " + wallet.WalletTransactionId
+                    });
+                    await _appExtension.SendMail(new MailContent()
+                    {
+                        To = wallet.ReceiverWalletNavigation.UserNavigation.Email,
+                        Subject = "Xác nhận giao dịch",
+                        Body = "Giao dịch booking của bạn đã được hủy bỏ. Mã giao dịch: " + wallet.WalletTransactionId
+                    });
                 }
                 else if (choice == (Int32)UpdateTransactionType.Course)
                 {
@@ -402,11 +492,35 @@ namespace Services.Implementations
 
                     _context.CourseTransactions.Update(course);
                     _context.WalletTransactions.Update(wallet);
+                    await _appExtension.SendMail(new MailContent()
+                    {
+                        To = wallet.SenderWalletNavigation.UserNavigation.Email,
+                        Subject = "Xác nhận giao dịch",
+                        Body = "Giao dịch course của bạn đã được hủy bỏ. Mã giao dịch: " + wallet.WalletTransactionId
+                    });
+                    await _appExtension.SendMail(new MailContent()
+                    {
+                        To = wallet.ReceiverWalletNavigation.UserNavigation.Email,
+                        Subject = "Xác nhận giao dịch",
+                        Body = "Giao dịch course của bạn đã được hủy bỏ. Mã giao dịch: " + wallet.WalletTransactionId
+                    });
                 }
                 else if (choice == (Int32)UpdateTransactionType.Wallet)
                 {
                     wallet.Status = (int)VNPayType.REJECT;
                     _context.WalletTransactions.Update(wallet);
+                    await _appExtension.SendMail(new MailContent()
+                    {
+                        To = wallet.SenderWalletNavigation.UserNavigation.Email,
+                        Subject = "Xác nhận giao dịch",
+                        Body = "Giao dịch ví của bạn đã được hủy bỏ. Mã giao dịch: " + wallet.WalletTransactionId
+                    });
+                    await _appExtension.SendMail(new MailContent()
+                    {
+                        To = wallet.ReceiverWalletNavigation.UserNavigation.Email,
+                        Subject = "Xác nhận giao dịch",
+                        Body = "Giao dịch ví của bạn đã được hủy bỏ. Mã giao dịch: " + wallet.WalletTransactionId
+                    });
                 }
                 else if (choice == (Int32)UpdateTransactionType.Unknown) { return new StatusCodeResult(406); }
             }

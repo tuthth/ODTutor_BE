@@ -10,8 +10,10 @@ namespace Models.Entities
     {
         public Guid PromotionId { get; set; }
         public string? PromotionCode { get; set; }
+        public Guid TutorId { get; set; }
         public decimal Percentage {  get; set; }
         public DateTime CreatedAt {  get; set; }
+        public virtual Tutor? TutorNavigation { get; set; }
         public virtual ICollection<CoursePromotion>? CoursePromotionsNavigation { get; set; }
     }
 }

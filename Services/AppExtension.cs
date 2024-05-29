@@ -1,8 +1,13 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using MailKit.Security;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
+using MimeKit;
 using Models.Entities;
+using Models.Models.Emails;
 using Newtonsoft.Json;
+using Settings.Mail;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,10 +20,12 @@ namespace Services
     public class AppExtension
     {
         private readonly IConfiguration _cf;
+        private readonly MailSetting _mailSettings;
 
-        public AppExtension(IConfiguration cf)
+        public AppExtension(IConfiguration cf, IOptions<MailSetting> mailOptions)
         {
             _cf = cf;
+            _mailSettings = mailOptions.Value;
         }
 
         public string CreateHashPassword(string password)
@@ -93,6 +100,63 @@ namespace Services
             {
                 throw new Exception(ex.ToString());
             }
+        }
+        //khi nao` co mail template roi` doi sau
+        public async Task<IActionResult> SendMail(MailContent mailContent)
+        {
+            try
+            {
+                var email = new MimeMessage();
+                email.Sender = new MailboxAddress(_mailSettings.DisplayName, _mailSettings.Mail);
+                email.From.Add(new MailboxAddress(_mailSettings.DisplayName, _mailSettings.Mail));
+                email.To.Add(MailboxAddress.Parse(mailContent.To));
+                email.Subject = mailContent.Subject;
+
+                //string projectDirectory = Directory.GetCurrentDirectory();
+                //string OTPSamplePath = Path.Combine(projectDirectory, "wwwroot", "template.html");
+                //string htmlContent = System.IO.File.ReadAllText(OTPSamplePath);
+                //htmlContent = htmlContent.Replace("{Body}", mailContent.Body);
+                //htmlContent = htmlContent.Replace("{OTP}", mailContent.OTP);
+                var builder = new BodyBuilder();
+                //builder.HtmlBody = htmlContent;
+                builder.HtmlBody = mailContent.Body;
+                email.Body = builder.ToMessageBody();
+
+                // dùng SmtpClient của MailKit
+                using var smtp = new MailKit.Net.Smtp.SmtpClient();
+
+                try
+                {
+                    smtp.Connect(_mailSettings.Host, _mailSettings.Port, SecureSocketOptions.StartTls);
+                    smtp.Authenticate(_mailSettings.Mail, _mailSettings.Password);
+                    await smtp.SendAsync(email);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.ToString());
+
+                    // Gửi mail thất bại, nội dung email sẽ lưu vào thư mục mailssave
+                    System.IO.Directory.CreateDirectory("mailssave");
+                    var emailsavefile = string.Format(@"mailssave/{0}.eml", Guid.NewGuid());
+                    await email.WriteToAsync(emailsavefile);
+                    throw new Exception(ex.ToString());
+                }
+
+                smtp.Disconnect(true);
+                return new StatusCodeResult(200);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.ToString());
+            }
+
+        }
+        public string GenerateRandomOTP()
+        {
+            Random random = new Random();
+            int otpValue = random.Next(0, 1000000); // Random số từ 0 đến 999999
+
+            return otpValue.ToString("D6"); // Định dạng để luôn có 6 chữ số
         }
     }
 }

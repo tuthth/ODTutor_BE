@@ -12,5 +12,11 @@ namespace Models.Models.Emails
         public string Subject { get; set; }         // Chủ đề (tiêu đề email)
         public string Body { get; set; }
         public string OTP { get; set; }
+        public string? TemplateDirectory { get; set; }
+    }
+    
+    public enum MailType
+    {
+        Unknown
     }
 }

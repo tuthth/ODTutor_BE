@@ -172,6 +172,11 @@ namespace Models.Entities
                 .HasKey(p => p.PromotionId);
 
             modelBuilder.Entity<Promotion>()
+                .HasOne(p => p.TutorNavigation)
+                .WithMany(t => t.PromotionsNavigation)
+                .HasForeignKey(p => p.TutorId).OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<Promotion>()
                 .HasMany(p => p.CoursePromotionsNavigation)
                 .WithOne(cp => cp.PromotionNavigation)
                 .HasForeignKey(cp => cp.PromotionId)
@@ -251,6 +256,11 @@ namespace Models.Entities
                 .HasOne(t => t.UserNavigation)
                 .WithOne(u => u.TutorNavigation)
                 .HasForeignKey<Tutor>(t => t.UserId).OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<Tutor>()
+                .HasMany(t => t.PromotionsNavigation)
+                .WithOne(p => p.TutorNavigation)
+                .HasForeignKey(p => p.TutorId).OnDelete(DeleteBehavior.NoAction);
 
             modelBuilder.Entity<Tutor>()
                 .HasMany(t => t.CoursesNavigation)

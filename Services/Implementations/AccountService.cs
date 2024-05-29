@@ -1,13 +1,18 @@
 ﻿using AutoMapper;
 using Google.Apis.Auth;
+using MailKit.Security;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages.Manage;
+using MimeKit;
 using Models.Entities;
+using Models.Models.Emails;
 using Models.Models.Requests;
 using Models.Models.Views;
 using Services.Interfaces;
+using Settings.Mail;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,9 +26,11 @@ namespace Services.Implementations
     public class AccountService : BaseService, IAccountService
     {
         private readonly IUserService _userService;
+        
         public AccountService(ODTutorContext context, IMapper mapper, IUserService userService) : base(context, mapper)
         {
             _userService = userService;
+            
         }
 
         /*============External Site===========*/
@@ -80,6 +87,12 @@ namespace Services.Implementations
                 await _context.SaveChangesAsync();
                 var accountResponse = _mapper.Map<AccountResponse>(account);
                 // Return information of account
+                await _appExtension.SendMail(new MailContent()
+                {
+                    To = account.Email,
+                    Subject = "[ODTutor] Thông báo xác thực tài khoản",
+                    Body = "Chào mừng bạn đến với ODTutor, vui lòng xác thực tài khoản của bạn để có thể trải nghiệm đầy đủ nhất. "
+                });
                 return new StatusCodeResult(201);
             }
             catch (Exception ex)
@@ -176,6 +189,12 @@ namespace Services.Implementations
                 user.DateOfBirth = request.DateOfBirth ?? DateTime.MinValue;
                 _context.Users.Update(user);
                 await _context.SaveChangesAsync();
+                await _appExtension.SendMail(new MailContent()
+                {
+                    To = user.Email,
+                    Subject = "[ODTutor] Thông báo cập nhật thông tin tài khoản",
+                    Body = "Thông tin tài khoản của bạn đã được cập nhật thành công"
+                });
                 return new StatusCodeResult(200);
             }
             catch (Exception ex)
@@ -222,5 +241,7 @@ namespace Services.Implementations
         {
             return _context.Users.FirstOrDefault(s => s.Id.Equals(UserID));
         }
+
+
     }
 }

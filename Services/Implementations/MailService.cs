@@ -35,7 +35,7 @@ namespace Services.Implementations
                 {
                     return new StatusCodeResult(409);
                 }
-                var tokenEmail = GenerateRandomOTP();
+                var tokenEmail = _appExtension.GenerateRandomOTP();
                 var checkEmailDefaulr = _context.Users.Any(u => u.Email.Equals(email) && u.EmailConfirmed == false);
 
                 if (checkEmailDefaulr)
@@ -76,13 +76,7 @@ namespace Services.Implementations
             }
         }
 
-        private string GenerateRandomOTP()
-        {
-            Random random = new Random();
-            int otpValue = random.Next(0, 1000000); // Random số từ 0 đến 999999
-
-            return otpValue.ToString("D6"); // Định dạng để luôn có 6 chữ số
-        }
+        
 
         public async Task<IActionResult> SendMail(MailContent mailContent)
         {
