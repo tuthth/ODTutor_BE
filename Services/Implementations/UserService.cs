@@ -31,14 +31,11 @@ namespace Services.Implementations
 {
     public class UserService : BaseService, IUserService
     {
-        private readonly IConfiguration _configuration;
+        
         private readonly JWTSetting _jwtSetting;
-        private readonly MailSetting mailSettings;
-        public UserService(ODTutorContext context, IConfiguration configuration, IMapper mapper, IOptions<JWTSetting> options, IOptions<MailSetting> mailOptions) : base(context, mapper)
+        public UserService(ODTutorContext context, IMapper mapper) : base(context, mapper)
         {
-            _jwtSetting = options.Value;
-            mailSettings = mailOptions.Value;
-            _configuration = configuration;
+            _jwtSetting = _jwtSettings.Value;
         }
 
         public Guid GetUserId(HttpContext httpContext)
