@@ -187,6 +187,10 @@ namespace Services.Implementations
                 {
                     throw new CrudException (HttpStatusCode.BadRequest, "Tutor Subject is required", "");
                 }
+
+                // Create a Tutor Action Log
+
+                // Create a notification for user who want to become a tutor
                 Notification notification = new Notification();
                 notification.NotificationId = new Guid();
                 notification.UserId = tutor.UserId;
@@ -206,7 +210,7 @@ namespace Services.Implementations
             }
         }
 
-        // Get Tutor Register Information
+        // Get Tutor Register Information --- Đây là nơi để dành cho những người xử lý tutor và duyệt request
         /*Đây là phần để lấy thông tin để admin hay moderator có thể hiểu và kiểm tra*/
         public async Task<ActionResult<TutorRegisterReponse>> GetTutorRegisterInformtaion(Guid tutorID)
         {
@@ -348,6 +352,7 @@ namespace Services.Implementations
                 throw new CrudException(HttpStatusCode.InternalServerError, ex.Message, "");
             }
         }
+
         // Check the Tutor Certificate 
         private async Task<bool> checkTutorCertificate (Guid tutorId)
         {   

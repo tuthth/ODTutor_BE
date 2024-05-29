@@ -3,13 +3,13 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.9.34728.123
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "API", "API\API.csproj", "{7C8AC26E-30B4-4518-81FF-182365721BD6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "API", "API\API.csproj", "{7C8AC26E-30B4-4518-81FF-182365721BD6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Settings", "Settings\Settings.csproj", "{12BFB3B2-9DC8-42C3-B739-6BCD8316ABA8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Settings", "Settings\Settings.csproj", "{12BFB3B2-9DC8-42C3-B739-6BCD8316ABA8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Services", "Services\Services.csproj", "{18C4B141-BDFD-4AE7-A46F-8843AB69E0CE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Services", "Services\Services.csproj", "{18C4B141-BDFD-4AE7-A46F-8843AB69E0CE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Models", "Models\Models.csproj", "{2B7CD89F-3BCF-42E7-A38C-2CAA7217853F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Models", "Models\Models.csproj", "{2B7CD89F-3BCF-42E7-A38C-2CAA7217853F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

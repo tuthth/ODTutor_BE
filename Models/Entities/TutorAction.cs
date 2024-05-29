@@ -10,7 +10,7 @@ namespace Models.Entities
     {
         public Guid TutorActionId { get; set; }
         public Guid TutorId { get; set; }
-        public Guid ModeratorId { get; set; }
+        public Guid? ModeratorId { get; set; }
         public DateTime CreateAt { get;set; }
         public DateTime? ReponseDate {get;set;}
         public string ? MeetingLink { get; set; }

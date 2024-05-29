@@ -75,6 +75,7 @@ namespace Services.Implementations
                 throw new Exception(ex.ToString());
             }
         }
+
         private string GenerateRandomOTP()
         {
             Random random = new Random();
