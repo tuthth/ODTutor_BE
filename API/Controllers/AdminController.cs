@@ -690,66 +690,6 @@ namespace API.Controllers
             }
             throw new Exception("Lỗi không xác định");
         }
-        [HttpGet("get/bookings")]
-        public async Task<ActionResult<List<Booking>>> GetAllBookings()
-        {
-            var result = await _adminService.GetAllBookings();
-            if (result is ActionResult<List<Booking>> bookings)
-            {
-                if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
-                {
-                    if (statusCodeResult.StatusCode == 404) { return NotFound("Không tìm thấy lịch đặt"); }
-                    if (statusCodeResult.StatusCode == 200) return Ok(bookings);
-                }
-                if ((IActionResult)result.Result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, exception.ToString());
-            }
-            throw new Exception("Lỗi không xác định");
-        }
-        [HttpGet("get/booking/{bookingID}")]
-        public async Task<ActionResult<Booking>> GetBooking(Guid bookingID)
-        {
-            var result = await _adminService.GetBooking(bookingID);
-            if (result is ActionResult<Booking> booking)
-            {
-                if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
-                {
-                    if (statusCodeResult.StatusCode == 404) { return NotFound("Không tìm thấy lịch đặt"); }
-                    if (statusCodeResult.StatusCode == 200) return Ok(booking);
-                }
-                if ((IActionResult)result.Result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, exception.ToString());
-            }
-            throw new Exception("Lỗi không xác định");
-        }
-        [HttpGet("get/bookings/student/{studentID}")]
-        public async Task<ActionResult<List<Booking>>> GetBookingsByStudentID(Guid studentID)
-        {
-            var result = await _adminService.GetBookingsByStudentId(studentID);
-            if (result is ActionResult<List<Booking>> bookings)
-            {
-                if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
-                {
-                    if (statusCodeResult.StatusCode == 404) { return NotFound("Không tìm thấy lịch đặt"); }
-                    if (statusCodeResult.StatusCode == 200) return Ok(bookings);
-                }
-                if ((IActionResult)result.Result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, exception.ToString());
-            }
-            throw new Exception("Lỗi không xác định");
-        }
-        [HttpGet("get/bookings/tutor/{tutorID}")]
-        public async Task<ActionResult<List<Booking>>> GetBookingsByTutorID(Guid tutorID)
-        {
-            var result = await _adminService.GetBookingsByTutorId(tutorID);
-            if (result is ActionResult<List<Booking>> bookings)
-            {
-                if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
-                {
-                    if (statusCodeResult.StatusCode == 404) { return NotFound("Không tìm thấy lịch đặt"); }
-                    if (statusCodeResult.StatusCode == 200) return Ok(bookings);
-                }
-                if ((IActionResult)result.Result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, exception.ToString());
-            }
-            throw new Exception("Lỗi không xác định");
-        }
         [HttpGet("get/user-blocks")]
         public async Task<ActionResult<List<UserBlock>>> GetAllUserBlocks()
         {

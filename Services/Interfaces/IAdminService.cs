@@ -56,10 +56,6 @@ namespace Services.Interfaces
         Task<ActionResult<List<TutorSchedule>>> GetAllTutorSchedules();
         Task<ActionResult<TutorSchedule>> GetTutorSchedule(Guid id);
         Task<ActionResult<List<TutorSchedule>>> GetTutorSchedulesByTutorId(Guid id);
-        Task<ActionResult<List<Booking>>> GetAllBookings();
-        Task<ActionResult<Booking>> GetBooking(Guid id);
-        Task<ActionResult<List<Booking>>> GetBookingsByStudentId(Guid id);
-        Task<ActionResult<List<Booking>>> GetBookingsByTutorId(Guid id);
         Task<ActionResult<List<UserBlock>>> GetAllUserBlocks();
         Task<ActionResult<List<UserBlock>>> GetAllBlockByCreateUserId(Guid id);
         Task<ActionResult<List<UserBlock>>> GetAllBlockByTargetUserId(Guid id);

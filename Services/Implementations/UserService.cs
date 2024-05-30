@@ -31,7 +31,7 @@ namespace Services.Implementations
 {
     public class UserService : BaseService, IUserService
     {
-        
+
         private readonly JWTSetting _jwtSetting;
         public UserService(ODTutorContext context, IMapper mapper) : base(context, mapper)
         {
@@ -159,14 +159,16 @@ namespace Services.Implementations
             if (user == null) return new StatusCodeResult(404); //user not found
             if (user.Active == true) return new StatusCodeResult(409); //user is active in system
             if (user.Banned == true) return new StatusCodeResult(403); //user is banned
-            var userAuthentication = _context.UserAuthentications.FirstOrDefault(ua => ((ua.UserId == user.Id) && ua.EmailTokenExpiry.Value.Date < DateTime.UtcNow.Date));
+            var userAuthentication = _context.UserAuthentications
+                .Where(ua => ua.UserId == user.Id && ua.EmailTokenExpiry >= DateTime.UtcNow).OrderByDescending(ua => ua.EmailTokenExpiry).FirstOrDefault();
             if (userAuthentication == null) return new StatusCodeResult(404); //no OTP request found
             if (userAuthentication.EmailToken != otp) return new StatusCodeResult(400); //wrong OTP
             if (userAuthentication.EmailTokenExpiry < DateTime.UtcNow) return new StatusCodeResult(408); //OTP expired
             user.Active = true;
             user.EmailConfirmed = true;
             _context.Users.Update(user);
-            _context.UserAuthentications.Remove(userAuthentication); //remove OTP request after confirmed
+            var allUserAuthentications = _context.UserAuthentications.Where(ua => ua.UserId == user.Id);
+            _context.UserAuthentications.RemoveRange(allUserAuthentications); //remove OTP request after confirmed
             await _context.SaveChangesAsync();
             await _appExtension.SendMail(new MailContent()
             {
@@ -216,7 +218,7 @@ namespace Services.Implementations
         }
 
         // Send Mail Confirm Banned
-        
+
 
 
 
@@ -266,7 +268,7 @@ namespace Services.Implementations
                     SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
                 };
             }
-            else if ( moderator != null)
+            else if (moderator != null)
             {
                 var moderatorInfo = _context.Moderators.FirstOrDefault(t => t.UserId == user.Id);
                 tokenDescriptor = new SecurityTokenDescriptor
@@ -308,7 +310,7 @@ namespace Services.Implementations
             {
                 accessToken = accessToken,
                 userId = user.Id,
-                role = GetRoleName(tutor,moderator),
+                role = GetRoleName(tutor, moderator),
                 tutorID = tutor?.TutorId,
                 moderatorID = moderator?.ModeratorId,
                 studentID = student?.StudentId
@@ -317,7 +319,7 @@ namespace Services.Implementations
             return response;
         }
         // Get Role 
-        private string GetRoleName( Tutor tutor, Moderator moderator)
+        private string GetRoleName(Tutor tutor, Moderator moderator)
         {
             if (tutor != null)
             {

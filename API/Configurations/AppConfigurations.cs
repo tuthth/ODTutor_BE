@@ -62,6 +62,7 @@ namespace API.Configurations
             services.AddScoped<IAccountService, AccountService>();
             services.AddScoped<ITutorDataService, TutorDataService>();
             services.AddScoped<IAdminService, AdminService>();
+            services.AddScoped<IBookingService, BookingService>();
         }
 
         public static void AddSwagger(this IServiceCollection services)

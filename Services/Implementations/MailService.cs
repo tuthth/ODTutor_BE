@@ -52,7 +52,7 @@ namespace Services.Implementations
                     await _context.SaveChangesAsync();
                     try
                     {
-                        await SendMail(new MailContent()
+                        await SendMailOTP(new MailContentOTP()
                         {
                             To = email,
                             Subject = "[ODTutor] Mã xác thực OTP",
@@ -78,7 +78,7 @@ namespace Services.Implementations
 
         
 
-        public async Task<IActionResult> SendMail(MailContent mailContent)
+        public async Task<IActionResult> SendMailOTP(MailContentOTP mailContent)
         {
             try
             {

@@ -10,7 +10,7 @@ namespace Services.Interfaces
 {
     public interface ISendMailService
     {
-        Task<IActionResult> SendMail(MailContent mailContent);
+        Task<IActionResult> SendMailOTP(MailContentOTP mailContent);
         Task<IActionResult> SendEmailTokenAsync(string email);
     }
 }
