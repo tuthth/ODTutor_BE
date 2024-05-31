@@ -210,66 +210,6 @@ namespace API.Controllers
             }
             throw new Exception("Lỗi không xác định");
         }
-        [HttpGet("get/reports")]
-        public async Task<ActionResult<List<Report>>> GetAllReports()
-        {
-            var result = await _adminService.GetAllReports();
-            if (result is ActionResult<List<Report>> reports)
-            {
-                if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
-                {
-                    if (statusCodeResult.StatusCode == 404) { return NotFound("Không tìm thấy báo cáo"); }
-                    if (statusCodeResult.StatusCode == 200) return Ok(reports);
-                }
-                if ((IActionResult)result.Result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, exception.ToString());
-            }
-            throw new Exception("Lỗi không xác định");
-        }
-        [HttpGet("get/report/{reportID}")]
-        public async Task<ActionResult<Report>> GetReport(Guid reportID)
-        {
-            var result = await _adminService.GetReport(reportID);
-            if (result is ActionResult<Report> report)
-            {
-                if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
-                {
-                    if (statusCodeResult.StatusCode == 404) { return NotFound("Không tìm thấy báo cáo"); }
-                    if (statusCodeResult.StatusCode == 200) return Ok(report);
-                }
-                if ((IActionResult)result.Result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, exception.ToString());
-            }
-            throw new Exception("Lỗi không xác định");
-        }
-        [HttpGet("get/reports/create/{userID}")]
-        public async Task<ActionResult<List<Report>>> GetReportsByUserID(Guid userID)
-        {
-            var result = await _adminService.GetReportsByUserId(userID);
-            if (result is ActionResult<List<Report>> reports)
-            {
-                if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
-                {
-                    if (statusCodeResult.StatusCode == 404) { return NotFound("Không tìm thấy báo cáo"); }
-                    if (statusCodeResult.StatusCode == 200) return Ok(reports);
-                }
-                if ((IActionResult)result.Result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, exception.ToString());
-            }
-            throw new Exception("Lỗi không xác định");
-        }
-        [HttpGet("get/reports/target/{reporterID}")]
-        public async Task<ActionResult<List<Report>>> GetReportsByReporterID(Guid reporterID)
-        {
-            var result = await _adminService.GetReportsByReporterId(reporterID);
-            if (result is ActionResult<List<Report>> reports)
-            {
-                if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
-                {
-                    if (statusCodeResult.StatusCode == 404) { return NotFound("Không tìm thấy báo cáo"); }
-                    if (statusCodeResult.StatusCode == 200) return Ok(reports);
-                }
-                if ((IActionResult)result.Result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, exception.ToString());
-            }
-            throw new Exception("Lỗi không xác định");
-        }
         [HttpGet("get/schedules")]
         public async Task<ActionResult<List<Schedule>>> GetAllSchedules()
         {

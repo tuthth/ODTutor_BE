@@ -24,10 +24,6 @@ namespace Services.Interfaces
         Task<ActionResult<List<CourseTransaction>>> GetCourseTransactionsBySenderId(Guid id);
         Task<ActionResult<List<CourseTransaction>>> GetCourseTransactionsByReceiverId(Guid id);
         Task<ActionResult<List<CourseTransaction>>> GetCourseTransactionsByCourseId(Guid id);
-        Task<ActionResult<List<Report>>> GetAllReports();
-        Task<ActionResult<Report>> GetReport(Guid id);
-        Task<ActionResult<List<Report>>> GetReportsByUserId(Guid id);
-        Task<ActionResult<List<Report>>> GetReportsByReporterId(Guid id);
         Task<ActionResult<List<Schedule>>> GetAllSchedules();
         Task<ActionResult<Schedule>> GetSchedule(Guid id);
         Task<ActionResult<List<Schedule>>> GetSchedulesByStudentCourseId(Guid id);
