@@ -35,7 +35,7 @@ namespace API.Controllers
         public async Task<IActionResult> addRegisterCertificateOfTutor(Guid tutorID, List<TutorRegisterCertificateRequest> certificateRequest)
         {
             var result = await _tutorRegisterService.TutorCertificatesRegister(tutorID, certificateRequest);
-            return Ok(result);
+            return result;
         }
 
         // Add Subject
@@ -43,14 +43,7 @@ namespace API.Controllers
         public async Task<IActionResult> addRegisterSubjectOfTutor(Guid tutorID, List<Guid> subjectIDs)
         {
             var result = await _tutorRegisterService.RegisterTutorSubject(tutorID, subjectIDs);
-            if (result is StatusCodeResult statusCodeResult)
-            {
-                if (statusCodeResult.StatusCode == 201) { return StatusCode(StatusCodes.Status201Created, "Đăng ký môn học gia sư thành công"); }
-                else if (statusCodeResult.StatusCode == 404) { return NotFound("Không tìm thấy thông tin gia sư"); }
-                else if (statusCodeResult.StatusCode == 400) { return BadRequest("Đăng ký môn học gia sư thất bại"); }
-            }
-            if (result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, exception.ToString());
-            throw new Exception("Xảy ra lỗi không xác định");
+            return result;
         }
         
         // Add Experience
@@ -63,9 +56,9 @@ namespace API.Controllers
 
         // Confirm and Create Notification
         [HttpPost("confirm/{tutorID}")]
-        public async Task<IActionResult> confirmRegisterFormAndCreateNoti(Guid tutorID)
+        public async Task<IActionResult> confirmRegisterFormAndCreateNoti(Guid tutorID, decimal money)
         {
-            var response = await _tutorRegisterService.CheckConfirmTutorInformationAndSendNotification(tutorID);
+            var response = await _tutorRegisterService.CheckConfirmTutorInformationAndSendNotification(tutorID,money);
             return response;
         }
 
