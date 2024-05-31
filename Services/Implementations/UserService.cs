@@ -189,37 +189,6 @@ namespace Services.Implementations
             return new StatusCodeResult(200);
         }
 
-        // Ban Account
-        public async Task<IActionResult> BanAccount(Guid userId)
-        {
-            var user = _context.Users.FirstOrDefault(u => u.Id == userId);
-            if (user == null) return new StatusCodeResult(404); //user not found
-            if (user.Banned == true) return new StatusCodeResult(409); //user is already banned
-            user.Banned = true;
-            user.BanExpiredAt = DateTime.UtcNow.AddYears(30); //ban for 24 hours
-            _context.Users.Update(user);
-            await _context.SaveChangesAsync();
-            try
-            {
-                await _appExtension.SendMail(new MailContent()
-                {
-                    To = user.Email,
-                    Subject = "[ODTutor] Thông báo đình chỉ tài khoản",
-                    Body = "Tài khoản của bạn bị đình chỉ do vi phạm chính sách sử dụng của ODTutor. Để mở khóa trước thời hạn, vui lòng liên hệ lại email này. \nTài khoản sẽ được tự động mở khóa vào lúc " + user.BanExpiredAt + " GMT+0",
-
-                });
-                return new StatusCodeResult(200);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-                return new StatusCodeResult(500);
-            }
-        }
-
-        // Send Mail Confirm Banned
-
-
 
 
 
@@ -333,6 +302,12 @@ namespace Services.Implementations
             {
                 return "Student";
             }
+        }
+        public async Task<IActionResult> IsUserBanned(Guid userId)
+        {
+            var user = _context.Users.FirstOrDefault(u => u.Id == userId && u.Banned == true);
+            if (user == null) return new StatusCodeResult(404);
+            return new StatusCodeResult(403);
         }
     }
 }

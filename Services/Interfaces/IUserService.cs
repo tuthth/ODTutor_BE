@@ -19,5 +19,6 @@ namespace Services.Interfaces
         //Task<IActionResult> GenerateJwtToken(User user, int role);
         Task<IActionResult> ConfirmOTP(string email, string otp);
         Task<IActionResult> RemoveExpiredOTP();
+        Task<IActionResult> IsUserBanned(Guid userId);
     }
 }

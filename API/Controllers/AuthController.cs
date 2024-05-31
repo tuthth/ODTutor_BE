@@ -65,9 +65,9 @@ namespace API.Controllers
                     else if (statusCodeResult.StatusCode == 403) { return StatusCode(403, "Tài khoản đã bị khóa"); }
                     else if(statusCodeResult.StatusCode == 408) { return StatusCode(408, "Mã OTP đã hết hạn"); }
                     else if (statusCodeResult.StatusCode == 200) { return Ok("Xác thực OTP thành công"); }
-                    else { return BadRequest("Xác thực email thất bại"); }
                 }
-                else { return BadRequest("Xác thực email thất bại"); }
+                if (checkConfirm is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, exception.ToString());
+                throw new Exception("Lỗi không xác định");
             }
             catch (Exception ex)
             {
@@ -84,9 +84,28 @@ namespace API.Controllers
                 {
                     if (statusCodeResult.StatusCode == 200) { return Ok("Xóa mã OTP hết hạn thành công"); }
                     else if(statusCodeResult.StatusCode == 404) { return NotFound("Không có mã OTP hết hạn"); }
-                    else { return BadRequest("Xóa mã OTP hết hạn thất bại"); }
                 }
-                else { return BadRequest("Xóa mã OTP hết hạn thất bại"); }
+                if (checkRemove is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, exception.ToString());
+                throw new Exception("Lỗi không xác định");
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+        [HttpGet("is-banned/{id}")]
+        public async Task<IActionResult> IsBanned(Guid id)
+        {
+            try
+            {
+                var checkBanned = await _userService.IsUserBanned(id);
+                if (checkBanned is StatusCodeResult statusCodeResult)
+                {
+                    if (statusCodeResult.StatusCode == 404) { return NotFound("Tài khoản không tồn tại"); }
+                    else if (statusCodeResult.StatusCode == 403) { return StatusCode(StatusCodes.Status403Forbidden, "Tài khoản đã bị khóa"); }
+                }
+                if (checkBanned is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, exception.ToString());
+                throw new Exception("Lỗi không xác định");
             }
             catch (Exception ex)
             {
