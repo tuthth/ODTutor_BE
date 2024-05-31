@@ -50,7 +50,8 @@ namespace Models.Entities
             // Use your preferred connection string here
             //optionsBuilder.UseSqlServer(GetConnectionStrings()).EnableSensitiveDataLogging();
             //optionsBuilder.UseSqlServer("Server=database.monoinfinity.net;uid=sa;pwd=1234567890Aa;Database=ODTutor;Encrypt=false;TrustServerCertificate=true;");
-            optionsBuilder.UseSqlServer(GetConnectionStrings());
+            //optionsBuilder.UseSqlServer(GetConnectionStrings());
+            optionsBuilder.UseSqlServer("Server=(local);uid=sa;pwd=12345;Database=ODTutor;Encrypt=false;TrustServerCertificate=true;");
 
         }
         private string GetConnectionStrings()
@@ -92,6 +93,7 @@ namespace Models.Entities
                 .HasOne(bt => bt.SenderWalletNavigation)
                 .WithMany(w => w.SenderBookingTransactionsNavigation)
                 .HasForeignKey(bt => bt.SenderWalletId).OnDelete(DeleteBehavior.NoAction);
+
             modelBuilder.Entity<BookingTransaction>()
                 .HasOne(bt => bt.ReceiverWalletNavigation)
                 .WithMany(w => w.ReceiverBookingTransactionsNavigation)
@@ -243,11 +245,6 @@ namespace Models.Entities
             modelBuilder.Entity<Subject>()
                 .HasKey(subj => subj.SubjectId);
 
-            modelBuilder.Entity<Subject>()
-                .HasOne(subj => subj.TutorSubjectNavigation)
-                .WithOne(ts => ts.SubjectNavigation)
-                .HasForeignKey<TutorSubject>(ts => ts.TutorSubjectId).OnDelete(DeleteBehavior.NoAction);
-
             // Tutor Entity Configuration
             modelBuilder.Entity<Tutor>()
                 .HasKey(t => t.TutorId);
@@ -332,11 +329,6 @@ namespace Models.Entities
             modelBuilder.Entity<TutorRatingImage>()
                 .HasKey(tri => tri.TutorRatingImageId);
 
-            /*            modelBuilder.Entity<TutorRatingImage>()
-                            .HasOne(tri => tri.TutorNavigation)
-                            .WithMany(t => t.TutorRatingsImagesNavigation)
-                            .HasForeignKey(tri => tri.TutorId).OnDelete(DeleteBehavior.NoAction);*/
-
             modelBuilder.Entity<TutorRatingImage>()
                 .HasOne(tri => tri.TutorRatingNavigation)
                 .WithMany(tr => tr.TutorRatingImagesNavigation)
@@ -353,8 +345,9 @@ namespace Models.Entities
 
             modelBuilder.Entity<TutorSubject>()
                 .HasOne(ts => ts.SubjectNavigation)
-                .WithOne(subj => subj.TutorSubjectNavigation)
-                .HasForeignKey<TutorSubject>(ts => ts.SubjectId).OnDelete(DeleteBehavior.NoAction);
+                .WithMany(subj => subj.TutorSubjectNavigation)
+                .HasForeignKey(ts => ts.SubjectId)
+                .OnDelete(DeleteBehavior.NoAction);
 
 
             // User Entity Configuration

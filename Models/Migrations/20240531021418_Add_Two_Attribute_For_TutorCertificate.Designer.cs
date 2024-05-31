@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Models.Entities;
 
@@ -11,9 +12,11 @@ using Models.Entities;
 namespace Models.Migrations
 {
     [DbContext(typeof(ODTutorContext))]
-    partial class ODTutorContextModelSnapshot : ModelSnapshot
+    [Migration("20240531021418_Add_Two_Attribute_For_TutorCertificate")]
+    partial class Add_Two_Attribute_For_TutorCertificate
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -692,7 +695,8 @@ namespace Models.Migrations
 
                     b.HasKey("TutorSubjectId");
 
-                    b.HasIndex("SubjectId");
+                    b.HasIndex("SubjectId")
+                        .IsUnique();
 
                     b.HasIndex("TutorId");
 
@@ -1194,8 +1198,8 @@ namespace Models.Migrations
             modelBuilder.Entity("Models.Entities.TutorSubject", b =>
                 {
                     b.HasOne("Models.Entities.Subject", "SubjectNavigation")
-                        .WithMany("TutorSubjectNavigation")
-                        .HasForeignKey("SubjectId")
+                        .WithOne("TutorSubjectNavigation")
+                        .HasForeignKey("Models.Entities.TutorSubject", "SubjectId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 

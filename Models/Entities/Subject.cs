@@ -14,7 +14,7 @@ namespace Models.Entities
         public string Content { get; set; }
         public string Note {  get; set; }
 
-        public virtual TutorSubject? TutorSubjectNavigation { get; set; }
+        public virtual ICollection<TutorSubject> TutorSubjectNavigation { get; set; }
         public virtual ICollection<StudentRequest>? StudentRequestsNavigation { get; set; }
     }
 }

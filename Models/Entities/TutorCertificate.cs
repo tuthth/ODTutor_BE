@@ -11,7 +11,8 @@ namespace Models.Entities
         public Guid TutorCertificateId { get; set; }
         public Guid TutorId { get; set; }
         public string ImageUrl { get; set; }
-
+        public string? CertificateType { get; set; }
+        public DateTime? CreateAt { get; set; }
         public virtual Tutor? TutorNavigation {  get; set; }
     }
 }

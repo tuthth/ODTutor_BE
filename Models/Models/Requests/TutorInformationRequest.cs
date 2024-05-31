@@ -16,10 +16,6 @@ namespace Models.Models.Requests
         [Required]
         public string Level { get; set; }
         [Required]
-        public decimal PricePerHour { get; set; }
-        [Required]
         public string Description { get; set; }
-        [Required]
-        public int Status { get; set; }
     }
 }
