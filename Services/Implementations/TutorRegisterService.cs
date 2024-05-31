@@ -93,7 +93,10 @@ namespace Services.Implementations
         public async Task<IActionResult> RegisterTutorSubject(Guid tutorID, List<Guid> subjectIDs)
         {
             var tutor = await _context.Tutors.Where(x => x.TutorId == tutorID).FirstOrDefaultAsync();
-            if (tutor == null) return new StatusCodeResult(404);
+            if (tutor == null)
+            {
+                throw new CrudException(HttpStatusCode.NotFound, "Tutor not found", "");
+            }
             List<TutorSubject> tutorSubjects = new List<TutorSubject>();
             try
             {
@@ -108,20 +111,18 @@ namespace Services.Implementations
                 }
                 if (tutorSubjects.Count < 0)
                 {
-                    return new StatusCodeResult(400);
+                    throw new CrudException (HttpStatusCode.BadRequest, "Subject is required", "");
                 }
                 else
                 {
                     _context.TutorSubjects.AddRange(tutorSubjects);
                     await _context.SaveChangesAsync();
-                    await _appExtension.SendMail(new MailContent()
-                    {
-                        To = tutor.UserNavigation.Email,
-                        Subject = "Yêu cầu xét duyệt môn học trở thành gia sư",
-                        Body = "Yêu cầu của bạn đã được gửi. Vui lòng đợi phản hồi qua email hoặc thông báo của hệ thống"
-                    });
-                    return new StatusCodeResult(201);
+                    throw new CrudException(HttpStatusCode.Created, "Đã ghi nhận đăng ký môn học", "");
                 }
+            }
+            catch (CrudException ex)
+            {
+                throw ex;
             }
             catch (Exception ex)
             {
@@ -177,17 +178,11 @@ namespace Services.Implementations
                 foreach (var tutorExperienceRegist in tutorExperienceRegistList)
                 {
                     TutorExperience tutorExperience = _mapper.Map<TutorExperience>(tutorExperienceRegist);
-                    tutorExperience.TutorExperienceId = new Guid();
+                    tutorExperience.TutorExperienceId = Guid.NewGuid();
                     tutorExperience.TutorId = tutorID;
                     _context.TutorExperiences.Add(tutorExperience);
                 }
                 await _context.SaveChangesAsync();
-                await _appExtension.SendMail(new MailContent()
-                {
-                    To = tutor.UserNavigation.Email,
-                    Subject = "Yêu cầu xét duyệt kinh nghiệm dạy môn học trở thành gia sư",
-                    Body = "Yêu cầu của bạn đã được gửi. Vui lòng đợi phản hồi qua email hoặc thông báo của hệ thống"
-                });
                 throw new CrudException(HttpStatusCode.Created, "Tutor Experience Created", "");
             }
             catch (CrudException ex)
@@ -202,7 +197,7 @@ namespace Services.Implementations
 
         // Check, Confirm and Send Notification
         // Step 5: Check, Confirm and Send Notification
-        public async Task<IActionResult> CheckConfirmTutorInformationAndSendNotification(Guid tutorID)
+        public async Task<IActionResult> CheckConfirmTutorInformationAndSendNotification(Guid tutorID, decimal totalPrice)
         {
             try
             {
@@ -215,6 +210,9 @@ namespace Services.Implementations
                 {
                     throw new CrudException(HttpStatusCode.BadRequest, "Tutor Subject is required", "");
                 }
+                //Update Tutor Money
+                tutor.PricePerHour = totalPrice;
+                await _context.SaveChangesAsync();
                 // Create a Tutor Action Log
                 TutorAction tutorRegister = new TutorAction();
                 tutorRegister.TutorActionId = Guid.NewGuid();
@@ -222,7 +220,9 @@ namespace Services.Implementations
                 tutorRegister.CreateAt = DateTime.Now;
                 tutorRegister.Description = "Xử lý xét duyệt gia sư";
                 tutorRegister.ActionType = 1; // "1" is Register
-                tutorRegister.Status = 0; // "0" is Pending 
+                tutorRegister.Status = 0; // "0" is Pending
+                await _context.TutorActions.AddAsync(tutorRegister);
+                await _context.SaveChangesAsync();
                 // Create a notification for user who want to become a tutor
                 Notification notification = new Notification();
                 notification.NotificationId = new Guid();

@@ -44,6 +44,7 @@ namespace Models.Entities
         public DbSet<Moderator> Moderators { get; set; }
         public DbSet<Notification> Notifications { get; set; }
         public DbSet<TutorExperience> TutorExperiences { get; set; }
+        public DbSet<TutorAction> TutorActions { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -51,8 +52,6 @@ namespace Models.Entities
             //optionsBuilder.UseSqlServer(GetConnectionStrings()).EnableSensitiveDataLogging();
             //optionsBuilder.UseSqlServer("Server=database.monoinfinity.net;uid=sa;pwd=1234567890Aa;Database=ODTutor;Encrypt=false;TrustServerCertificate=true;");
             optionsBuilder.UseSqlServer(GetConnectionStrings());
-          
-
         }
         private string GetConnectionStrings()
         {

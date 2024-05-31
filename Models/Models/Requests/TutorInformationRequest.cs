@@ -17,5 +17,7 @@ namespace Models.Models.Requests
         public string Level { get; set; }
         [Required]
         public string Description { get; set; }
+        [Required]
+        public string VideoUrl { get; set; }
     }
 }
