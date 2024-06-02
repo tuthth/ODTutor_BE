@@ -165,7 +165,7 @@ namespace API.Controllers
             }
             throw new Exception("Lỗi không xác định");
         }
-        [HttpGet("get/course-transactions/{senderID}")]
+        [HttpGet("get/course-transactions/sender/{senderID}")]
         public async Task<ActionResult<List<CourseTransaction>>> GetCourseTransactionsBySenderID(Guid senderID)
         {
             var result = await _adminService.GetCourseTransactionsBySenderId(senderID);
@@ -180,7 +180,7 @@ namespace API.Controllers
             }
             throw new Exception("Lỗi không xác định");
         }
-        [HttpGet("get/course-transactions/{receiverID}")]
+        [HttpGet("get/course-transactions/receiver.{receiverID}")]
         public async Task<ActionResult<List<CourseTransaction>>> GetCourseTransactionsByReceiverID(Guid receiverID)
         {
             var result = await _adminService.GetCourseTransactionsByReceiverId(receiverID);
@@ -195,7 +195,7 @@ namespace API.Controllers
             }
             throw new Exception("Lỗi không xác định");
         }
-        [HttpGet("get/course-transactions/{courseID}")]
+        [HttpGet("get/course-transactions/course/{courseID}")]
         public async Task<ActionResult<List<CourseTransaction>>> GetCourseTransactionsByCourseID(Guid courseID)
         {
             var result = await _adminService.GetCourseTransactionsByCourseId(courseID);

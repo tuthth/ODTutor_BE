@@ -29,15 +29,15 @@ namespace Services.Implementations
 
         public async Task<IActionResult> CreateDepositToAccount(WalletTransactionCreate transactionCreate)
         {
-            var user = _httpContextAccessor.HttpContext.User?.Claims?.FirstOrDefault(c => c.Type == "UserId")?.Value;
-            var findUser = _context.Users.FirstOrDefault(u => u.Id == Guid.Parse(user));
-            if (findUser == null)
+            var findUser = new User();
+            if (transactionCreate.Choice == (Int32)VNPayTransactionType.Deposit)
             {
-                return new StatusCodeResult(404);
-            }
-            if(transactionCreate.Choice == (Int32)VNPayTransactionType.Deposit)
-            {
-                var receiverWallet = _context.Wallets.Include(w => w.ReceiverWalletTransactionsNavigation.FirstOrDefault(w => w.ReceiverWalletId.Equals(transactionCreate.TargetId)));
+                findUser = _context.Users.FirstOrDefault(u => u.WalletNavigation.WalletId == transactionCreate.ReceiverId);
+                if (findUser == null)
+                {
+                    return new StatusCodeResult(404);
+                }
+                var receiverWallet = _context.Wallets.Include(w => w.ReceiverWalletTransactionsNavigation.FirstOrDefault(w => w.ReceiverWalletId.Equals(transactionCreate.ReceiverId)));
                 if(receiverWallet == null)
                 {
                     return new StatusCodeResult(404);
@@ -45,14 +45,14 @@ namespace Services.Implementations
                 WalletTransaction transaction = new WalletTransaction
                 {
                     WalletTransactionId = Guid.NewGuid(),
-                    SenderWalletId = new Guid(),
-                    ReceiverWalletId = transactionCreate.TargetId,
+                    SenderWalletId = (Guid)transactionCreate.SenderId,
+                    ReceiverWalletId = (Guid)transactionCreate.ReceiverId,
                     CreatedAt = DateTime.UtcNow,
                     Amount = transactionCreate.Amount,
-                    Status = (int)VNPayType.APPROVE,
+                    Status = (int)VNPayType.PENDING,
                 };
-                var receiveWallet = _context.Wallets.FirstOrDefault(w => w.WalletId == transactionCreate.TargetId);
-                receiveWallet.PendingAmount += transactionCreate.Amount;
+                var receiveWallet = _context.Wallets.FirstOrDefault(w => w.WalletId == transactionCreate.ReceiverId);
+                receiveWallet.Amount += transactionCreate.Amount;
 
                 _context.WalletTransactions.Add(transaction);
                 await _context.SaveChangesAsync();
@@ -69,14 +69,14 @@ namespace Services.Implementations
                 vnpay.AddRequestData("vnp_TmnCode", vnp_TmnCode);
                 vnpay.AddRequestData("vnp_Amount", Math.Floor(decimal.Parse(transactionCreate.Amount.ToString()) * 100).ToString());
                 vnpay.AddRequestData("vnp_BankCode", "VNBANK");
-                vnpay.AddRequestData("vnp_CreateDate", DateTime.UtcNow.ToString("yyyyMMddHHmmss"));
+                vnpay.AddRequestData("vnp_CreateDate", DateTime.Now.ToString("yyyyMMddHHmmss"));
                 vnpay.AddRequestData("vnp_CurrCode", "VND");
                 vnpay.AddRequestData("vnp_IpAddr", Utils.GetIpAddress(_httpContextAccessor));
                 vnpay.AddRequestData("vnp_Locale", "vn");
-                vnpay.AddRequestData("vnp_OrderInfo", "Thanh toán đơn hàng: " + transaction.WalletTransactionId);
+                vnpay.AddRequestData("vnp_OrderInfo", "Thanh toan don hang " + transaction.WalletTransactionId.ToString().Replace("-",""));
                 vnpay.AddRequestData("vnp_OrderType", "other");
                 vnpay.AddRequestData("vnp_ReturnUrl", vnp_Returnurl);
-                vnpay.AddRequestData("vnp_TxnRef", transaction.WalletTransactionId.ToString());
+                vnpay.AddRequestData("vnp_TxnRef", DateTime.Now.Ticks.ToString());
 
                 string paymentUrl = vnpay.CreateRequestUrl(vnp_Url, vnp_HashSecret);
                 await _appExtension.SendMail(new MailContent()
@@ -90,9 +90,14 @@ namespace Services.Implementations
                     PaymentUrl = paymentUrl
                 });
             }
-            else if(transactionCreate.Choice == (Int32)VNPayTransactionType.Withdraw)
+            else if (transactionCreate.Choice == (Int32)VNPayTransactionType.Withdraw)
             {
-                var senderWallet = _context.Wallets.Include(w => w.SenderWalletTransactionsNavigation.FirstOrDefault(w => w.SenderWalletId.Equals(transactionCreate.TargetId)));
+                findUser = _context.Users.FirstOrDefault(u => u.WalletNavigation.WalletId == transactionCreate.SenderId);
+                if (findUser == null)
+                {
+                    return new StatusCodeResult(404);
+                }
+                var senderWallet = _context.Wallets.Include(w => w.SenderWalletTransactionsNavigation.FirstOrDefault(w => w.SenderWalletId.Equals(transactionCreate.SenderId)));
                 if (senderWallet == null)
                 {
                     return new StatusCodeResult(404);
@@ -100,18 +105,18 @@ namespace Services.Implementations
                 WalletTransaction transaction = new WalletTransaction
                 {
                     WalletTransactionId = Guid.NewGuid(),
-                    SenderWalletId = transactionCreate.TargetId,
-                    ReceiverWalletId = new Guid(),
+                    SenderWalletId = (Guid)transactionCreate.SenderId,
+                    ReceiverWalletId = (Guid)transactionCreate.ReceiverId, // This should be the admin's wallet ID
                     CreatedAt = DateTime.UtcNow,
                     Amount = transactionCreate.Amount,
-                    Status = (int)VNPayType.APPROVE,
+                    Status = (int)VNPayType.PENDING,
                 };
-                var sendWallet = _context.Wallets.FirstOrDefault(w => w.WalletId == transactionCreate.TargetId);
-                if(sendWallet.Amount < transactionCreate.Amount)
+                var sendWallet = _context.Wallets.FirstOrDefault(w => w.WalletId == transactionCreate.SenderId);
+                if (sendWallet.Amount < transactionCreate.Amount)
                 {
                     return new StatusCodeResult(409);
                 }
-                sendWallet.PendingAmount -= transactionCreate.Amount;
+                sendWallet.Amount -= transactionCreate.Amount; // Deduct the amount from the sender's wallet
 
                 _context.WalletTransactions.Add(transaction);
                 await _context.SaveChangesAsync();
@@ -128,14 +133,14 @@ namespace Services.Implementations
                 vnpay.AddRequestData("vnp_TmnCode", vnp_TmnCode);
                 vnpay.AddRequestData("vnp_Amount", Math.Floor(decimal.Parse(transactionCreate.Amount.ToString()) * 100).ToString());
                 vnpay.AddRequestData("vnp_BankCode", "VNBANK");
-                vnpay.AddRequestData("vnp_CreateDate", DateTime.UtcNow.ToString("yyyyMMddHHmmss"));
+                vnpay.AddRequestData("vnp_CreateDate", DateTime.Now.ToString("yyyyMMddHHmmss"));
                 vnpay.AddRequestData("vnp_CurrCode", "VND");
                 vnpay.AddRequestData("vnp_IpAddr", Utils.GetIpAddress(_httpContextAccessor));
                 vnpay.AddRequestData("vnp_Locale", "vn");
-                vnpay.AddRequestData("vnp_OrderInfo", "Thanh toán đơn hàng: " + transaction.WalletTransactionId);
+                vnpay.AddRequestData("vnp_OrderInfo", "Thanh toan don hang " + transaction.WalletTransactionId.ToString().Replace("-", ""));
                 vnpay.AddRequestData("vnp_OrderType", "other");
                 vnpay.AddRequestData("vnp_ReturnUrl", vnp_Returnurl);
-                vnpay.AddRequestData("vnp_TxnRef", transaction.WalletTransactionId.ToString());
+                vnpay.AddRequestData("vnp_TxnRef", DateTime.Now.Ticks.ToString());
 
                 string paymentUrl = vnpay.CreateRequestUrl(vnp_Url, vnp_HashSecret);
                 await _appExtension.SendMail(new MailContent()
@@ -161,18 +166,18 @@ namespace Services.Implementations
                 Body = "Giao dịch không hợp lệ, vui lòng kiểm tra lại thông tin."
             });
             return new StatusCodeResult(500);
-        }
+            }
 
-        public async Task<IActionResult> CreateDepositVnPayBooking(BookingTransactionCreate transactionCreate, Guid sendUserId, Guid receiverUserId)
+        public async Task<IActionResult> CreateDepositVnPayBooking(BookingTransactionCreate transactionCreate)
         {
             var user = _httpContextAccessor.HttpContext.User?.Claims?.FirstOrDefault(c => c.Type == "UserId")?.Value;
-            var findUser = _context.Users.FirstOrDefault(u => u.Id == Guid.Parse(user));
+            var findUser = _context.Users.FirstOrDefault(u => u.Id == transactionCreate.SenderId);
             if(findUser == null)
             {
                 return new StatusCodeResult(404);
             }
-            var senderWallet = _context.Wallets.Include(w => w.SenderCourseTransactionsNavigation.FirstOrDefault(w => w.SenderWalletId.Equals(sendUserId)));
-            var receiverWallet = _context.Wallets.Include(w => w.ReceiverCourseTransactionsNavigation.FirstOrDefault(w => w.ReceiverWalletId.Equals(receiverUserId)));
+            var senderWallet = _context.Wallets.Include(w => w.SenderCourseTransactionsNavigation.FirstOrDefault(w => w.SenderWalletId.Equals(transactionCreate.SenderId)));
+            var receiverWallet = _context.Wallets.Include(w => w.ReceiverCourseTransactionsNavigation.FirstOrDefault(w => w.ReceiverWalletId.Equals(transactionCreate.ReceiverId)));
             if (senderWallet == null || receiverWallet == null)
             {
                 return new StatusCodeResult(404);
@@ -181,8 +186,8 @@ namespace Services.Implementations
             BookingTransaction transaction = new BookingTransaction
             {
                 BookingTransactionId = Guid.NewGuid(),
-                SenderWalletId = sendUserId,
-                ReceiverWalletId = receiverUserId,
+                SenderWalletId = (Guid)transactionCreate.SenderId,
+                ReceiverWalletId = (Guid)transactionCreate.ReceiverId,
                 BookingId = transactionCreate.BookingId, 
                 CreatedAt = DateTime.UtcNow,
                 Amount = transactionCreate.Amount,
@@ -192,14 +197,14 @@ namespace Services.Implementations
             WalletTransaction senderTransaction = new WalletTransaction
             {
                 WalletTransactionId = transaction.BookingTransactionId,
-                SenderWalletId = sendUserId,
-                ReceiverWalletId = receiverUserId,
+                SenderWalletId = (Guid)transactionCreate.SenderId,
+                ReceiverWalletId = (Guid)transactionCreate.ReceiverId,
                 Amount = transactionCreate.Amount,
                 CreatedAt = DateTime.UtcNow,
                 Status = (int)VNPayType.PENDING
             };
-            var sendWallet = _context.Wallets.FirstOrDefault(w => w.WalletId == sendUserId);
-            var receiveWallet = _context.Wallets.FirstOrDefault(w => w.WalletId == receiverUserId);
+            var sendWallet = _context.Wallets.FirstOrDefault(w => w.WalletId == transactionCreate.SenderId);
+            var receiveWallet = _context.Wallets.FirstOrDefault(w => w.WalletId == transactionCreate.ReceiverId);
             if(sendWallet.Amount < transactionCreate.Amount)
             {
                 await _appExtension.SendMail(new MailContent()
@@ -224,16 +229,15 @@ namespace Services.Implementations
             });
             return new StatusCodeResult(201);
         }
-        public async Task<IActionResult> CreateDepositVnPayCourse(CourseTransactionCreate transactionCreate, Guid sendUserId, Guid receiverUserId)
+        public async Task<IActionResult> CreateDepositVnPayCourse(CourseTransactionCreate transactionCreate)
         {
-            var user = _httpContextAccessor.HttpContext.User?.Claims?.FirstOrDefault(c => c.Type == "UserId")?.Value;
-            var findUser = _context.Users.FirstOrDefault(u => u.Id == Guid.Parse(user));
+            var findUser = _context.Users.FirstOrDefault(u => u.Id == transactionCreate.SenderId);
             if (findUser == null)
             {
                 return new StatusCodeResult(404);
             }
-            var senderWallet = _context.Wallets.Include(w => w.SenderCourseTransactionsNavigation.FirstOrDefault(w => w.SenderWalletId.Equals(sendUserId)));
-            var receiverWallet = _context.Wallets.Include(w => w.ReceiverCourseTransactionsNavigation.FirstOrDefault(w => w.ReceiverWalletId.Equals(receiverUserId)));
+            var senderWallet = _context.Wallets.Include(w => w.SenderCourseTransactionsNavigation.FirstOrDefault(w => w.SenderWalletId.Equals(transactionCreate.SenderId)));
+            var receiverWallet = _context.Wallets.Include(w => w.ReceiverCourseTransactionsNavigation.FirstOrDefault(w => w.ReceiverWalletId.Equals(transactionCreate.ReceiverId)));
             if (senderWallet == null || receiverWallet == null)
             {
                 return new StatusCodeResult(404);
@@ -242,8 +246,8 @@ namespace Services.Implementations
             CourseTransaction transaction = new CourseTransaction
             {
                 CourseTransactionId = Guid.NewGuid(),
-                SenderWalletId = sendUserId,
-                ReceiverWalletId = receiverUserId,
+                SenderWalletId = (Guid)transactionCreate.SenderId,
+                ReceiverWalletId = (Guid)transactionCreate.ReceiverId,
                 CourseId = transactionCreate.CourseId,
                 CreatedAt = DateTime.UtcNow,
                 Amount = transactionCreate.Amount,
@@ -253,14 +257,14 @@ namespace Services.Implementations
             WalletTransaction senderTransaction = new WalletTransaction
             {
                 WalletTransactionId = transaction.CourseTransactionId,
-                SenderWalletId = sendUserId,
-                ReceiverWalletId = receiverUserId,
+                SenderWalletId = (Guid)transactionCreate.SenderId,
+                ReceiverWalletId = (Guid)transactionCreate.ReceiverId,
                 Amount = transactionCreate.Amount,
                 CreatedAt = DateTime.UtcNow,
                 Status = (int)VNPayType.PENDING
             };
-            var sendWallet = _context.Wallets.FirstOrDefault(w => w.WalletId == sendUserId);
-            var receiveWallet = _context.Wallets.FirstOrDefault(w => w.WalletId == receiverUserId);
+            var sendWallet = _context.Wallets.FirstOrDefault(w => w.WalletId == transactionCreate.SenderId);
+            var receiveWallet = _context.Wallets.FirstOrDefault(w => w.WalletId == transactionCreate.ReceiverId);
             if (sendWallet.Amount < transactionCreate.Amount)
             {
                 await _appExtension.SendMail(new MailContent()
@@ -353,6 +357,8 @@ namespace Services.Implementations
         public async Task<IActionResult> UpdateTransaction(Guid walletTransactionId, int choice, int updateStatus)
         {
             var wallet = await _context.WalletTransactions.FirstOrDefaultAsync(w => w.WalletTransactionId == walletTransactionId);
+            var sender = await _context.Users.FirstOrDefaultAsync(u => u.WalletNavigation.WalletId == wallet.SenderWalletId);
+            var receiver = await _context.Users.FirstOrDefaultAsync(u => u.WalletNavigation.WalletId == wallet.ReceiverWalletId);
             //only accept pending transaction
             if (wallet == null)
             {
@@ -385,13 +391,13 @@ namespace Services.Implementations
                     _context.WalletTransactions.Update(wallet);
                     await _appExtension.SendMail(new MailContent()
                     {
-                        To = wallet.SenderWalletNavigation.UserNavigation.Email,
+                        To = sender.Email,
                         Subject = "Xác nhận giao dịch",
                         Body = "Giao dịch booking của bạn đã được xác nhận. Mã giao dịch: " + wallet.WalletTransactionId
                     });
                     await _appExtension.SendMail(new MailContent()
                     {
-                        To = wallet.ReceiverWalletNavigation.UserNavigation.Email,
+                        To = receiver.Email,
                         Subject = "Xác nhận giao dịch",
                         Body = "Giao dịch booking của bạn đã được xác nhận. Mã giao dịch: " + wallet.WalletTransactionId
                     });
@@ -417,13 +423,13 @@ namespace Services.Implementations
                     _context.WalletTransactions.Update(wallet);
                     await _appExtension.SendMail(new MailContent()
                     {
-                        To = wallet.SenderWalletNavigation.UserNavigation.Email,
+                        To = sender.Email,
                         Subject = "Xác nhận giao dịch",
                         Body = "Giao dịch course của bạn đã được xác nhận. Mã giao dịch: " + wallet.WalletTransactionId
                     });
                     await _appExtension.SendMail(new MailContent()
                     {
-                        To = wallet.ReceiverWalletNavigation.UserNavigation.Email,
+                        To = receiver.Email,
                         Subject = "Xác nhận giao dịch",
                         Body = "Giao dịch course của bạn đã được xác nhận. Mã giao dịch: " + wallet.WalletTransactionId
                     });
@@ -434,13 +440,13 @@ namespace Services.Implementations
                     _context.WalletTransactions.Update(wallet);
                     await _appExtension.SendMail(new MailContent()
                     {
-                        To = wallet.SenderWalletNavigation.UserNavigation.Email,
+                        To = sender.Email,
                         Subject = "Xác nhận giao dịch",
                         Body = "Giao dịch ví của bạn đã được xác nhận. Mã giao dịch: " + wallet.WalletTransactionId
                     });
                     await _appExtension.SendMail(new MailContent()
                     {
-                        To = wallet.ReceiverWalletNavigation.UserNavigation.Email,
+                        To = receiver.Email,
                         Subject = "Xác nhận giao dịch",
                         Body = "Giao dịch ví của bạn đã được xác nhận. Mã giao dịch: " + wallet.WalletTransactionId
                     });
@@ -466,13 +472,13 @@ namespace Services.Implementations
                     _context.WalletTransactions.Update(wallet);
                     await _appExtension.SendMail(new MailContent()
                     {
-                        To = wallet.SenderWalletNavigation.UserNavigation.Email,
+                        To = sender.Email,
                         Subject = "Xác nhận giao dịch",
                         Body = "Giao dịch booking của bạn đã được hủy bỏ. Mã giao dịch: " + wallet.WalletTransactionId
                     });
                     await _appExtension.SendMail(new MailContent()
                     {
-                        To = wallet.ReceiverWalletNavigation.UserNavigation.Email,
+                        To = receiver.Email,
                         Subject = "Xác nhận giao dịch",
                         Body = "Giao dịch booking của bạn đã được hủy bỏ. Mã giao dịch: " + wallet.WalletTransactionId
                     });
@@ -494,13 +500,13 @@ namespace Services.Implementations
                     _context.WalletTransactions.Update(wallet);
                     await _appExtension.SendMail(new MailContent()
                     {
-                        To = wallet.SenderWalletNavigation.UserNavigation.Email,
+                        To = sender.Email,
                         Subject = "Xác nhận giao dịch",
                         Body = "Giao dịch course của bạn đã được hủy bỏ. Mã giao dịch: " + wallet.WalletTransactionId
                     });
                     await _appExtension.SendMail(new MailContent()
                     {
-                        To = wallet.ReceiverWalletNavigation.UserNavigation.Email,
+                        To = receiver.Email,
                         Subject = "Xác nhận giao dịch",
                         Body = "Giao dịch course của bạn đã được hủy bỏ. Mã giao dịch: " + wallet.WalletTransactionId
                     });
@@ -511,13 +517,13 @@ namespace Services.Implementations
                     _context.WalletTransactions.Update(wallet);
                     await _appExtension.SendMail(new MailContent()
                     {
-                        To = wallet.SenderWalletNavigation.UserNavigation.Email,
+                        To = sender.Email,
                         Subject = "Xác nhận giao dịch",
                         Body = "Giao dịch ví của bạn đã được hủy bỏ. Mã giao dịch: " + wallet.WalletTransactionId
                     });
                     await _appExtension.SendMail(new MailContent()
                     {
-                        To = wallet.ReceiverWalletNavigation.UserNavigation.Email,
+                        To = receiver.Email,
                         Subject = "Xác nhận giao dịch",
                         Body = "Giao dịch ví của bạn đã được hủy bỏ. Mã giao dịch: " + wallet.WalletTransactionId
                     });

@@ -14,6 +14,8 @@ namespace Models.Models.Requests
         public decimal Amount { get; set; }
         [Required]
         public string RedirectUrl { get; set; } = null!;
+        public Guid? SenderId { get; set; }
+        public Guid? ReceiverId { get; set; }
     }
     public class BookingTransactionCreate : TransactionCreate
     {
@@ -27,7 +29,6 @@ namespace Models.Models.Requests
     }
     public class WalletTransactionCreate : TransactionCreate
     {
-        public Guid TargetId { get; set; }
         public int Choice { get; set; }
     }
 }

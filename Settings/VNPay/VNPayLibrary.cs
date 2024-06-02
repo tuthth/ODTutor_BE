@@ -143,7 +143,7 @@ namespace Settings.VNPay
                 ipAddress = httpContextAccessor.HttpContext.Request.Headers["HTTP_X_FORWARDED_FOR"];
 
                 if (string.IsNullOrEmpty(ipAddress) || (ipAddress.ToLower() == "unknown") || ipAddress.Length > 45)
-                    ipAddress = httpContextAccessor.HttpContext.Request.Headers["REMOTE_ADDR"];
+                    ipAddress = httpContextAccessor.HttpContext.Connection.RemoteIpAddress.ToString();
             }
             catch (Exception ex)
             {

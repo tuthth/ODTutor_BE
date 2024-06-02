@@ -23,100 +23,107 @@ namespace API.Controllers
         //[Authorize(Roles = "Student")]
         public async Task<IActionResult> DepositVnpayBooking([FromBody] WalletTransactionCreate transactionCreate)
         {
-            try
+            var transaction = await _transactionService.CreateDepositToAccount(transactionCreate);
+            if (transaction is IActionResult actionResult)
             {
-                //var userId = _userService.GetUserId(HttpContext);
-                var transaction = await _transactionService.CreateDepositToAccount(transactionCreate);
-                if (transaction is StatusCodeResult statusCodeResult)
+                if (actionResult is StatusCodeResult statusCodeResult)
                 {
-                    if (statusCodeResult.StatusCode == 404) { return NotFound("Không tìm thấy ví"); }
-                    else if(statusCodeResult.StatusCode == 406) { return StatusCode(StatusCodes.Status406NotAcceptable, "Giao dịch không rõ trạng thái"); }
-                    else if (statusCodeResult.StatusCode == 409) { return Conflict("Số dư tài khoản không đủ thực hiện giao dịch"); }
-                    else if(statusCodeResult.StatusCode == 500) { return StatusCode(StatusCodes.Status500InternalServerError, "Lỗi hệ thống"); }
+                    {
+                        if (statusCodeResult.StatusCode == 404) { return NotFound("Không tìm thấy ví"); }
+                        else if (statusCodeResult.StatusCode == 406) { return StatusCode(StatusCodes.Status406NotAcceptable, "Giao dịch không rõ trạng thái"); }
+                        else if (statusCodeResult.StatusCode == 409) { return Conflict("Số dư tài khoản không đủ thực hiện giao dịch"); }
+                        else if (statusCodeResult.StatusCode == 500) { return StatusCode(StatusCodes.Status500InternalServerError, "Lỗi hệ thống"); }
+                    }
                 }
-                else if (transaction is JsonResult okObjectResult)
+                if (actionResult is JsonResult okObjectResult)
                 {
                     return Ok(okObjectResult.Value);
                 }
-                return BadRequest("Lấy thông tin thanh toán thất bại");
             }
-            catch (Exception ex)
+            else if (transaction is Exception exception)
             {
-                return BadRequest(ex.Message);
+                return StatusCode(StatusCodes.Status500InternalServerError, exception.Message);
             }
+            throw new Exception("Lỗi không xác định");
         }
         [HttpPost("booking")]
         //[Authorize(Roles = "Student")]
         public async Task<IActionResult> DepositVnpayBooking([FromBody] BookingTransactionCreate transactionCreate)
         {
-            try
+            var transaction = await _transactionService.CreateDepositVnPayBooking(transactionCreate);
+            if (transaction is IActionResult actionResult)
             {
-                //var userId = _userService.GetUserId(HttpContext);
-                var transaction = await _transactionService.CreateDepositVnPayBooking(transactionCreate, Guid.NewGuid(), Guid.NewGuid());
-                if (transaction is StatusCodeResult statusCodeResult)
+                if (actionResult is StatusCodeResult statusCodeResult)
                 {
                     if (statusCodeResult.StatusCode == 404) { return NotFound("Không tìm thấy ví"); }
+                    else if (statusCodeResult.StatusCode == 406) { return StatusCode(StatusCodes.Status406NotAcceptable, "Giao dịch không rõ trạng thái"); }
                     else if (statusCodeResult.StatusCode == 409) { return Conflict("Số dư tài khoản không đủ thực hiện giao dịch"); }
+                    else if (statusCodeResult.StatusCode == 500) { return StatusCode(StatusCodes.Status500InternalServerError, "Lỗi hệ thống"); }
                 }
-                else if (transaction is JsonResult okObjectResult)
+                if (actionResult is JsonResult okObjectResult)
                 {
                     return Ok(okObjectResult.Value);
                 }
-                return BadRequest("Lấy thông tin thanh toán thất bại");
             }
-            catch (Exception ex)
+            else if (transaction is Exception exception)
             {
-                return BadRequest(ex.Message);
+                return StatusCode(StatusCodes.Status500InternalServerError, exception.Message);
             }
+            throw new Exception("Lỗi không xác định");
         }
+
         [HttpPost("course")]
         //[Authorize(Roles = "Student")]
         public async Task<IActionResult> DepositVnpayCourse([FromBody] CourseTransactionCreate transactionCreate)
         {
-            try
+            var transaction = await _transactionService.CreateDepositVnPayCourse(transactionCreate);
+            if (transaction is IActionResult actionResult)
             {
-                //var userId = _userService.GetUserId(HttpContext);
-                var transaction = await _transactionService.CreateDepositVnPayCourse(transactionCreate, Guid.NewGuid(), Guid.NewGuid());
-                if (transaction is StatusCodeResult statusCodeResult)
+                if (actionResult is StatusCodeResult statusCodeResult)
                 {
                     if (statusCodeResult.StatusCode == 404) { return NotFound("Không tìm thấy ví"); }
+                    else if (statusCodeResult.StatusCode == 406) { return StatusCode(StatusCodes.Status406NotAcceptable, "Giao dịch không rõ trạng thái"); }
                     else if (statusCodeResult.StatusCode == 409) { return Conflict("Số dư tài khoản không đủ thực hiện giao dịch"); }
+                    else if (statusCodeResult.StatusCode == 500) { return StatusCode(StatusCodes.Status500InternalServerError, "Lỗi hệ thống"); }
                 }
-                else if (transaction is JsonResult okObjectResult)
+                if (actionResult is JsonResult okObjectResult)
                 {
                     return Ok(okObjectResult.Value);
                 }
-                return BadRequest("Lấy thông tin thanh toán thất bại");
             }
-            catch (Exception ex)
+            else if (transaction is Exception exception)
             {
-                return BadRequest(ex.Message);
+                return StatusCode(StatusCodes.Status500InternalServerError, exception.Message);
             }
+            throw new Exception("Lỗi không xác định");
         }
+
         [HttpPost("update")]
         public async Task<IActionResult> UpdateTransaction([FromBody] UpdateTransactionRequest updateTransactionRequest)
         {
-            try
+            var transaction = await _transactionService.UpdateTransaction(updateTransactionRequest.TransactionId, updateTransactionRequest.Choice, updateTransactionRequest.UpdateStatus);
+            if (transaction is IActionResult actionResult)
             {
-                var transaction = await _transactionService.UpdateTransaction(updateTransactionRequest.TransactionId, updateTransactionRequest.Choice, updateTransactionRequest.UpdateStatus);
-                if (transaction is StatusCodeResult statusCodeResult)
+                if (actionResult is StatusCodeResult statusCodeResult)
                 {
                     if (statusCodeResult.StatusCode == 404) { return NotFound("Không tìm thấy giao dịch"); }
-                    else if (statusCodeResult.StatusCode == 409) { return Conflict("Giao dịch đã được xử lý"); }
                     else if (statusCodeResult.StatusCode == 406) { return StatusCode(StatusCodes.Status406NotAcceptable, "Giao dịch không rõ trạng thái"); }
+                    else if (statusCodeResult.StatusCode == 409) { return Conflict("Giao dịch đã được xử lý"); }
+                    else if (statusCodeResult.StatusCode == 500) { return StatusCode(StatusCodes.Status500InternalServerError, "Lỗi hệ thống"); }
                     else if (statusCodeResult.StatusCode == 200) { return Ok("Cập nhật giao dịch thành công"); }
                 }
-                else if (transaction is JsonResult okObjectResult)
+                if (actionResult is JsonResult okObjectResult)
                 {
                     return Ok(okObjectResult.Value);
                 }
-                return BadRequest("Cập nhật giao dịch thất bại");
             }
-            catch (Exception ex)
+            else if (transaction is Exception exception)
             {
-                return BadRequest(ex.Message);
+                return StatusCode(StatusCodes.Status500InternalServerError, exception.Message);
             }
+            throw new Exception("Lỗi không xác định");
         }
+
 
         [HttpGet("get/booking")]
         [Authorize(Roles = "Admin")]

@@ -19,26 +19,29 @@ namespace API.Controllers
         [HttpPost("otp/email")]
         public async Task<IActionResult> SendMail([FromBody] SendOTPRequest sendOTPRequest)
         {
-            string test = null;
-            try
+            var checkEmail = await _sendMailService.SendEmailTokenAsync(sendOTPRequest.Email.Trim());
+            if (checkEmail is IActionResult actionResult)
             {
-                var checkEmail = await _sendMailService.SendEmailTokenAsync(sendOTPRequest.Email.Trim());
-                if (checkEmail is StatusCodeResult statusCodeResult)
+                if (actionResult is StatusCodeResult statusCodeResult)
                 {
-                    if (statusCodeResult.StatusCode == 409) { return Conflict("Email đã được xác thực trước đó hoặc tài khoản không tồn tại"); }
-                    else if (statusCodeResult.StatusCode == 201) { return StatusCode(StatusCodes.Status201Created,"Gửi mã xác thực thành công"); }
-                    else if(statusCodeResult.StatusCode == 204) { return NoContent(); }
-                    else { return StatusCode(StatusCodes.Status500InternalServerError, "Xảy ra lỗi ở server"); }
+                    if (statusCodeResult.StatusCode == 404) { return NotFound("Không tìm thấy ví"); }
+                    else if (statusCodeResult.StatusCode == 406) { return StatusCode(StatusCodes.Status406NotAcceptable, "Giao dịch không rõ trạng thái"); }
+                    else if (statusCodeResult.StatusCode == 409) { return Conflict("Số dư tài khoản không đủ thực hiện giao dịch"); }
+                    else if (statusCodeResult.StatusCode == 500) { return StatusCode(StatusCodes.Status500InternalServerError, "Lỗi hệ thống"); }
+                    else if (statusCodeResult.StatusCode == 201) { return StatusCode(StatusCodes.Status201Created, "Gửi mã xác thực thành công"); }
+                    else if (statusCodeResult.StatusCode == 204) { return NoContent(); }
                 }
-                if (checkEmail is Exception ex) {
-                    test = ex.ToString();
-                    return BadRequest(ex.ToString()); }
-                else throw new Exception(test);
+                if (actionResult is JsonResult okObjectResult)
+                {
+                    return Ok(okObjectResult.Value);
+                }
             }
-            catch (Exception ex)
+            else if (checkEmail is Exception exception)
             {
-                return BadRequest(ex.ToString());
+                return StatusCode(StatusCodes.Status500InternalServerError, exception.Message);
             }
+            throw new Exception("Lỗi không xác định");
         }
+
     }
 }

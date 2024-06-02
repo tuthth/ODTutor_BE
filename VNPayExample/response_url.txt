@@ -1,0 +1,4 @@
+http://localhost:16262/vnpay_return.aspx?vnp_Amount=4000000000&vnp_BankCode=NCB&vnp_BankTranNo=VNP14440055&vnp_CardType=ATM&vnp_OrderInfo=Thanh+toan+don+hang+0ffadb23496d4fb7975628234b956d03&vnp_PayDate=20240602115416&vnp_ResponseCode=00&vnp_TmnCode=8T28BC14&vnp_TransactionNo=14440055&vnp_TransactionStatus=00&vnp_TxnRef=638529260090309109&vnp_SecureHash=baa7aaf53427bf9a14c203575b7f2e0735a89aee67a2c735681f52ed7536fd4412532b61ab69d318d7be737da5a05636dc15bc2b38d321e09cb70563724bd595
+
+Để gửi số tiền thanh toán là 40,000,000 VND thì merchant cần nhân thêm 100 lần (khử phần thập phân), sau đó gửi sang VNPAY là: 4000000000
+
