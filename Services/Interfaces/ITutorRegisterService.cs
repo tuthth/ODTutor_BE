@@ -19,5 +19,6 @@ namespace Services.Interfaces
         Task<IActionResult> RegisterTutorExperience(Guid tutorID, List<TutorExperienceRequest> tutorExperienceRegistList);
         Task<IActionResult> CheckConfirmTutorInformationAndSendNotification(Guid tutorID, decimal totalPrice);
         Task<ActionResult<TutorRegisterReponse>> GetTutorRegisterInformtaion(Guid tutorID);
+        Task<IActionResult> CreateTutorSlotSchedule(Guid tutorID, TutorRegistScheduleRequest tutorRegistScheduleRequest);
     }   
 }

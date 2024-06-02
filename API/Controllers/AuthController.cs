@@ -17,32 +17,6 @@ namespace API.Controllers
             _userService = userService;
         }
 
-/*        [HttpPost("login")]
-        public async Task<IActionResult> Login([FromBody] LoginRequest loginRequest, [FromQuery] int role)
-        {
-            try
-            {
-                var checkLogin = await _userService.Login(loginRequest, role);
-                if (checkLogin is StatusCodeResult statusCodeResult)
-                {
-                    if (statusCodeResult.StatusCode == 404) { return NotFound("Tài khoản không tồn tại"); }
-                    else if (statusCodeResult.StatusCode == 409) { return Conflict("Vui lòng đăng xuất ở thiết bị khác trước khi đăng nhập"); }
-                    else if (statusCodeResult.StatusCode == 403) { return StatusCode(403, "Tài khoản đã bị khóa"); }
-                    else if (statusCodeResult.StatusCode == 200) { return Ok("Đăng nhập thành công"); }
-                    else { return BadRequest("Đăng nhập thất bại"); }
-                }
-                else if (checkLogin is JsonResult okObjectResult)
-                {
-                    return Ok(okObjectResult.Value);
-                }
-                else { return BadRequest("Đăng nhập thất bại"); }
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
-        }*/
-
         // Login V2
         [HttpPost("login-v2")]
         public async Task<LoginAccountResponse> LoginV2([FromBody] LoginRequest user)

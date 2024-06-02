@@ -21,13 +21,14 @@ namespace Models.Entities
         public virtual User? UserNavigation {get; set;}
         public virtual ICollection<Promotion> PromotionsNavigation { get; set; }
         public virtual ICollection<Course>? CoursesNavigation { get; set; }
-        public virtual ICollection<TutorSchedule>? TutorSchedulesNavigation { get; set; }
         public virtual ICollection<TutorCertificate>? TutorCertificatesNavigation { get; set; }
         public virtual ICollection<TutorSubject>? TutorSubjectsNavigation { get; set; }
         public virtual ICollection<TutorRating>? TutorRatingsNavigation { get; set; }
         public virtual ICollection<TutorAction>? TutorActionsNavigation { get; set; }
         public virtual ICollection<TutorExperience>? TutorExperiencesNavigation { get; set; }
-        //public virtual ICollection<TutorRatingImage>? TutorRatingsImagesNavigation { get; set; }
+        public virtual ICollection<TutorWeekAvailable>? TutorWeekAvailablesNavigation { get; set; }
+        public virtual ICollection<TutorSlotAvailable>? TutorSlotAvailablesNavigation { get; set; }
+        public virtual ICollection<TutorDateAvailable>? TutorDateAvailablesNavigation { get; set; }
         public virtual ICollection<Booking>? BookingsNavigation {get; set;}
     }
 }

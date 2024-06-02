@@ -62,6 +62,14 @@ namespace API.Controllers
             return response;
         }
 
+        //Create Tutor Slot Schedule
+        [HttpPost("create/slot-schedule/{tutorID}")]
+        public async Task<IActionResult> createTutorSlotSchedule(Guid tutorID, [FromBody] TutorRegistScheduleRequest tutorRegistScheduleRequest)
+        {
+            var response = await _tutorRegisterService.CreateTutorSlotSchedule(tutorID, tutorRegistScheduleRequest);
+            return response;
+        }
+
         // Get All Tutor Register Information
         [HttpGet("get/tutor-register/{tutorID}")]
         public async Task<ActionResult<TutorRegisterReponse>> getAllTutorRegisterInformation(Guid tutorID)

@@ -21,6 +21,7 @@ namespace Models.Mappings
             CreateMap<User, AccountResponse>();
             CreateMap<User, UserAccountResponse>();
             CreateMap<TutorExperienceRequest,TutorExperience>();
+            CreateMap<TutorDateAvailable, TutorRegistDate>();
         }
     }
 }

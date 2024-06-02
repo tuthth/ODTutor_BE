@@ -245,6 +245,53 @@ namespace Services.Implementations
             }
         }
 
+        // Register Tutor Schedule
+        // Step 6: Create Schedule for Tutor
+        public async Task<IActionResult> CreateTutorSlotSchedule ( Guid tutorID, TutorRegistScheduleRequest tutorRegistScheduleRequest)
+        {
+            var tutor = await _context.Tutors.Where(x => x.TutorId == tutorID).FirstOrDefaultAsync();
+            if (tutor == null)
+            {
+                throw new CrudException(HttpStatusCode.NotFound, "Tutor not found", "");
+            }
+            try
+            {
+                // Create a new TutorWeekAvailable
+                TutorWeekAvailable tutorWeekAvailable = new TutorWeekAvailable();
+                tutorWeekAvailable.TutorWeekAvailableId = Guid.NewGuid();
+                tutorWeekAvailable.TutorId = tutorID;
+                tutorWeekAvailable.StartTime = tutorRegistScheduleRequest.StartTime;
+                tutorWeekAvailable.EndTime = tutorRegistScheduleRequest.EndTime;
+                _context.TutorWeekAvailables.Add(tutorWeekAvailable);
+                await _context.SaveChangesAsync();
+                // Create a new TutorDateAvailable
+                foreach (var tutorRegistDate in tutorRegistScheduleRequest.dateList)
+                {
+                    TutorDateAvailable tutorDateAvailable = new TutorDateAvailable();
+                    tutorDateAvailable.TutorDateAvailableID = Guid.NewGuid();
+                    tutorDateAvailable.TutorID = tutorID;
+                    tutorDateAvailable.TutorWeekAvailableID = tutorWeekAvailable.TutorWeekAvailableId;
+                    tutorDateAvailable.Date = tutorRegistDate.Date;
+                    tutorDateAvailable.DayOfWeek = tutorRegistDate.DayOfWeek;
+                    tutorDateAvailable.StartTime = tutorRegistDate.StartTime;
+                    tutorDateAvailable.EndTime = tutorRegistDate.EndTime;
+                    _context.TutorDateAvailables.Add(tutorDateAvailable);
+                    await _context.SaveChangesAsync();
+                    // Generate Slot Based On Date
+                    var slotList = await generateSlotBasedOnProvidedDate(tutorID, tutorDateAvailable);
+                }
+                throw new CrudException(HttpStatusCode.Created, "Tutor Schedule Created", "");
+            }
+            catch (CrudException ex)
+            {
+                throw ex;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.ToString());
+            }
+        }
+
         // Get Tutor Register Information --- Đây là nơi để dành cho những người xử lý tutor và duyệt request
         /*Đây là phần để lấy thông tin để admin hay moderator có thể hiểu và kiểm tra*/
         public async Task<ActionResult<TutorRegisterReponse>> GetTutorRegisterInformtaion(Guid tutorID)
@@ -407,6 +454,47 @@ namespace Services.Implementations
             }
         }
 
+        // Create Tutor Slot Based On Date 
+        private async Task<List<TutorSlotAvailable>> generateSlotBasedOnProvidedDate( Guid tutorID,TutorDateAvailable date)
+        {   
+            List<TutorSlotAvailable> slotList = new List<TutorSlotAvailable>();
+            try
+            {
+                TimeSpan StartTime = date.StartTime;
+                TimeSpan EndTime = date.EndTime;
+                while (StartTime < EndTime)
+                {
+                    TutorSlotAvailable tutorSlot = new TutorSlotAvailable();
+                    tutorSlot.TutorSlotAvailableID = Guid.NewGuid();
+                    tutorSlot.TutorDateAvailableID = date.TutorDateAvailableID;
+                    tutorSlot.TutorID = tutorID;
+                    tutorSlot.StartTime = StartTime;
+                    tutorSlot.Status = 0; // "0" is Available
+                    tutorSlot.IsBooked = false;
+
+                    slotList.Add(tutorSlot);
+
+                    StartTime = StartTime.Add(new TimeSpan(1, 0, 0));
+
+                    // Check the time in next slot is over the end time 
+                    if (StartTime >= EndTime)
+                    {
+                        break;
+                    }
+                }
+                await _context.TutorSlotAvailables.AddRangeAsync(slotList);
+                await _context.SaveChangesAsync();
+                return slotList;
+            }
+            catch(CrudException ex)
+            {
+                throw ex;
+            }
+            catch(Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
         // Accept Tutor + Notification
 
         // Deny Tutor + Notification

@@ -47,23 +47,6 @@ namespace Services.Implementations
             }
             return Guid.Empty;
         }
-        // Login Version 1
-        /* public async Task<IActionResult> Login(LoginRequest loginRequest, int role)
-         {
-             var user = _context.Users.FirstOrDefault(u => (u.Email == loginRequest.Email || u.Username == loginRequest.Username) && u.Password.Equals(loginRequest.Password));
-             if (user == null) return new StatusCodeResult(404);
-             if (user.Active == false) return new StatusCodeResult(409); //user is not active in system
-             if (user.Banned == true) return new StatusCodeResult(403); //user is banned
-
-             if (user != null)
-             {
-                 return await GenerateJwtToken(user, role);
-             }
-             else
-             {
-                 return new StatusCodeResult(400);
-             }
-         }*/
 
         // Login Version 2
         public async Task<LoginAccountResponse> LoginV2(LoginRequest loginRequest)

@@ -33,7 +33,6 @@ namespace Models.Entities
         public DbSet<TutorCertificate> TutorCertificates { get; set; }
         public DbSet<TutorRating> TutorRatings { get; set; }
         public DbSet<TutorRatingImage> TutorRatingImages { get; set; }
-        public DbSet<TutorSchedule> TutorSchedules { get; set; }
         public DbSet<TutorSubject> TutorSubjects { get; set; }
         public DbSet<User> Users { get; set; }
         public DbSet<UserAuthentication> UserAuthentications { get; set; }
@@ -45,13 +44,17 @@ namespace Models.Entities
         public DbSet<Notification> Notifications { get; set; }
         public DbSet<TutorExperience> TutorExperiences { get; set; }
         public DbSet<TutorAction> TutorActions { get; set; }
+        public DbSet<TutorWeekAvailable> TutorWeekAvailables { get; set; }
+        public DbSet<TutorDateAvailable> TutorDateAvailables { get; set; }
+        public DbSet<TutorSlotAvailable> TutorSlotAvailables { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             // Use your preferred connection string here
             //optionsBuilder.UseSqlServer(GetConnectionStrings()).EnableSensitiveDataLogging();
             //optionsBuilder.UseSqlServer("Server=database.monoinfinity.net;uid=sa;pwd=1234567890Aa;Database=ODTutor;Encrypt=false;TrustServerCertificate=true;");
-            optionsBuilder.UseSqlServer(GetConnectionStrings());
+            /*optionsBuilder.UseSqlServer(GetConnectionStrings());*/
+            optionsBuilder.UseSqlServer("Server=(local);uid=sa;pwd=12345;Database=ODTutor;Encrypt=false;TrustServerCertificate=true;");
         }
         private string GetConnectionStrings()
         {
@@ -284,10 +287,6 @@ namespace Models.Entities
                 .HasForeignKey(b => b.TutorId).OnDelete(DeleteBehavior.NoAction);
 
             modelBuilder.Entity<Tutor>()
-                .HasMany(t => t.TutorSchedulesNavigation)
-                .WithOne(ts => ts.TutorNavigation)
-                .HasForeignKey(ts => ts.TutorId).OnDelete(DeleteBehavior.NoAction);
-            modelBuilder.Entity<Tutor>()
                 .HasMany(t => t.TutorExperiencesNavigation)
                 .WithOne(te => te.TutorNavigation)
                 .HasForeignKey(te => te.TutorId).OnDelete(DeleteBehavior.NoAction);
@@ -467,15 +466,6 @@ namespace Models.Entities
                .WithMany(w => w.ReceiverWalletTransactionsNavigation)
                .HasForeignKey(wt => wt.ReceiverWalletId).OnDelete(DeleteBehavior.NoAction);
 
-            // Configure TutorSchedule entity
-            modelBuilder.Entity<TutorSchedule>()
-                .HasKey(ts => ts.TutorScheduleId);
-
-            modelBuilder.Entity<TutorSchedule>()
-                .HasOne(ts => ts.TutorNavigation)
-                .WithMany(t => t.TutorSchedulesNavigation)
-                .HasForeignKey(ts => ts.TutorId).OnDelete(DeleteBehavior.NoAction);
-
             //Configure StudentRequest entity
 
             modelBuilder.Entity<StudentRequest>()
@@ -509,8 +499,6 @@ namespace Models.Entities
                 .WithOne(u => u.ModeratorNavigation)
                 .HasForeignKey<Moderator>(m => m.UserId).OnDelete(DeleteBehavior.NoAction);
 
-
-
             // Configure TutorExperience entity
             modelBuilder.Entity<TutorExperience>()
                 .HasKey(te => te.TutorExperienceId);
@@ -529,6 +517,48 @@ namespace Models.Entities
                 .HasOne(ta => ta.TutorNavigation)
                 .WithMany(t => t.TutorActionsNavigation)
                 .HasForeignKey(ta => ta.TutorId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            // Configure TutorWeekAvailable entity
+            modelBuilder.Entity<TutorWeekAvailable>()
+                .HasKey(twa => twa.TutorWeekAvailableId);
+
+            modelBuilder.Entity<TutorWeekAvailable>()
+                .HasOne(twa => twa.Tutor)
+                .WithMany(t => t.TutorWeekAvailablesNavigation)
+                .HasForeignKey(twa => twa.TutorId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            // Configure TutorDateAvailable entity
+            modelBuilder.Entity<TutorDateAvailable>()
+                .HasKey(tda => tda.TutorDateAvailableID);
+
+            modelBuilder.Entity<TutorDateAvailable>()
+                .HasOne(t => t.Tutor)
+                .WithMany(t => t.TutorDateAvailablesNavigation)
+                .HasForeignKey(tda => tda.TutorID)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<TutorDateAvailable>()
+                .HasOne(t => t.TutorWeekAvailable)
+                .WithMany(twa => twa.TutorDateAvailables)
+                .HasForeignKey(tda => tda.TutorWeekAvailableID)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            // Configure TutorSlotAvailable entity
+            modelBuilder.Entity<TutorSlotAvailable>()
+                .HasKey(tsa => tsa.TutorSlotAvailableID);
+
+            modelBuilder.Entity<TutorSlotAvailable>()
+                .HasOne(t => t.TutorDateAvailable)
+                .WithMany(tda => tda.TutorSlotAvailables)
+                .HasForeignKey(tsa => tsa.TutorDateAvailableID)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<TutorSlotAvailable>()
+                .HasOne(t => t.Tutor)
+                .WithMany(t => t.TutorSlotAvailablesNavigation)
+                .HasForeignKey(tsa => tsa.TutorID)
                 .OnDelete(DeleteBehavior.NoAction);
         }
 

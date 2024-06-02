@@ -627,54 +627,7 @@ namespace Services.Implementations
                 throw new Exception(ex.ToString());
             }
         }
-        public async Task<ActionResult<List<TutorSchedule>>> GetAllTutorSchedules()
-        {
-            try
-            {
-                var tutorSchedules = await _context.TutorSchedules.ToListAsync();
-                if (tutorSchedules == null)
-                {
-                    return new StatusCodeResult(404);
-                }
-                return tutorSchedules;
-            }
-            catch (Exception ex)
-            {
-                throw new Exception(ex.ToString());
-            }
-        }
-        public async Task<ActionResult<TutorSchedule>> GetTutorSchedule(Guid id)
-        {
-            try
-            {
-                var tutorSchedule = await _context.TutorSchedules.FirstOrDefaultAsync(c => c.TutorScheduleId == id);
-                if (tutorSchedule == null)
-                {
-                    return new StatusCodeResult(404);
-                }
-                return tutorSchedule;
-            }
-            catch (Exception ex)
-            {
-                throw new Exception(ex.ToString());
-            }
-        }
-        public async Task<ActionResult<List<TutorSchedule>>> GetTutorSchedulesByTutorId(Guid id)
-        {
-            try
-            {
-                var tutorSchedules = await _context.TutorSchedules.Where(c => c.TutorId == id).ToListAsync();
-                if (tutorSchedules == null)
-                {
-                    return new StatusCodeResult(404);
-                }
-                return tutorSchedules;
-            }
-            catch (Exception ex)
-            {
-                throw new Exception(ex.ToString());
-            }
-        }
+
         public async Task<ActionResult<List<UserBlock>>> GetAllUserBlocks()
         {
             try

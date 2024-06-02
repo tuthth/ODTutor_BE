@@ -19,7 +19,6 @@ namespace Models.Entities
         public int Status { get; set; }
         public string? Description { get; set; }
         public string? GoogleMeetUrl {get; set;}
-
         public virtual Student? StudentNavigation {  get; set; }
         public virtual Tutor? TutorNavigation { get; set; }
         public virtual ICollection<TutorRating>? TutorRatingsNavigation { get; set; }

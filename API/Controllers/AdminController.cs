@@ -585,51 +585,7 @@ namespace API.Controllers
             }
             throw new Exception("Lỗi không xác định");
         }
-        [HttpGet("get/tutor-schedules")]
-        public async Task<ActionResult<List<TutorSchedule>>> GetAllTutorSchedules()
-        {
-            var result = await _adminService.GetAllTutorSchedules();
-            if (result is ActionResult<List<TutorSchedule>> tutorSchedules)
-            {
-                if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
-                {
-                    if (statusCodeResult.StatusCode == 404) { return NotFound("Không tìm thấy lịch học gia sư"); }
-                    if (statusCodeResult.StatusCode == 200) return Ok(tutorSchedules);
-                }
-                if ((IActionResult)result.Result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, exception.ToString());
-            }
-            throw new Exception("Lỗi không xác định");
-        }
-        [HttpGet("get/tutor-schedule/{tutorScheduleID}")]
-        public async Task<ActionResult<TutorSchedule>> GetTutorSchedule(Guid tutorScheduleID)
-        {
-            var result = await _adminService.GetTutorSchedule(tutorScheduleID);
-            if (result is ActionResult<TutorSchedule> tutorSchedule)
-            {
-                if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
-                {
-                    if (statusCodeResult.StatusCode == 404) { return NotFound("Không tìm thấy lịch học gia sư"); }
-                    if (statusCodeResult.StatusCode == 200) return Ok(tutorSchedule);
-                }
-                if ((IActionResult)result.Result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, exception.ToString());
-            }
-            throw new Exception("Lỗi không xác định");
-        }
-        [HttpGet("get/tutor-schedules/tutor/{tutorID}")]
-        public async Task<ActionResult<List<TutorSchedule>>> GetTutorSchedulesByTutorID(Guid tutorID)
-        {
-            var result = await _adminService.GetTutorSchedulesByTutorId(tutorID);
-            if (result is ActionResult<List<TutorSchedule>> tutorSchedules)
-            {
-                if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
-                {
-                    if (statusCodeResult.StatusCode == 404) { return NotFound("Không tìm thấy lịch học gia sư"); }
-                    if (statusCodeResult.StatusCode == 200) return Ok(tutorSchedules);
-                }
-                if ((IActionResult)result.Result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, exception.ToString());
-            }
-            throw new Exception("Lỗi không xác định");
-        }
+
         [HttpGet("get/user-blocks")]
         public async Task<ActionResult<List<UserBlock>>> GetAllUserBlocks()
         {
