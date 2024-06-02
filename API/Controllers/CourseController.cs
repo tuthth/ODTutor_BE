@@ -12,6 +12,11 @@ namespace API.Controllers
     {
         private readonly ICourseService _courseService;
 
+        public CourseController(ICourseService courseService)
+        {
+            _courseService = courseService;
+        }
+
         [HttpPost("create")]
         public async Task<IActionResult> CreateCourse([FromBody] CourseRequest courseRequest)
         {
