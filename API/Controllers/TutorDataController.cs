@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Models.Models.Requests;
 using Models.Models.Views;
 using Services.Interfaces;
 
@@ -20,6 +21,13 @@ namespace API.Controllers
             if(tutors == null) return NotFound();
             return tutors;
         }
+        [HttpGet("get/all/v2")]
+        public async Task<ActionResult<List<TutorAccountResponse>>> GetAvailaibleV2([FromQuery] PagingRequest pagingRequest)
+        {
+            var tutors = await _tutorDataService.GetAvalaibleTutorsV2(pagingRequest);
+            return Ok(tutors);
+        }
+
         [HttpGet("get/{tutorId}")]
         public async Task<ActionResult<TutorAccountResponse>> GetTutorById(Guid tutorId)
         {
