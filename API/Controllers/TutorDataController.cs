@@ -35,5 +35,12 @@ namespace API.Controllers
             if (tutor == null) return StatusCode(StatusCodes.Status404NotFound, "Không tìm thấy tài khoản, hoặc tài khoản bạn tìm đang bị đình chỉ");
             return tutor;
         }
+
+        [HttpGet("get/rating/{tutorId}")]
+        public async Task<ActionResult<TutorRatingResponse>> GetTutorRating(Guid tutorId)
+        {
+            var tutorRating = await _tutorDataService.GetTutorRating(tutorId);
+            return tutorRating;
+        }
     }
 }

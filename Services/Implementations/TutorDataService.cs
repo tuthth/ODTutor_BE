@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Models.Entities;
+using Models.Enumerables;
 using Models.Models.Requests;
 using Models.Models.Views;
 using Models.PageHelper;
@@ -20,6 +21,7 @@ namespace Services.Implementations
         public TutorDataService(ODTutorContext context, IMapper mapper) : base(context, mapper)
         {
         }
+
         // Get All Tutors Version 1
         public async Task<ActionResult<List<TutorAccountResponse>>> GetAvalaibleTutors()
         {
@@ -139,5 +141,63 @@ namespace Services.Implementations
             if (tutor == null) return new StatusCodeResult(404);
             return tutor;
         }
+
+        // Get Tutor Rating By Tutor ID
+        public async Task<ActionResult<TutorRatingResponse>> GetTutorRating(Guid tutorId)
+        {
+            try
+            {   
+                var response = new TutorRatingResponse();
+                if (tutorId == null)
+                {
+                    throw new CrudException(HttpStatusCode.BadRequest, "Tutor ID is required or invalid", "Tutor ID is required");
+                }
+                // Get All Tutor Rating
+                var tutorRatings = await _context.TutorRatings.Where(tr => tr.TutorId == tutorId).ToListAsync();
+
+                // Get All Tutor Rating One Star
+                var tutorRatingOneStart = tutorRatings.Where(tr => tr.RatePoints == (int)TutorRatingStartEnum.OneStart).ToList();
+
+                // Get All Tutor Rating Two Star
+                var tutorRatingTwoStart = tutorRatings.Where(tr => tr.RatePoints == (int)TutorRatingStartEnum.TwoStart).ToList();
+
+                // Get All Tutor Rating Three Star
+                var tutorRatingThreeStart = tutorRatings.Where(tr => tr.RatePoints == (int)TutorRatingStartEnum.ThreeStart).ToList();
+
+                // Get All Tutor Rating Four Star
+                var tutorRatingFourStart = tutorRatings.Where(tr => tr.RatePoints == (int)TutorRatingStartEnum.FourStart).ToList();
+
+                // Get All Tutor Rating Five Star
+                var tutorRatingFiveStart = tutorRatings.Where(tr => tr.RatePoints == (int)TutorRatingStartEnum.FiveStart).ToList();
+
+                // Calculate Sum Total Rating
+                var totalRating = tutorRatings.Sum(tr => tr.RatePoints);
+                // Calculate Number Of Total Rating
+                var totalRatingNumber = tutorRatings.Count();
+                // Calculate Total End Rating
+                if (totalRating == 0)
+                {
+                    throw new CrudException(HttpStatusCode.NotFound, "Hiện tại không ghi nhận feedback từ khách hàng!1", "");
+                }
+                var totalEndRating = (double) totalRating / totalRatingNumber;      
+                response.TutorId = tutorId;
+                response.TotalRatingNumber = tutorRatings.Count();
+                response.TotalRatingNumberOneStart = tutorRatingOneStart.Count();
+                response.TotalRatingNumberTwoStart = tutorRatingTwoStart.Count();
+                response.TotalRatingNumberThreeStart = tutorRatingThreeStart.Count();
+                response.TotalRatingNumberFourStart = tutorRatingFourStart.Count();
+                response.TotalRatingNumberFiveStart = tutorRatingFiveStart.Count();
+                response.TotalEndRating = totalEndRating;
+                return response;
+            }
+            catch (CrudException ex)
+            {
+                throw ex;
+            } catch (Exception ex)
+            {
+                throw new CrudException(HttpStatusCode.InternalServerError, "Get Tutor Rating Error", ex.Message);
+            }
+        }
+
     }
 }
