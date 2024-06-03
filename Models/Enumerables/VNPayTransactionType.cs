@@ -10,6 +10,7 @@ namespace Models.Enumerables
     {
         Unknown,
         Deposit,
-        Withdraw
+        Withdraw,
+        Upgrade
     }
 }

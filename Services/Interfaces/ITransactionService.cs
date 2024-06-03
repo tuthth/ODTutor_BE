@@ -13,6 +13,7 @@ namespace Services.Interfaces
     {
         Task<IActionResult> CreateDepositVnPayBooking(BookingTransactionCreate transactionCreate);
         Task<IActionResult> CreateDepositVnPayCourse(CourseTransactionCreate transactionCreate);
+        Task<IActionResult> UpgradeAccount(WalletTransactionCreate transactionCreate);
         Task<IActionResult> CreateDepositToAccount(WalletTransactionCreate transactionCreate);
         Task<BookingTransaction> GetBookingTransactionById(Guid transactionId);
         Task<CourseTransaction> GetCourseTransactionById(Guid courseId);

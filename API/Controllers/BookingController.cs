@@ -6,6 +6,8 @@ using Services.Interfaces;
 
 namespace API.Controllers
 {
+    [Route("api/[controller]")]
+    [ApiController]
     public class BookingController : ControllerBase
     {
        private readonly IBookingService _bookingService;
@@ -73,6 +75,9 @@ namespace API.Controllers
             }
             throw new Exception("Lỗi không xác định");
         }
+        /// <summary>
+        ///         Booking status: 1 ( Learning ), 2 ( Finsihed ), 3 ( Deleted ), 4 ( Pending )
+        /// </summary>
         [HttpPost("create/booking")]
         public async Task<IActionResult> CreateBooking(BookingRequest bookingRequest)
         {

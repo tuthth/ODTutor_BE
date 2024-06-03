@@ -69,6 +69,7 @@ namespace API.Configurations
         {
             services.AddSwaggerGen(c =>
             {
+                c.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, $"{Assembly.GetExecutingAssembly().GetName().Name}.xml"));
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "On-Demand Tutor Service Interface", Description = "APIs for ODTutor Application", Version = "v1" });
                 c.DescribeAllParametersInCamelCase();
                 c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
