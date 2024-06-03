@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Models.Entities;
+using Models.Enumerables;
 using Models.Models.Emails;
 using Models.Models.Requests;
 using Models.Models.Views;
@@ -252,7 +253,11 @@ namespace Services.Implementations
             var tutor = await _context.Tutors.Where(x => x.TutorId == tutorID).FirstOrDefaultAsync();
             if (tutor == null)
             {
-                throw new CrudException(HttpStatusCode.NotFound, "Tutor not found", "");
+                throw new CrudException(HttpStatusCode.NotFound,"Tutor not found", "");
+            }
+            if (tutorRegistScheduleRequest.StartTime >= tutorRegistScheduleRequest.EndTime)
+            {
+                throw new CrudException(HttpStatusCode.BadRequest, "Start time must be less than end time", "");
             }
             try
             {
@@ -327,6 +332,90 @@ namespace Services.Implementations
                 throw new Exception(ex.Message);
             }
         }
+
+        // Approval Tutor Register 
+        public async Task<IActionResult> ApproveTheTutorRegister(Guid tutorActionId, Guid approvalID)
+        {
+            try
+            {
+                TutorAction tutorAction = _context.TutorActions.FirstOrDefault(ta => ta.TutorActionId == tutorActionId);
+                if (tutorAction == null)
+                {
+                    throw new CrudException(HttpStatusCode.BadRequest, "Not Found TutorAction", "");
+                }
+                tutorAction.ModeratorId = approvalID;
+                tutorAction.ReponseDate = DateTime.Now;
+                tutorAction.Status = (Int32)TutorActionEnum.Accept;
+                await _context.SaveChangesAsync();
+
+                // Change the Status Of Tutor
+                Tutor tutor = _context.Tutors.FirstOrDefault(t => t.TutorId == tutorAction.TutorId);
+                tutor.Status = (Int32)TutorEnum.Active;
+                await _context.SaveChangesAsync();
+
+                // Create a notification for Tutor
+                Notification notification = new Notification();
+                notification.NotificationId = Guid.NewGuid();
+                notification.UserId = tutor.UserId;
+                notification.Title = "Yêu cầu xét duyệt trở thành gia sư đã được chấp nhận";
+                notification.Content = "Yêu cầu của bạn đã được chấp nhận. Bạn đã trở thành gia sư trên hệ thống";
+                notification.CreatedAt = DateTime.Now;
+                notification.Status = (Int32)NotificationEnum.Active;
+                await _context.Notifications.AddAsync(notification);
+                await _context.SaveChangesAsync();
+                throw new CrudException(HttpStatusCode.OK, "Tutor Approved", "");
+            }
+            catch (CrudException ex)
+            {
+                throw ex;
+            }
+            catch (Exception ex)
+            {
+                throw new CrudException(HttpStatusCode.InternalServerError, "System Error", "");
+            }
+        }
+
+        // Deny Tutor Register
+        public async Task<IActionResult> DenyTheTutorRegister (Guid tutorActionId, Guid denyID)
+        {
+            try
+            {
+                TutorAction tutorAction = _context.TutorActions.FirstOrDefault(ta => ta.TutorActionId == tutorActionId);
+                if (tutorAction == null)
+                {
+                    throw new CrudException(HttpStatusCode.BadRequest, "Not Found TutorAction", "");
+                }
+                tutorAction.ModeratorId = denyID;
+                tutorAction.ReponseDate = DateTime.Now;
+                tutorAction.Status = (Int32)TutorActionEnum.Reject;
+                await _context.SaveChangesAsync();
+
+                // Change the Status Of Tutor
+                Tutor tutor = _context.Tutors.FirstOrDefault(t => t.TutorId == tutorAction.TutorId);
+                tutor.Status = (Int32)TutorEnum.Inactive;
+                await _context.SaveChangesAsync();
+
+                // Create a notification for Tutor
+                Notification notification = new Notification();
+                notification.NotificationId = Guid.NewGuid();
+                notification.UserId = tutor.UserId;
+                notification.Title = "Yêu cầu xét duyệt trở thành gia sư đã bị từ chối";
+                notification.Content = "Yêu cầu của bạn đã bị từ chối. Vui lòng liên hệ với hệ thống để biết thêm thông tin";
+                notification.CreatedAt = DateTime.Now;
+                notification.Status = (Int32)NotificationEnum.Deleted;
+                await _context.Notifications.AddAsync(notification);
+                await _context.SaveChangesAsync();
+                throw new CrudException(HttpStatusCode.OK, "Tutor Denied", "");
+            }
+            catch (CrudException ex)
+            {
+                throw ex;
+            }
+            catch (Exception ex)
+            {
+                throw new CrudException(HttpStatusCode.InternalServerError, "System Error", "");
+            }
+        }   
 
         /*-------Internal Site---------*/
 
@@ -495,8 +584,5 @@ namespace Services.Implementations
                 throw new Exception(ex.Message);
             }
         }
-        // Accept Tutor + Notification
-
-        // Deny Tutor + Notification
     }
 }

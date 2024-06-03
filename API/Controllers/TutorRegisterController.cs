@@ -84,7 +84,21 @@ namespace API.Controllers
             throw new Exception("Xảy ra lỗi không xác định");
         }
 
+        // Approve Tutor Register
+        [HttpPost("approve/{tutorActionId}/{approvalID}")]
+        public async Task<IActionResult> approveTutorRegister(Guid tutorActionId, Guid approvalID)
+        {
+            var result = await _tutorRegisterService.ApproveTheTutorRegister(tutorActionId, approvalID);
+            return result;
+        }
 
+        // Deny Tutor Register
+        [HttpPost("deny/{tutorActionId}/{denyID}")]
+        public async Task<IActionResult> denyTutorRegister(Guid tutorActionId, Guid denyID)
+        {
+            var result = await _tutorRegisterService.DenyTheTutorRegister(tutorActionId, denyID);
+            return result;
+        }
     }
 
 }
