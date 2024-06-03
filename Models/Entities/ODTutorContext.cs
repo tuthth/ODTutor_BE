@@ -18,7 +18,7 @@ namespace Models.Entities
         }
         public DbSet<Booking> Bookings { get; set; }
         public DbSet<BookingTransaction> BookingTransactions { get; set; }
-        public DbSet<Course> Courses { get; set; }
+        public DbSet<Course> Courses {get; set;}
         public DbSet<CourseOutline> CourseOutlines { get; set; }
         public DbSet<CoursePromotion> CoursePromotions { get; set; }
         public DbSet<CourseTransaction> CourseTransactions { get; set; }

@@ -16,6 +16,9 @@ namespace API.Controllers
         {
             _courseService = courseService;
         }
+        /// <summary>
+        ///         Course status: 1 ( Active ), 2 (Inactive), 3 (Deleted)
+        /// </summary>
 
         [HttpPost("create")]
         public async Task<IActionResult> CreateCourse([FromBody] CourseRequest courseRequest)

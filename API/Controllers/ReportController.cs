@@ -6,6 +6,8 @@ using Services.Interfaces;
 
 namespace API.Controllers
 {
+    [Route("api/[controller]")]
+    [ApiController]
     public class ReportController : ControllerBase
     {
         private readonly IReportService _reportService;
@@ -14,6 +16,10 @@ namespace API.Controllers
         {
             _reportService = reportService;
         }
+        /// <summary>
+        ///         Report enum: 1 (Finished), 2 (Processing), 3 (Cancelled)
+        /// </summary>
+
         [HttpPost("create")]
         public async Task<IActionResult> CreateReport(ReportRequest reportRequest) {
             var result = await _reportService.CreateReport(reportRequest);
@@ -45,6 +51,10 @@ namespace API.Controllers
             if (result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, exception.ToString());
             throw new Exception("Lỗi không xác định");
         }
+        /// <summary>
+        ///             Report action enum: 1 (SevenDays), 2 (ThirtyDays), 3 (NinetyDays), 4 (Lifetime - 30 years)
+        /// </summary>
+       
         [HttpPost("action")]
         public async Task<IActionResult> MakeActionReport(ReportAction action)
         {

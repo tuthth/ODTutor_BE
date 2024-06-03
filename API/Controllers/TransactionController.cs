@@ -19,6 +19,9 @@ namespace API.Controllers
             _transactionService = transactionService;
             //_userService = userService;
         }
+        /// <summary>
+        ///         Transaction choice: 1 ( Deposit ), 2 ( Withdraw )
+        /// </summary>
         [HttpPost("wallet")]
         //[Authorize(Roles = "Student")]
         public async Task<IActionResult> DepositVnpayBooking([FromBody] WalletTransactionCreate transactionCreate)
@@ -31,6 +34,35 @@ namespace API.Controllers
                     {
                         if (statusCodeResult.StatusCode == 404) { return NotFound("Không tìm thấy ví"); }
                         else if (statusCodeResult.StatusCode == 406) { return StatusCode(StatusCodes.Status406NotAcceptable, "Giao dịch không rõ trạng thái"); }
+                        else if (statusCodeResult.StatusCode == 409) { return Conflict("Số dư tài khoản không đủ thực hiện giao dịch"); }
+                        else if (statusCodeResult.StatusCode == 500) { return StatusCode(StatusCodes.Status500InternalServerError, "Lỗi hệ thống"); }
+                    }
+                }
+                if (actionResult is JsonResult okObjectResult)
+                {
+                    return Ok(okObjectResult.Value);
+                }
+            }
+            else if (transaction is Exception exception)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, exception.Message);
+            }
+            throw new Exception("Lỗi không xác định");
+        }
+        /// <summary>
+        ///         Transaction choice: 3 ( Premium ), not equal 3 == error 406
+        /// </summary>
+        [HttpPost("premium")]
+        public async Task<IActionResult> UpgradeAccount([FromBody] WalletTransactionCreate transactionCreate)
+        {
+            var transaction = await _transactionService.UpgradeAccount(transactionCreate);
+            if (transaction is IActionResult actionResult)
+            {
+                if (actionResult is StatusCodeResult statusCodeResult)
+                {
+                    {
+                        if (statusCodeResult.StatusCode == 404) { return NotFound("Không tìm thấy ví"); }
+                        else if (statusCodeResult.StatusCode == 406) { return StatusCode(StatusCodes.Status406NotAcceptable, "Chỉ phục vụ giao dịch nâng cấp tài khoản"); }
                         else if (statusCodeResult.StatusCode == 409) { return Conflict("Số dư tài khoản không đủ thực hiện giao dịch"); }
                         else if (statusCodeResult.StatusCode == 500) { return StatusCode(StatusCodes.Status500InternalServerError, "Lỗi hệ thống"); }
                     }
@@ -97,6 +129,9 @@ namespace API.Controllers
             }
             throw new Exception("Lỗi không xác định");
         }
+        /// <summary>
+        /// Update choice: 1 ( Booking ), 2 ( Course ), 3 ( Wallet ); Update status: 0 ( Approve ), 1 ( Pending ) (Auto error), 2 ( Reject )
+        /// </summary>
 
         [HttpPost("update")]
         public async Task<IActionResult> UpdateTransaction([FromBody] UpdateTransactionRequest updateTransactionRequest)
@@ -124,6 +159,9 @@ namespace API.Controllers
             throw new Exception("Lỗi không xác định");
         }
 
+        /// <summary>
+        /// VNpay Type status for wallet transaction: 0 (Approve), 1 (Pending), 2 (Reject)
+        /// </summary>
 
         [HttpGet("get/booking")]
         [Authorize(Roles = "Admin")]

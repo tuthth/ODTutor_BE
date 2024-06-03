@@ -14,6 +14,7 @@ using Models.Entities;
 using Models.Enumerables;
 using Microsoft.EntityFrameworkCore;
 using Models.Models.Emails;
+using NuGet.Protocol.Plugins;
 
 namespace Services.Implementations
 {
@@ -38,7 +39,7 @@ namespace Services.Implementations
                     return new StatusCodeResult(404);
                 }
                 var receiverWallet = _context.Wallets.Include(w => w.ReceiverWalletTransactionsNavigation.FirstOrDefault(w => w.ReceiverWalletId.Equals(transactionCreate.ReceiverId)));
-                if(receiverWallet == null)
+                if (receiverWallet == null)
                 {
                     return new StatusCodeResult(404);
                 }
@@ -52,8 +53,8 @@ namespace Services.Implementations
                     Status = (int)VNPayType.PENDING,
                 };
                 var receiveWallet = _context.Wallets.FirstOrDefault(w => w.WalletId == transactionCreate.ReceiverId);
-                receiveWallet.Amount += transactionCreate.Amount;
-
+                receiveWallet.PendingAmount += transactionCreate.Amount;
+                _context.Wallets.Update(receiveWallet);
                 _context.WalletTransactions.Add(transaction);
                 await _context.SaveChangesAsync();
 
@@ -73,7 +74,7 @@ namespace Services.Implementations
                 vnpay.AddRequestData("vnp_CurrCode", "VND");
                 vnpay.AddRequestData("vnp_IpAddr", Utils.GetIpAddress(_httpContextAccessor));
                 vnpay.AddRequestData("vnp_Locale", "vn");
-                vnpay.AddRequestData("vnp_OrderInfo", "Thanh toan don hang " + transaction.WalletTransactionId.ToString().Replace("-",""));
+                vnpay.AddRequestData("vnp_OrderInfo", "Thanh toan don hang " + transaction.WalletTransactionId.ToString().Replace("-", ""));
                 vnpay.AddRequestData("vnp_OrderType", "other");
                 vnpay.AddRequestData("vnp_ReturnUrl", vnp_Returnurl);
                 vnpay.AddRequestData("vnp_TxnRef", DateTime.Now.Ticks.ToString());
@@ -116,8 +117,8 @@ namespace Services.Implementations
                 {
                     return new StatusCodeResult(409);
                 }
-                sendWallet.Amount -= transactionCreate.Amount; // Deduct the amount from the sender's wallet
-
+                sendWallet.PendingAmount -= transactionCreate.Amount; // Deduct the amount from the sender's wallet
+                _context.Wallets.Update(sendWallet);
                 _context.WalletTransactions.Add(transaction);
                 await _context.SaveChangesAsync();
 
@@ -155,7 +156,7 @@ namespace Services.Implementations
                     PaymentUrl = paymentUrl
                 });
             }
-            else if(transactionCreate.Choice == (Int32)VNPayTransactionType.Unknown)
+            else if (transactionCreate.Choice == (Int32)VNPayTransactionType.Unknown)
             {
                 return new StatusCodeResult(406);
             }
@@ -166,13 +167,59 @@ namespace Services.Implementations
                 Body = "Giao dịch không hợp lệ, vui lòng kiểm tra lại thông tin."
             });
             return new StatusCodeResult(500);
+        }
+
+        public async Task<IActionResult> UpgradeAccount(WalletTransactionCreate transactionCreate)
+        {
+            if(transactionCreate.Choice != (Int32)VNPayTransactionType.Upgrade)
+            {
+                return new StatusCodeResult(406);
             }
+            var findUser = _context.Users.FirstOrDefault(u => u.Id == transactionCreate.SenderId);
+            if(findUser == null)
+            {
+                return new StatusCodeResult(404);
+            }
+            var senderWallet = _context.Wallets.Include(w => w.SenderCourseTransactionsNavigation.FirstOrDefault(w => w.SenderWalletId.Equals(transactionCreate.SenderId)));
+            var receiverWallet = _context.Wallets.Include(w => w.ReceiverCourseTransactionsNavigation.FirstOrDefault(w => w.ReceiverWalletId.Equals(transactionCreate.ReceiverId)));
+            if (senderWallet == null || receiverWallet == null)
+            {
+                return new StatusCodeResult(404);
+            }
+            WalletTransaction transaction = new WalletTransaction
+            {
+                WalletTransactionId = Guid.NewGuid(),
+                SenderWalletId = (Guid)transactionCreate.SenderId,
+                ReceiverWalletId = (Guid)transactionCreate.ReceiverId,
+                CreatedAt = DateTime.UtcNow,
+                Amount = transactionCreate.Amount,
+                Status = (int)VNPayType.APPROVE,
+            };
+            var receiveWallet = _context.Wallets.FirstOrDefault(w => w.WalletId == transactionCreate.ReceiverId);
+            receiveWallet.Amount += transactionCreate.Amount;
+            var sendWallet = _context.Wallets.FirstOrDefault(w => w.WalletId == transactionCreate.SenderId);
+            sendWallet.Amount -= transactionCreate.Amount;
+
+            _context.WalletTransactions.Add(transaction);
+            _context.Wallets.Update(receiveWallet);
+            _context.Wallets.Update(sendWallet);
+            findUser.IsPremium = true;
+            _context.Users.Update(findUser);
+            await _context.SaveChangesAsync();
+            await _appExtension.SendMail(new MailContent()
+            {
+                To = findUser.Email,
+                Subject = "Nâng cấp tài khoản",
+                Body = "Tài khoản của bạn đã được nâng cấp thành Premium. Hãy truy cập hệ thống để trải nghiệm đầy đủ tính năng. \nMã giao dịch: " + transaction.WalletTransactionId
+            });
+            return new StatusCodeResult(200);
+        }
 
         public async Task<IActionResult> CreateDepositVnPayBooking(BookingTransactionCreate transactionCreate)
         {
             var user = _httpContextAccessor.HttpContext.User?.Claims?.FirstOrDefault(c => c.Type == "UserId")?.Value;
             var findUser = _context.Users.FirstOrDefault(u => u.Id == transactionCreate.SenderId);
-            if(findUser == null)
+            if (findUser == null)
             {
                 return new StatusCodeResult(404);
             }
@@ -188,7 +235,7 @@ namespace Services.Implementations
                 BookingTransactionId = Guid.NewGuid(),
                 SenderWalletId = (Guid)transactionCreate.SenderId,
                 ReceiverWalletId = (Guid)transactionCreate.ReceiverId,
-                BookingId = transactionCreate.BookingId, 
+                BookingId = transactionCreate.BookingId,
                 CreatedAt = DateTime.UtcNow,
                 Amount = transactionCreate.Amount,
                 Status = (int)VNPayType.PENDING,
@@ -205,7 +252,7 @@ namespace Services.Implementations
             };
             var sendWallet = _context.Wallets.FirstOrDefault(w => w.WalletId == transactionCreate.SenderId);
             var receiveWallet = _context.Wallets.FirstOrDefault(w => w.WalletId == transactionCreate.ReceiverId);
-            if(sendWallet.Amount < transactionCreate.Amount)
+            if (sendWallet.Amount < transactionCreate.Amount)
             {
                 await _appExtension.SendMail(new MailContent()
                 {
@@ -218,6 +265,8 @@ namespace Services.Implementations
             sendWallet.PendingAmount -= transactionCreate.Amount;
             receiveWallet.PendingAmount += transactionCreate.Amount;
 
+            _context.Wallets.Update(sendWallet);
+            _context.Wallets.Update(receiveWallet);
             _context.BookingTransactions.Add(transaction);
             _context.WalletTransactions.Add(senderTransaction);
             await _context.SaveChangesAsync();
@@ -278,6 +327,9 @@ namespace Services.Implementations
             sendWallet.PendingAmount -= transactionCreate.Amount;
             receiveWallet.PendingAmount += transactionCreate.Amount;
 
+            _context.Wallets.Update(sendWallet);
+            _context.Wallets.Update(receiveWallet);
+
             _context.CourseTransactions.Add(transaction);
             _context.WalletTransactions.Add(senderTransaction);
             await _context.SaveChangesAsync();
@@ -329,7 +381,7 @@ namespace Services.Implementations
                 return new StatusCodeResult(405);
             }
             var walletTransaction = await _context.WalletTransactions.Where(a => a.SenderWalletId == Guid.Parse(user) || a.ReceiverWalletId == Guid.Parse(user)).ToListAsync();
-            if(walletTransaction == null)
+            if (walletTransaction == null)
             {
                 return new StatusCodeResult(404);
             }
@@ -368,7 +420,7 @@ namespace Services.Implementations
             {
                 return new StatusCodeResult(409);
             }
-            if(updateStatus == (Int32)VNPayType.APPROVE)
+            if (updateStatus == (Int32)VNPayType.APPROVE)
             {
                 if (choice == (Int32)UpdateTransactionType.Booking)
                 {
@@ -453,7 +505,7 @@ namespace Services.Implementations
                 }
                 else if (choice == (Int32)UpdateTransactionType.Unknown) { return new StatusCodeResult(406); }
             }
-            else if(updateStatus == (Int32)VNPayType.REJECT)
+            else if (updateStatus == (Int32)VNPayType.REJECT)
             {
                 if (choice == (Int32)UpdateTransactionType.Booking)
                 {
@@ -530,11 +582,11 @@ namespace Services.Implementations
                 }
                 else if (choice == (Int32)UpdateTransactionType.Unknown) { return new StatusCodeResult(406); }
             }
-            else if(updateStatus == (Int32)VNPayType.PENDING)
+            else if (updateStatus == (Int32)VNPayType.PENDING)
             {
                 return new StatusCodeResult(406);
             }
-            
+
             await _context.SaveChangesAsync();
             return new StatusCodeResult(200);
         }
