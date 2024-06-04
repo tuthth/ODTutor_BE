@@ -15,7 +15,9 @@ namespace API.Controllers
         {
             _googleCalendarService = googleCalendarService;
         }
-
+        /// <summary>
+        ///  error on deploy, do not use
+        /// </summary>
         [HttpPost("event/create")]
         public async Task<IActionResult> CreateCalendarEvent(GGCalendarEventSetting setting)
         {

@@ -724,54 +724,6 @@ namespace Services.Implementations
                 throw new Exception(ex.ToString());
             }
         }
-        public async Task<ActionResult<List<Wallet>>> GetAllWallets()
-        {
-            try
-            {
-                var wallets = await _context.Wallets.ToListAsync();
-                if (wallets == null)
-                {
-                    return new StatusCodeResult(404);
-                }
-                return wallets;
-            }
-            catch (Exception ex)
-            {
-                throw new Exception(ex.ToString());
-            }
-        }
-        public async Task<ActionResult<Wallet>> GetWalletByWalletId(Guid id)
-        {
-            try
-            {
-                var wallet = await _context.Wallets.FirstOrDefaultAsync(c => c.WalletId == id);
-                if (wallet == null)
-                {
-                    return new StatusCodeResult(404);
-                }
-                return wallet;
-            }
-            catch (Exception ex)
-            {
-                throw new Exception(ex.ToString());
-            }
-        }
-        public async Task<ActionResult<Wallet>> GetWalletByUserId(Guid id)
-        {
-            try
-            {
-                var wallet = await _context.Wallets.FirstOrDefaultAsync(c => c.UserId == id);
-                if (wallet == null)
-                {
-                    return new StatusCodeResult(404);
-                }
-                return wallet;
-            }
-            catch (Exception ex)
-            {
-                throw new Exception(ex.ToString());
-            }
-        }
         public async Task<ActionResult<List<BookingTransaction>>> GetAllBookingTransactions()
         {
             try

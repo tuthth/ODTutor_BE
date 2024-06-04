@@ -720,54 +720,6 @@ namespace API.Controllers
             throw new Exception("Lỗi không xác định");
         }
 
-        [HttpGet("get/wallets")]
-        public async Task<ActionResult<List<Wallet>>> GetAllWallets()
-        {
-            var result = await _adminService.GetAllWallets();
-            if (result is ActionResult<List<Wallet>> wallets)
-            {
-                if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
-                {
-                    if (statusCodeResult.StatusCode == 404) { return NotFound(new { Message = "Không tìm thấy ví" }); }
-                    if (statusCodeResult.StatusCode == 200) return Ok(wallets);
-                }
-                if ((IActionResult)result.Result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
-            }
-            throw new Exception("Lỗi không xác định");
-        }
-
-        [HttpGet("get/wallet/{walletID}")]
-        public async Task<ActionResult<Wallet>> GetWallet(Guid walletID)
-        {
-            var result = await _adminService.GetWalletByWalletId(walletID);
-            if (result is ActionResult<Wallet> wallet)
-            {
-                if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
-                {
-                    if (statusCodeResult.StatusCode == 404) { return NotFound(new { Message = "Không tìm thấy ví" }); }
-                    if (statusCodeResult.StatusCode == 200) return Ok(wallet);
-                }
-                if ((IActionResult)result.Result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
-            }
-            throw new Exception("Lỗi không xác định");
-        }
-
-        [HttpGet("get/wallet/user/{userID}")]
-        public async Task<ActionResult<Wallet>> GetWalletByUserID(Guid userID)
-        {
-            var result = await _adminService.GetWalletByUserId(userID);
-            if (result is ActionResult<Wallet> wallet)
-            {
-                if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
-                {
-                    if (statusCodeResult.StatusCode == 404) { return NotFound(new { Message = "Không tìm thấy ví" }); }
-                    if (statusCodeResult.StatusCode == 200) return Ok(wallet);
-                }
-                if ((IActionResult)result.Result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
-            }
-            throw new Exception("Lỗi không xác định");
-        }
-
         [HttpGet("get/booking-transactions")]
         public async Task<ActionResult<List<BookingTransaction>>> GetAllBookingTransactions()
         {

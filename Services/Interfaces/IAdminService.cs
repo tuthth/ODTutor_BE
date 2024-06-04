@@ -55,9 +55,6 @@ namespace Services.Interfaces
         Task<ActionResult<List<UserFollow>>> GetAllUserFollows();
         Task<ActionResult<List<UserFollow>>> GetAllFollowsByCreateUserId(Guid id);
         Task<ActionResult<List<UserFollow>>> GetAllFollowsByTargetUserId(Guid id);
-        Task<ActionResult<List<Wallet>>> GetAllWallets();
-        Task<ActionResult<Wallet>> GetWalletByWalletId(Guid id);
-        Task<ActionResult<Wallet>> GetWalletByUserId(Guid id);
         Task<ActionResult<List<BookingTransaction>>> GetAllBookingTransactions();
         Task<ActionResult<List<BookingTransaction>>> GetBookingTransactionsByBookingId(Guid id);
         Task<ActionResult<List<BookingTransaction>>> GetBookingTransactionsBySenderId(Guid id);
