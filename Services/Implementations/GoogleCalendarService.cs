@@ -75,7 +75,8 @@ namespace Services.Implementations
 
                 var service = new CalendarService(new BaseClientService.Initializer()
                 {
-                    HttpClientInitializer = credential
+                    HttpClientInitializer = credential,
+                    ApiKey = "AIzaSyAiQNS-CznTqJg_5AryVa4cGMhRjqWX8II"
                 });
 
                 List<EventAttendee> attendees = new List<EventAttendee>();
