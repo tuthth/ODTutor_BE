@@ -199,5 +199,43 @@ namespace Services.Implementations
             }
         }
 
+        // Get Tutor Rating List By Tutor ID
+        public async Task<PageResults<TutorFeedBackResponse>> GetTutorFeedBackResponseByTutorID ( Guid tutorID, PagingRequest pagingRequest)
+        {
+            try
+            {   
+                if (tutorID == null)
+                {
+                    throw new CrudException(HttpStatusCode.BadRequest, "Tutor ID is required or invalid", "Tutor ID is required");
+                }
+                var tutorFeedBack = await _context.TutorRatings
+                    .Where(tr => tr.TutorId == tutorID)
+                    .Select(tr => new TutorFeedBackResponse
+                    {
+                        TutorRatingId = tr.TutorRatingId,
+                        TutorID = tr.TutorId,
+                        StudentID = tr.StudentId,
+                        BookingID = tr.BookingId,
+                        StudentAvatar = tr.StudentNavigation.UserNavigation.ImageUrl,
+                        StudentName = tr.StudentNavigation.UserNavigation.Name,
+                        CreateAt = tr.CreatedAt,
+                        RatePoints = tr.RatePoints,
+                        Content = tr.Content
+                    }).ToListAsync();
+                if (tutorFeedBack.Count == 0)
+                {
+                    throw new CrudException(HttpStatusCode.NotFound, "Hiện tại không ghi nhận feedback từ khách hàng!", "");
+                }
+                var result = PagingHelper<TutorFeedBackResponse>.Paging(tutorFeedBack, pagingRequest.Page, pagingRequest.PageSize);
+                return result;
+            } catch (CrudException ex)
+            {
+                throw ex;
+            } catch (Exception ex)
+            {
+                throw new CrudException(HttpStatusCode.InternalServerError, "Get Tutor FeedBack Response Error", ex.Message);
+            }
+        }
+
     }
 }

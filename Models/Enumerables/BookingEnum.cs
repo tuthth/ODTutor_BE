@@ -12,6 +12,7 @@ namespace Models.Enumerables
         Learning = 1,
         Finished = 2,
         Deleted = 3,
-        Pending = 4
+        Pending = 4,
+        Accepted = 5,
     }
 }

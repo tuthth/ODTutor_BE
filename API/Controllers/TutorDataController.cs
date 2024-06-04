@@ -36,11 +36,20 @@ namespace API.Controllers
             return tutor;
         }
 
+        
         [HttpGet("get/rating/{tutorId}")]
         public async Task<ActionResult<TutorRatingResponse>> GetTutorRating(Guid tutorId)
         {
             var tutorRating = await _tutorDataService.GetTutorRating(tutorId);
             return tutorRating;
+        }
+
+        // Get Tutor Feedback Response by Tutor ID
+        [HttpGet("get/feedbacks/{tutorID}")]
+        public async Task<ActionResult<List<TutorFeedBackResponse>>> GetTutorFeedBackResponseByTutorID(Guid tutorID, [FromQuery] PagingRequest pagingRequest)
+        {
+            var response = await _tutorDataService.GetTutorFeedBackResponseByTutorID(tutorID, pagingRequest);
+            return Ok(response);
         }
     }
 }

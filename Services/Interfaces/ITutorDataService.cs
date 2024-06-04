@@ -15,5 +15,6 @@ namespace Services.Interfaces
         Task<PageResults<TutorAccountResponse>> GetAvalaibleTutorsV2(PagingRequest pagingRequest);
         Task<ActionResult<TutorAccountResponse>> GetTutorById(Guid tutorId);
         Task<ActionResult<TutorRatingResponse>> GetTutorRating(Guid tutorId);
+        Task<PageResults<TutorFeedBackResponse>> GetTutorFeedBackResponseByTutorID(Guid tutorID, PagingRequest pagingRequest);
     }
 }

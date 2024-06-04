@@ -60,6 +60,7 @@ namespace API.Controllers
             }
             throw new Exception("Lỗi không xác định");
         }
+
         [HttpGet("get/bookings/tutor/{tutorID}")]
         public async Task<ActionResult<List<Booking>>> GetBookingsByTutorID(Guid tutorID)
         {
@@ -76,7 +77,7 @@ namespace API.Controllers
             throw new Exception("Lỗi không xác định");
         }
         /// <summary>
-        ///         Booking status: 1 ( Learning ), 2 ( Finsihed ), 3 ( Deleted ), 4 ( Pending )
+        ///         Booking status: 1 ( Learning ), 2 ( Finsihed ), 3 ( Deleted ), 4 ( Pending ), 5 ( Accepted )
         /// </summary>
         [HttpPost("create/booking")]
         public async Task<IActionResult> CreateBooking(BookingRequest bookingRequest)
