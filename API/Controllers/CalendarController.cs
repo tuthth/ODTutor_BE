@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Services.Interfaces;
 using Settings.Google.Calendar;
+using System;
 
 namespace API.Controllers
 {
@@ -30,7 +31,7 @@ namespace API.Controllers
                     if (statusCodeResult.StatusCode == 409) { return StatusCode(StatusCodes.Status409Conflict ,"Thời gian bắt đầu sự kiện không thể trước thời gian hiện tại, vui lòng kiểm tra lại thông tin"); }
                 }
                 if(checkCreateEvent is JsonResult jsonResult) { return Ok(jsonResult.Value); }
-                if(checkCreateEvent is Exception ex){ return StatusCode(StatusCodes.Status500InternalServerError, ex.ToString()); }
+                if(checkCreateEvent is Exception exception){ return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() }); }
                 throw new Exception("Lỗi không xác định");
             }
             catch (Exception ex)

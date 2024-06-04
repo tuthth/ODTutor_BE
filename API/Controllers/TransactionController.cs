@@ -32,10 +32,9 @@ namespace API.Controllers
                 if (actionResult is StatusCodeResult statusCodeResult)
                 {
                     {
-                        if (statusCodeResult.StatusCode == 404) { return NotFound("Không tìm thấy ví"); }
-                        else if (statusCodeResult.StatusCode == 406) { return StatusCode(StatusCodes.Status406NotAcceptable, "Giao dịch không rõ trạng thái"); }
-                        else if (statusCodeResult.StatusCode == 409) { return Conflict("Số dư tài khoản không đủ thực hiện giao dịch"); }
-                        else if (statusCodeResult.StatusCode == 500) { return StatusCode(StatusCodes.Status500InternalServerError, "Lỗi hệ thống"); }
+                        if (statusCodeResult.StatusCode == 404) { return NotFound(new {Message = "Không tìm thấy ví"}); }
+                        else if (statusCodeResult.StatusCode == 406) { return StatusCode(StatusCodes.Status406NotAcceptable, new {Message = "Giao dịch không rõ trạng thái" } ); }
+                        else if (statusCodeResult.StatusCode == 409) { return Conflict(new {Message = "Số dư tài khoản không đủ thực hiện giao dịch" }); }
                     }
                 }
                 if (actionResult is JsonResult okObjectResult)
@@ -45,7 +44,7 @@ namespace API.Controllers
             }
             else if (transaction is Exception exception)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, exception.Message);
+                return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
             }
             throw new Exception("Lỗi không xác định");
         }
@@ -61,10 +60,10 @@ namespace API.Controllers
                 if (actionResult is StatusCodeResult statusCodeResult)
                 {
                     {
-                        if (statusCodeResult.StatusCode == 404) { return NotFound("Không tìm thấy ví"); }
+                        if (statusCodeResult.StatusCode == 404) { return NotFound(new {Message = "Không tìm thấy ví"}); }
                         else if (statusCodeResult.StatusCode == 406) { return StatusCode(StatusCodes.Status406NotAcceptable, "Chỉ phục vụ giao dịch nâng cấp tài khoản"); }
-                        else if (statusCodeResult.StatusCode == 409) { return Conflict("Số dư tài khoản không đủ thực hiện giao dịch"); }
-                        else if (statusCodeResult.StatusCode == 500) { return StatusCode(StatusCodes.Status500InternalServerError, "Lỗi hệ thống"); }
+                        else if (statusCodeResult.StatusCode == 409) { return Conflict(new { Message = "Số dư tài khoản không đủ thực hiện giao dịch"}); }
+ 
                     }
                 }
                 if (actionResult is JsonResult okObjectResult)
@@ -74,7 +73,7 @@ namespace API.Controllers
             }
             else if (transaction is Exception exception)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, exception.Message);
+               return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
             }
             throw new Exception("Lỗi không xác định");
         }
@@ -87,10 +86,9 @@ namespace API.Controllers
             {
                 if (actionResult is StatusCodeResult statusCodeResult)
                 {
-                    if (statusCodeResult.StatusCode == 404) { return NotFound("Không tìm thấy ví"); }
-                    else if (statusCodeResult.StatusCode == 406) { return StatusCode(StatusCodes.Status406NotAcceptable, "Giao dịch không rõ trạng thái"); }
-                    else if (statusCodeResult.StatusCode == 409) { return Conflict("Số dư tài khoản không đủ thực hiện giao dịch"); }
-                    else if (statusCodeResult.StatusCode == 500) { return StatusCode(StatusCodes.Status500InternalServerError, "Lỗi hệ thống"); }
+                    if (statusCodeResult.StatusCode == 404) { return NotFound(new {Message = "Không tìm thấy ví"}); }
+                    else if (statusCodeResult.StatusCode == 406) { return StatusCode(StatusCodes.Status406NotAcceptable, new {Message = "Giao dịch không rõ trạng thái" } ); }
+                    else if (statusCodeResult.StatusCode == 409) { return Conflict(new {Message = "Số dư tài khoản không đủ thực hiện giao dịch" }); }
                 }
                 if (actionResult is JsonResult okObjectResult)
                 {
@@ -99,7 +97,7 @@ namespace API.Controllers
             }
             else if (transaction is Exception exception)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, exception.Message);
+               return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
             }
             throw new Exception("Lỗi không xác định");
         }
@@ -113,10 +111,9 @@ namespace API.Controllers
             {
                 if (actionResult is StatusCodeResult statusCodeResult)
                 {
-                    if (statusCodeResult.StatusCode == 404) { return NotFound("Không tìm thấy ví"); }
-                    else if (statusCodeResult.StatusCode == 406) { return StatusCode(StatusCodes.Status406NotAcceptable, "Giao dịch không rõ trạng thái"); }
-                    else if (statusCodeResult.StatusCode == 409) { return Conflict("Số dư tài khoản không đủ thực hiện giao dịch"); }
-                    else if (statusCodeResult.StatusCode == 500) { return StatusCode(StatusCodes.Status500InternalServerError, "Lỗi hệ thống"); }
+                    if (statusCodeResult.StatusCode == 404) { return NotFound(new {Message = "Không tìm thấy ví"}); }
+                    else if (statusCodeResult.StatusCode == 406) { return StatusCode(StatusCodes.Status406NotAcceptable, new {Message = "Giao dịch không rõ trạng thái" } ); }
+                    else if (statusCodeResult.StatusCode == 409) { return Conflict(new {Message = "Số dư tài khoản không đủ thực hiện giao dịch"}); }
                 }
                 if (actionResult is JsonResult okObjectResult)
                 {
@@ -125,7 +122,7 @@ namespace API.Controllers
             }
             else if (transaction is Exception exception)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, exception.Message);
+               return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
             }
             throw new Exception("Lỗi không xác định");
         }
@@ -141,11 +138,10 @@ namespace API.Controllers
             {
                 if (actionResult is StatusCodeResult statusCodeResult)
                 {
-                    if (statusCodeResult.StatusCode == 404) { return NotFound("Không tìm thấy giao dịch"); }
-                    else if (statusCodeResult.StatusCode == 406) { return StatusCode(StatusCodes.Status406NotAcceptable, "Giao dịch không rõ trạng thái"); }
-                    else if (statusCodeResult.StatusCode == 409) { return Conflict("Giao dịch đã được xử lý"); }
-                    else if (statusCodeResult.StatusCode == 500) { return StatusCode(StatusCodes.Status500InternalServerError, "Lỗi hệ thống"); }
-                    else if (statusCodeResult.StatusCode == 200) { return Ok("Cập nhật giao dịch thành công"); }
+                    if (statusCodeResult.StatusCode == 404) { return NotFound(new {Message = "Không tìm thấy giao dịch" }); }
+                    else if (statusCodeResult.StatusCode == 406) { return StatusCode(StatusCodes.Status406NotAcceptable, new {Message = "Giao dịch không rõ trạng thái" } ); }
+                    else if (statusCodeResult.StatusCode == 409) { return Conflict(new {Message = "Giao dịch đã được xử lý" }); }
+                    else if (statusCodeResult.StatusCode == 200) { return Ok(new {Message = "Cập nhật giao dịch thành công" }); }
                 }
                 if (actionResult is JsonResult okObjectResult)
                 {
@@ -154,7 +150,7 @@ namespace API.Controllers
             }
             else if (transaction is Exception exception)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, exception.Message);
+               return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
             }
             throw new Exception("Lỗi không xác định");
         }
