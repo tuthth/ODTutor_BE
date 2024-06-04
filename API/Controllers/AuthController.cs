@@ -36,8 +36,9 @@ namespace API.Controllers
                 {
                     if (statusCodeResult.StatusCode == 404) { return NotFound("Tài khoản không tồn tại, hoặc không có yêu cầu gửi OTP trước đó"); }
                     else if (statusCodeResult.StatusCode == 409) { return Conflict("Email đã được xác thực trước đó"); }
-                    else if (statusCodeResult.StatusCode == 403) { return StatusCode(403, "Tài khoản đã bị khóa"); }
-                    else if(statusCodeResult.StatusCode == 408) { return StatusCode(408, "Mã OTP đã hết hạn"); }
+                    else if (statusCodeResult.StatusCode == 403) { return StatusCode(StatusCodes.Status403Forbidden, "Tài khoản đã bị khóa"); }
+                    else if(statusCodeResult.StatusCode == 408) { return StatusCode(StatusCodes.Status408RequestTimeout, "Mã OTP đã hết hạn"); }
+                    else if(statusCodeResult.StatusCode == 400) { return BadRequest("Mã OTP không chính xác"); }
                     else if (statusCodeResult.StatusCode == 200) { return Ok("Xác thực OTP thành công"); }
                 }
                 if (checkConfirm is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, exception.ToString());
@@ -48,7 +49,55 @@ namespace API.Controllers
                 return BadRequest(ex.Message);
             }
         }
-        [Authorize]
+        [HttpPost("confirm-change-password")]
+        public async Task<IActionResult> ConfirmChangePassword([FromBody] ChangePasswordRequest confirmEmailRequest)
+        {
+            try
+            {
+                var checkConfirm = await _userService.ConfirmOTPChangePassword(confirmEmailRequest.Email, confirmEmailRequest.OldPassword, confirmEmailRequest.NewPassword, confirmEmailRequest.ConfirmNewPassword ,confirmEmailRequest.OTP);
+                if (checkConfirm is StatusCodeResult statusCodeResult)
+                {
+                    if (statusCodeResult.StatusCode == 404) { return NotFound("Tài khoản không tồn tại, hoặc không có yêu cầu gửi OTP trước đó"); }
+                    else if (statusCodeResult.StatusCode == 409) { return Conflict("Email đã được xác thực trước đó"); }
+                    else if (statusCodeResult.StatusCode == 403) { return StatusCode(StatusCodes.Status403Forbidden, "Tài khoản đã bị khóa"); }
+                    else if (statusCodeResult.StatusCode == 408) { return StatusCode(StatusCodes.Status408RequestTimeout, "Mã OTP đã hết hạn"); }
+                    else if (statusCodeResult.StatusCode == 406) { return StatusCode(StatusCodes.Status406NotAcceptable, "Mật khẩu cũ không chính xác"); }
+                    else if (statusCodeResult.StatusCode == 409) { return StatusCode(StatusCodes.Status409Conflict, "Mật khẩu mới không khớp");}
+                    else if (statusCodeResult.StatusCode == 400) { return BadRequest("Mã OTP không chính xác"); }
+                    else if (statusCodeResult.StatusCode == 200) { return Ok("Xác thực OTP thành công"); }
+                }
+                if (checkConfirm is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, exception.ToString());
+                throw new Exception("Lỗi không xác định");
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+        [HttpPost("confirm-forgot-password")]
+        public async Task<IActionResult> ConfirmForgotPassword([FromBody] ForgetPasswordRequest confirmEmailRequest)
+        {
+            try
+            {
+                var checkConfirm = await _userService.ConfirmOTPForgotPassword(confirmEmailRequest.Email, confirmEmailRequest.NewPassword, confirmEmailRequest.ConfirmNewPassword, confirmEmailRequest.OTP);
+                if (checkConfirm is StatusCodeResult statusCodeResult)
+                {
+                    if (statusCodeResult.StatusCode == 404) { return NotFound("Tài khoản không tồn tại, hoặc không có yêu cầu gửi OTP trước đó"); }
+                    else if (statusCodeResult.StatusCode == 409) { return Conflict("Email đã được xác thực trước đó"); }
+                    else if (statusCodeResult.StatusCode == 403) { return StatusCode(StatusCodes.Status403Forbidden, "Tài khoản đã bị khóa"); }
+                    else if (statusCodeResult.StatusCode == 408) { return StatusCode(StatusCodes.Status408RequestTimeout, "Mã OTP đã hết hạn"); }
+                    else if (statusCodeResult.StatusCode == 409) { return StatusCode(StatusCodes.Status409Conflict, "Mật khẩu mới không khớp"); }
+                    else if (statusCodeResult.StatusCode == 400) { return BadRequest("Mã OTP không chính xác"); }
+                    else if (statusCodeResult.StatusCode == 200) { return Ok("Xác thực OTP thành công"); }
+                }
+                if (checkConfirm is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, exception.ToString());
+                throw new Exception("Lỗi không xác định");
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
         [HttpPost("remove-expire")]
         public async Task<IActionResult> RemoveExpiredOTP() {
             try

@@ -5,6 +5,7 @@ using Google.Apis.Calendar.v3.Data;
 using Google.Apis.Services;
 using Microsoft.AspNetCore.Mvc;
 using Models.Entities;
+using Models.Models.Emails;
 using Services.Interfaces;
 using Settings.Google.Calendar;
 using System;
@@ -20,8 +21,42 @@ namespace Services.Implementations
         public GoogleCalendarService(ODTutorContext context, IMapper mapper) : base(context, mapper)
         {
         }
+
+        //cai nay` con` loi o server
         public async Task<IActionResult> CreateCalendarEvent(GGCalendarEventSetting setting)
         {
+            foreach(var attendee in setting.Attendees)
+            {
+                var checkEmail = _context.Users.FirstOrDefault(u => u.Email.Equals(attendee.Email) && u.Banned == false);
+                if (checkEmail == null)
+                {
+                    return new StatusCodeResult(404);
+                }
+            }
+            if(setting.Attendees.Count == 0)
+            {
+                return new StatusCodeResult(400);
+            }
+            if(setting.Start < DateTime.UtcNow)
+            {
+                return new StatusCodeResult(409);
+            }
+            if (setting.End < setting.Start)
+            {
+                return new StatusCodeResult(406);
+            }
+            if(setting.RedirectUri == null)
+            {
+                return new StatusCodeResult(403);
+            }
+            if(setting.Summary == null)
+            {
+                setting.Summary = "TestCapstone";
+            }
+            if(setting.Description == null)
+            {
+                setting.Description = "TestCapstone";
+            }
             try
             {
                 string[] scopes = { CalendarService.Scope.Calendar };
@@ -29,16 +64,20 @@ namespace Services.Implementations
                 string credPath = Path.Combine(projectDirectory, "Properties", "credentials.json");
 
                 var clientSecrets = await GoogleClientSecrets.FromFileAsync(credPath);
+
                 var credential = await GoogleWebAuthorizationBroker.AuthorizeAsync(
                     clientSecrets.Secrets,
                     scopes,
                     "user",
-                    CancellationToken.None);
+                    CancellationToken.None,
+                    null,
+                    new LocalServerCodeReceiver(setting.RedirectUri));
 
                 var service = new CalendarService(new BaseClientService.Initializer()
                 {
                     HttpClientInitializer = credential
                 });
+
                 List<EventAttendee> attendees = new List<EventAttendee>();
                 foreach (var attendee in setting.Attendees)
                 {
@@ -56,12 +95,12 @@ namespace Services.Implementations
                     Start = new EventDateTime()
                     {
                         DateTime = setting.Start,
-                        TimeZone = setting.TimeZone
+                        TimeZone = "Asia/Ho_Chi_Minh"
                     },
                     End = new EventDateTime()
                     {
                         DateTime = setting.End,
-                        TimeZone = setting.TimeZone
+                        TimeZone = "Asia/Ho_Chi_Minh"
                     },
                     ConferenceData = new ConferenceData()
                     {
@@ -88,15 +127,23 @@ namespace Services.Implementations
                 Console.WriteLine("Event created: {0}", createdEvent.HtmlLink);
                 Console.WriteLine("Meet link created: {0}", createdEvent.HangoutLink);
 
-                return new StatusCodeResult(201);
+                foreach (var attendee in setting.Attendees)
+                {
+                    await _appExtension.SendMail(new MailContent()
+                    {
+                        To = attendee.Email,
+                        Subject = "Thông báo sự kiện mới",
+                        Body = "Đây là link tham gia buổi học tại Google Meet. \nLink tham gia: " + createdEvent.HangoutLink
+                    });
+                }
+                return new JsonResult(new { GoogleMeetLink = createdEvent.HangoutLink});
             }
             catch (Exception ex)
             {
-
                 throw new Exception(ex.ToString());
             }
-           
         }
+
     }
-   
+
 }

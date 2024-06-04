@@ -88,6 +88,7 @@ namespace Services.Implementations
                 });
                 return new JsonResult(new
                 {
+                    WalletTransactionId = transaction.WalletTransactionId,
                     PaymentUrl = paymentUrl
                 });
             }
@@ -153,6 +154,7 @@ namespace Services.Implementations
 
                 return new JsonResult(new
                 {
+                    WalletTransactionId = transaction.WalletTransactionId,
                     PaymentUrl = paymentUrl
                 });
             }
