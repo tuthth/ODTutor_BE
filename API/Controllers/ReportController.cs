@@ -77,13 +77,13 @@ namespace API.Controllers
             var result = await _reportService.GetAllReports();
             if (result is ActionResult<List<Report>> reports)
             {
-                if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
-                {
-                    if (statusCodeResult.StatusCode == 404) { return NotFound(new {Message = "Không tìm thấy báo cáo" }); }
-                    if (statusCodeResult.StatusCode == 200) return Ok(reports);
-                }
-                if ((IActionResult)result.Result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
+                return Ok(reports.Value);
             }
+            if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
+            {
+                if (statusCodeResult.StatusCode == 404) { return NotFound(new { Message = "Không tìm thấy báo cáo" }); }
+            }
+            if ((IActionResult)result.Result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
             throw new Exception("Lỗi không xác định");
         }
         [HttpGet("get/{reportID}")]
@@ -92,13 +92,14 @@ namespace API.Controllers
             var result = await _reportService.GetReport(reportID);
             if (result is ActionResult<Report> report)
             {
-                if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
-                {
-                    if (statusCodeResult.StatusCode == 404) { return NotFound(new {Message = "Không tìm thấy báo cáo" }); }
-                    if (statusCodeResult.StatusCode == 200) return Ok(report);
-                }
-                if ((IActionResult)result.Result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
+                return Ok(report.Value);
             }
+            if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
+            {
+                if (statusCodeResult.StatusCode == 404) { return NotFound(new { Message = "Không tìm thấy báo cáo" }); }
+
+            }
+            if ((IActionResult)result.Result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
             throw new Exception("Lỗi không xác định");
         }
         [HttpGet("get/create/{userID}")]
@@ -107,13 +108,13 @@ namespace API.Controllers
             var result = await _reportService.GetReportsByUserId(userID);
             if (result is ActionResult<List<Report>> reports)
             {
-                if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
-                {
-                    if (statusCodeResult.StatusCode == 404) { return NotFound(new {Message = "Không tìm thấy báo cáo" }); }
-                    if (statusCodeResult.StatusCode == 200) return Ok(reports);
-                }
-                if ((IActionResult)result.Result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
+                return Ok(reports.Value);
             }
+            if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
+            {
+                if (statusCodeResult.StatusCode == 404) { return NotFound(new { Message = "Không tìm thấy báo cáo" }); }
+            }
+            if ((IActionResult)result.Result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
             throw new Exception("Lỗi không xác định");
         }
         [HttpGet("get/target/{reporterID}")]
@@ -122,13 +123,13 @@ namespace API.Controllers
             var result = await _reportService.GetReportsByReporterId(reporterID);
             if (result is ActionResult<List<Report>> reports)
             {
-                if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
-                {
-                    if (statusCodeResult.StatusCode == 404) { return NotFound(new {Message = "Không tìm thấy báo cáo" }); }
-                    if (statusCodeResult.StatusCode == 200) return Ok(reports);
-                }
-                if ((IActionResult)result.Result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
+                return Ok(reports.Value);
             }
+            if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
+            {
+                if (statusCodeResult.StatusCode == 404) { return NotFound(new { Message = "Không tìm thấy báo cáo" }); }
+            }
+            if ((IActionResult)result.Result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
             throw new Exception("Lỗi không xác định");
         }
     }

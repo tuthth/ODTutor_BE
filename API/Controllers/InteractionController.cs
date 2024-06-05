@@ -8,7 +8,7 @@ namespace API.Controllers
 {
     public class InteractionController : ControllerBase
     {
-       private readonly IUserInteractService _userInteractService;
+        private readonly IUserInteractService _userInteractService;
         public InteractionController(IUserInteractService userInteractService)
         {
             _userInteractService = userInteractService;
@@ -78,13 +78,13 @@ namespace API.Controllers
             var result = await _userInteractService.GetAllUserBlocks();
             if (result is ActionResult<List<UserBlock>> userBlocks)
             {
-                if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
-                {
-                    if (statusCodeResult.StatusCode == 404) { return NotFound(new { Message = "Không tìm thấy khóa tài khoản" }); }
-                    if (statusCodeResult.StatusCode == 200) return Ok(userBlocks);
-                }
-                if ((IActionResult)result.Result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
+                return Ok(userBlocks.Value);
             }
+            if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
+            {
+                if (statusCodeResult.StatusCode == 404) { return NotFound(new { Message = "Không tìm thấy khóa tài khoản" }); }
+            }
+            if ((IActionResult)result.Result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
             throw new Exception("Lỗi không xác định");
         }
 
@@ -94,13 +94,14 @@ namespace API.Controllers
             var result = await _userInteractService.GetAllBlockByCreateUserId(userBlockID);
             if (result is ActionResult<List<UserBlock>> userBlock)
             {
-                if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
-                {
-                    if (statusCodeResult.StatusCode == 404) { return NotFound(new { Message = "Không tìm thấy khóa tài khoản" }); }
-                    if (statusCodeResult.StatusCode == 200) return Ok(userBlock);
-                }
-                if ((IActionResult)result.Result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
+                return Ok(userBlock.Value);
             }
+            if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
+            {
+                if (statusCodeResult.StatusCode == 404) { return NotFound(new { Message = "Không tìm thấy khóa tài khoản" }); }
+
+            }
+            if ((IActionResult)result.Result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
             throw new Exception("Lỗi không xác định");
         }
 
@@ -110,13 +111,13 @@ namespace API.Controllers
             var result = await _userInteractService.GetAllBlockByTargetUserId(targetID);
             if (result is ActionResult<List<UserBlock>> userBlocks)
             {
-                if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
-                {
-                    if (statusCodeResult.StatusCode == 404) { return NotFound(new { Message = "Không tìm thấy khóa tài khoản" }); }
-                    if (statusCodeResult.StatusCode == 200) return Ok(userBlocks);
-                }
-                if ((IActionResult)result.Result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
+                return Ok(userBlocks.Value);
             }
+            if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
+            {
+                if (statusCodeResult.StatusCode == 404) { return NotFound(new { Message = "Không tìm thấy khóa tài khoản" }); }
+            }
+            if ((IActionResult)result.Result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
             throw new Exception("Lỗi không xác định");
         }
 
@@ -126,13 +127,13 @@ namespace API.Controllers
             var result = await _userInteractService.GetAllUserFollows();
             if (result is ActionResult<List<UserFollow>> userFollows)
             {
-                if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
-                {
-                    if (statusCodeResult.StatusCode == 404) { return NotFound(new { Message = "Không tìm thấy theo dõi tài khoản" }); }
-                    if (statusCodeResult.StatusCode == 200) return Ok(userFollows);
-                }
-                if ((IActionResult)result.Result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
+                return Ok(userFollows.Value);
             }
+            if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
+            {
+                if (statusCodeResult.StatusCode == 404) { return NotFound(new { Message = "Không tìm thấy theo dõi tài khoản" }); }
+            }
+            if ((IActionResult)result.Result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
             throw new Exception("Lỗi không xác định");
         }
 
@@ -142,13 +143,13 @@ namespace API.Controllers
             var result = await _userInteractService.GetAllFollowsByCreateUserId(userFollowID);
             if (result is ActionResult<List<UserFollow>> userFollow)
             {
-                if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
-                {
-                    if (statusCodeResult.StatusCode == 404) { return NotFound(new { Message = "Không tìm thấy theo dõi tài khoản" }); }
-                    if (statusCodeResult.StatusCode == 200) return Ok(userFollow);
-                }
-                if ((IActionResult)result.Result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
+                return Ok(userFollow.Value);
             }
+            if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
+            {
+                if (statusCodeResult.StatusCode == 404) { return NotFound(new { Message = "Không tìm thấy theo dõi tài khoản" }); }
+            }
+            if ((IActionResult)result.Result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
             throw new Exception("Lỗi không xác định");
         }
 
@@ -158,13 +159,13 @@ namespace API.Controllers
             var result = await _userInteractService.GetAllFollowsByTargetUserId(targetID);
             if (result is ActionResult<List<UserFollow>> userFollows)
             {
-                if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
-                {
-                    if (statusCodeResult.StatusCode == 404) { return NotFound(new { Message = "Không tìm thấy theo dõi tài khoản" }); }
-                    if (statusCodeResult.StatusCode == 200) return Ok(userFollows);
-                }
-                if ((IActionResult)result.Result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
+                return Ok(userFollows.Value);
             }
+            if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
+            {
+                if (statusCodeResult.StatusCode == 404) { return NotFound(new { Message = "Không tìm thấy theo dõi tài khoản" }); }
+            }
+            if ((IActionResult)result.Result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
             throw new Exception("Lỗi không xác định");
         }
 
