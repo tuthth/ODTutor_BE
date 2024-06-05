@@ -343,37 +343,6 @@ namespace Services.Implementations
             });
             return new StatusCodeResult(201);
         }
-
-
-        public async Task<BookingTransaction> GetBookingTransactionById(Guid transactionId)
-        {
-            var tran = await _context.BookingTransactions.Include(t => t.SenderWalletNavigation).FirstOrDefaultAsync(t => t.BookingTransactionId == transactionId);
-            if (tran == null)
-            {
-                return null;
-            }
-            return tran;
-        }
-
-        public async Task<CourseTransaction> GetCourseTransactionById(Guid transactionId)
-        {
-            var tran = await _context.CourseTransactions.Include(t => t.SenderWalletNavigation).FirstOrDefaultAsync(t => t.CourseTransactionId == transactionId);
-            if (tran == null)
-            {
-                return null;
-            }
-            return tran;
-        }
-
-        public async Task<WalletTransaction> GetWalletTransactionById(Guid transactionId)
-        {
-            var tran = await _context.WalletTransactions.Include(t => t.SenderWalletNavigation).FirstOrDefaultAsync(t => t.WalletTransactionId == transactionId);
-            if (tran == null)
-            {
-                return null;
-            }
-            return tran;
-        }
         public async Task<ActionResult<List<WalletTransaction>>> GetWalletTransactionByAccountId()
         {
             var user = _httpContextAccessor.HttpContext.User?.Claims?.FirstOrDefault(c => c.Type == "UserId")?.Value;
@@ -593,5 +562,213 @@ namespace Services.Implementations
             return new StatusCodeResult(200);
         }
 
+        public async Task<ActionResult<List<BookingTransaction>>> GetAllBookingTransactions()
+        {
+            try
+            {
+                var bookingTransactions = await _context.BookingTransactions.ToListAsync();
+                if (bookingTransactions == null)
+                {
+                    return new StatusCodeResult(404);
+                }
+                return bookingTransactions;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.ToString());
+            }
+        }
+        public async Task<ActionResult<List<BookingTransaction>>> GetBookingTransactionsBySenderId(Guid id)
+        {
+            try
+            {
+                var bookingTransactions = await _context.BookingTransactions.Where(c => c.SenderWalletId == id).ToListAsync();
+                if (bookingTransactions == null)
+                {
+                    return new StatusCodeResult(404);
+                }
+                return bookingTransactions;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.ToString());
+            }
+        }
+        public async Task<ActionResult<List<BookingTransaction>>> GetBookingTransactionsByReceiverId(Guid id)
+        {
+            try
+            {
+                var bookingTransactions = await _context.BookingTransactions.Where(c => c.ReceiverWalletId == id).ToListAsync();
+                if (bookingTransactions == null)
+                {
+                    return new StatusCodeResult(404);
+                }
+                return bookingTransactions;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.ToString());
+            }
+        }
+        public async Task<ActionResult<List<BookingTransaction>>> GetBookingTransactionsByBookingId(Guid id)
+        {
+            try
+            {
+                var bookingTransactions = await _context.BookingTransactions.Where(c => c.BookingId == id).ToListAsync();
+                if (bookingTransactions == null)
+                {
+                    return new StatusCodeResult(404);
+                }
+                return bookingTransactions;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.ToString());
+            }
+        }
+        public async Task<ActionResult<List<WalletTransaction>>> GetAllWalletTransactions()
+        {
+            try
+            {
+                var walletTransactions = await _context.WalletTransactions.ToListAsync();
+                if (walletTransactions == null)
+                {
+                    return new StatusCodeResult(404);
+                }
+                return walletTransactions;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.ToString());
+            }
+        }
+        public async Task<ActionResult<List<WalletTransaction>>> GetWalletTransactionsByWalletTransactionId(Guid id)
+        {
+            try
+            {
+                var walletTransactions = await _context.WalletTransactions.Where(c => c.WalletTransactionId == id).ToListAsync();
+                if (walletTransactions == null)
+                {
+                    return new StatusCodeResult(404);
+                }
+                return walletTransactions;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.ToString());
+            }
+        }
+        public async Task<ActionResult<List<WalletTransaction>>> GetWalletTransactionsBySenderId(Guid id)
+        {
+            try
+            {
+                var walletTransactions = await _context.WalletTransactions.Where(c => c.SenderWalletId == id).ToListAsync();
+                if (walletTransactions == null)
+                {
+                    return new StatusCodeResult(404);
+                }
+                return walletTransactions;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.ToString());
+            }
+        }
+        public async Task<ActionResult<List<WalletTransaction>>> GetWalletTransactionsByReceiverId(Guid id)
+        {
+            try
+            {
+                var walletTransactions = await _context.WalletTransactions.Where(c => c.ReceiverWalletId == id).ToListAsync();
+                if (walletTransactions == null)
+                {
+                    return new StatusCodeResult(404);
+                }
+                return walletTransactions;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.ToString());
+            }
+        }
+        public async Task<ActionResult<List<CourseTransaction>>> GetAllCourseTransactions()
+        {
+            try
+            {
+                var courseTransactions = await _context.CourseTransactions.ToListAsync();
+                if (courseTransactions == null)
+                {
+                    return new StatusCodeResult(404);
+                }
+                return courseTransactions;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.ToString());
+            }
+        }
+        public async Task<ActionResult<CourseTransaction>> GetCourseTransaction(Guid id)
+        {
+            try
+            {
+                var courseTransaction = await _context.CourseTransactions.FirstOrDefaultAsync(c => c.CourseTransactionId == id);
+                if (courseTransaction == null)
+                {
+                    return new StatusCodeResult(404);
+                }
+                return courseTransaction;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.ToString());
+            }
+        }
+        public async Task<ActionResult<List<CourseTransaction>>> GetCourseTransactionsBySenderId(Guid id)
+        {
+            try
+            {
+                var courseTransactions = await _context.CourseTransactions.Where(c => c.SenderWalletId == id).ToListAsync();
+                if (courseTransactions == null)
+                {
+                    return new StatusCodeResult(404);
+                }
+                return courseTransactions;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.ToString());
+            }
+        }
+        public async Task<ActionResult<List<CourseTransaction>>> GetCourseTransactionsByReceiverId(Guid id)
+        {
+            try
+            {
+                var courseTransactions = await _context.CourseTransactions.Where(c => c.ReceiverWalletId == id).ToListAsync();
+                if (courseTransactions == null)
+                {
+                    return new StatusCodeResult(404);
+                }
+                return courseTransactions;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.ToString());
+            }
+        }
+        public async Task<ActionResult<List<CourseTransaction>>> GetCourseTransactionsByCourseId(Guid id)
+        {
+            try
+            {
+                var courseTransactions = await _context.CourseTransactions.Where(c => c.CourseId == id).ToListAsync();
+                if (courseTransactions == null)
+                {
+                    return new StatusCodeResult(404);
+                }
+                return courseTransactions;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.ToString());
+            }
+        }
     }
 }

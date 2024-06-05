@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Models.Entities;
 using Models.Enumerables;
 using Models.Models.Requests;
+using Services.Implementations;
 using Services.Interfaces;
 
 namespace API.Controllers
@@ -171,16 +172,200 @@ namespace API.Controllers
         [Authorize(Roles = "Admin")]
         public async Task<List<WalletTransaction>> GetAllWallet() => await _transactionService.GetAllWallet();
 
-        [HttpGet("get/booking/{id}")]
-        [Authorize]
-        public async Task<BookingTransaction> GetBooking(Guid id) => await _transactionService.GetBookingTransactionById(id);
-
-        [HttpGet("get/course/{id}")]
-        [Authorize]
-        public async Task<CourseTransaction> GetCourse(Guid id) => await _transactionService.GetCourseTransactionById(id);
-
-        [HttpGet("get/wallet/{id}")]
-        [Authorize]
-        public async Task<WalletTransaction> GetWallet(Guid id) => await _transactionService.GetWalletTransactionById(id);
+        [HttpGet("get/course-transactions")]
+        public async Task<ActionResult<List<CourseTransaction>>> GetAllCourseTransactions()
+        {
+            var result = await _transactionService.GetAllCourseTransactions();
+            if (result is ActionResult<List<CourseTransaction>> courseTransactions)
+            {
+                if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
+                {
+                    if (statusCodeResult.StatusCode == 404) { return NotFound(new { Message = "Không tìm thấy giao dịch khóa học" }); }
+                    if (statusCodeResult.StatusCode == 200) return Ok(courseTransactions);
+                }
+                if ((IActionResult)result.Result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
+            }
+            throw new Exception("Lỗi không xác định");
+        }
+        [HttpGet("get/course-transaction/{courseTransactionID}")]
+        public async Task<ActionResult<CourseTransaction>> GetCourseTransaction(Guid courseTransactionID)
+        {
+            var result = await _transactionService.GetCourseTransaction(courseTransactionID);
+            if (result is ActionResult<CourseTransaction> courseTransaction)
+            {
+                if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
+                {
+                    if (statusCodeResult.StatusCode == 404) { return NotFound(new { Message = "Không tìm thấy giao dịch khóa học" }); }
+                    if (statusCodeResult.StatusCode == 200) return Ok(courseTransaction);
+                }
+                if ((IActionResult)result.Result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
+            }
+            throw new Exception("Lỗi không xác định");
+        }
+        [HttpGet("get/course-transactions/sender/{senderID}")]
+        public async Task<ActionResult<List<CourseTransaction>>> GetCourseTransactionsBySenderID(Guid senderID)
+        {
+            var result = await _transactionService.GetCourseTransactionsBySenderId(senderID);
+            if (result is ActionResult<List<CourseTransaction>> courseTransactions)
+            {
+                if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
+                {
+                    if (statusCodeResult.StatusCode == 404) { return NotFound(new { Message = "Không tìm thấy giao dịch khóa học" }); }
+                    if (statusCodeResult.StatusCode == 200) return Ok(courseTransactions);
+                }
+                if ((IActionResult)result.Result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
+            }
+            throw new Exception("Lỗi không xác định");
+        }
+        [HttpGet("get/course-transactions/receiver/{receiverID}")]
+        public async Task<ActionResult<List<CourseTransaction>>> GetCourseTransactionsByReceiverID(Guid receiverID)
+        {
+            var result = await _transactionService.GetCourseTransactionsByReceiverId(receiverID);
+            if (result is ActionResult<List<CourseTransaction>> courseTransactions)
+            {
+                if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
+                {
+                    if (statusCodeResult.StatusCode == 404) { return NotFound(new { Message = "Không tìm thấy giao dịch khóa học" }); }
+                    if (statusCodeResult.StatusCode == 200) return Ok(courseTransactions);
+                }
+                if ((IActionResult)result.Result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
+            }
+            throw new Exception("Lỗi không xác định");
+        }
+        [HttpGet("get/course-transactions/course/{courseID}")]
+        public async Task<ActionResult<List<CourseTransaction>>> GetCourseTransactionsByCourseID(Guid courseID)
+        {
+            var result = await _transactionService.GetCourseTransactionsByCourseId(courseID);
+            if (result is ActionResult<List<CourseTransaction>> courseTransactions)
+            {
+                if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
+                {
+                    if (statusCodeResult.StatusCode == 404) { return NotFound(new { Message = "Không tìm thấy giao dịch khóa học" }); }
+                    if (statusCodeResult.StatusCode == 200) return Ok(courseTransactions);
+                }
+                if ((IActionResult)result.Result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
+            }
+            throw new Exception("Lỗi không xác định");
+        }
+         [HttpGet("get/booking-transactions")]
+        public async Task<ActionResult<List<BookingTransaction>>> GetAllBookingTransactions()
+        {
+            var result = await _transactionService.GetAllBookingTransactions();
+            if (result is ActionResult<List<BookingTransaction>> bookingTransactions)
+            {
+                if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
+                {
+                    if (statusCodeResult.StatusCode == 404) { return NotFound(new { Message = "Không tìm thấy giao dịch đặt lịch" }); }
+                    if (statusCodeResult.StatusCode == 200) return Ok(bookingTransactions);
+                }
+                if ((IActionResult)result.Result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
+            }
+            throw new Exception("Lỗi không xác định");
+        }
+        [HttpGet("get/booking-transaction/{bookingTransactionID}")]
+        public async Task<ActionResult<List<BookingTransaction>>> GetBookingTransaction(Guid bookingTransactionID)
+        {
+            var result = await _transactionService.GetBookingTransactionsByBookingId(bookingTransactionID);
+            if (result is ActionResult<List<BookingTransaction>> bookingTransaction)
+            {
+                if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
+                {
+                    if (statusCodeResult.StatusCode == 404) { return NotFound(new { Message = "Không tìm thấy giao dịch đặt lịch" }); }
+                    if (statusCodeResult.StatusCode == 200) return Ok(bookingTransaction);
+                }
+                if ((IActionResult)result.Result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
+            }
+            throw new Exception("Lỗi không xác định");
+        }
+        [HttpGet("get/booking-transactions/sender/{senderID}")]
+        public async Task<ActionResult<List<BookingTransaction>>> GetBookingTransactionsBySenderID(Guid senderID)
+        {
+            var result = await _transactionService.GetBookingTransactionsBySenderId(senderID);
+            if (result is ActionResult<List<BookingTransaction>> bookingTransactions)
+            {
+                if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
+                {
+                    if (statusCodeResult.StatusCode == 404) { return NotFound(new { Message = "Không tìm thấy giao dịch đặt lịch" }); }
+                    if (statusCodeResult.StatusCode == 200) return Ok(bookingTransactions);
+                }
+                if ((IActionResult)result.Result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
+            }
+            throw new Exception("Lỗi không xác định");
+        }
+        [HttpGet("get/booking-transactions/receiver/{receiverID}")]
+        public async Task<ActionResult<List<BookingTransaction>>> GetBookingTransactionsByReceiverID(Guid receiverID)
+        {
+            var result = await _transactionService.GetBookingTransactionsByReceiverId(receiverID);
+            if (result is ActionResult<List<BookingTransaction>> bookingTransactions)
+            {
+                if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
+                {
+                    if (statusCodeResult.StatusCode == 404) { return NotFound(new { Message = "Không tìm thấy giao dịch đặt lịch" }); }
+                    if (statusCodeResult.StatusCode == 200) return Ok(bookingTransactions);
+                }
+                if ((IActionResult)result.Result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
+            }
+            throw new Exception("Lỗi không xác định");
+        }
+        [HttpGet("get/wallet-transactions")]
+        public async Task<ActionResult<List<WalletTransaction>>> GetAllWalletTransactions()
+        {
+            var result = await _transactionService.GetAllWalletTransactions();
+            if (result is ActionResult<List<WalletTransaction>> walletTransactions)
+            {
+                if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
+                {
+                    if (statusCodeResult.StatusCode == 404) { return NotFound(new { Message = "Không tìm thấy giao dịch ví" }); }
+                    if (statusCodeResult.StatusCode == 200) return Ok(walletTransactions);
+                }
+                if ((IActionResult)result.Result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
+            }
+            throw new Exception("Lỗi không xác định");
+        }
+        [HttpGet("get/wallet-transaction/{walletTransactionID}")]
+        public async Task<ActionResult<List<WalletTransaction>>> GetWalletTransaction(Guid walletTransactionID)
+        {
+            var result = await _transactionService.GetWalletTransactionsByWalletTransactionId(walletTransactionID);
+            if (result is ActionResult<List<WalletTransaction>> walletTransaction)
+            {
+                if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
+                {
+                    if (statusCodeResult.StatusCode == 404) { return NotFound(new { Message = "Không tìm thấy giao dịch ví" }); }
+                    if (statusCodeResult.StatusCode == 200) return Ok(walletTransaction);
+                }
+                if ((IActionResult)result.Result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
+            }
+            throw new Exception("Lỗi không xác định");
+        }
+        [HttpGet("get/wallet-transactions/sender/{senderID}")]
+        public async Task<ActionResult<List<WalletTransaction>>> GetWalletTransactionsBySenderID(Guid senderID)
+        {
+            var result = await _transactionService.GetWalletTransactionsBySenderId(senderID);
+            if (result is ActionResult<List<WalletTransaction>> walletTransactions)
+            {
+                if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
+                {
+                    if (statusCodeResult.StatusCode == 404) { return NotFound(new { Message = "Không tìm thấy giao dịch ví" }); }
+                    if (statusCodeResult.StatusCode == 200) return Ok(walletTransactions);
+                }
+                if ((IActionResult)result.Result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
+            }
+            throw new Exception("Lỗi không xác định");
+        }
+        [HttpGet("get/wallet-transactions/receiver/{receiverID}")]
+        public async Task<ActionResult<List<WalletTransaction>>> GetWalletTransactionsByReceiverID(Guid receiverID)
+        {
+            var result = await _transactionService.GetWalletTransactionsByReceiverId(receiverID);
+            if (result is ActionResult<List<WalletTransaction>> walletTransactions)
+            {
+                if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
+                {
+                    if (statusCodeResult.StatusCode == 404) { return NotFound(new { Message = "Không tìm thấy giao dịch ví" }); }
+                    if (statusCodeResult.StatusCode == 200) return Ok(walletTransactions);
+                }
+                if ((IActionResult)result.Result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
+            }
+            throw new Exception("Lỗi không xác định");
+        }
     }
 }
