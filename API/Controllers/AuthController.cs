@@ -25,7 +25,20 @@ namespace API.Controllers
             return (response);
         }
 
+        // Login By Admin
+        /// <summary>
+        /// Đăng nhập bằng tài khoản admin
+        /// </summary>
+        /// <param name="confirmEmailRequest"></param>
+        /// <returns></returns>
         // Confirm Email
+        [HttpPost("login-by-admin")]
+        public async Task<LoginAccountResponse> LoginByAdmin([FromBody] LoginRequest user)
+        {
+            LoginAccountResponse response = await _userService.LoginByAdmin(user);
+            return (response);
+        }
+
         [HttpPost("confirm")]
         public async Task<IActionResult> ConfirmEmail([FromBody]ConfirmEmailRequest confirmEmailRequest)
         {

@@ -1,4 +1,6 @@
 ﻿using AutoMapper;
+using Azure;
+using Emgu.CV.Features2D;
 using MailKit.Security;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -25,6 +27,7 @@ using System.Net;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace Services.Implementations
@@ -83,57 +86,45 @@ namespace Services.Implementations
                 throw new CrudException(HttpStatusCode.InternalServerError, ex.Message, "");
             }
         }
-        // V1 - tạm thời khóa
-        /*public async Task<IActionResult> GenerateJwtToken(User user, int role)
+
+        // Login By Admin Email
+        public async Task<LoginAccountResponse> LoginByAdmin(LoginRequest loginRequest)
         {
-            var key = Encoding.ASCII.GetBytes(_configuration["AppSettings:SecretKey"]); // Lấy khóa bí mật từ cấu hình
-            var tokenHandler = new JwtSecurityTokenHandler();
-            var secretKeyBytes = Encoding.UTF8.GetBytes(_jwtSetting.SecretKey);
-            var tokenDescriptor = new SecurityTokenDescriptor();
-            if (role == (Int32)UserRoles.Student)
+            try
             {
-                var student = _context.Students.FirstOrDefault(s => s.UserId == user.Id);
-                tokenDescriptor = new SecurityTokenDescriptor
+                if (string.IsNullOrEmpty(loginRequest.Email) || string.IsNullOrEmpty(loginRequest.Password))
                 {
-                    Subject = new ClaimsIdentity(new[]
+                    throw new CrudException(HttpStatusCode.BadRequest, "Email or Password is empty", "");
+                }
+                if (!Regex.IsMatch(loginRequest.Password, "^(?=.*\\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{8,12}$"))
                 {
-                new Claim("UserId", user.Id.ToString()),
-                new Claim("StudentId", student.StudentId.ToString()),
-                new Claim(ClaimTypes.Name, user.Username ?? string.Empty),
-                new Claim(ClaimTypes.Email, user.Email ?? string.Empty),
-                new Claim(ClaimTypes.Role, role.ToString())
-            }),
-                    Expires = DateTime.UtcNow.AddHours(1),
-                    SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
-                };
-            }
-            if (role == (Int32)UserRoles.Tutor)
-            {
-                var tutor = _context.Tutors.FirstOrDefault(t => t.UserId == user.Id);
-                tokenDescriptor = new SecurityTokenDescriptor
+                    throw new CrudException(HttpStatusCode.BadRequest, "Password must be 8-12 characters, contain at least 1 uppercase letter, 1 lowercase letter, 1 number", "");
+                }
+                if (loginRequest.Email == _configuration["AdminAccount:EmailAdmin"] 
+                    && loginRequest.Password == _configuration["AdminAccount:PasswordAdmin"])
                 {
-                    Subject = new ClaimsIdentity(new[]
+                    var user = _context.Users.FirstOrDefault(u => u.Email == loginRequest.Email);
+                    if (user == null)
                     {
-                new Claim("UserId", user.Id.ToString()),
-                new Claim("TutorId", tutor.TutorId.ToString()),
-                new Claim(ClaimTypes.Name, user.Username ?? string.Empty),
-                new Claim(ClaimTypes.Email, user.Email ?? string.Empty),
-                new Claim(ClaimTypes.Role, role.ToString())
-            }),
-                    Expires = DateTime.UtcNow.AddHours(1),
-                    SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
-                };
+                        throw new CrudException(HttpStatusCode.NotFound, "User not found", "");
+                    }
+                 var response = GenerateJwtTokenAdmin(user);
+                 return response;
+                }
+                else
+                {
+                    throw new CrudException(HttpStatusCode.BadRequest, "Email or Password is incorrect", "");
+                }     
             }
-
-
-            var token = tokenHandler.CreateToken(tokenDescriptor);
-            var accessToken = tokenHandler.WriteToken(token);
-
-            return new JsonResult(new
+            catch (CrudException ex)
             {
-                AccessToken = accessToken
-            });
-        }*/
+                throw ex;
+            }
+            catch(Exception ex)
+            {
+                throw new CrudException(HttpStatusCode.InternalServerError, ex.Message, "");
+            }
+        }
 
         // Confirm OTP
         public async Task<IActionResult> ConfirmOTP(string email, string otp)
@@ -267,6 +258,40 @@ namespace Services.Implementations
                 moderatorID = moderator?.ModeratorId,
                 studentID = student?.StudentId
 
+            };
+            return response;
+        }
+
+        // Generate Token
+        private LoginAccountResponse GenerateJwtTokenAdmin(User user)
+        {
+            if (user == null)
+            {
+                throw new CrudException(HttpStatusCode.NotFound, "User not found", "");
+            }
+            var key = Encoding.ASCII.GetBytes(_configuration["AppSettings:SecretKey"]); // Lấy khóa bí mật từ cấu hình
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var secretKeyBytes = Encoding.UTF8.GetBytes(_jwtSetting.SecretKey);
+            var tokenDescriptor = new SecurityTokenDescriptor();
+                tokenDescriptor = new SecurityTokenDescriptor
+                {
+                    Subject = new ClaimsIdentity(new[]
+                    {
+                new Claim("UserId", user.Id.ToString()),
+                new Claim(ClaimTypes.Name, user.Username ?? string.Empty),
+                new Claim(ClaimTypes.Email, user.Email ?? string.Empty),
+                new Claim(ClaimTypes.Role, "Admin")
+            }),
+                    Expires = DateTime.UtcNow.AddHours(1),
+                    SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
+                };
+            var token = tokenHandler.CreateToken(tokenDescriptor);
+            var accessToken = tokenHandler.WriteToken(token);
+            LoginAccountResponse response = new LoginAccountResponse
+            {
+                accessToken = accessToken,
+                userId = user.Id,
+                role = "Admin",
             };
             return response;
         }

@@ -13,4 +13,10 @@ namespace Models.Enumerables
         Inactive = 2,
         Banned = 3
     }
+    public enum TutorSlotAvailabilityEnum
+    {   
+        Available = 0,
+        NotAvailable = 1,
+        Cancelled = 2,
+    }
 }

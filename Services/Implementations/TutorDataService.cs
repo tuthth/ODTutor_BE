@@ -237,5 +237,37 @@ namespace Services.Implementations
             }
         }
 
+        // Get Tutor Schedule By Tutor ID
+        public async Task<ActionResult<List<TutorScheduleResponse>>> GetAllTutorSlotRegistered (Guid tutorID)
+        {
+            try
+            {
+                var tutorSchedule = await _context.TutorWeekAvailables
+                    .Where(ts => ts.TutorId == tutorID)
+                    .Select(ts => new TutorScheduleResponse
+                    {
+                        TutorID = ts.TutorId,
+                        StartTime = ts.StartTime,
+                        EndTime = ts.EndTime,
+                        TutorSlots = ts.TutorDateAvailables.SelectMany(tda => tda.TutorSlotAvailables).Select(tsa => new TutorSlotResponse
+                        {
+                            TutorSlotID = tsa.TutorSlotAvailableID,
+                            Date = tsa.TutorDateAvailable.Date,
+                            DayOfWeek = tsa.TutorDateAvailable.DayOfWeek,
+                            StartTime = tsa.StartTime,
+                            IsBooked = tsa.IsBooked,
+                            Status = tsa.Status
+                        }).ToList()
+                    }).ToListAsync();
+                return tutorSchedule;
+            } catch (CrudException ex)
+            {
+                throw ex;
+            } catch (Exception ex)
+            {
+                throw new CrudException(HttpStatusCode.InternalServerError, "Get Tutor Schedule Error", ex.Message);
+            }
+        }
+
     }
 }
