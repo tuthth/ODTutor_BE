@@ -31,18 +31,13 @@ namespace Services.Implementations
             {
                 return new StatusCodeResult(406);
             }
-            var booking = new Booking
+            if(bookingRequest.Status != (Int32)BookingEnum.Pending)
             {
-                BookingId = Guid.NewGuid(),
-                StudentId = bookingRequest.StudentId,
-                TutorId = bookingRequest.TutorId,
-                Duration = bookingRequest.Duration,
-                CreatedAt = DateTime.UtcNow,
-                Message = bookingRequest.Message,
-                TotalPrice = bookingRequest.TotalPrice,
-                Status = (Int32)BookingEnum.Pending,
-                Description = bookingRequest.Description
-            };
+                return new StatusCodeResult(409);
+            }
+            var booking = _mapper.Map<Booking>(bookingRequest);
+            booking.BookingId = Guid.NewGuid();
+            booking.CreatedAt = DateTime.UtcNow;
             _context.Bookings.Add(booking);
             await _context.SaveChangesAsync();
             await _appExtension.SendMail(new MailContent()
@@ -129,15 +124,8 @@ namespace Services.Implementations
             {
                 return new StatusCodeResult(406);
             }
-            var tutorRating = new TutorRating
-            {
-                TutorRatingId = Guid.NewGuid(),
-                TutorId = tutorRatingRequest.TutorId,
-                StudentId = tutorRatingRequest.StudentId,
-                RatePoints = tutorRatingRequest.RatePoints,
-                Content = tutorRatingRequest.Content,
-                BookingId = tutorRatingRequest.BookingId
-            };
+            var tutorRating = _mapper.Map<TutorRating>(tutorRatingRequest);
+            tutorRating.TutorRatingId = Guid.NewGuid();
             _context.TutorRatings.Add(tutorRating);
             var tutorRatingImages = await _appExtension.UploadImagesToImgBB(tutorRatingRequest.ImageFiles);
             foreach (var imageUrl in tutorRatingImages)
