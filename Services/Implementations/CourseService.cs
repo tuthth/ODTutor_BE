@@ -31,17 +31,8 @@ namespace Services.Implementations
             {
                 return new StatusCodeResult(400);
             }
-            var course = new Course
-            {
-                CourseId = Guid.NewGuid(),
-                TutorId = courseRequest.TutorId,
-                CreatedAt = DateTime.UtcNow,
-                Description = courseRequest.Description,
-                TotalMoney = courseRequest.TotalMoney,
-                TotalSlots = courseRequest.TotalSlots,
-                Note = courseRequest.Note,
-                Status = (Int32)CourseEnum.Active
-            };
+            var course = _mapper.Map<Course>(courseRequest);
+            course.CourseId = Guid.NewGuid();
             _context.Courses.Add(course);
             await _context.SaveChangesAsync();
             await _appExtension.SendMail(new MailContent()
@@ -189,14 +180,8 @@ namespace Services.Implementations
             {
                 return new StatusCodeResult(404);
             }
-            var courseOutline = new CourseOutline
-            {
-                CourseOutlineId = Guid.NewGuid(),
-                CourseId = courseOutlineRequest.CourseId,
-                Description = courseOutlineRequest.Description,
-                Title = courseOutlineRequest.Title,
-                Status = (Int32)CourseEnum.Active
-            };
+            var courseOutline = _mapper.Map<CourseOutline>(courseOutlineRequest);
+            courseOutline.CourseOutlineId = Guid.NewGuid();
             _context.CourseOutlines.Add(courseOutline);
             await _context.SaveChangesAsync();
             await _appExtension.SendMail(new MailContent()
@@ -289,11 +274,7 @@ namespace Services.Implementations
             {
                 return new StatusCodeResult(404);
             }
-            var coursePromotion = new CoursePromotion
-            {
-                CourseId = coursePromotionRequest.CourseId,
-                PromotionId = coursePromotionRequest.PromotionId
-            };
+            var coursePromotion = _mapper.Map<CoursePromotion>(coursePromotionRequest);
             _context.CoursePromotions.Add(coursePromotion);
             await _context.SaveChangesAsync();
             await _appExtension.SendMail(new MailContent()
@@ -346,14 +327,8 @@ namespace Services.Implementations
             {
                 return new StatusCodeResult(409);
             }
-            var promotion = new Promotion
-            {
-                TutorId = createPromotion.TutorId,
-                PromotionId = Guid.NewGuid(),
-                PromotionCode = createPromotion.PromotionCode.ToUpper(),
-                Percentage = createPromotion.Percentage,
-                CreatedAt = DateTime.UtcNow
-            };
+            var promotion = _mapper.Map<Promotion>(createPromotion);
+            promotion.PromotionId = Guid.NewGuid();
             _context.Promotions.Add(promotion);
             await _context.SaveChangesAsync();
             await _appExtension.SendMail(new MailContent()

@@ -24,21 +24,14 @@ namespace API.Controllers
             {
                 if (actionResult is StatusCodeResult statusCodeResult)
                 {
-                    if (statusCodeResult.StatusCode == 404) { return NotFound("Không tìm thấy ví"); }
-                    else if (statusCodeResult.StatusCode == 406) { return StatusCode(StatusCodes.Status406NotAcceptable, "Giao dịch không rõ trạng thái"); }
-                    else if (statusCodeResult.StatusCode == 409) { return Conflict("Số dư tài khoản không đủ thực hiện giao dịch"); }
-                    else if (statusCodeResult.StatusCode == 500) { return StatusCode(StatusCodes.Status500InternalServerError, "Lỗi hệ thống"); }
-                    else if (statusCodeResult.StatusCode == 201) { return StatusCode(StatusCodes.Status201Created, "Gửi mã xác thực thành công"); }
+                    if (statusCodeResult.StatusCode == 409) { return Conflict(new {Message = "Email đã xác thực trước đó" }); }
+                    else if (statusCodeResult.StatusCode == 201) { return StatusCode(StatusCodes.Status201Created, new {Message = "Gửi mã xác thực thành công" }); }
                     else if (statusCodeResult.StatusCode == 204) { return NoContent(); }
-                }
-                if (actionResult is JsonResult okObjectResult)
-                {
-                    return Ok(okObjectResult.Value);
                 }
             }
             else if (checkEmail is Exception exception)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, exception.Message);
+                return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
             }
             throw new Exception("Lỗi không xác định");
         }

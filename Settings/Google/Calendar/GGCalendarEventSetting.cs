@@ -8,11 +8,11 @@ namespace Settings.Google.Calendar
 {
     public class GGCalendarEventSetting
     {
-        public string Summary { get; set; }
-        public string Description { get; set; }
+        public string? Summary { get; set; }
+        public string? Description { get; set; }
         public DateTime Start { get; set; }
         public DateTime End { get; set; }
-        public string TimeZone { get; set; }
+        public string RedirectUri { get; set; }
         public List<GGCalendarEventAttendee> Attendees { get; set; }
     }
 }

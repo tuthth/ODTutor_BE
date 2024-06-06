@@ -23,10 +23,10 @@ namespace API.Controllers
             {
                 if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
                 {
-                    if (statusCodeResult.StatusCode == 404) { return NotFound("Không tìm thấy lịch đặt"); }
+                    if (statusCodeResult.StatusCode == 404) { return NotFound(new {Message = "Không tìm thấy lịch đặt" }); }
                     if (statusCodeResult.StatusCode == 200) return Ok(bookings);
                 }
-                if ((IActionResult)result.Result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, exception.ToString());
+                if ((IActionResult)result.Result is Exception exception) StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
             }
             throw new Exception("Lỗi không xác định");
         }
@@ -38,10 +38,10 @@ namespace API.Controllers
             {
                 if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
                 {
-                    if (statusCodeResult.StatusCode == 404) { return NotFound("Không tìm thấy lịch đặt"); }
+                    if (statusCodeResult.StatusCode == 404) { return NotFound(new {Message = "Không tìm thấy lịch đặt" }); }
                     if (statusCodeResult.StatusCode == 200) return Ok(booking);
                 }
-                if ((IActionResult)result.Result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, exception.ToString());
+                if ((IActionResult)result.Result is Exception exception) StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
             }
             throw new Exception("Lỗi không xác định");
         }
@@ -53,10 +53,10 @@ namespace API.Controllers
             {
                 if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
                 {
-                    if (statusCodeResult.StatusCode == 404) { return NotFound("Không tìm thấy lịch đặt"); }
+                    if (statusCodeResult.StatusCode == 404) { return NotFound(new {Message = "Không tìm thấy lịch đặt" }); }
                     if (statusCodeResult.StatusCode == 200) return Ok(bookings);
                 }
-                if ((IActionResult)result.Result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, exception.ToString());
+                if ((IActionResult)result.Result is Exception exception) StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
             }
             throw new Exception("Lỗi không xác định");
         }
@@ -69,10 +69,10 @@ namespace API.Controllers
             {
                 if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
                 {
-                    if (statusCodeResult.StatusCode == 404) { return NotFound("Không tìm thấy lịch đặt"); }
+                    if (statusCodeResult.StatusCode == 404) { return NotFound(new {Message = "Không tìm thấy lịch đặt" }); }
                     if (statusCodeResult.StatusCode == 200) return Ok(bookings);
                 }
-                if ((IActionResult)result.Result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, exception.ToString());
+                if ((IActionResult)result.Result is Exception exception) StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
             }
             throw new Exception("Lỗi không xác định");
         }
@@ -87,11 +87,11 @@ namespace API.Controllers
             {
                 if (actionResult is StatusCodeResult statusCodeResult)
                 {
-                    if (statusCodeResult.StatusCode == 400) { return BadRequest("Dữ liệu không hợp lệ"); }
-                    if (statusCodeResult.StatusCode == 406) { return StatusCode(StatusCodes.Status406NotAcceptable, "Có tài khoản đang bị đình chỉ bởi hệ thống"); }
-                    if (statusCodeResult.StatusCode == 201) return StatusCode(StatusCodes.Status201Created, "Đặt lịch học thành công, vui lòng đến mục Thanh toán");
+                    if (statusCodeResult.StatusCode == 400) { return BadRequest(new {Message = "Dữ liệu không hợp lệ" }); }
+                    if (statusCodeResult.StatusCode == 406) { return StatusCode(StatusCodes.Status406NotAcceptable, new {Message = "Có tài khoản đang bị đình chỉ bởi hệ thống" }); }
+                    if (statusCodeResult.StatusCode == 201) return StatusCode(StatusCodes.Status201Created, new {Message =  "Đặt lịch học thành công, vui lòng đến mục Thanh toán" });
                 }
-                if (actionResult is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, exception.ToString());
+                if (actionResult is Exception exception) StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
             }
             throw new Exception("Lỗi không xác định");
         }
@@ -103,11 +103,11 @@ namespace API.Controllers
             {
                 if (actionResult is StatusCodeResult statusCodeResult)
                 {
-                    if (statusCodeResult.StatusCode == 400) { return BadRequest("Dữ liệu không hợp lệ"); }
-                    if (statusCodeResult.StatusCode == 406) { return StatusCode(StatusCodes.Status406NotAcceptable, "Có tài khoản đang bị đình chỉ bởi hệ thống"); }
+                    if (statusCodeResult.StatusCode == 400) { return BadRequest(new {Message = "Dữ liệu không hợp lệ" }); }
+                    if (statusCodeResult.StatusCode == 406) { return StatusCode(StatusCodes.Status406NotAcceptable, new {Message = "Có tài khoản đang bị đình chỉ bởi hệ thống" } ); }
                     if (statusCodeResult.StatusCode == 200) return Ok();
                 }
-                if (actionResult is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, exception.ToString());
+                if (actionResult is Exception exception) StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
             }
             throw new Exception("Lỗi không xác định");
         }
@@ -119,12 +119,12 @@ namespace API.Controllers
             {
                 if (actionResult is StatusCodeResult statusCodeResult)
                 {
-                    if (statusCodeResult.StatusCode == 400) { return BadRequest("Dữ liệu không hợp lệ"); }
-                    if(statusCodeResult.StatusCode == 404) return NotFound("Không tìm thấy lịch đặt đã hoàn thành");
-                    if (statusCodeResult.StatusCode == 406) { return StatusCode(StatusCodes.Status406NotAcceptable, "Tài khoản student đang bị đình chỉ bởi hệ thống"); }
-                    if (statusCodeResult.StatusCode == 201) return StatusCode(StatusCodes.Status201Created, "Đánh giá thành công");
+                    if (statusCodeResult.StatusCode == 400) { return BadRequest(new {Message = "Dữ liệu không hợp lệ"}); }
+                    if(statusCodeResult.StatusCode == 404) return NotFound(new {Message = "Không tìm thấy lịch đặt đã hoàn thành" });
+                    if (statusCodeResult.StatusCode == 406) { return StatusCode(StatusCodes.Status406NotAcceptable, new { Message = "Tài khoản student đang bị đình chỉ bởi hệ thống" }); }
+                    if (statusCodeResult.StatusCode == 201) return StatusCode(StatusCodes.Status201Created, new { Message = "Đánh giá thành công" } );
                 }
-                if (actionResult is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, exception.ToString());
+                if (actionResult is Exception exception) StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
             }
             throw new Exception("Lỗi không xác định");
         }
@@ -136,12 +136,12 @@ namespace API.Controllers
             {
                 if (actionResult is StatusCodeResult statusCodeResult)
                 {
-                    if (statusCodeResult.StatusCode == 400) { return BadRequest("Dữ liệu không hợp lệ"); }
-                    if (statusCodeResult.StatusCode == 404) return NotFound("Không tìm thấy lịch đặt đã hoàn thành");
-                    if (statusCodeResult.StatusCode == 406) { return StatusCode(StatusCodes.Status406NotAcceptable, "Tài khoản student đang bị đình chỉ bởi hệ thống"); }
-                    if (statusCodeResult.StatusCode == 200) return StatusCode(StatusCodes.Status200OK, "Cập nhật đánh giá thành công");
+                    if (statusCodeResult.StatusCode == 400) { return BadRequest(new { Message = "Dữ liệu không hợp lệ" }); }
+                    if (statusCodeResult.StatusCode == 404) return NotFound(new { Message = "Không tìm thấy lịch đặt đã hoàn thành" });
+                    if (statusCodeResult.StatusCode == 406) { return StatusCode(StatusCodes.Status406NotAcceptable, new { Message = "Tài khoản student đang bị đình chỉ bởi hệ thống" }); }
+                    if (statusCodeResult.StatusCode == 201) return StatusCode(StatusCodes.Status201Created, new { Message = "Đánh giá thành công" });
                 }
-                if (actionResult is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, exception.ToString());
+                if (actionResult is Exception exception) StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
             }
             throw new Exception("Lỗi không xác định");
         }
@@ -153,11 +153,12 @@ namespace API.Controllers
             {
                 if (actionResult is StatusCodeResult statusCodeResult)
                 {
-                    if (statusCodeResult.StatusCode == 404) return NotFound("Không tìm thấy lịch đặt đã hoàn thành");
-                    if (statusCodeResult.StatusCode == 406) { return StatusCode(StatusCodes.Status406NotAcceptable, "Tài khoản student đang bị đình chỉ bởi hệ thống"); }
-                    if (statusCodeResult.StatusCode == 204) return StatusCode(StatusCodes.Status204NoContent, "Xóa đánh giá thành công");
+                    if (statusCodeResult.StatusCode == 400) { return BadRequest(new { Message = "Dữ liệu không hợp lệ" }); }
+                    if (statusCodeResult.StatusCode == 404) return NotFound(new { Message = "Không tìm thấy lịch đặt đã hoàn thành" });
+                    if (statusCodeResult.StatusCode == 406) { return StatusCode(StatusCodes.Status406NotAcceptable, new { Message = "Tài khoản student đang bị đình chỉ bởi hệ thống" }); }
+                    if (statusCodeResult.StatusCode == 201) return StatusCode(StatusCodes.Status201Created, new { Message = "Đánh giá thành công" });
                 }
-                if (actionResult is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, exception.ToString());
+                if (actionResult is Exception exception) StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
             }
             throw new Exception("Lỗi không xác định");
         }

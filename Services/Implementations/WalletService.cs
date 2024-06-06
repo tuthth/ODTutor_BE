@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Models.Entities;
 using Models.Models.Views;
 using Services.Interfaces;
@@ -14,15 +15,53 @@ namespace Services.Implementations
         public WalletService(ODTutorContext context, IMapper mapper) : base(context, mapper)
         {
         }
-        public async Task<IActionResult> GetWallet(Guid userId)
+        public async Task<ActionResult<List<Wallet>>> GetAllWallets()
         {
-            var wallet = _context.Wallets.Where(w => w.UserId.Equals(userId)).ProjectTo<WalletView>(_mapper.ConfigurationProvider).FirstOrDefault();
-            if (wallet == null)
+            try
             {
-                return new StatusCodeResult(404);
+                var wallets = await _context.Wallets.ToListAsync();
+                if (wallets == null)
+                {
+                    return new StatusCodeResult(404);
+                }
+                return wallets;
             }
-            return new Microsoft.AspNetCore.Mvc.JsonResult(wallet);
-
+            catch (Exception ex)
+            {
+                throw new Exception(ex.ToString());
+            }
+        }
+        public async Task<ActionResult<Wallet>> GetWalletByWalletId(Guid id)
+        {
+            try
+            {
+                var wallet = await _context.Wallets.FirstOrDefaultAsync(c => c.WalletId == id);
+                if (wallet == null)
+                {
+                    return new StatusCodeResult(404);
+                }
+                return wallet;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.ToString());
+            }
+        }
+        public async Task<ActionResult<Wallet>> GetWalletByUserId(Guid id)
+        {
+            try
+            {
+                var wallet = await _context.Wallets.FirstOrDefaultAsync(c => c.UserId == id);
+                if (wallet == null)
+                {
+                    return new StatusCodeResult(404);
+                }
+                return wallet;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.ToString());
+            }
         }
     }
 }

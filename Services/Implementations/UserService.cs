@@ -129,9 +129,8 @@ namespace Services.Implementations
         // Confirm OTP
         public async Task<IActionResult> ConfirmOTP(string email, string otp)
         {
-            var user = _context.Users.FirstOrDefault(u => u.Email == email);
+            var user = _context.Users.FirstOrDefault(u => u.Email.Equals(email));
             if (user == null) return new StatusCodeResult(404); //user not found
-            if (user.Active == true) return new StatusCodeResult(409); //user is active in system
             if (user.Banned == true) return new StatusCodeResult(403); //user is banned
             var userAuthentication = _context.UserAuthentications
                 .Where(ua => ua.UserId == user.Id && ua.EmailTokenExpiry >= DateTime.UtcNow).OrderByDescending(ua => ua.EmailTokenExpiry).FirstOrDefault();
@@ -149,6 +148,61 @@ namespace Services.Implementations
                 To = email,
                 Subject = "[ODTutor] Xác thực email thành công",
                 Body = "Chúc mừng bạn đã xác thực email thành công. Bạn có thể sử dụng tài khoản của mình để đăng nhập vào hệ thống ODTutor."
+            });
+            return new StatusCodeResult(200);
+        }
+
+        public async Task<IActionResult> ConfirmOTPChangePassword(string email, string oldPassword, string newPassword, string confirmNewPassword, string otp)
+        {
+            var user = _context.Users.FirstOrDefault(u => u.Email.Equals(email));
+            if (user == null) return new StatusCodeResult(404); //user not found
+            if (user.Banned == true) return new StatusCodeResult(403); //user is banned
+            var userAuthentication = _context.UserAuthentications
+                .Where(ua => ua.UserId == user.Id && ua.EmailTokenExpiry >= DateTime.UtcNow).OrderByDescending(ua => ua.EmailTokenExpiry).FirstOrDefault();
+            if (userAuthentication == null) return new StatusCodeResult(404); //no OTP request found
+            if (userAuthentication.EmailToken != otp) return new StatusCodeResult(400); //wrong OTP
+            if (userAuthentication.EmailTokenExpiry < DateTime.UtcNow) return new StatusCodeResult(408); //OTP expired
+
+            if (!_appExtension.VerifyPasswordHash(oldPassword, user.Password)) return new StatusCodeResult(406); //wrong old password
+            if (newPassword != confirmNewPassword) return new StatusCodeResult(409); //new password and confirm password not match
+
+            user.Password = _appExtension.CreateHashPassword(newPassword);
+            _context.Users.Update(user);
+            var allUserAuthentications = _context.UserAuthentications.Where(ua => ua.UserId == user.Id);
+            _context.UserAuthentications.RemoveRange(allUserAuthentications); //remove OTP request after confirmed
+            await _context.SaveChangesAsync();
+            await _appExtension.SendMail(new MailContent()
+            {
+                To = email,
+                Subject = "[ODTutor] Thay đổi mật khẩu thành công",
+                Body = "Chúc mừng bạn đã thay đổi mật khẩu thành công. Bạn có thể sử dụng mật khẩu mới để đăng nhập vào hệ thống ODTutor."
+            });
+            return new StatusCodeResult(200);
+        }
+
+        public async Task<IActionResult> ConfirmOTPForgotPassword(string email, string newPassword, string confirmNewPassword, string otp)
+        {
+            var user = _context.Users.FirstOrDefault(u => u.Email.Equals(email));
+            if (user == null) return new StatusCodeResult(404); //user not found
+            if (user.Banned == true) return new StatusCodeResult(403); //user is banned
+            var userAuthentication = _context.UserAuthentications
+                .Where(ua => ua.UserId == user.Id && ua.EmailTokenExpiry >= DateTime.UtcNow).OrderByDescending(ua => ua.EmailTokenExpiry).FirstOrDefault();
+            if (userAuthentication == null) return new StatusCodeResult(404); //no OTP request found
+            if (userAuthentication.EmailToken != otp) return new StatusCodeResult(400); //wrong OTP
+            if (userAuthentication.EmailTokenExpiry < DateTime.UtcNow) return new StatusCodeResult(408); //OTP expired
+
+            if (newPassword != confirmNewPassword) return new StatusCodeResult(409); //new password and confirm password not match
+
+            user.Password = _appExtension.CreateHashPassword(newPassword);
+            _context.Users.Update(user);
+            var allUserAuthentications = _context.UserAuthentications.Where(ua => ua.UserId == user.Id);
+            _context.UserAuthentications.RemoveRange(allUserAuthentications); //remove OTP request after confirmed
+            await _context.SaveChangesAsync();
+            await _appExtension.SendMail(new MailContent()
+            {
+                To = email,
+                Subject = "[ODTutor] Thay đổi mật khẩu thành công",
+                Body = "Chúc mừng bạn đã thay đổi mật khẩu thành công. Bạn có thể sử dụng mật khẩu mới để đăng nhập vào hệ thống ODTutor."
             });
             return new StatusCodeResult(200);
         }

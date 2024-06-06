@@ -32,7 +32,7 @@ namespace API.Controllers
         public async Task<ActionResult<TutorAccountResponse>> GetTutorById(Guid tutorId)
         {
             var tutor = await _tutorDataService.GetTutorById(tutorId);
-            if (tutor == null) return StatusCode(StatusCodes.Status404NotFound, "Không tìm thấy tài khoản, hoặc tài khoản bạn tìm đang bị đình chỉ");
+            if (tutor == null) return StatusCode(StatusCodes.Status404NotFound, new {Message = "Không tìm thấy tài khoản, hoặc tài khoản bạn tìm đang bị đình chỉ" } );
             return tutor;
         }
 

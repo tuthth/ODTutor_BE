@@ -1,0 +1,21 @@
+﻿using Microsoft.AspNetCore.Mvc;
+using Models.Entities;
+using Models.Models.Requests;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Services.Interfaces
+{
+    public interface IStudentRequestService
+    {
+        Task<IActionResult> CreateStudentRequest(CreateStudentRequest request);
+        Task<IActionResult> UpdateStudentRequest(UpdateStudentRequest request);
+        Task<ActionResult<List<StudentRequest>>> GetAllStudentRequests();
+        Task<ActionResult<StudentRequest>> GetStudentRequest(Guid id);
+        Task<ActionResult<List<StudentRequest>>> GetStudentRequestsByStudentId(Guid id);
+        Task<ActionResult<List<StudentRequest>>> GetStudentRequestsBySubjectId(Guid id);
+    }
+}

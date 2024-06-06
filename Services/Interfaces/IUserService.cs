@@ -21,5 +21,7 @@ namespace Services.Interfaces
         Task<IActionResult> RemoveExpiredOTP();
         Task<IActionResult> IsUserBanned(Guid userId);
         Task<LoginAccountResponse> LoginByAdmin(LoginRequest loginRequest);
+        Task<IActionResult> ConfirmOTPChangePassword(string email, string oldPassword, string newPassword, string confirmNewPassword, string otp);
+        Task<IActionResult> ConfirmOTPForgotPassword(string email, string newPassword, string confirmNewPassword, string otp);
     }
 }
