@@ -8,6 +8,8 @@ using Services.Interfaces;
 
 namespace API.Controllers
 {
+    [Route("api/[controller]")]
+    [ApiController]
     public class InteractionController : ControllerBase
     {
         private readonly IUserInteractService _userInteractService;
