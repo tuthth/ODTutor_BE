@@ -5,6 +5,8 @@ using Services.Interfaces;
 
 namespace API.Controllers
 {
+    [Route("api/[controller]")]
+    [ApiController]
     public class SubjectController : ControllerBase
     {
         private readonly ISubjectService _subjectService;

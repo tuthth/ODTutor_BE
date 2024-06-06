@@ -21,13 +21,13 @@ namespace API.Controllers
             var result = await _adminService.GetAllUsers();
             if (result is ActionResult<List<User>> users)
             {
-                if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
-                {
-                    if (statusCodeResult.StatusCode == 404) { return NotFound(new { Message = "Không tìm thấy người dùng" }); }
-                    if (statusCodeResult.StatusCode == 200) return Ok(users);
-                }
-                if ((IActionResult)result.Result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
+                return Ok(users.Value);
             }
+            if((IActionResult)result.Result is StatusCodeResult statusCodeResult)
+            {
+                if (statusCodeResult.StatusCode == 404) { return NotFound(new { Message = "Không tìm thấy người dùng" }); }
+            }
+            if((IActionResult)result.Result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
             throw new Exception("Lỗi không xác định");
         }
 
@@ -37,29 +37,13 @@ namespace API.Controllers
             var result = await _adminService.GetUser(userID);
             if (result is ActionResult<User> user)
             {
-                if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
-                {
-                    if (statusCodeResult.StatusCode == 404) { return NotFound(new { Message = "Không tìm thấy người dùng" }); }
-                    if (statusCodeResult.StatusCode == 200) return Ok(user);
-                }
-                if ((IActionResult)result.Result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
+                return Ok(user.Value);
             }
-            throw new Exception("Lỗi không xác định");
-        }
-
-        [HttpGet("get/students")]
-        public async Task<ActionResult<List<Student>>> GetAllStudents()
-        {
-            var result = await _adminService.GetAllStudents();
-            if (result is ActionResult<List<Student>> students)
+            if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
             {
-                if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
-                {
-                    if (statusCodeResult.StatusCode == 404) { return NotFound(new { Message = "Không tìm thấy sinh viên" }); }
-                    if (statusCodeResult.StatusCode == 200) return Ok(students);
-                }
-                if ((IActionResult)result.Result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
+                if (statusCodeResult.StatusCode == 404) { return NotFound(new { Message = "Không tìm thấy người dùng" }); }
             }
+            if ((IActionResult)result.Result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
             throw new Exception("Lỗi không xác định");
         }
 
@@ -69,29 +53,13 @@ namespace API.Controllers
             var result = await _adminService.GetStudent(studentID);
             if (result is ActionResult<Student> student)
             {
-                if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
-                {
-                    if (statusCodeResult.StatusCode == 404) { return NotFound(new { Message = "Không tìm thấy sinh viên" }); }
-                    if (statusCodeResult.StatusCode == 200) return Ok(student);
-                }
-                if ((IActionResult)result.Result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
+                return Ok(student.Value);
             }
-            throw new Exception("Lỗi không xác định");
-        }
-
-        [HttpGet("get/tutors")]
-        public async Task<ActionResult<List<Tutor>>> GetAllTutors()
-        {
-            var result = await _adminService.GetAllTutors();
-            if (result is ActionResult<List<Tutor>> tutors)
+            if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
             {
-                if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
-                {
-                    if (statusCodeResult.StatusCode == 404) { return NotFound(new { Message = "Không tìm thấy gia sư" }); }
-                    if (statusCodeResult.StatusCode == 200) return Ok(tutors);
-                }
-                if ((IActionResult)result.Result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
+                if (statusCodeResult.StatusCode == 404) { return NotFound(new { Message = "Không tìm thấy sinh viên" }); }
             }
+            if ((IActionResult)result.Result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
             throw new Exception("Lỗi không xác định");
         }
 
@@ -101,29 +69,13 @@ namespace API.Controllers
             var result = await _adminService.GetTutor(tutorID);
             if (result is ActionResult<Tutor> tutor)
             {
-                if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
-                {
-                    if (statusCodeResult.StatusCode == 404) { return NotFound(new { Message = "Không tìm thấy gia sư" }); }
-                    if (statusCodeResult.StatusCode == 200) return Ok(tutor);
-                }
-                if ((IActionResult)result.Result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
+                return Ok(tutor.Value);
             }
-            throw new Exception("Lỗi không xác định");
-        }
-
-        [HttpGet("get/subjects")]
-        public async Task<ActionResult<List<Subject>>> GetAllSubjects()
-        {
-            var result = await _adminService.GetAllSubjects();
-            if (result is ActionResult<List<Subject>> subjects)
+            if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
             {
-                if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
-                {
-                    if (statusCodeResult.StatusCode == 404) { return NotFound(new { Message = "Không tìm thấy môn học" }); }
-                    if (statusCodeResult.StatusCode == 200) return Ok(subjects);
-                }
-                if ((IActionResult)result.Result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
+                if (statusCodeResult.StatusCode == 404) { return NotFound(new { Message = "Không tìm thấy gia sư" }); }
             }
+            if ((IActionResult)result.Result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
             throw new Exception("Lỗi không xác định");
         }
 
@@ -133,28 +85,29 @@ namespace API.Controllers
             var result = await _adminService.GetSubject(subjectID);
             if (result is ActionResult<Subject> subject)
             {
-                if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
-                {
-                    if (statusCodeResult.StatusCode == 404) { return NotFound(new { Message = "Không tìm thấy môn học" }); }
-                    if (statusCodeResult.StatusCode == 200) return Ok(subject);
-                }
-                if ((IActionResult)result.Result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
+                return Ok(subject.Value);
             }
+            if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
+            {
+                if (statusCodeResult.StatusCode == 404) { return NotFound(new { Message = "Không tìm thấy môn học" }); }
+            }
+            if ((IActionResult)result.Result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
             throw new Exception("Lỗi không xác định");
         }
+
         [HttpGet("get/schedules")]
         public async Task<ActionResult<List<Schedule>>> GetAllSchedules()
         {
             var result = await _adminService.GetAllSchedules();
             if (result is ActionResult<List<Schedule>> schedules)
             {
-                if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
-                {
-                    if (statusCodeResult.StatusCode == 404) { return NotFound(new { Message = "Không tìm thấy lịch học" }); }
-                    if (statusCodeResult.StatusCode == 200) return Ok(schedules);
-                }
-                if ((IActionResult)result.Result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
+                return Ok(schedules.Value);
             }
+            if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
+            {
+                if (statusCodeResult.StatusCode == 404) { return NotFound(new { Message = "Không tìm thấy lịch học" }); }
+            }
+            if ((IActionResult)result.Result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
             throw new Exception("Lỗi không xác định");
         }
 
@@ -164,13 +117,13 @@ namespace API.Controllers
             var result = await _adminService.GetSchedule(scheduleID);
             if (result is ActionResult<Schedule> schedule)
             {
-                if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
-                {
-                    if (statusCodeResult.StatusCode == 404) { return NotFound(new { Message = "Không tìm thấy lịch học" }); }
-                    if (statusCodeResult.StatusCode == 200) return Ok(schedule);
-                }
-                if ((IActionResult)result.Result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
+                return Ok(schedule.Value);
             }
+            if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
+            {
+                if (statusCodeResult.StatusCode == 404) { return NotFound(new { Message = "Không tìm thấy lịch học" }); }
+            }
+            if ((IActionResult)result.Result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
             throw new Exception("Lỗi không xác định");
         }
 
@@ -180,13 +133,13 @@ namespace API.Controllers
             var result = await _adminService.GetSchedulesByStudentCourseId(studentCourseID);
             if (result is ActionResult<List<Schedule>> schedules)
             {
-                if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
-                {
-                    if (statusCodeResult.StatusCode == 404) { return NotFound(new { Message = "Không tìm thấy lịch học" }); }
-                    if (statusCodeResult.StatusCode == 200) return Ok(schedules);
-                }
-                if ((IActionResult)result.Result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
+                return Ok(schedules.Value);
             }
+            if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
+            {
+                if (statusCodeResult.StatusCode == 404) { return NotFound(new { Message = "Không tìm thấy lịch học" }); }
+            }
+            if ((IActionResult)result.Result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
             throw new Exception("Lỗi không xác định");
         }
 
@@ -196,13 +149,13 @@ namespace API.Controllers
             var result = await _adminService.GetAllStudentCourses();
             if (result is ActionResult<List<StudentCourse>> studentCourses)
             {
-                if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
-                {
-                    if (statusCodeResult.StatusCode == 404) { return NotFound(new { Message = "Không tìm thấy khóa học sinh viên" }); }
-                    if (statusCodeResult.StatusCode == 200) return Ok(studentCourses);
-                }
-                if ((IActionResult)result.Result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
+                return Ok(studentCourses.Value);
             }
+            if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
+            {
+                if (statusCodeResult.StatusCode == 404) { return NotFound(new { Message = "Không tìm thấy khóa học sinh viên" }); }
+            }
+            if ((IActionResult)result.Result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
             throw new Exception("Lỗi không xác định");
         }
 
@@ -212,13 +165,13 @@ namespace API.Controllers
             var result = await _adminService.GetStudentCourse(studentCourseID);
             if (result is ActionResult<StudentCourse> studentCourse)
             {
-                if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
-                {
-                    if (statusCodeResult.StatusCode == 404) { return NotFound(new { Message = "Không tìm thấy khóa học sinh viên" }); }
-                    if (statusCodeResult.StatusCode == 200) return Ok(studentCourse);
-                }
-                if ((IActionResult)result.Result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
+                return Ok(studentCourse.Value);
             }
+            if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
+            {
+                if (statusCodeResult.StatusCode == 404) { return NotFound(new { Message = "Không tìm thấy khóa học sinh viên" }); }
+            }
+            if ((IActionResult)result.Result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
             throw new Exception("Lỗi không xác định");
         }
 
@@ -228,13 +181,13 @@ namespace API.Controllers
             var result = await _adminService.GetStudentCoursesByCourseId(courseID);
             if (result is ActionResult<List<StudentCourse>> studentCourses)
             {
-                if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
-                {
-                    if (statusCodeResult.StatusCode == 404) { return NotFound(new { Message = "Không tìm thấy khóa học sinh viên" }); }
-                    if (statusCodeResult.StatusCode == 200) return Ok(studentCourses);
-                }
-                if ((IActionResult)result.Result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
+                return Ok(studentCourses.Value);
             }
+            if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
+            {
+                if (statusCodeResult.StatusCode == 404) { return NotFound(new { Message = "Không tìm thấy khóa học sinh viên" }); }
+            }
+            if ((IActionResult)result.Result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
             throw new Exception("Lỗi không xác định");
         }
 
@@ -244,13 +197,13 @@ namespace API.Controllers
             var result = await _adminService.GetStudentCoursesByStudentId(studentID);
             if (result is ActionResult<List<StudentCourse>> studentCourses)
             {
-                if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
-                {
-                    if (statusCodeResult.StatusCode == 404) { return NotFound(new { Message = "Không tìm thấy khóa học sinh viên" }); }
-                    if (statusCodeResult.StatusCode == 200) return Ok(studentCourses);
-                }
-                if ((IActionResult)result.Result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
+                return Ok(studentCourses.Value);
             }
+            if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
+            {
+                if (statusCodeResult.StatusCode == 404) { return NotFound(new { Message = "Không tìm thấy khóa học sinh viên" }); }
+            }
+            if ((IActionResult)result.Result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
             throw new Exception("Lỗi không xác định");
         }
 
@@ -260,13 +213,13 @@ namespace API.Controllers
             var result = await _adminService.GetAllTutorCertificates();
             if (result is ActionResult<List<TutorCertificate>> tutorCertificates)
             {
-                if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
-                {
-                    if (statusCodeResult.StatusCode == 404) { return NotFound(new { Message = "Không tìm thấy chứng chỉ gia sư" }); }
-                    if (statusCodeResult.StatusCode == 200) return Ok(tutorCertificates);
-                }
-                if ((IActionResult)result.Result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
+                return Ok(tutorCertificates.Value);
             }
+            if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
+            {
+                if (statusCodeResult.StatusCode == 404) { return NotFound(new { Message = "Không tìm thấy chứng chỉ gia sư" }); }
+            }
+            if ((IActionResult)result.Result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
             throw new Exception("Lỗi không xác định");
         }
 
@@ -276,13 +229,13 @@ namespace API.Controllers
             var result = await _adminService.GetTutorCertificate(tutorCertificateID);
             if (result is ActionResult<TutorCertificate> tutorCertificate)
             {
-                if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
-                {
-                    if (statusCodeResult.StatusCode == 404) { return NotFound(new { Message = "Không tìm thấy chứng chỉ gia sư" }); }
-                    if (statusCodeResult.StatusCode == 200) return Ok(tutorCertificate);
-                }
-                if ((IActionResult)result.Result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
+                return Ok(tutorCertificate.Value);
             }
+            if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
+            {
+                if (statusCodeResult.StatusCode == 404) { return NotFound(new { Message = "Không tìm thấy chứng chỉ gia sư" }); }
+            }
+            if ((IActionResult)result.Result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
             throw new Exception("Lỗi không xác định");
         }
 
@@ -292,13 +245,13 @@ namespace API.Controllers
             var result = await _adminService.GetTutorCertificatesByTutorId(tutorID);
             if (result is ActionResult<List<TutorCertificate>> tutorCertificates)
             {
-                if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
-                {
-                    if (statusCodeResult.StatusCode == 404) { return NotFound(new { Message = "Không tìm thấy chứng chỉ gia sư" }); }
-                    if (statusCodeResult.StatusCode == 200) return Ok(tutorCertificates);
-                }
-                if ((IActionResult)result.Result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
+                return Ok(tutorCertificates.Value);
             }
+            if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
+            {
+                if (statusCodeResult.StatusCode == 404) { return NotFound(new { Message = "Không tìm thấy chứng chỉ gia sư" }); }
+            }
+            if ((IActionResult)result.Result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
             throw new Exception("Lỗi không xác định");
         }
 
@@ -308,13 +261,13 @@ namespace API.Controllers
             var result = await _adminService.GetTutorCertificatesBySubjectId(subjectID);
             if (result is ActionResult<List<TutorCertificate>> tutorCertificates)
             {
-                if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
-                {
-                    if (statusCodeResult.StatusCode == 404) { return NotFound(new { Message = "Không tìm thấy chứng chỉ gia sư" }); }
-                    if (statusCodeResult.StatusCode == 200) return Ok(tutorCertificates);
-                }
-                if ((IActionResult)result.Result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
+                return Ok(tutorCertificates.Value);
             }
+            if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
+            {
+                if (statusCodeResult.StatusCode == 404) { return NotFound(new { Message = "Không tìm thấy chứng chỉ gia sư" }); }
+            }
+            if ((IActionResult)result.Result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
             throw new Exception("Lỗi không xác định");
         }
 
@@ -324,13 +277,13 @@ namespace API.Controllers
             var result = await _adminService.GetAllTutorSubjects();
             if (result is ActionResult<List<TutorSubject>> tutorSubjects)
             {
-                if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
-                {
-                    if (statusCodeResult.StatusCode == 404) { return NotFound(new { Message = "Không tìm thấy môn học gia sư" }); }
-                    if (statusCodeResult.StatusCode == 200) return Ok(tutorSubjects);
-                }
-                if ((IActionResult)result.Result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
+                return Ok(tutorSubjects.Value);
             }
+            if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
+            {
+                if (statusCodeResult.StatusCode == 404) { return NotFound(new { Message = "Không tìm thấy môn học gia sư" }); }
+            }
+            if ((IActionResult)result.Result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
             throw new Exception("Lỗi không xác định");
         }
 
@@ -340,13 +293,13 @@ namespace API.Controllers
             var result = await _adminService.GetTutorSubject(tutorSubjectID);
             if (result is ActionResult<TutorSubject> tutorSubject)
             {
-                if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
-                {
-                    if (statusCodeResult.StatusCode == 404) { return NotFound(new { Message = "Không tìm thấy môn học gia sư" }); }
-                    if (statusCodeResult.StatusCode == 200) return Ok(tutorSubject);
-                }
-                if ((IActionResult)result.Result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
+                return Ok(tutorSubject.Value);
             }
+            if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
+            {
+                if (statusCodeResult.StatusCode == 404) { return NotFound(new { Message = "Không tìm thấy môn học gia sư" }); }
+            }
+            if ((IActionResult)result.Result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
             throw new Exception("Lỗi không xác định");
         }
 
@@ -356,13 +309,13 @@ namespace API.Controllers
             var result = await _adminService.GetTutorSubjectsByTutorId(tutorID);
             if (result is ActionResult<List<TutorSubject>> tutorSubjects)
             {
-                if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
-                {
-                    if (statusCodeResult.StatusCode == 404) { return NotFound(new { Message = "Không tìm thấy môn học gia sư" }); }
-                    if (statusCodeResult.StatusCode == 200) return Ok(tutorSubjects);
-                }
-                if ((IActionResult)result.Result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
+                return Ok(tutorSubjects.Value);
             }
+            if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
+            {
+                if (statusCodeResult.StatusCode == 404) { return NotFound(new { Message = "Không tìm thấy môn học gia sư" }); }
+            }
+            if ((IActionResult)result.Result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
             throw new Exception("Lỗi không xác định");
         }
 
@@ -372,13 +325,13 @@ namespace API.Controllers
             var result = await _adminService.GetTutorSubjectsBySubjectId(subjectID);
             if (result is ActionResult<List<TutorSubject>> tutorSubjects)
             {
-                if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
-                {
-                    if (statusCodeResult.StatusCode == 404) { return NotFound(new { Message = "Không tìm thấy môn học gia sư" }); }
-                    if (statusCodeResult.StatusCode == 200) return Ok(tutorSubjects);
-                }
-                if ((IActionResult)result.Result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
+                return Ok(tutorSubjects.Value);
             }
+            if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
+            {
+                if (statusCodeResult.StatusCode == 404) { return NotFound(new { Message = "Không tìm thấy môn học gia sư" }); }
+            }
+            if ((IActionResult)result.Result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
             throw new Exception("Lỗi không xác định");
         }
 
@@ -388,13 +341,13 @@ namespace API.Controllers
             var result = await _adminService.GetAllTutorRatings();
             if (result is ActionResult<List<TutorRating>> tutorRatings)
             {
-                if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
-                {
-                    if (statusCodeResult.StatusCode == 404) { return NotFound(new { Message = "Không tìm thấy đánh giá gia sư" }); }
-                    if (statusCodeResult.StatusCode == 200) return Ok(tutorRatings);
-                }
-                if ((IActionResult)result.Result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
+                return Ok(tutorRatings.Value);
             }
+            if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
+            {
+                if (statusCodeResult.StatusCode == 404) { return NotFound(new { Message = "Không tìm thấy đánh giá gia sư" }); }
+            }
+            if ((IActionResult)result.Result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
             throw new Exception("Lỗi không xác định");
         }
 
@@ -404,13 +357,13 @@ namespace API.Controllers
             var result = await _adminService.GetTutorRating(tutorRatingID);
             if (result is ActionResult<TutorRating> tutorRating)
             {
-                if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
-                {
-                    if (statusCodeResult.StatusCode == 404) { return NotFound(new { Message = "Không tìm thấy đánh giá gia sư" }); }
-                    if (statusCodeResult.StatusCode == 200) return Ok(tutorRating);
-                }
-                if ((IActionResult)result.Result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
+                return Ok(tutorRating.Value);
             }
+            if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
+            {
+                if (statusCodeResult.StatusCode == 404) { return NotFound(new { Message = "Không tìm thấy đánh giá gia sư" }); }
+            }
+            if ((IActionResult)result.Result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
             throw new Exception("Lỗi không xác định");
         }
 
@@ -420,13 +373,13 @@ namespace API.Controllers
             var result = await _adminService.GetTutorRatingsByTutorId(tutorID);
             if (result is ActionResult<List<TutorRating>> tutorRatings)
             {
-                if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
-                {
-                    if (statusCodeResult.StatusCode == 404) { return NotFound(new { Message = "Không tìm thấy đánh giá gia sư" }); }
-                    if (statusCodeResult.StatusCode == 200) return Ok(tutorRatings);
-                }
-                if ((IActionResult)result.Result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
+                return Ok(tutorRatings.Value);
             }
+            if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
+            {
+                if (statusCodeResult.StatusCode == 404) { return NotFound(new { Message = "Không tìm thấy đánh giá gia sư" }); }
+            }
+            if ((IActionResult)result.Result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
             throw new Exception("Lỗi không xác định");
         }
 
@@ -436,13 +389,13 @@ namespace API.Controllers
             var result = await _adminService.GetTutorRatingsByStudentId(studentID);
             if (result is ActionResult<List<TutorRating>> tutorRatings)
             {
-                if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
-                {
-                    if (statusCodeResult.StatusCode == 404) { return NotFound(new { Message = "Không tìm thấy đánh giá gia sư" }); }
-                    if (statusCodeResult.StatusCode == 200) return Ok(tutorRatings);
-                }
-                if ((IActionResult)result.Result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
+                return Ok(tutorRatings.Value);
             }
+            if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
+            {
+                if (statusCodeResult.StatusCode == 404) { return NotFound(new { Message = "Không tìm thấy đánh giá gia sư" }); }
+            }
+            if ((IActionResult)result.Result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
             throw new Exception("Lỗi không xác định");
         }
 
@@ -452,13 +405,13 @@ namespace API.Controllers
             var result = await _adminService.GetAllTutorRatingImages();
             if (result is ActionResult<List<TutorRatingImage>> tutorRatingImages)
             {
-                if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
-                {
-                    if (statusCodeResult.StatusCode == 404) { return NotFound(new { Message = "Không tìm thấy hình ảnh đánh giá gia sư" }); }
-                    if (statusCodeResult.StatusCode == 200) return Ok(tutorRatingImages);
-                }
-                if ((IActionResult)result.Result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
+                return Ok(tutorRatingImages.Value);
             }
+            if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
+            {
+                if (statusCodeResult.StatusCode == 404) { return NotFound(new { Message = "Không tìm thấy hình ảnh đánh giá gia sư" }); }
+            }
+            if ((IActionResult)result.Result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
             throw new Exception("Lỗi không xác định");
         }
 
@@ -468,74 +421,79 @@ namespace API.Controllers
             var result = await _adminService.GetTutorRatingImage(tutorRatingImageID);
             if (result is ActionResult<TutorRatingImage> tutorRatingImage)
             {
-                if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
-                {
-                    if (statusCodeResult.StatusCode == 404) { return NotFound(new { Message = "Không tìm thấy hình ảnh đánh giá gia sư" }); }
-                    if (statusCodeResult.StatusCode == 200) return Ok(tutorRatingImage);
-                }
-                if ((IActionResult)result.Result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
+                return Ok(tutorRatingImage.Value);
             }
+            if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
+            {
+                if (statusCodeResult.StatusCode == 404) { return NotFound(new { Message = "Không tìm thấy hình ảnh đánh giá gia sư" }); }
+            }
+            if ((IActionResult)result.Result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
             throw new Exception("Lỗi không xác định");
         }
+
         [HttpGet("get/moderators")]
         public async Task<ActionResult<List<Moderator>>> GetAllModerators()
         {
             var result = await _adminService.GetModerators();
             if (result is ActionResult<List<Moderator>> moderators)
             {
-                if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
-                {
-                    if (statusCodeResult.StatusCode == 404) { return NotFound(new { Message = "Không tìm thấy quản trị viên" }); }
-                    if (statusCodeResult.StatusCode == 200) return Ok(moderators);
-                }
-                if ((IActionResult)result.Result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
+                return Ok(moderators.Value);
             }
+            if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
+            {
+                if (statusCodeResult.StatusCode == 404) { return NotFound(new { Message = "Không tìm thấy quản trị viên" }); }
+            }
+            if ((IActionResult)result.Result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
             throw new Exception("Lỗi không xác định");
         }
+
         [HttpGet("get/moderator/{moderatorID}")]
         public async Task<ActionResult<Moderator>> GetModerator(Guid moderatorID)
         {
             var result = await _adminService.GetModeratorById(moderatorID);
             if (result is ActionResult<Moderator> moderator)
             {
-                if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
-                {
-                    if (statusCodeResult.StatusCode == 404) { return NotFound(new { Message = "Không tìm thấy quản trị viên" }); }
-                    if (statusCodeResult.StatusCode == 200) return Ok(moderator);
-                }
-                if ((IActionResult)result.Result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
+                return Ok(moderator.Value);
             }
+            if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
+            {
+                if (statusCodeResult.StatusCode == 404) { return NotFound(new { Message = "Không tìm thấy quản trị viên" }); }
+            }
+            if ((IActionResult)result.Result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
             throw new Exception("Lỗi không xác định");
         }
+
         [HttpGet("get/notifications")]
         public async Task<ActionResult<List<Notification>>> GetAllNotifications()
         {
             var result = await _adminService.GetNotifications();
             if (result is ActionResult<List<Notification>> notifications)
             {
-                if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
-                {
-                    if (statusCodeResult.StatusCode == 404) { return NotFound(new { Message = "Không tìm thấy thông báo" }); }
-                    if (statusCodeResult.StatusCode == 200) return Ok(notifications);
-                }
-                if ((IActionResult)result.Result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
+                return Ok(notifications.Value);
             }
+            if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
+            {
+                if (statusCodeResult.StatusCode == 404) { return NotFound(new { Message = "Không tìm thấy thông báo" }); }
+            }
+            if ((IActionResult)result.Result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
             throw new Exception("Lỗi không xác định");
         }
+
         [HttpGet("get/notification/{userID}")]
         public async Task<ActionResult<List<Notification>>> GetNotificationsByUserId(Guid userID)
         {
             var result = await _adminService.GetNotificationsByUserId(userID);
             if (result is ActionResult<List<Notification>> notifications)
             {
-                if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
-                {
-                    if (statusCodeResult.StatusCode == 404) { return NotFound(new { Message = "Không tìm thấy thông báo" }); }
-                    if (statusCodeResult.StatusCode == 200) return Ok(notifications);
-                }
-                if ((IActionResult)result.Result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
+                return Ok(notifications.Value);
             }
+            if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
+            {
+                if (statusCodeResult.StatusCode == 404) { return NotFound(new { Message = "Không tìm thấy thông báo" }); }
+            }
+            if ((IActionResult)result.Result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
             throw new Exception("Lỗi không xác định");
         }
+
     }
 }

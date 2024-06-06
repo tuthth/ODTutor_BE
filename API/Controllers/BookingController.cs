@@ -21,43 +21,45 @@ namespace API.Controllers
             var result = await _bookingService.GetAllBookings();
             if (result is ActionResult<List<Booking>> bookings)
             {
-                if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
-                {
-                    if (statusCodeResult.StatusCode == 404) { return NotFound(new {Message = "Không tìm thấy lịch đặt" }); }
-                    if (statusCodeResult.StatusCode == 200) return Ok(bookings);
-                }
-                if ((IActionResult)result.Result is Exception exception) StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
+                return Ok(bookings.Value);
             }
+            if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
+            {
+                if (statusCodeResult.StatusCode == 404) { return NotFound(new { Message = "Không tìm thấy lịch đặt" }); }
+            }
+            if ((IActionResult)result.Result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
             throw new Exception("Lỗi không xác định");
         }
+
         [HttpGet("get/booking/{bookingID}")]
         public async Task<ActionResult<Booking>> GetBooking(Guid bookingID)
         {
             var result = await _bookingService.GetBooking(bookingID);
             if (result is ActionResult<Booking> booking)
             {
-                if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
-                {
-                    if (statusCodeResult.StatusCode == 404) { return NotFound(new {Message = "Không tìm thấy lịch đặt" }); }
-                    if (statusCodeResult.StatusCode == 200) return Ok(booking);
-                }
-                if ((IActionResult)result.Result is Exception exception) StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
+                return Ok(booking.Value);
             }
+            if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
+            {
+                if (statusCodeResult.StatusCode == 404) { return NotFound(new { Message = "Không tìm thấy lịch đặt" }); }
+            }
+            if ((IActionResult)result.Result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
             throw new Exception("Lỗi không xác định");
         }
+
         [HttpGet("get/bookings/student/{studentID}")]
         public async Task<ActionResult<List<Booking>>> GetBookingsByStudentID(Guid studentID)
         {
             var result = await _bookingService.GetBookingsByStudentId(studentID);
             if (result is ActionResult<List<Booking>> bookings)
             {
-                if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
-                {
-                    if (statusCodeResult.StatusCode == 404) { return NotFound(new {Message = "Không tìm thấy lịch đặt" }); }
-                    if (statusCodeResult.StatusCode == 200) return Ok(bookings);
-                }
-                if ((IActionResult)result.Result is Exception exception) StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
+                return Ok(bookings.Value);
             }
+            if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
+            {
+                if (statusCodeResult.StatusCode == 404) { return NotFound(new { Message = "Không tìm thấy lịch đặt" }); }
+            }
+            if ((IActionResult)result.Result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
             throw new Exception("Lỗi không xác định");
         }
 
@@ -67,15 +69,16 @@ namespace API.Controllers
             var result = await _bookingService.GetBookingsByTutorId(tutorID);
             if (result is ActionResult<List<Booking>> bookings)
             {
-                if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
-                {
-                    if (statusCodeResult.StatusCode == 404) { return NotFound(new {Message = "Không tìm thấy lịch đặt" }); }
-                    if (statusCodeResult.StatusCode == 200) return Ok(bookings);
-                }
-                if ((IActionResult)result.Result is Exception exception) StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
+                return Ok(bookings.Value);
             }
+            if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
+            {
+                if (statusCodeResult.StatusCode == 404) { return NotFound(new { Message = "Không tìm thấy lịch đặt" }); }
+            }
+            if ((IActionResult)result.Result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
             throw new Exception("Lỗi không xác định");
         }
+
         /// <summary>
         ///         Booking status: 1 ( Learning ), 2 ( Finsihed ), 3 ( Deleted ), 4 ( Pending ), 5 ( Accepted )
         /// </summary>

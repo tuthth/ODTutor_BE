@@ -20,7 +20,7 @@ namespace Services.Implementations
         }
         public async Task<IActionResult> CreateStudentRequest(CreateStudentRequest request)
         {
-            var student = _context.Students.FirstOrDefault(x => x.StudentId == request.StudentId);
+            var student = _context.Students.FirstOrDefault(x => x.StudentId == request.StudentId && x.UserNavigation.IsPremium == true);
             var subject = _context.Subjects.FirstOrDefault(x => x.SubjectId == request.SubjectId);
             if (student == null || subject == null)
             {
