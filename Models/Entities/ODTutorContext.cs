@@ -60,7 +60,7 @@ namespace Models.Entities
         private string GetConnectionStrings()
         {
             var config = new ConfigurationBuilder()
-                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+                .AddJsonFile("appsettings.json", optional: true, reloadOnChange: false)
                 .SetBasePath(Directory.GetCurrentDirectory())
                 .Build();
             return config.GetConnectionString("DefaultConnection");
