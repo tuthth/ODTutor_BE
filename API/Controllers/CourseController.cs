@@ -1,6 +1,8 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Mvc;
 using Models.Entities;
 using Models.Models.Requests;
+using Models.Models.Views;
 using Services.Implementations;
 using Services.Interfaces;
 
@@ -11,11 +13,14 @@ namespace API.Controllers
     public class CourseController : ControllerBase
     {
         private readonly ICourseService _courseService;
+        private readonly IMapper _mapper;
 
-        public CourseController(ICourseService courseService)
+        public CourseController(ICourseService courseService, IMapper mapper)
         {
             _courseService = courseService;
+            _mapper = mapper;
         }
+
         /// <summary>
         ///         Course status: 1 ( Active ), 2 (Inactive), 3 (Deleted)
         /// </summary>
@@ -230,12 +235,13 @@ namespace API.Controllers
             throw new Exception("Lỗi không xác định");
         }
         [HttpGet("get/courses")]
-        public async Task<ActionResult<List<Course>>> GetAllCourses()
+        public async Task<ActionResult<List<CourseView>>> GetAllCourses()
         {
             var result = await _courseService.GetAllCourses();
-            if (result is ActionResult<List<Course>> courses)
+            if (result is ActionResult<List<Course>> courses && result.Value != null)
             {
-                return Ok(courses.Value);
+               var courseViews = _mapper.Map<List<CourseView>>(courses.Value);
+                return Ok(courseViews);
             }
             if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
             {
@@ -246,12 +252,13 @@ namespace API.Controllers
         }
 
         [HttpGet("get/course/{courseID}")]
-        public async Task<ActionResult<Course>> GetCourse(Guid courseID)
+        public async Task<ActionResult<CourseView>> GetCourse(Guid courseID)
         {
             var result = await _courseService.GetCourse(courseID);
-            if (result is ActionResult<Course> course)
+            if (result is ActionResult<Course> course && result.Value != null)
             {
-                return Ok(course.Value);
+                var courseView = _mapper.Map<CourseView>(course.Value);
+                return Ok(courseView);
             }
             if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
             {
@@ -262,12 +269,13 @@ namespace API.Controllers
         }
 
         [HttpGet("get/course-outlines")]
-        public async Task<ActionResult<List<CourseOutline>>> GetAllCourseOutlines()
+        public async Task<ActionResult<List<CourseOutlineView>>> GetAllCourseOutlines()
         {
             var result = await _courseService.GetAllCourseOutlines();
-            if (result is ActionResult<List<CourseOutline>> courseOutlines)
+            if (result is ActionResult<List<CourseOutline>> courseOutlines && result.Value != null)
             {
-                return Ok(courseOutlines.Value);
+                var courseOutlineViews = _mapper.Map<List<CourseOutlineView>>(courseOutlines.Value);
+                return Ok(courseOutlineViews);
             }
             if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
             {
@@ -278,12 +286,13 @@ namespace API.Controllers
         }
 
         [HttpGet("get/course-outline/{courseOutlineID}")]
-        public async Task<ActionResult<CourseOutline>> GetCourseOutline(Guid courseOutlineID)
+        public async Task<ActionResult<CourseOutlineView>> GetCourseOutline(Guid courseOutlineID)
         {
             var result = await _courseService.GetCourseOutline(courseOutlineID);
-            if (result is ActionResult<CourseOutline> courseOutline)
+            if (result is ActionResult<CourseOutline> courseOutline && result.Value != null)
             {
-                return Ok(courseOutline.Value);
+                var courseOutlineView = _mapper.Map<CourseOutlineView>(courseOutline.Value);
+                return Ok(courseOutlineView);
             }
             if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
             {
@@ -294,12 +303,13 @@ namespace API.Controllers
         }
 
         [HttpGet("get/course-promotions")]
-        public async Task<ActionResult<List<CoursePromotion>>> GetAllCoursePromotions()
+        public async Task<ActionResult<List<CoursePromotionView>>> GetAllCoursePromotions()
         {
             var result = await _courseService.GetAllCoursePromotions();
-            if (result is ActionResult<List<CoursePromotion>> coursePromotions)
+            if (result is ActionResult<List<CoursePromotion>> coursePromotions && result.Value != null)
             {
-                return Ok(coursePromotions.Value);
+                var coursePromotionViews = _mapper.Map<List<CoursePromotionView>>(coursePromotions.Value);
+                return Ok(coursePromotionViews);
             }
             if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
             {
@@ -310,12 +320,13 @@ namespace API.Controllers
         }
 
         [HttpGet("get/course-promotion/{coursePromotionID}")]
-        public async Task<ActionResult<CoursePromotion>> GetCoursePromotion(Guid coursePromotionID)
+        public async Task<ActionResult<CoursePromotionView>> GetCoursePromotion(Guid coursePromotionID)
         {
             var result = await _courseService.GetCoursePromotion(coursePromotionID);
-            if (result is ActionResult<CoursePromotion> coursePromotion)
+            if (result is ActionResult<CoursePromotion> coursePromotion && result.Value != null)
             {
-                return Ok(coursePromotion.Value);
+                var coursePromotionView = _mapper.Map<CoursePromotionView>(coursePromotion.Value);
+                return Ok(coursePromotionView);
             }
             if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
             {
@@ -325,12 +336,13 @@ namespace API.Controllers
             throw new Exception("Lỗi không xác định");
         }
         [HttpGet("get/promotions")]
-        public async Task<ActionResult<List<Promotion>>> GetAllPromotions()
+        public async Task<ActionResult<List<PromotionView>>> GetAllPromotions()
         {
             var result = await _courseService.GetAllPromotions();
-            if (result is ActionResult<List<Promotion>> promotions)
+            if (result is ActionResult<List<Promotion>> promotions && result.Value != null)
             {
-                return Ok(promotions.Value);
+                var promotionViews = _mapper.Map<List<PromotionView>>(promotions.Value);
+                return Ok(promotionViews);
             }
             if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
             {
@@ -340,12 +352,13 @@ namespace API.Controllers
             throw new Exception("Lỗi không xác định");
         }
         [HttpGet("get/promotion/{promotionID}")]
-        public async Task<ActionResult<Promotion>> GetPromotion(Guid promotionID)
+        public async Task<ActionResult<PromotionView>> GetPromotion(Guid promotionID)
         {
             var result = await _courseService.GetPromotion(promotionID);
-            if (result is ActionResult<Promotion> promotion)
+            if (result is ActionResult<Promotion> promotion && result.Value != null)
             {
-                return Ok(promotion.Value);
+                var promotionView = _mapper.Map<PromotionView>(promotion.Value);
+                return Ok(promotionView);
             }
             if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
             {

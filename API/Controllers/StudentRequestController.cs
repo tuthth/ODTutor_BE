@@ -1,6 +1,8 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Mvc;
 using Models.Entities;
 using Models.Models.Requests;
+using Models.Models.Views;
 using Services.Implementations;
 using Services.Interfaces;
 
@@ -11,10 +13,14 @@ namespace API.Controllers
     public class StudentRequestController : ControllerBase
     {
         private readonly IStudentRequestService _studentRequestService;
-        public StudentRequestController(IStudentRequestService studentRequestService)
+        private readonly IMapper _mapper;
+
+        public StudentRequestController(IStudentRequestService studentRequestService, IMapper mapper)
         {
             _studentRequestService = studentRequestService;
+            _mapper = mapper;
         }
+
         [HttpPost("create")]
         public async Task<IActionResult> CreateStudentRequest([FromBody] CreateStudentRequest request)
         {
@@ -48,12 +54,13 @@ namespace API.Controllers
         }
 
         [HttpGet("get/all")]
-        public async Task<ActionResult<List<StudentRequest>>> GetAllStudentRequests()
+        public async Task<ActionResult<List<StudentRequestView>>> GetAllStudentRequests()
         {
             var result = await _studentRequestService.GetAllStudentRequests();
-            if (result is ActionResult<List<StudentRequest>> studentRequests)
+            if (result is ActionResult<List<StudentRequest>> studentRequests && result.Value != null)
             {
-                return Ok(studentRequests.Value);
+                var studentRequestViews = _mapper.Map<List<StudentRequestView>>(studentRequests.Value);
+                return Ok(studentRequestViews);
             }
             if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
             {
@@ -64,12 +71,13 @@ namespace API.Controllers
         }
 
         [HttpGet("get/{studentRequestID}")]
-        public async Task<ActionResult<StudentRequest>> GetStudentRequest(Guid studentRequestID)
+        public async Task<ActionResult<StudentRequestView>> GetStudentRequest(Guid studentRequestID)
         {
             var result = await _studentRequestService.GetStudentRequest(studentRequestID);
-            if (result is ActionResult<StudentRequest> studentRequest)
+            if (result is ActionResult<StudentRequest> studentRequest && result.Value != null)
             {
-                return Ok(studentRequest.Value);
+                var studentRequestView = _mapper.Map<StudentRequestView>(studentRequest.Value);
+                return Ok(studentRequestView);
             }
             if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
             {
@@ -80,12 +88,13 @@ namespace API.Controllers
         }
 
         [HttpGet("get/student/{studentID}")]
-        public async Task<ActionResult<List<StudentRequest>>> GetStudentRequestsByStudentID(Guid studentID)
+        public async Task<ActionResult<List<StudentRequestView>>> GetStudentRequestsByStudentID(Guid studentID)
         {
             var result = await _studentRequestService.GetStudentRequestsByStudentId(studentID);
-            if (result is ActionResult<List<StudentRequest>> studentRequests)
+            if (result is ActionResult<List<StudentRequest>> studentRequests && result.Value != null)
             {
-                return Ok(studentRequests.Value);
+                var studentRequestViews = _mapper.Map<List<StudentRequestView>>(studentRequests.Value);
+                return Ok(studentRequestViews);
             }
             if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
             {
@@ -96,12 +105,13 @@ namespace API.Controllers
         }
 
         [HttpGet("get/subject/{subjectID}")]
-        public async Task<ActionResult<List<StudentRequest>>> GetStudentRequestsBySubjectID(Guid subjectID)
+        public async Task<ActionResult<List<StudentRequestView>>> GetStudentRequestsBySubjectID(Guid subjectID)
         {
             var result = await _studentRequestService.GetStudentRequestsBySubjectId(subjectID);
-            if (result is ActionResult<List<StudentRequest>> studentRequests)
+            if (result is ActionResult<List<StudentRequest>> studentRequests && result.Value != null)
             {
-                return Ok(studentRequests.Value);
+                var studentRequestViews = _mapper.Map<List<StudentRequestView>>(studentRequests.Value);
+                return Ok(studentRequestViews);
             }
             if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
             {

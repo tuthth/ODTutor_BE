@@ -1,6 +1,8 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Mvc;
 using Models.Entities;
 using Models.Models.Requests;
+using Models.Models.Views;
 using Services.Implementations;
 using Services.Interfaces;
 
@@ -11,11 +13,14 @@ namespace API.Controllers
     public class ReportController : ControllerBase
     {
         private readonly IReportService _reportService;
+        private readonly IMapper _mapper;
 
-        public ReportController(IReportService reportService)
+        public ReportController(IReportService reportService, IMapper mapper)
         {
             _reportService = reportService;
+            _mapper = mapper;
         }
+
         /// <summary>
         ///         Report enum: 1 (Finished), 2 (Processing), 3 (Cancelled)
         /// </summary>
@@ -72,12 +77,13 @@ namespace API.Controllers
             throw new Exception("Lỗi không xác định");
         }
         [HttpGet("get/all")]
-        public async Task<ActionResult<List<Report>>> GetAllReports()
+        public async Task<ActionResult<List<ReportView>>> GetAllReports()
         {
             var result = await _reportService.GetAllReports();
-            if (result is ActionResult<List<Report>> reports)
+            if (result is ActionResult<List<Report>> reports && result.Value != null)
             {
-                return Ok(reports.Value);
+                var reportViews = _mapper.Map<List<ReportView>>(reports.Value);
+                return Ok(reportViews);
             }
             if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
             {
@@ -87,12 +93,13 @@ namespace API.Controllers
             throw new Exception("Lỗi không xác định");
         }
         [HttpGet("get/{reportID}")]
-        public async Task<ActionResult<Report>> GetReport(Guid reportID)
+        public async Task<ActionResult<ReportView>> GetReport(Guid reportID)
         {
             var result = await _reportService.GetReport(reportID);
-            if (result is ActionResult<Report> report)
+            if (result is ActionResult<Report> report && result.Value != null)
             {
-                return Ok(report.Value);
+                var reportView = _mapper.Map<ReportView>(report.Value);
+                return Ok(reportView);
             }
             if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
             {
@@ -103,12 +110,13 @@ namespace API.Controllers
             throw new Exception("Lỗi không xác định");
         }
         [HttpGet("get/create/{userID}")]
-        public async Task<ActionResult<List<Report>>> GetReportsByUserID(Guid userID)
+        public async Task<ActionResult<List<ReportView>>> GetReportsByUserID(Guid userID)
         {
             var result = await _reportService.GetReportsByUserId(userID);
-            if (result is ActionResult<List<Report>> reports)
+            if (result is ActionResult<List<Report>> reports && result.Value != null)
             {
-                return Ok(reports.Value);
+                var reportViews = _mapper.Map<List<ReportView>>(reports.Value);
+                return Ok(reportViews);
             }
             if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
             {
@@ -118,12 +126,13 @@ namespace API.Controllers
             throw new Exception("Lỗi không xác định");
         }
         [HttpGet("get/target/{reporterID}")]
-        public async Task<ActionResult<List<Report>>> GetReportsByReporterID(Guid reporterID)
+        public async Task<ActionResult<List<ReportView>>> GetReportsByReporterID(Guid reporterID)
         {
             var result = await _reportService.GetReportsByReporterId(reporterID);
-            if (result is ActionResult<List<Report>> reports)
+            if (result is ActionResult<List<Report>> reports && result.Value != null)
             {
-                return Ok(reports.Value);
+                var reportViews = _mapper.Map<List<ReportView>>(reports.Value);
+                return Ok(reportViews);
             }
             if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
             {

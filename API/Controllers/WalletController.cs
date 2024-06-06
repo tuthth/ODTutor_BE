@@ -30,7 +30,7 @@ namespace API.Controllers
         public async Task<ActionResult<List<Wallet>>> GetAllWallets()
         {
             var result = await _walletService.GetAllWallets();
-            if (result is ActionResult<List<Wallet>> wallets)
+            if (result is ActionResult<List<Wallet>> wallets && result.Value != null)
             {
                 return Ok(wallets.Value);
             }
@@ -46,7 +46,7 @@ namespace API.Controllers
         public async Task<ActionResult<Wallet>> GetWallet(Guid walletID)
         {
             var result = await _walletService.GetWalletByWalletId(walletID);
-            if (result is ActionResult<Wallet> wallet)
+            if (result is ActionResult<Wallet> wallet && result.Value != null)
             {
                 return Ok(wallet.Value);
             }
@@ -62,7 +62,7 @@ namespace API.Controllers
         public async Task<ActionResult<Wallet>> GetWalletByUserID(Guid userID)
         {
             var result = await _walletService.GetWalletByUserId(userID);
-            if (result is ActionResult<Wallet> wallet)
+            if (result is ActionResult<Wallet> wallet && result.Value != null)
             {
                 return Ok(wallet.Value);
             }

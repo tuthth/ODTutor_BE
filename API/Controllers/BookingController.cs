@@ -1,6 +1,8 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Mvc;
 using Models.Entities;
 using Models.Models.Requests;
+using Models.Models.Views;
 using Services.Implementations;
 using Services.Interfaces;
 
@@ -10,18 +12,23 @@ namespace API.Controllers
     [ApiController]
     public class BookingController : ControllerBase
     {
-       private readonly IBookingService _bookingService;
-        public BookingController(IBookingService bookingService)
+        private readonly IBookingService _bookingService;
+        private readonly IMapper _mapper;
+
+        public BookingController(IBookingService bookingService, IMapper mapper)
         {
             _bookingService = bookingService;
+            _mapper = mapper;
         }
+
         [HttpGet("get/bookings")]
-        public async Task<ActionResult<List<Booking>>> GetAllBookings()
+        public async Task<ActionResult<List<BookingView>>> GetAllBookings()
         {
             var result = await _bookingService.GetAllBookings();
-            if (result is ActionResult<List<Booking>> bookings)
+            if (result is ActionResult<List<Booking>> bookings && result.Value != null)
             {
-                return Ok(bookings.Value);
+                var bookingViews = _mapper.Map<List<BookingView>>(bookings.Value);
+                return Ok(bookingViews);
             }
             if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
             {
@@ -32,12 +39,13 @@ namespace API.Controllers
         }
 
         [HttpGet("get/booking/{bookingID}")]
-        public async Task<ActionResult<Booking>> GetBooking(Guid bookingID)
+        public async Task<ActionResult<BookingView>> GetBooking(Guid bookingID)
         {
             var result = await _bookingService.GetBooking(bookingID);
-            if (result is ActionResult<Booking> booking)
+            if (result is ActionResult<Booking> booking && result.Value != null)
             {
-                return Ok(booking.Value);
+                var bookingView = _mapper.Map<BookingView>(booking.Value);
+                return Ok(bookingView);
             }
             if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
             {
@@ -48,12 +56,13 @@ namespace API.Controllers
         }
 
         [HttpGet("get/bookings/student/{studentID}")]
-        public async Task<ActionResult<List<Booking>>> GetBookingsByStudentID(Guid studentID)
+        public async Task<ActionResult<List<BookingView>>> GetBookingsByStudentID(Guid studentID)
         {
             var result = await _bookingService.GetBookingsByStudentId(studentID);
-            if (result is ActionResult<List<Booking>> bookings)
+            if (result is ActionResult<List<Booking>> bookings && result.Value != null)
             {
-                return Ok(bookings.Value);
+                var bookingViews = _mapper.Map<List<BookingView>>(bookings.Value);
+                return Ok(bookingViews);
             }
             if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
             {
@@ -64,12 +73,13 @@ namespace API.Controllers
         }
 
         [HttpGet("get/bookings/tutor/{tutorID}")]
-        public async Task<ActionResult<List<Booking>>> GetBookingsByTutorID(Guid tutorID)
+        public async Task<ActionResult<List<BookingView>>> GetBookingsByTutorID(Guid tutorID)
         {
             var result = await _bookingService.GetBookingsByTutorId(tutorID);
-            if (result is ActionResult<List<Booking>> bookings)
+            if (result is ActionResult<List<Booking>> bookings && result.Value != null)
             {
-                return Ok(bookings.Value);
+                var bookingViews = _mapper.Map<List<BookingView>>(bookings.Value);
+                return Ok(bookingViews);
             }
             if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
             {
@@ -90,9 +100,9 @@ namespace API.Controllers
             {
                 if (actionResult is StatusCodeResult statusCodeResult)
                 {
-                    if (statusCodeResult.StatusCode == 400) { return BadRequest(new {Message = "Dữ liệu không hợp lệ" }); }
-                    if (statusCodeResult.StatusCode == 406) { return StatusCode(StatusCodes.Status406NotAcceptable, new {Message = "Có tài khoản đang bị đình chỉ bởi hệ thống" }); }
-                    if (statusCodeResult.StatusCode == 201) return StatusCode(StatusCodes.Status201Created, new {Message =  "Đặt lịch học thành công, vui lòng đến mục Thanh toán" });
+                    if (statusCodeResult.StatusCode == 400) { return BadRequest(new { Message = "Dữ liệu không hợp lệ" }); }
+                    if (statusCodeResult.StatusCode == 406) { return StatusCode(StatusCodes.Status406NotAcceptable, new { Message = "Có tài khoản đang bị đình chỉ bởi hệ thống" }); }
+                    if (statusCodeResult.StatusCode == 201) return StatusCode(StatusCodes.Status201Created, new { Message = "Đặt lịch học thành công, vui lòng đến mục Thanh toán" });
                 }
                 if (actionResult is Exception exception) StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
             }
@@ -106,8 +116,8 @@ namespace API.Controllers
             {
                 if (actionResult is StatusCodeResult statusCodeResult)
                 {
-                    if (statusCodeResult.StatusCode == 400) { return BadRequest(new {Message = "Dữ liệu không hợp lệ" }); }
-                    if (statusCodeResult.StatusCode == 406) { return StatusCode(StatusCodes.Status406NotAcceptable, new {Message = "Có tài khoản đang bị đình chỉ bởi hệ thống" } ); }
+                    if (statusCodeResult.StatusCode == 400) { return BadRequest(new { Message = "Dữ liệu không hợp lệ" }); }
+                    if (statusCodeResult.StatusCode == 406) { return StatusCode(StatusCodes.Status406NotAcceptable, new { Message = "Có tài khoản đang bị đình chỉ bởi hệ thống" }); }
                     if (statusCodeResult.StatusCode == 200) return Ok();
                 }
                 if (actionResult is Exception exception) StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
@@ -122,10 +132,10 @@ namespace API.Controllers
             {
                 if (actionResult is StatusCodeResult statusCodeResult)
                 {
-                    if (statusCodeResult.StatusCode == 400) { return BadRequest(new {Message = "Dữ liệu không hợp lệ"}); }
-                    if(statusCodeResult.StatusCode == 404) return NotFound(new {Message = "Không tìm thấy lịch đặt đã hoàn thành" });
+                    if (statusCodeResult.StatusCode == 400) { return BadRequest(new { Message = "Dữ liệu không hợp lệ" }); }
+                    if (statusCodeResult.StatusCode == 404) return NotFound(new { Message = "Không tìm thấy lịch đặt đã hoàn thành" });
                     if (statusCodeResult.StatusCode == 406) { return StatusCode(StatusCodes.Status406NotAcceptable, new { Message = "Tài khoản student đang bị đình chỉ bởi hệ thống" }); }
-                    if (statusCodeResult.StatusCode == 201) return StatusCode(StatusCodes.Status201Created, new { Message = "Đánh giá thành công" } );
+                    if (statusCodeResult.StatusCode == 201) return StatusCode(StatusCodes.Status201Created, new { Message = "Đánh giá thành công" });
                 }
                 if (actionResult is Exception exception) StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
             }

@@ -1,8 +1,10 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Models.Entities;
 using Models.Enumerables;
 using Models.Models.Requests;
+using Models.Models.Views;
 using Services.Implementations;
 using Services.Interfaces;
 
@@ -13,13 +15,15 @@ namespace API.Controllers
     public class TransactionController : ControllerBase
     {
         private readonly ITransactionService _transactionService;
+        private readonly IMapper _mapper;
         //private readonly IUserService _userService;
 
-        public TransactionController(ITransactionService transactionService)
+        public TransactionController(ITransactionService transactionService, IMapper mapper)
         {
             _transactionService = transactionService;
-            //_userService = userService;
+            _mapper = mapper;
         }
+
         /// <summary>
         ///         Transaction choice: 1 ( Deposit ), 2 ( Withdraw )
         /// </summary>
@@ -160,25 +164,14 @@ namespace API.Controllers
         /// VNpay Type status for wallet transaction: 0 (Approve), 1 (Pending), 2 (Reject)
         /// </summary>
 
-        [HttpGet("get/booking")]
-        [Authorize(Roles = "Admin")]
-        public async Task<List<BookingTransaction>> GetAll() => await _transactionService.GetAllBooking();
-
-        [HttpGet("get/course")]
-        [Authorize(Roles = "Admin")]
-        public async Task<List<CourseTransaction>> GetAllCourse() => await _transactionService.GetAllCourse();
-
-        [HttpGet("get/wallet")]
-        [Authorize(Roles = "Admin")]
-        public async Task<List<WalletTransaction>> GetAllWallet() => await _transactionService.GetAllWallet();
-
         [HttpGet("get/course-transactions")]
-        public async Task<ActionResult<List<CourseTransaction>>> GetAllCourseTransactions()
+        public async Task<ActionResult<List<CourseTransactionView>>> GetAllCourseTransactions()
         {
             var result = await _transactionService.GetAllCourseTransactions();
-            if (result is ActionResult<List<CourseTransaction>> courseTransactions)
+            if (result is ActionResult<List<CourseTransaction>> courseTransactions && result.Value != null)
             {
-                return Ok(courseTransactions.Value);
+                var courseTransactionViews = _mapper.Map<List<CourseTransactionView>>(courseTransactions.Value);
+                return Ok(courseTransactionViews);
             }
             if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
             {
@@ -189,12 +182,13 @@ namespace API.Controllers
         }
 
         [HttpGet("get/course-transaction/{courseTransactionID}")]
-        public async Task<ActionResult<CourseTransaction>> GetCourseTransaction(Guid courseTransactionID)
+        public async Task<ActionResult<CourseTransactionView>> GetCourseTransaction(Guid courseTransactionID)
         {
             var result = await _transactionService.GetCourseTransaction(courseTransactionID);
-            if (result is ActionResult<CourseTransaction> courseTransaction)
+            if (result is ActionResult<CourseTransaction> courseTransaction && result.Value != null)
             {
-                return Ok(courseTransaction.Value);
+                var courseTransactionView = _mapper.Map<CourseTransactionView>(courseTransaction.Value);
+                return Ok(courseTransactionView);
             }
             if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
             {
@@ -205,12 +199,13 @@ namespace API.Controllers
         }
 
         [HttpGet("get/course-transactions/sender/{senderID}")]
-        public async Task<ActionResult<List<CourseTransaction>>> GetCourseTransactionsBySenderID(Guid senderID)
+        public async Task<ActionResult<List<CourseTransactionView>>> GetCourseTransactionsBySenderID(Guid senderID)
         {
             var result = await _transactionService.GetCourseTransactionsBySenderId(senderID);
-            if (result is ActionResult<List<CourseTransaction>> courseTransactions)
+            if (result is ActionResult<List<CourseTransaction>> courseTransactions && result.Value != null)
             {
-                return Ok(courseTransactions.Value);
+                var courseTransactionViews = _mapper.Map<List<CourseTransactionView>>(courseTransactions.Value);
+                return Ok(courseTransactionViews);
             }
             if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
             {
@@ -221,12 +216,13 @@ namespace API.Controllers
         }
 
         [HttpGet("get/course-transactions/receiver/{receiverID}")]
-        public async Task<ActionResult<List<CourseTransaction>>> GetCourseTransactionsByReceiverID(Guid receiverID)
+        public async Task<ActionResult<List<CourseTransactionView>>> GetCourseTransactionsByReceiverID(Guid receiverID)
         {
             var result = await _transactionService.GetCourseTransactionsByReceiverId(receiverID);
-            if (result is ActionResult<List<CourseTransaction>> courseTransactions)
+            if (result is ActionResult<List<CourseTransaction>> courseTransactions && result.Value != null)
             {
-                return Ok(courseTransactions.Value);
+                var courseTransactionViews = _mapper.Map<List<CourseTransactionView>>(courseTransactions.Value);
+                return Ok(courseTransactionViews);
             }
             if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
             {
@@ -237,12 +233,13 @@ namespace API.Controllers
         }
 
         [HttpGet("get/booking-transactions")]
-        public async Task<ActionResult<List<BookingTransaction>>> GetAllBookingTransactions()
+        public async Task<ActionResult<List<BookingTransactionView>>> GetAllBookingTransactions()
         {
             var result = await _transactionService.GetAllBookingTransactions();
-            if (result is ActionResult<List<BookingTransaction>> bookingTransactions)
+            if (result is ActionResult<List<BookingTransaction>> bookingTransactions && result.Value != null)
             {
-                return Ok(bookingTransactions.Value);
+                var bookingTransactionViews = _mapper.Map<List<BookingTransactionView>>(bookingTransactions.Value);
+                return Ok(bookingTransactionViews);
             }
             if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
             {
@@ -253,12 +250,13 @@ namespace API.Controllers
         }
 
         [HttpGet("get/booking-transaction/{bookingTransactionID}")]
-        public async Task<ActionResult<List<BookingTransaction>>> GetBookingTransaction(Guid bookingTransactionID)
+        public async Task<ActionResult<List<BookingTransactionView>>> GetBookingTransaction(Guid bookingTransactionID)
         {
             var result = await _transactionService.GetBookingTransactionsByBookingId(bookingTransactionID);
-            if (result is ActionResult<List<BookingTransaction>> bookingTransaction)
+            if (result is ActionResult<List<BookingTransaction>> bookingTransaction && result.Value != null)
             {
-                return Ok(bookingTransaction.Value);
+                var bookingTransactionView = _mapper.Map<List<BookingTransactionView>>(bookingTransaction.Value);
+                return Ok(bookingTransactionView);
             }
             if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
             {
@@ -269,12 +267,13 @@ namespace API.Controllers
         }
 
         [HttpGet("get/booking-transactions/sender/{senderID}")]
-        public async Task<ActionResult<List<BookingTransaction>>> GetBookingTransactionsBySenderID(Guid senderID)
+        public async Task<ActionResult<List<BookingTransactionView>>> GetBookingTransactionsBySenderID(Guid senderID)
         {
             var result = await _transactionService.GetBookingTransactionsBySenderId(senderID);
-            if (result is ActionResult<List<BookingTransaction>> bookingTransactions)
+            if (result is ActionResult<List<BookingTransaction>> bookingTransactions && result.Value != null)
             {
-                return Ok(bookingTransactions.Value);
+                var bookingTransactionViews = _mapper.Map<List<BookingTransactionView>>(bookingTransactions.Value);
+                return Ok(bookingTransactionViews);
             }
             if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
             {
@@ -285,12 +284,13 @@ namespace API.Controllers
         }
 
         [HttpGet("get/booking-transactions/receiver/{receiverID}")]
-        public async Task<ActionResult<List<BookingTransaction>>> GetBookingTransactionsByReceiverID(Guid receiverID)
+        public async Task<ActionResult<List<BookingTransactionView>>> GetBookingTransactionsByReceiverID(Guid receiverID)
         {
             var result = await _transactionService.GetBookingTransactionsByReceiverId(receiverID);
-            if (result is ActionResult<List<BookingTransaction>> bookingTransactions)
+            if (result is ActionResult<List<BookingTransaction>> bookingTransactions && result.Value != null)
             {
-                return Ok(bookingTransactions.Value);
+                var bookingTransactionViews = _mapper.Map<List<BookingTransactionView>>(bookingTransactions.Value);
+                return Ok(bookingTransactionViews);
             }
             if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
             {
@@ -301,12 +301,13 @@ namespace API.Controllers
         }
 
         [HttpGet("get/wallet-transactions")]
-        public async Task<ActionResult<List<WalletTransaction>>> GetAllWalletTransactions()
+        public async Task<ActionResult<List<WalletTransactionView>>> GetAllWalletTransactions()
         {
             var result = await _transactionService.GetAllWalletTransactions();
-            if (result is ActionResult<List<WalletTransaction>> walletTransactions)
+            if (result is ActionResult<List<WalletTransaction>> walletTransactions && result.Value != null)
             {
-                return Ok(walletTransactions.Value);
+                var walletTransactionViews = _mapper.Map<List<WalletTransactionView>>(walletTransactions.Value);
+                return Ok(walletTransactionViews);
             }
             if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
             {
@@ -316,12 +317,13 @@ namespace API.Controllers
             throw new Exception("Lỗi không xác định");
         }
         [HttpGet("get/wallet-transaction/{walletTransactionID}")]
-        public async Task<ActionResult<List<WalletTransaction>>> GetWalletTransaction(Guid walletTransactionID)
+        public async Task<ActionResult<List<WalletTransactionView>>> GetWalletTransaction(Guid walletTransactionID)
         {
             var result = await _transactionService.GetWalletTransactionsByWalletTransactionId(walletTransactionID);
-            if (result is ActionResult<List<WalletTransaction>> walletTransaction)
+            if (result is ActionResult<List<WalletTransaction>> walletTransaction && result.Value != null)
             {
-                return Ok(walletTransaction.Value);
+                var walletTransactionView = _mapper.Map<List<WalletTransactionView>>(walletTransaction.Value);
+                return Ok(walletTransactionView);
             }
             if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
             {
@@ -331,12 +333,13 @@ namespace API.Controllers
             throw new Exception("Lỗi không xác định");
         }
         [HttpGet("get/wallet-transactions/sender/{senderID}")]
-        public async Task<ActionResult<List<WalletTransaction>>> GetWalletTransactionsBySenderID(Guid senderID)
+        public async Task<ActionResult<List<WalletTransactionView>>> GetWalletTransactionsBySenderID(Guid senderID)
         {
             var result = await _transactionService.GetWalletTransactionsBySenderId(senderID);
-            if (result is ActionResult<List<WalletTransaction>> walletTransactions)
+            if (result is ActionResult<List<WalletTransaction>> walletTransactions && result.Value != null)
             {
-                return Ok(walletTransactions.Value);
+                var walletTransactionViews = _mapper.Map<List<WalletTransactionView>>(walletTransactions.Value);
+                return Ok(walletTransactionViews);
             }
             if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
             {
@@ -346,12 +349,13 @@ namespace API.Controllers
             throw new Exception("Lỗi không xác định");
         }
         [HttpGet("get/wallet-transactions/receiver/{receiverID}")]
-        public async Task<ActionResult<List<WalletTransaction>>> GetWalletTransactionsByReceiverID(Guid receiverID)
+        public async Task<ActionResult<List<WalletTransactionView>>> GetWalletTransactionsByReceiverID(Guid receiverID)
         {
             var result = await _transactionService.GetWalletTransactionsByReceiverId(receiverID);
-            if (result is ActionResult<List<WalletTransaction>> walletTransactions)
+            if (result is ActionResult<List<WalletTransaction>> walletTransactions && result.Value != null)
             {
-                return Ok(walletTransactions.Value);
+                var walletTransactionViews = _mapper.Map<List<WalletTransactionView>>(walletTransactions.Value);
+                return Ok(walletTransactionViews);
             }
             if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
             {

@@ -1,6 +1,8 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Mvc;
 using Models.Entities;
 using Models.Models.Requests;
+using Models.Models.Views;
 using Services.Interfaces;
 
 namespace API.Controllers
@@ -10,34 +12,22 @@ namespace API.Controllers
     public class AdminController : ControllerBase
     {
         private readonly IAdminService _adminService;
+        private readonly IMapper _mapper;
 
-        public AdminController(IAdminService adminService)
+        public AdminController(IAdminService adminService, IMapper mapper)
         {
             _adminService = adminService;
-        }
-        [HttpGet("get/users")]
-        public async Task<ActionResult<List<User>>> GetAllUsers()
-        {
-            var result = await _adminService.GetAllUsers();
-            if (result is ActionResult<List<User>> users)
-            {
-                return Ok(users.Value);
-            }
-            if((IActionResult)result.Result is StatusCodeResult statusCodeResult)
-            {
-                if (statusCodeResult.StatusCode == 404) { return NotFound(new { Message = "Không tìm thấy người dùng" }); }
-            }
-            if((IActionResult)result.Result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
-            throw new Exception("Lỗi không xác định");
+            _mapper = mapper;
         }
 
-        [HttpGet("get/user/{userID}")]
-        public async Task<ActionResult<User>> GetUser(Guid userID)
+        [HttpGet("get/users")]
+        public async Task<ActionResult<List<UserView>>> GetAllUsers()
         {
-            var result = await _adminService.GetUser(userID);
-            if (result is ActionResult<User> user)
+            var result = await _adminService.GetAllUsers();
+            if (result is ActionResult<List<User>> users && result.Value != null)
             {
-                return Ok(user.Value);
+                var userViews = _mapper.Map<List<UserView>>(users.Value);
+                return Ok(userViews);
             }
             if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
             {
@@ -47,13 +37,30 @@ namespace API.Controllers
             throw new Exception("Lỗi không xác định");
         }
 
-        [HttpGet("get/student/{studentID}")]
-        public async Task<ActionResult<Student>> GetStudent(Guid studentID)
+        [HttpGet("get/user/{userID}")]
+        public async Task<ActionResult<UserView>> GetUser(Guid userID)
         {
-            var result = await _adminService.GetStudent(studentID);
-            if (result is ActionResult<Student> student)
+            var result = await _adminService.GetUser(userID);
+            if (result is ActionResult<User> user && result.Value != null)
             {
-                return Ok(student.Value);
+                var userView = _mapper.Map<UserView>(user.Value);
+                return Ok(userView);
+            }
+            if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
+            {
+                if (statusCodeResult.StatusCode == 404) { return NotFound(new { Message = "Không tìm thấy người dùng" }); }
+            }
+            if ((IActionResult)result.Result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
+            throw new Exception("Lỗi không xác định");
+        }
+        [HttpGet("get/students")]
+        public async Task<ActionResult<List<StudentView>>> GetAllStudents()
+        {
+            var result = await _adminService.GetAllStudents();
+            if (result is ActionResult<List<Student>> students && result.Value != null)
+            {
+                var studentViews = _mapper.Map<List<StudentView>>(students.Value);
+                return Ok(studentViews);
             }
             if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
             {
@@ -63,13 +70,30 @@ namespace API.Controllers
             throw new Exception("Lỗi không xác định");
         }
 
-        [HttpGet("get/tutor/{tutorID}")]
-        public async Task<ActionResult<Tutor>> GetTutor(Guid tutorID)
+        [HttpGet("get/student/{studentID}")]
+        public async Task<ActionResult<StudentView>> GetStudent(Guid studentID)
         {
-            var result = await _adminService.GetTutor(tutorID);
-            if (result is ActionResult<Tutor> tutor)
+            var result = await _adminService.GetStudent(studentID);
+            if (result is ActionResult<Student> student && result.Value != null)
             {
-                return Ok(tutor.Value);
+                var studentView = _mapper.Map<StudentView>(student.Value);
+                return Ok(studentView);
+            }
+            if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
+            {
+                if (statusCodeResult.StatusCode == 404) { return NotFound(new { Message = "Không tìm thấy sinh viên" }); }
+            }
+            if ((IActionResult)result.Result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
+            throw new Exception("Lỗi không xác định");
+        }
+        [HttpGet("get/tutors")]
+        public async Task<ActionResult<List<TutorView>>> GetAllTutors()
+        {
+            var result = await _adminService.GetAllTutors();
+            if (result is ActionResult<List<Tutor>> tutors && result.Value != null)
+            {
+                var tutorViews = _mapper.Map<List<TutorView>>(tutors.Value);
+                return Ok(tutorViews);
             }
             if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
             {
@@ -79,13 +103,48 @@ namespace API.Controllers
             throw new Exception("Lỗi không xác định");
         }
 
+        [HttpGet("get/tutor/{tutorID}")]
+        public async Task<ActionResult<TutorView>> GetTutor(Guid tutorID)
+        {
+            var result = await _adminService.GetTutor(tutorID);
+            if (result is ActionResult<Tutor> tutor && result.Value != null)
+            {
+                var tutorView = _mapper.Map<TutorView>(tutor.Value);
+                return Ok(tutorView);
+            }
+            if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
+            {
+                if (statusCodeResult.StatusCode == 404) { return NotFound(new { Message = "Không tìm thấy gia sư" }); }
+            }
+            if ((IActionResult)result.Result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
+            throw new Exception("Lỗi không xác định");
+        }
+        [HttpGet("get/subjects")]
+        public async Task<ActionResult<List<SubjectView>>> GetAllSubjects()
+        {
+            var result = await _adminService.GetAllSubjects();
+            if (result is ActionResult<List<Subject>> subjects && result.Value != null)
+            {
+                var subjectViews = _mapper.Map<List<SubjectView>>(subjects.Value);
+                return Ok(subjectViews);
+            }
+            if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
+            {
+                if (statusCodeResult.StatusCode == 404) { return NotFound(new { Message = "Không tìm thấy môn học" }); }
+            }
+            if ((IActionResult)result.Result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
+            throw new Exception("Lỗi không xác định");
+        }
+
+
         [HttpGet("get/subject/{subjectID}")]
-        public async Task<ActionResult<Subject>> GetSubject(Guid subjectID)
+        public async Task<ActionResult<SubjectView>> GetSubject(Guid subjectID)
         {
             var result = await _adminService.GetSubject(subjectID);
-            if (result is ActionResult<Subject> subject)
+            if (result is ActionResult<Subject> subject && result.Value != null)
             {
-                return Ok(subject.Value);
+                var subjectView = _mapper.Map<SubjectView>(subject.Value);
+                return Ok(subjectView);
             }
             if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
             {
@@ -96,12 +155,13 @@ namespace API.Controllers
         }
 
         [HttpGet("get/schedules")]
-        public async Task<ActionResult<List<Schedule>>> GetAllSchedules()
+        public async Task<ActionResult<List<ScheduleView>>> GetAllSchedules()
         {
             var result = await _adminService.GetAllSchedules();
-            if (result is ActionResult<List<Schedule>> schedules)
+            if (result is ActionResult<List<Schedule>> schedules && result.Value != null)
             {
-                return Ok(schedules.Value);
+                var scheduleViews = _mapper.Map<List<ScheduleView>>(schedules.Value);
+                return Ok(scheduleViews);
             }
             if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
             {
@@ -112,12 +172,13 @@ namespace API.Controllers
         }
 
         [HttpGet("get/schedule/{scheduleID}")]
-        public async Task<ActionResult<Schedule>> GetSchedule(Guid scheduleID)
+        public async Task<ActionResult<ScheduleView>> GetSchedule(Guid scheduleID)
         {
             var result = await _adminService.GetSchedule(scheduleID);
-            if (result is ActionResult<Schedule> schedule)
+            if (result is ActionResult<Schedule> schedule && result.Value != null)
             {
-                return Ok(schedule.Value);
+                var scheduleView = _mapper.Map<ScheduleView>(schedule.Value);
+                return Ok(scheduleView);
             }
             if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
             {
@@ -128,12 +189,13 @@ namespace API.Controllers
         }
 
         [HttpGet("get/schedules/student-course/{studentCourseID}")]
-        public async Task<ActionResult<List<Schedule>>> GetSchedulesByStudentCourseID(Guid studentCourseID)
+        public async Task<ActionResult<List<ScheduleView>>> GetSchedulesByStudentCourseID(Guid studentCourseID)
         {
             var result = await _adminService.GetSchedulesByStudentCourseId(studentCourseID);
-            if (result is ActionResult<List<Schedule>> schedules)
+            if (result is ActionResult<List<Schedule>> schedules && result.Value != null)
             {
-                return Ok(schedules.Value);
+                var scheduleViews = _mapper.Map<List<ScheduleView>>(schedules.Value);
+                return Ok(scheduleViews);
             }
             if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
             {
@@ -144,12 +206,13 @@ namespace API.Controllers
         }
 
         [HttpGet("get/student-courses")]
-        public async Task<ActionResult<List<StudentCourse>>> GetAllStudentCourses()
+        public async Task<ActionResult<List<StudentCourseView>>> GetAllStudentCourses()
         {
             var result = await _adminService.GetAllStudentCourses();
-            if (result is ActionResult<List<StudentCourse>> studentCourses)
+            if (result is ActionResult<List<StudentCourse>> studentCourses && result.Value != null)
             {
-                return Ok(studentCourses.Value);
+                var studentCourseViews = _mapper.Map<List<StudentCourseView>>(studentCourses.Value);
+                return Ok(studentCourseViews);
             }
             if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
             {
@@ -160,12 +223,13 @@ namespace API.Controllers
         }
 
         [HttpGet("get/student-course/{studentCourseID}")]
-        public async Task<ActionResult<StudentCourse>> GetStudentCourse(Guid studentCourseID)
+        public async Task<ActionResult<StudentCourseView>> GetStudentCourse(Guid studentCourseID)
         {
             var result = await _adminService.GetStudentCourse(studentCourseID);
-            if (result is ActionResult<StudentCourse> studentCourse)
+            if (result is ActionResult<StudentCourse> studentCourse && result.Value != null)
             {
-                return Ok(studentCourse.Value);
+                var studentCourseView = _mapper.Map<StudentCourseView>(studentCourse.Value);
+                return Ok(studentCourseView);
             }
             if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
             {
@@ -176,12 +240,13 @@ namespace API.Controllers
         }
 
         [HttpGet("get/student-courses/course/{courseID}")]
-        public async Task<ActionResult<List<StudentCourse>>> GetStudentCoursesByCourseID(Guid courseID)
+        public async Task<ActionResult<List<StudentCourseView>>> GetStudentCoursesByCourseID(Guid courseID)
         {
             var result = await _adminService.GetStudentCoursesByCourseId(courseID);
-            if (result is ActionResult<List<StudentCourse>> studentCourses)
+            if (result is ActionResult<List<StudentCourse>> studentCourses && result.Value != null)
             {
-                return Ok(studentCourses.Value);
+                var studentCourseViews = _mapper.Map<List<StudentCourseView>>(studentCourses.Value);
+                return Ok(studentCourseViews);
             }
             if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
             {
@@ -192,12 +257,13 @@ namespace API.Controllers
         }
 
         [HttpGet("get/student-courses/student/{studentID}")]
-        public async Task<ActionResult<List<StudentCourse>>> GetStudentCoursesByStudentID(Guid studentID)
+        public async Task<ActionResult<List<StudentCourseView>>> GetStudentCoursesByStudentID(Guid studentID)
         {
             var result = await _adminService.GetStudentCoursesByStudentId(studentID);
-            if (result is ActionResult<List<StudentCourse>> studentCourses)
+            if (result is ActionResult<List<StudentCourse>> studentCourses && result.Value != null)
             {
-                return Ok(studentCourses.Value);
+                var studentCourseViews = _mapper.Map<List<StudentCourseView>>(studentCourses.Value);
+                return Ok(studentCourseViews);
             }
             if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
             {
@@ -208,12 +274,13 @@ namespace API.Controllers
         }
 
         [HttpGet("get/tutor-certificates")]
-        public async Task<ActionResult<List<TutorCertificate>>> GetAllTutorCertificates()
+        public async Task<ActionResult<List<TutorCertificateView>>> GetAllTutorCertificates()
         {
             var result = await _adminService.GetAllTutorCertificates();
-            if (result is ActionResult<List<TutorCertificate>> tutorCertificates)
+            if (result is ActionResult<List<TutorCertificate>> tutorCertificates && result.Value != null)
             {
-                return Ok(tutorCertificates.Value);
+                var tutorCertificateViews = _mapper.Map<List<TutorCertificateView>>(tutorCertificates.Value);
+                return Ok(tutorCertificateViews);
             }
             if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
             {
@@ -224,12 +291,13 @@ namespace API.Controllers
         }
 
         [HttpGet("get/tutor-certificate/{tutorCertificateID}")]
-        public async Task<ActionResult<TutorCertificate>> GetTutorCertificate(Guid tutorCertificateID)
+        public async Task<ActionResult<TutorCertificateView>> GetTutorCertificate(Guid tutorCertificateID)
         {
             var result = await _adminService.GetTutorCertificate(tutorCertificateID);
-            if (result is ActionResult<TutorCertificate> tutorCertificate)
+            if (result is ActionResult<TutorCertificate> tutorCertificate && result.Value != null)
             {
-                return Ok(tutorCertificate.Value);
+                var tutorCertificateView = _mapper.Map<TutorCertificateView>(tutorCertificate.Value);
+                return Ok(tutorCertificateView);
             }
             if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
             {
@@ -240,12 +308,13 @@ namespace API.Controllers
         }
 
         [HttpGet("get/tutor-certificates/tutor/{tutorID}")]
-        public async Task<ActionResult<List<TutorCertificate>>> GetTutorCertificatesByTutorID(Guid tutorID)
+        public async Task<ActionResult<List<TutorCertificateView>>> GetTutorCertificatesByTutorID(Guid tutorID)
         {
             var result = await _adminService.GetTutorCertificatesByTutorId(tutorID);
-            if (result is ActionResult<List<TutorCertificate>> tutorCertificates)
+            if (result is ActionResult<List<TutorCertificate>> tutorCertificates && result.Value != null)
             {
-                return Ok(tutorCertificates.Value);
+                var tutorCertificateViews = _mapper.Map<List<TutorCertificateView>>(tutorCertificates.Value);
+                return Ok(tutorCertificateViews);
             }
             if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
             {
@@ -256,12 +325,13 @@ namespace API.Controllers
         }
 
         [HttpGet("get/tutor-certificates/subject/{subjectID}")]
-        public async Task<ActionResult<List<TutorCertificate>>> GetTutorCertificatesBySubjectID(Guid subjectID)
+        public async Task<ActionResult<List<TutorCertificateView>>> GetTutorCertificatesBySubjectID(Guid subjectID)
         {
             var result = await _adminService.GetTutorCertificatesBySubjectId(subjectID);
-            if (result is ActionResult<List<TutorCertificate>> tutorCertificates)
+            if (result is ActionResult<List<TutorCertificate>> tutorCertificates && result.Value != null)
             {
-                return Ok(tutorCertificates.Value);
+                var tutorCertificateViews = _mapper.Map<List<TutorCertificateView>>(tutorCertificates.Value);
+                return Ok(tutorCertificateViews);
             }
             if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
             {
@@ -272,12 +342,13 @@ namespace API.Controllers
         }
 
         [HttpGet("get/tutor-subjects")]
-        public async Task<ActionResult<List<TutorSubject>>> GetAllTutorSubjects()
+        public async Task<ActionResult<List<TutorSubjectView>>> GetAllTutorSubjects()
         {
             var result = await _adminService.GetAllTutorSubjects();
-            if (result is ActionResult<List<TutorSubject>> tutorSubjects)
+            if (result is ActionResult<List<TutorSubject>> tutorSubjects && result.Value != null)
             {
-                return Ok(tutorSubjects.Value);
+                var tutorSubjectViews = _mapper.Map<List<TutorSubjectView>>(tutorSubjects.Value);
+                return Ok(tutorSubjectViews);
             }
             if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
             {
@@ -288,12 +359,13 @@ namespace API.Controllers
         }
 
         [HttpGet("get/tutor-subject/{tutorSubjectID}")]
-        public async Task<ActionResult<TutorSubject>> GetTutorSubject(Guid tutorSubjectID)
+        public async Task<ActionResult<TutorSubjectView>> GetTutorSubject(Guid tutorSubjectID)
         {
             var result = await _adminService.GetTutorSubject(tutorSubjectID);
-            if (result is ActionResult<TutorSubject> tutorSubject)
+            if (result is ActionResult<TutorSubject> tutorSubject && result.Value != null)
             {
-                return Ok(tutorSubject.Value);
+                var tutorSubjectView = _mapper.Map<TutorSubjectView>(tutorSubject.Value);
+                return Ok(tutorSubjectView);
             }
             if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
             {
@@ -304,12 +376,13 @@ namespace API.Controllers
         }
 
         [HttpGet("get/tutor-subjects/tutor/{tutorID}")]
-        public async Task<ActionResult<List<TutorSubject>>> GetTutorSubjectsByTutorID(Guid tutorID)
+        public async Task<ActionResult<List<TutorSubjectView>>> GetTutorSubjectsByTutorID(Guid tutorID)
         {
             var result = await _adminService.GetTutorSubjectsByTutorId(tutorID);
-            if (result is ActionResult<List<TutorSubject>> tutorSubjects)
+            if (result is ActionResult<List<TutorSubject>> tutorSubjects && result.Value != null)
             {
-                return Ok(tutorSubjects.Value);
+                var tutorSubjectViews = _mapper.Map<List<TutorSubjectView>>(tutorSubjects.Value);
+                return Ok(tutorSubjectViews);
             }
             if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
             {
@@ -320,12 +393,13 @@ namespace API.Controllers
         }
 
         [HttpGet("get/tutor-subjects/subject/{subjectID}")]
-        public async Task<ActionResult<List<TutorSubject>>> GetTutorSubjectsBySubjectID(Guid subjectID)
+        public async Task<ActionResult<List<TutorSubjectView>>> GetTutorSubjectsBySubjectID(Guid subjectID)
         {
             var result = await _adminService.GetTutorSubjectsBySubjectId(subjectID);
-            if (result is ActionResult<List<TutorSubject>> tutorSubjects)
+            if (result is ActionResult<List<TutorSubject>> tutorSubjects && result.Value != null)
             {
-                return Ok(tutorSubjects.Value);
+                var tutorSubjectViews = _mapper.Map<List<TutorSubjectView>>(tutorSubjects.Value);
+                return Ok(tutorSubjectViews);
             }
             if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
             {
@@ -336,12 +410,13 @@ namespace API.Controllers
         }
 
         [HttpGet("get/tutor-ratings")]
-        public async Task<ActionResult<List<TutorRating>>> GetAllTutorRatings()
+        public async Task<ActionResult<List<TutorRatingView>>> GetAllTutorRatings()
         {
             var result = await _adminService.GetAllTutorRatings();
-            if (result is ActionResult<List<TutorRating>> tutorRatings)
+            if (result is ActionResult<List<TutorRating>> tutorRatings && result.Value != null)
             {
-                return Ok(tutorRatings.Value);
+                var tutorRatingViews = _mapper.Map<List<TutorRatingView>>(tutorRatings.Value);
+                return Ok(tutorRatingViews);
             }
             if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
             {
@@ -352,12 +427,13 @@ namespace API.Controllers
         }
 
         [HttpGet("get/tutor-rating/{tutorRatingID}")]
-        public async Task<ActionResult<TutorRating>> GetTutorRating(Guid tutorRatingID)
+        public async Task<ActionResult<TutorRatingView>> GetTutorRating(Guid tutorRatingID)
         {
             var result = await _adminService.GetTutorRating(tutorRatingID);
-            if (result is ActionResult<TutorRating> tutorRating)
+            if (result is ActionResult<TutorRating> tutorRating && result.Value != null)
             {
-                return Ok(tutorRating.Value);
+                var tutorRatingView = _mapper.Map<TutorRatingView>(tutorRating.Value);
+                return Ok(tutorRatingView);
             }
             if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
             {
@@ -368,12 +444,13 @@ namespace API.Controllers
         }
 
         [HttpGet("get/tutor-ratings/tutor/{tutorID}")]
-        public async Task<ActionResult<List<TutorRating>>> GetTutorRatingsByTutorID(Guid tutorID)
+        public async Task<ActionResult<List<TutorRatingView>>> GetTutorRatingsByTutorID(Guid tutorID)
         {
             var result = await _adminService.GetTutorRatingsByTutorId(tutorID);
-            if (result is ActionResult<List<TutorRating>> tutorRatings)
+            if (result is ActionResult<List<TutorRating>> tutorRatings && result.Value != null)
             {
-                return Ok(tutorRatings.Value);
+                var tutorRatingViews = _mapper.Map<List<TutorRatingView>>(tutorRatings.Value);
+                return Ok(tutorRatingViews);
             }
             if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
             {
@@ -384,12 +461,13 @@ namespace API.Controllers
         }
 
         [HttpGet("get/tutor-ratings/student/{studentID}")]
-        public async Task<ActionResult<List<TutorRating>>> GetTutorRatingsByStudentID(Guid studentID)
+        public async Task<ActionResult<List<TutorRatingView>>> GetTutorRatingsByStudentID(Guid studentID)
         {
             var result = await _adminService.GetTutorRatingsByStudentId(studentID);
-            if (result is ActionResult<List<TutorRating>> tutorRatings)
+            if (result is ActionResult<List<TutorRating>> tutorRatings && result.Value != null)
             {
-                return Ok(tutorRatings.Value);
+               var tutorRatingViews = _mapper.Map<List<TutorRatingView>>(tutorRatings.Value);
+                return Ok(tutorRatingViews);
             }
             if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
             {
@@ -400,12 +478,13 @@ namespace API.Controllers
         }
 
         [HttpGet("get/tutor-rating-images")]
-        public async Task<ActionResult<List<TutorRatingImage>>> GetAllTutorRatingImages()
+        public async Task<ActionResult<List<TutorRatingImageView>>> GetAllTutorRatingImages()
         {
             var result = await _adminService.GetAllTutorRatingImages();
-            if (result is ActionResult<List<TutorRatingImage>> tutorRatingImages)
+            if (result is ActionResult<List<TutorRatingImage>> tutorRatingImages && result.Value != null)
             {
-                return Ok(tutorRatingImages.Value);
+                var tutorRatingImageViews = _mapper.Map<List<TutorRatingImageView>>(tutorRatingImages.Value);
+                return Ok(tutorRatingImageViews);
             }
             if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
             {
@@ -416,12 +495,13 @@ namespace API.Controllers
         }
 
         [HttpGet("get/tutor-rating-image/{tutorRatingImageID}")]
-        public async Task<ActionResult<TutorRatingImage>> GetTutorRatingImage(Guid tutorRatingImageID)
+        public async Task<ActionResult<TutorRatingImageView>> GetTutorRatingImage(Guid tutorRatingImageID)
         {
             var result = await _adminService.GetTutorRatingImage(tutorRatingImageID);
-            if (result is ActionResult<TutorRatingImage> tutorRatingImage)
+            if (result is ActionResult<TutorRatingImage> tutorRatingImage && result.Value != null)
             {
-                return Ok(tutorRatingImage.Value);
+                var tutorRatingImageView = _mapper.Map<TutorRatingImageView>(tutorRatingImage.Value);
+                return Ok(tutorRatingImageView);
             }
             if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
             {
@@ -432,12 +512,13 @@ namespace API.Controllers
         }
 
         [HttpGet("get/moderators")]
-        public async Task<ActionResult<List<Moderator>>> GetAllModerators()
+        public async Task<ActionResult<List<ModeratorView>>> GetAllModerators()
         {
             var result = await _adminService.GetModerators();
-            if (result is ActionResult<List<Moderator>> moderators)
+            if (result is ActionResult<List<Moderator>> moderators && result.Value != null)
             {
-                return Ok(moderators.Value);
+                var moderatorViews = _mapper.Map<List<ModeratorView>>(moderators.Value);
+                return Ok(moderatorViews);
             }
             if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
             {
@@ -448,12 +529,13 @@ namespace API.Controllers
         }
 
         [HttpGet("get/moderator/{moderatorID}")]
-        public async Task<ActionResult<Moderator>> GetModerator(Guid moderatorID)
+        public async Task<ActionResult<ModeratorView>> GetModerator(Guid moderatorID)
         {
             var result = await _adminService.GetModeratorById(moderatorID);
-            if (result is ActionResult<Moderator> moderator)
+            if (result is ActionResult<Moderator> moderator && result.Value != null)
             {
-                return Ok(moderator.Value);
+                var moderatorView = _mapper.Map<ModeratorView>(moderator.Value);
+                return Ok(moderatorView);
             }
             if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
             {
@@ -464,12 +546,13 @@ namespace API.Controllers
         }
 
         [HttpGet("get/notifications")]
-        public async Task<ActionResult<List<Notification>>> GetAllNotifications()
+        public async Task<ActionResult<List<NotificationView>>> GetAllNotifications()
         {
             var result = await _adminService.GetNotifications();
-            if (result is ActionResult<List<Notification>> notifications)
+            if (result is ActionResult<List<Notification>> notifications && result.Value != null)
             {
-                return Ok(notifications.Value);
+                var notificationViews = _mapper.Map<List<NotificationView>>(notifications.Value);
+                return Ok(notificationViews);
             }
             if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
             {
@@ -480,12 +563,13 @@ namespace API.Controllers
         }
 
         [HttpGet("get/notification/{userID}")]
-        public async Task<ActionResult<List<Notification>>> GetNotificationsByUserId(Guid userID)
+        public async Task<ActionResult<List<NotificationView>>> GetNotificationsByUserId(Guid userID)
         {
             var result = await _adminService.GetNotificationsByUserId(userID);
-            if (result is ActionResult<List<Notification>> notifications)
+            if (result is ActionResult<List<Notification>> notifications && result.Value != null)
             {
-                return Ok(notifications.Value);
+                var notificationViews = _mapper.Map<List<NotificationView>>(notifications.Value);
+                return Ok(notificationViews);
             }
             if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
             {

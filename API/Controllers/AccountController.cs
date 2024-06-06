@@ -68,7 +68,7 @@ namespace API.Controllers
         public async Task<ActionResult<List<UserAccountResponse>>> GetAll()
         {
             var rs = await _accountService.GetAllUser();
-            if (rs is List<UserAccountResponse> userAccountResponses) return Ok(userAccountResponses);
+            if (rs is List<UserAccountResponse> userAccountResponses && rs.Count > 0) return Ok(userAccountResponses);
             if ((IActionResult)rs is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
             throw new Exception("Lỗi không xác định");
         }

@@ -47,6 +47,30 @@ namespace Models.Mappings
             CreateMap<TutorRating, UpdateTutorRatingRequest>();
             CreateMap<User, UpdateAccountRequest>();
             CreateMap<User, UpdateUserAccountRequest>();
+            CreateMap<User, UserView>();
+            CreateMap<Student, StudentView>();
+            CreateMap<Tutor, TutorView>();
+            CreateMap<Subject, SubjectView>();
+            CreateMap<Schedule, ScheduleView>();
+            CreateMap<StudentCourse, StudentCourseView>();
+            CreateMap<TutorCertificate, TutorCertificateView>();
+            CreateMap<TutorExperience, TutorExperienceView>();
+            CreateMap<TutorSubject, TutorSubjectView>();
+            CreateMap<TutorRating, TutorRatingView>();
+            CreateMap<TutorRatingImage, TutorRatingImageView>();
+            CreateMap<Moderator, ModeratorView>();
+            CreateMap<Booking, BookingView>();
+            CreateMap<Course, CourseView>();
+            CreateMap<CourseOutline, CourseOutlineView>();
+            CreateMap<CoursePromotion, CoursePromotionView>();
+            CreateMap<Report, ReportView>();
+            CreateMap<Promotion, PromotionView>();
+            CreateMap<UserBlock, UserBlockView>();
+            CreateMap<UserFollow, UserFollowView>();
+            CreateMap<StudentRequest, StudentRequestView>();
+            CreateMap<BookingTransaction, BookingTransactionView>();
+            CreateMap<CourseTransaction, CourseTransactionView>();
+            CreateMap<WalletTransaction, WalletTransactionView>();
         }
     }
 }

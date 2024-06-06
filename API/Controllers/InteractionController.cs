@@ -1,6 +1,8 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Mvc;
 using Models.Entities;
 using Models.Models.Requests;
+using Models.Models.Views;
 using Services.Implementations;
 using Services.Interfaces;
 
@@ -9,10 +11,14 @@ namespace API.Controllers
     public class InteractionController : ControllerBase
     {
         private readonly IUserInteractService _userInteractService;
-        public InteractionController(IUserInteractService userInteractService)
+        private readonly IMapper _mapper;
+
+        public InteractionController(IUserInteractService userInteractService, IMapper mapper)
         {
             _userInteractService = userInteractService;
+            _mapper = mapper;
         }
+
         [HttpPost("follow")]
         public async Task<IActionResult> FollowUser(UserInteractRequest request)
         {
@@ -73,12 +79,13 @@ namespace API.Controllers
             throw new Exception("Lỗi không xác định");
         }
         [HttpGet("get/user-blocks")]
-        public async Task<ActionResult<List<UserBlock>>> GetAllUserBlocks()
+        public async Task<ActionResult<List<UserBlockView>>> GetAllUserBlocks()
         {
             var result = await _userInteractService.GetAllUserBlocks();
-            if (result is ActionResult<List<UserBlock>> userBlocks)
+            if (result is ActionResult<List<UserBlock>> userBlocks && result.Value != null)
             {
-                return Ok(userBlocks.Value);
+                var userBlockViews = _mapper.Map<List<UserBlockView>>(userBlocks.Value);
+                return Ok(userBlockViews);
             }
             if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
             {
@@ -89,12 +96,13 @@ namespace API.Controllers
         }
 
         [HttpGet("get/user-block/create/{userBlockID}")]
-        public async Task<ActionResult<List<UserBlock>>> GetUserBlock(Guid userBlockID)
+        public async Task<ActionResult<List<UserBlockView>>> GetUserBlock(Guid userBlockID)
         {
             var result = await _userInteractService.GetAllBlockByCreateUserId(userBlockID);
-            if (result is ActionResult<List<UserBlock>> userBlock)
+            if (result is ActionResult<List<UserBlock>> userBlock && result.Value != null)
             {
-                return Ok(userBlock.Value);
+                var userBlockViews = _mapper.Map<List<UserBlockView>>(userBlock.Value);
+                return Ok(userBlockViews);
             }
             if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
             {
@@ -106,12 +114,13 @@ namespace API.Controllers
         }
 
         [HttpGet("get/user-blocks/target/{targetID}")]
-        public async Task<ActionResult<List<UserBlock>>> GetUserBlocksByTargetID(Guid targetID)
+        public async Task<ActionResult<List<UserBlockView>>> GetUserBlocksByTargetID(Guid targetID)
         {
             var result = await _userInteractService.GetAllBlockByTargetUserId(targetID);
-            if (result is ActionResult<List<UserBlock>> userBlocks)
+            if (result is ActionResult<List<UserBlock>> userBlocks && result.Value != null)
             {
-                return Ok(userBlocks.Value);
+                var userBlockViews = _mapper.Map<List<UserBlockView>>(userBlocks.Value);
+                return Ok(userBlockViews);
             }
             if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
             {
@@ -122,12 +131,13 @@ namespace API.Controllers
         }
 
         [HttpGet("get/user-follows")]
-        public async Task<ActionResult<List<UserFollow>>> GetAllUserFollows()
+        public async Task<ActionResult<List<UserFollowView>>> GetAllUserFollows()
         {
             var result = await _userInteractService.GetAllUserFollows();
-            if (result is ActionResult<List<UserFollow>> userFollows)
+            if (result is ActionResult<List<UserFollow>> userFollows && result.Value != null)
             {
-                return Ok(userFollows.Value);
+                var userFollowViews = _mapper.Map<List<UserFollowView>>(userFollows.Value);
+                return Ok(userFollowViews);
             }
             if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
             {
@@ -138,12 +148,13 @@ namespace API.Controllers
         }
 
         [HttpGet("get/user-follow/create/{userFollowID}")]
-        public async Task<ActionResult<List<UserFollow>>> GetUserFollow(Guid userFollowID)
+        public async Task<ActionResult<List<UserFollowView>>> GetUserFollow(Guid userFollowID)
         {
             var result = await _userInteractService.GetAllFollowsByCreateUserId(userFollowID);
-            if (result is ActionResult<List<UserFollow>> userFollow)
+            if (result is ActionResult<List<UserFollow>> userFollow && result.Value != null)
             {
-                return Ok(userFollow.Value);
+                var userFollowViews = _mapper.Map<List<UserFollowView>>(userFollow.Value);
+                return Ok(userFollowViews);
             }
             if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
             {
@@ -154,12 +165,13 @@ namespace API.Controllers
         }
 
         [HttpGet("get/user-follows/target/{targetID}")]
-        public async Task<ActionResult<List<UserFollow>>> GetUserFollowsByTargetID(Guid targetID)
+        public async Task<ActionResult<List<UserFollowView>>> GetUserFollowsByTargetID(Guid targetID)
         {
             var result = await _userInteractService.GetAllFollowsByTargetUserId(targetID);
-            if (result is ActionResult<List<UserFollow>> userFollows)
+            if (result is ActionResult<List<UserFollow>> userFollows && result.Value != null)
             {
-                return Ok(userFollows.Value);
+                var userFollowViews = _mapper.Map<List<UserFollowView>>(userFollows.Value);
+                return Ok(userFollowViews);
             }
             if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
             {
