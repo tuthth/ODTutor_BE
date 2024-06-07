@@ -26,7 +26,6 @@ namespace API.Controllers
                 {
                     if (statusCodeResult.StatusCode == 409) { return Conflict(new {Message = "Email đã xác thực trước đó" }); }
                     else if (statusCodeResult.StatusCode == 201) { return StatusCode(StatusCodes.Status201Created, new {Message = "Gửi mã xác thực thành công" }); }
-                    else if (statusCodeResult.StatusCode == 204) { return NoContent(); }
                 }
             }
             else if (checkEmail is Exception exception)

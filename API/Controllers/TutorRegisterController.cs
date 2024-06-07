@@ -21,7 +21,10 @@ namespace API.Controllers
         {
             _tutorRegisterService = tutorRegisterService;
         }
-
+        /// <summary>
+        /// step 1 FE
+        /// </summary>
+        
         // Add Informtion
         [HttpPost("register")]
         public async Task<IActionResult> addRegisterInformationOfTutor([FromBody] TutorInformationRequest tutorRequest)
@@ -29,7 +32,10 @@ namespace API.Controllers
             var response = await _tutorRegisterService.RegisterTutorInformation(tutorRequest);
             return Ok(response);
         }
-
+        /// <summary>
+        /// step 3 fe
+        /// </summary>
+       
         // Add Certificate
         [HttpPost("register/certificate/{tutorID}")]
         public async Task<IActionResult> addRegisterCertificateOfTutor(Guid tutorID, List<TutorRegisterCertificateRequest> certificateRequest)
@@ -37,6 +43,10 @@ namespace API.Controllers
             var result = await _tutorRegisterService.TutorCertificatesRegister(tutorID, certificateRequest);
             return result;
         }
+        /// <summary>
+        /// chua ro?
+        /// </summary>
+        
 
         // Add Subject
         [HttpPost("register/subjects/{tutorID}")]
@@ -45,7 +55,10 @@ namespace API.Controllers
             var result = await _tutorRegisterService.RegisterTutorSubject(tutorID, subjectIDs);
             return result;
         }
-        
+        /// <summary>
+        /// step 4 fe
+        /// </summary>
+
         // Add Experience
         [HttpPost("register/experiences/{tutorID}")]
         public async Task<IActionResult> addRegisterExperienceOfTutor(Guid tutorID, List<TutorExperienceRequest> tutorExperiences)
@@ -53,7 +66,10 @@ namespace API.Controllers
             var result = await _tutorRegisterService.RegisterTutorExperience(tutorID, tutorExperiences);
             return result;
         }
-
+        /// <summary>
+        /// step 7 fe
+        /// </summary>
+       
         // Confirm and Create Notification
         [HttpPost("confirm/{tutorID}")]
         public async Task<IActionResult> confirmRegisterFormAndCreateNoti(Guid tutorID, decimal money)
@@ -61,7 +77,10 @@ namespace API.Controllers
             var response = await _tutorRegisterService.CheckConfirmTutorInformationAndSendNotification(tutorID,money);
             return response;
         }
-
+        /// <summary>
+        /// step 6 fe
+        /// </summary>
+        
         //Create Tutor Slot Schedule
         [HttpPost("create/slot-schedule/{tutorID}")]
         public async Task<IActionResult> createTutorSlotSchedule(Guid tutorID, [FromBody] TutorRegistScheduleRequest tutorRegistScheduleRequest)

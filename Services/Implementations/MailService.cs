@@ -31,12 +31,12 @@ namespace Services.Implementations
             {
                 var checkEmail = _context.Users.FirstOrDefault(u => u.Email.Equals(email));
 
-                if (checkEmail == null || checkEmail.EmailConfirmed == true)
+                if (checkEmail == null)
                 {
                     return new StatusCodeResult(409);
                 }
                 var tokenEmail = _appExtension.GenerateRandomOTP();
-                var checkEmailDefaulr = _context.Users.Any(u => u.Email.Equals(email) && u.EmailConfirmed == false);
+                var checkEmailDefaulr = _context.Users.Any(u => u.Email.Equals(email));
 
                 if (checkEmailDefaulr)
                 {
@@ -58,16 +58,15 @@ namespace Services.Implementations
                             Subject = "[ODTutor] Mã xác thực OTP",
                             Body = "Đây là mã xác thực OTP của bạn" + ".\n Mã này sẽ hết hạn vào " + userAuthentication.EmailTokenExpiry + " GMT +0",
                             OTP = tokenEmail
-                        });
-                        return new StatusCodeResult(201);
+                        });   
                     }
                     catch (Exception ex)
                     {
-                        // Handle the error here, for example log the error message
-                        throw new Exception(ex.ToString()); // Return a 500 Internal Server Error status code
+                        
+                        throw new Exception(ex.ToString()); 
                     }
                 }
-                return new StatusCodeResult(204);
+                return new StatusCodeResult(201);
             }
             catch (Exception ex)
             {
