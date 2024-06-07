@@ -30,7 +30,20 @@ namespace API.Controllers
         public async Task<IActionResult> addRegisterInformationOfTutor([FromBody] TutorInformationRequest tutorRequest)
         {
             var response = await _tutorRegisterService.RegisterTutorInformation(tutorRequest);
-            return Ok(response);
+            if (response is ActionResult<TutorRegisterStepOneResponse> tutorRegisterStepOneResponse && response.Value != null)
+            {
+                return Ok(tutorRegisterStepOneResponse.Value);
+            }
+            if((IActionResult)response.Result is StatusCodeResult statusCodeResult)
+            {
+                if (statusCodeResult.StatusCode == 400) return BadRequest(new { Message = "Vui lòng kiểm tra lại hình ảnh cá nhân nhập vào" });
+                if (statusCodeResult.StatusCode == 404) return NotFound(new { Message = "Không tìm thấy thông tin người dùng" });
+            }
+            if((IActionResult)response.Result is Exception exception)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
+            }
+            throw new Exception("Xảy ra lỗi không xác định");
         }
         /// <summary>
         /// step 3 fe
@@ -41,7 +54,17 @@ namespace API.Controllers
         public async Task<IActionResult> addRegisterCertificateOfTutor(Guid tutorID, List<TutorRegisterCertificateRequest> certificateRequest)
         {
             var result = await _tutorRegisterService.TutorCertificatesRegister(tutorID, certificateRequest);
-            return result;
+            if(result is StatusCodeResult statusCodeResult)
+            {
+                if (statusCodeResult.StatusCode == 201) return StatusCode(StatusCodes.Status201Created, new { Message = "Đăng ký bằng cấp thành công" });
+                if (statusCodeResult.StatusCode == 400) return BadRequest(new { Message = "Vui lòng kiểm tra lại dữ liệu bằng cấp ở nhập liệu đầu vào" });
+                if (statusCodeResult.StatusCode == 404) return NotFound(new { Message = "Không tìm thấy thông tin gia sư" });
+            }
+            if (result is Exception exception)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
+            }
+            throw new Exception("Xảy ra lỗi không xác định");
         }
         /// <summary>
         /// chua ro?
@@ -53,7 +76,17 @@ namespace API.Controllers
         public async Task<IActionResult> addRegisterSubjectOfTutor(Guid tutorID, List<Guid> subjectIDs)
         {
             var result = await _tutorRegisterService.RegisterTutorSubject(tutorID, subjectIDs);
-            return result;
+            if(result is StatusCodeResult statusCodeResult)
+            {
+                if (statusCodeResult.StatusCode == 201) return StatusCode(StatusCodes.Status201Created, new { Message = "Đăng ký môn học thành công" });
+                if (statusCodeResult.StatusCode == 400) return BadRequest(new { Message = "Vui lòng kiểm tra lại dữ liệu môn học ở nhập liệu đầu vào" });
+                if (statusCodeResult.StatusCode == 404) return NotFound(new { Message = "Không tìm thấy thông tin gia sư" });
+            }
+            if (result is Exception exception)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
+            }
+            throw new Exception("Xảy ra lỗi không xác định");
         }
         /// <summary>
         /// step 4 fe
@@ -64,29 +97,60 @@ namespace API.Controllers
         public async Task<IActionResult> addRegisterExperienceOfTutor(Guid tutorID, List<TutorExperienceRequest> tutorExperiences)
         {
             var result = await _tutorRegisterService.RegisterTutorExperience(tutorID, tutorExperiences);
-            return result;
+            if(result is StatusCodeResult statusCodeResult)
+            {
+                if (statusCodeResult.StatusCode == 201) return StatusCode(StatusCodes.Status201Created, new { Message = "Đăng ký kinh nghiệm dạy học thành công" });
+                if (statusCodeResult.StatusCode == 400) return BadRequest(new { Message = "Vui lòng kiểm tra lại dữ liệu kinh nghiệm ở nhập liệu đầu vào" });
+                if (statusCodeResult.StatusCode == 404) return NotFound(new { Message = "Không tìm thấy thông tin gia sư" });
+            }
+            if (result is Exception exception)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
+            }
+            throw new Exception("Xảy ra lỗi không xác định");
         }
         /// <summary>
         /// step 7 fe
         /// </summary>
        
         // Confirm and Create Notification
-        [HttpPost("confirm/{tutorID}")]
-        public async Task<IActionResult> confirmRegisterFormAndCreateNoti(Guid tutorID, decimal money)
+        [HttpPost("confirm")]
+        public async Task<IActionResult> confirmRegisterFormAndCreateNoti([FromBody]TutorConfirmRequest request)
         {
-            var response = await _tutorRegisterService.CheckConfirmTutorInformationAndSendNotification(tutorID,money);
-            return response;
+            var response = await _tutorRegisterService.CheckConfirmTutorInformationAndSendNotification(request);
+            if (response is StatusCodeResult statusCodeResult)
+            {
+                if (statusCodeResult.StatusCode == 201) return StatusCode(StatusCodes.Status201Created, new { Message = "Yêu cầu xét duyệt trở thành gia sư đã được gửi, vui lòng đợi phản hồi từ hệ thống" });
+                if (statusCodeResult.StatusCode == 400) return BadRequest(new { Message = "Vui lòng kiểm tra lại dữ liệu môn học và bằng cấp ở nhập liệu đầu vào" });
+                if (statusCodeResult.StatusCode == 404) return NotFound(new { Message = "Không tìm thấy thông tin gia sư" });
+            }
+            if (response is Exception exception)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
+            }
+            throw new Exception("Xảy ra lỗi không xác định");
         }
         /// <summary>
-        /// step 6 fe
+        /// step 6 fe, lưu ý ko cố tình tạo 1 khoảng quá dài tránh thời gian xử lý request lâu hơn 1 phút
         /// </summary>
         
         //Create Tutor Slot Schedule
-        [HttpPost("create/slot-schedule/{tutorID}")]
-        public async Task<IActionResult> createTutorSlotSchedule(Guid tutorID, [FromBody] TutorRegistScheduleRequest tutorRegistScheduleRequest)
+        [HttpPost("create/slot-schedule")]
+        public async Task<IActionResult> createTutorSlotSchedule([FromBody] TutorRegistScheduleRequest tutorRegistScheduleRequest)
         {
-            var response = await _tutorRegisterService.CreateTutorSlotSchedule(tutorID, tutorRegistScheduleRequest);
-            return response;
+            var response = await _tutorRegisterService.CreateTutorSlotSchedule(tutorRegistScheduleRequest);
+            if(response is StatusCodeResult statusCodeResult)
+            {
+                if (statusCodeResult.StatusCode == 201) return StatusCode(StatusCodes.Status201Created, new { Message = "Tạo lịch học thành công" });
+                if (statusCodeResult.StatusCode == 400) return BadRequest(new { Message = "Vui lòng kiểm tra lại dữ liệu ngày ở nhập liệu đầu vào" });
+                if (statusCodeResult.StatusCode == 404) return NotFound(new { Message = "Không tìm thấy thông tin gia sư" });
+                if (statusCodeResult.StatusCode == 409) return StatusCode(StatusCodes.Status409Conflict ,new { Message = "Giờ kết thúc không thể xảy ra trước giờ bắt đầu, vui lòng kiểm tra lại" });
+            }
+            if(response is Exception exception)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new {Message = exception.ToString()});
+            }
+            throw new Exception("Xảy ra lỗi không xác định");
         }
 
         // Get All Tutor Register Information
@@ -104,19 +168,39 @@ namespace API.Controllers
         }
 
         // Approve Tutor Register
-        [HttpPost("approve/{tutorActionId}/{approvalID}")]
-        public async Task<IActionResult> approveTutorRegister(Guid tutorActionId, Guid approvalID)
+        [HttpPost("approve")]
+        public async Task<IActionResult> approveTutorRegister([FromBody]TutorApprovalRequest request)
         {
-            var result = await _tutorRegisterService.ApproveTheTutorRegister(tutorActionId, approvalID);
-            return result;
+            var result = await _tutorRegisterService.ApproveTheTutorRegister(request);
+            if(result is StatusCodeResult statusCodeResult)
+            {
+                if (statusCodeResult.StatusCode == 200) return Ok(new { Message = "Duyệt thành công" });
+                if (statusCodeResult.StatusCode == 400) return BadRequest(new { Message = "Vui lòng kiểm tra lại dữ liệu đầu vào" });
+                if (statusCodeResult.StatusCode == 404) return NotFound(new { Message = "Không tìm thấy thông tin gia sư" });
+            }
+            if (result is Exception exception)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
+            }
+            throw new Exception("Xảy ra lỗi không xác định");
         }
 
         // Deny Tutor Register
         [HttpPost("deny/{tutorActionId}/{denyID}")]
-        public async Task<IActionResult> denyTutorRegister(Guid tutorActionId, Guid denyID)
+        public async Task<IActionResult> denyTutorRegister([FromBody]TutorApprovalRequest request)
         {
-            var result = await _tutorRegisterService.DenyTheTutorRegister(tutorActionId, denyID);
-            return result;
+            var result = await _tutorRegisterService.DenyTheTutorRegister(request);
+            if (result is StatusCodeResult statusCodeResult)
+            {
+                if (statusCodeResult.StatusCode == 200) return Ok(new { Message = "Từ chối thành công" });
+                if (statusCodeResult.StatusCode == 400) return BadRequest(new { Message = "Vui lòng kiểm tra lại dữ liệu đầu vào" });
+                if (statusCodeResult.StatusCode == 404) return NotFound(new { Message = "Không tìm thấy thông tin gia sư" });
+            }
+            if (result is Exception exception)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
+            }
+            throw new Exception("Xảy ra lỗi không xác định");
         }
     }
 

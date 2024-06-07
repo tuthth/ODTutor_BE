@@ -64,7 +64,7 @@ namespace Models.Migrations
 
                     b.HasIndex("TutorId");
 
-                    b.ToTable("Bookings", (string)null);
+                    b.ToTable("Bookings");
                 });
 
             modelBuilder.Entity("Models.Entities.BookingTransaction", b =>
@@ -100,7 +100,7 @@ namespace Models.Migrations
 
                     b.HasIndex("SenderWalletId");
 
-                    b.ToTable("BookingTransactions", (string)null);
+                    b.ToTable("BookingTransactions");
                 });
 
             modelBuilder.Entity("Models.Entities.Course", b =>
@@ -134,7 +134,7 @@ namespace Models.Migrations
 
                     b.HasIndex("TutorId");
 
-                    b.ToTable("Courses", (string)null);
+                    b.ToTable("Courses");
                 });
 
             modelBuilder.Entity("Models.Entities.CourseOutline", b =>
@@ -159,7 +159,7 @@ namespace Models.Migrations
 
                     b.HasIndex("CourseId");
 
-                    b.ToTable("CourseOutlines", (string)null);
+                    b.ToTable("CourseOutlines");
                 });
 
             modelBuilder.Entity("Models.Entities.CoursePromotion", b =>
@@ -177,7 +177,7 @@ namespace Models.Migrations
 
                     b.HasIndex("CourseId");
 
-                    b.ToTable("CoursePromotions", (string)null);
+                    b.ToTable("CoursePromotions");
                 });
 
             modelBuilder.Entity("Models.Entities.CourseTransaction", b =>
@@ -209,7 +209,7 @@ namespace Models.Migrations
 
                     b.HasIndex("SenderWalletId");
 
-                    b.ToTable("CourseTransactions", (string)null);
+                    b.ToTable("CourseTransactions");
                 });
 
             modelBuilder.Entity("Models.Entities.Moderator", b =>
@@ -226,7 +226,7 @@ namespace Models.Migrations
                     b.HasIndex("UserId")
                         .IsUnique();
 
-                    b.ToTable("Moderators", (string)null);
+                    b.ToTable("Moderators");
                 });
 
             modelBuilder.Entity("Models.Entities.Notification", b =>
@@ -256,7 +256,7 @@ namespace Models.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Notifications", (string)null);
+                    b.ToTable("Notifications");
                 });
 
             modelBuilder.Entity("Models.Entities.Promotion", b =>
@@ -281,7 +281,7 @@ namespace Models.Migrations
 
                     b.HasIndex("TutorId");
 
-                    b.ToTable("Promotions", (string)null);
+                    b.ToTable("Promotions");
                 });
 
             modelBuilder.Entity("Models.Entities.Report", b =>
@@ -312,7 +312,7 @@ namespace Models.Migrations
 
                     b.HasIndex("SenderUserId");
 
-                    b.ToTable("Reports", (string)null);
+                    b.ToTable("Reports");
                 });
 
             modelBuilder.Entity("Models.Entities.Schedule", b =>
@@ -337,7 +337,7 @@ namespace Models.Migrations
 
                     b.HasIndex("StudentCourseId");
 
-                    b.ToTable("Schedules", (string)null);
+                    b.ToTable("Schedules");
                 });
 
             modelBuilder.Entity("Models.Entities.Student", b =>
@@ -354,7 +354,7 @@ namespace Models.Migrations
                     b.HasIndex("UserId")
                         .IsUnique();
 
-                    b.ToTable("Students", (string)null);
+                    b.ToTable("Students");
                 });
 
             modelBuilder.Entity("Models.Entities.StudentCourse", b =>
@@ -384,7 +384,7 @@ namespace Models.Migrations
 
                     b.HasIndex("StudentId");
 
-                    b.ToTable("StudentCourses", (string)null);
+                    b.ToTable("StudentCourses");
                 });
 
             modelBuilder.Entity("Models.Entities.StudentRequest", b =>
@@ -414,7 +414,7 @@ namespace Models.Migrations
 
                     b.HasIndex("SubjectId");
 
-                    b.ToTable("StudentRequests", (string)null);
+                    b.ToTable("StudentRequests");
                 });
 
             modelBuilder.Entity("Models.Entities.Subject", b =>
@@ -441,7 +441,7 @@ namespace Models.Migrations
 
                     b.HasKey("SubjectId");
 
-                    b.ToTable("Subjects", (string)null);
+                    b.ToTable("Subjects");
                 });
 
             modelBuilder.Entity("Models.Entities.Tutor", b =>
@@ -485,7 +485,7 @@ namespace Models.Migrations
                     b.HasIndex("UserId")
                         .IsUnique();
 
-                    b.ToTable("Tutors", (string)null);
+                    b.ToTable("Tutors");
                 });
 
             modelBuilder.Entity("Models.Entities.TutorAction", b =>
@@ -528,7 +528,7 @@ namespace Models.Migrations
 
                     b.HasIndex("TutorId");
 
-                    b.ToTable("TutorActions", (string)null);
+                    b.ToTable("TutorActions");
                 });
 
             modelBuilder.Entity("Models.Entities.TutorCertificate", b =>
@@ -554,7 +554,7 @@ namespace Models.Migrations
 
                     b.HasIndex("TutorId");
 
-                    b.ToTable("TutorCertificates", (string)null);
+                    b.ToTable("TutorCertificates");
                 });
 
             modelBuilder.Entity("Models.Entities.TutorDateAvailable", b =>
@@ -621,7 +621,7 @@ namespace Models.Migrations
 
                     b.HasIndex("TutorId");
 
-                    b.ToTable("TutorExperiences", (string)null);
+                    b.ToTable("TutorExperiences");
                 });
 
             modelBuilder.Entity("Models.Entities.TutorRating", b =>
@@ -657,7 +657,7 @@ namespace Models.Migrations
 
                     b.HasIndex("TutorId");
 
-                    b.ToTable("TutorRatings", (string)null);
+                    b.ToTable("TutorRatings");
                 });
 
             modelBuilder.Entity("Models.Entities.TutorRatingImage", b =>
@@ -677,7 +677,7 @@ namespace Models.Migrations
 
                     b.HasIndex("TutorRatingId");
 
-                    b.ToTable("TutorRatingImages", (string)null);
+                    b.ToTable("TutorRatingImages");
                 });
 
             modelBuilder.Entity("Models.Entities.TutorSlotAvailable", b =>
@@ -731,7 +731,7 @@ namespace Models.Migrations
 
                     b.HasIndex("TutorId");
 
-                    b.ToTable("TutorSubjects", (string)null);
+                    b.ToTable("TutorSubjects");
                 });
 
             modelBuilder.Entity("Models.Entities.TutorWeekAvailable", b =>
@@ -807,7 +807,7 @@ namespace Models.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Users", (string)null);
+                    b.ToTable("Users");
                 });
 
             modelBuilder.Entity("Models.Entities.UserAuthentication", b =>
@@ -829,7 +829,7 @@ namespace Models.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("UserAuthentications", (string)null);
+                    b.ToTable("UserAuthentications");
                 });
 
             modelBuilder.Entity("Models.Entities.UserBlock", b =>
@@ -847,7 +847,7 @@ namespace Models.Migrations
 
                     b.HasIndex("TargetUserId");
 
-                    b.ToTable("UserBlocks", (string)null);
+                    b.ToTable("UserBlocks");
                 });
 
             modelBuilder.Entity("Models.Entities.UserFollow", b =>
@@ -865,7 +865,7 @@ namespace Models.Migrations
 
                     b.HasIndex("TargetUserId");
 
-                    b.ToTable("UserFollows", (string)null);
+                    b.ToTable("UserFollows");
                 });
 
             modelBuilder.Entity("Models.Entities.Wallet", b =>
@@ -897,7 +897,7 @@ namespace Models.Migrations
                     b.HasIndex("UserId")
                         .IsUnique();
 
-                    b.ToTable("Wallets", (string)null);
+                    b.ToTable("Wallets");
                 });
 
             modelBuilder.Entity("Models.Entities.WalletTransaction", b =>
@@ -927,7 +927,7 @@ namespace Models.Migrations
 
                     b.HasIndex("SenderWalletId");
 
-                    b.ToTable("WalletTransactions", (string)null);
+                    b.ToTable("WalletTransactions");
                 });
 
             modelBuilder.Entity("Models.Entities.Booking", b =>

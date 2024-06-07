@@ -47,12 +47,12 @@ namespace Services.Implementations
                 var user = findUserByUserID(tutorRequest.UserId);
                 if (user == null)
                 {
-                    throw new CrudException(HttpStatusCode.NotFound, "User not found", "");
+                    return new StatusCodeResult(404);
                 }
                 // check the avatar photo
                 if (!await checkPhotoAvatar(user.ImageUrl))
                 {
-                    throw new CrudException(HttpStatusCode.BadRequest, "Photo do not have human face", "");
+                    return new StatusCodeResult(400);
                 }
                 //Map and save tutor information
                 Tutor tutor = _mapper.Map<Tutor>(tutorRequest);
@@ -79,10 +79,6 @@ namespace Services.Implementations
                     return response;
                 }
             }
-            catch (CrudException ex)
-            {
-                throw ex;
-            }
             catch (Exception ex)
             {
                 throw new Exception(ex.ToString());
@@ -96,7 +92,7 @@ namespace Services.Implementations
             var tutor = await _context.Tutors.Where(x => x.TutorId == tutorID).FirstOrDefaultAsync();
             if (tutor == null)
             {
-                throw new CrudException(HttpStatusCode.NotFound, "Tutor not found", "");
+                return new StatusCodeResult(404);
             }
             List<TutorSubject> tutorSubjects = new List<TutorSubject>();
             try
@@ -112,13 +108,13 @@ namespace Services.Implementations
                 }
                 if (tutorSubjects.Count < 0)
                 {
-                    throw new CrudException (HttpStatusCode.BadRequest, "Subject is required", "");
+                    return new StatusCodeResult(400);
                 }
                 else
                 {
                     _context.TutorSubjects.AddRange(tutorSubjects);
                     await _context.SaveChangesAsync();
-                    throw new CrudException(HttpStatusCode.Created, "Đã ghi nhận đăng ký môn học", "");
+                    return new StatusCodeResult(201);
                 }
             }
             catch (CrudException ex)
@@ -138,7 +134,7 @@ namespace Services.Implementations
             var tutor = await _context.Tutors.Where(x => x.TutorId == tutorID).FirstOrDefaultAsync();
             if (tutor == null)
             {
-                throw new CrudException(HttpStatusCode.NotFound, "Tutor not found", "");
+                return new StatusCodeResult(404);
             }
             try
             {
@@ -153,11 +149,7 @@ namespace Services.Implementations
                     _context.TutorCertificates.Add(certificate);
                     await _context.SaveChangesAsync();
                 }
-                throw new CrudException(HttpStatusCode.Created, "Các chứng chỉ đã được ghi nhận", "");
-            }
-            catch (CrudException ex)
-            {
-                throw ex;
+                return new StatusCodeResult(201);
             }
             catch (Exception ex)
             {
@@ -172,7 +164,7 @@ namespace Services.Implementations
             var tutor = await _context.Tutors.Where(x => x.TutorId == tutorID).FirstOrDefaultAsync();
             if (tutor == null)
             {
-                throw new CrudException(HttpStatusCode.NotFound, "Tutor not found", "");
+                return new StatusCodeResult(404);
             }
             try
             {
@@ -184,7 +176,7 @@ namespace Services.Implementations
                     _context.TutorExperiences.Add(tutorExperience);
                 }
                 await _context.SaveChangesAsync();
-                throw new CrudException(HttpStatusCode.Created, "Tutor Experience Created", "");
+                return new StatusCodeResult(201);
             }
             catch (CrudException ex)
             {
@@ -198,26 +190,26 @@ namespace Services.Implementations
 
         // Check, Confirm and Send Notification
         // Step 5: Check, Confirm and Send Notification
-        public async Task<IActionResult> CheckConfirmTutorInformationAndSendNotification(Guid tutorID, decimal totalPrice)
+        public async Task<IActionResult> CheckConfirmTutorInformationAndSendNotification(TutorConfirmRequest request)
         {
             try
             {
-                var tutor = await _context.Tutors.Where(x => x.TutorId == tutorID).FirstOrDefaultAsync();
-                if (!await checkTutorCertificate(tutorID))
+                var tutor = await _context.Tutors.Where(x => x.TutorId == request.TutorID).FirstOrDefaultAsync();
+                if (!await checkTutorCertificate(request.TutorID))
                 {
-                    throw new CrudException(HttpStatusCode.BadRequest, "Tutor Certificate is required", "");
+                    return new StatusCodeResult(400);
                 }
-                if (!await checkTutorSubject(tutorID))
+                if (!await checkTutorSubject(request.TutorID))
                 {
-                    throw new CrudException(HttpStatusCode.BadRequest, "Tutor Subject is required", "");
+                    return new StatusCodeResult(400);
                 }
                 //Update Tutor Money
-                tutor.PricePerHour = totalPrice;
+                tutor.PricePerHour = request.Price;
                 await _context.SaveChangesAsync();
                 // Create a Tutor Action Log
                 TutorAction tutorRegister = new TutorAction();
                 tutorRegister.TutorActionId = Guid.NewGuid();
-                tutorRegister.TutorId = tutorID;
+                tutorRegister.TutorId = request.TutorID;
                 tutorRegister.CreateAt = DateTime.Now;
                 tutorRegister.Description = "Xử lý xét duyệt gia sư";
                 tutorRegister.ActionType = 1; // "1" is Register
@@ -234,7 +226,7 @@ namespace Services.Implementations
                 notification.Status = 1; // "1" is sent
                 await _context.Notifications.AddAsync(notification);
                 await _context.SaveChangesAsync();
-                throw new CrudException(HttpStatusCode.Created, "Register Sent", "");
+                return new StatusCodeResult(201);
             }
             catch (CrudException ex)
             {
@@ -248,54 +240,70 @@ namespace Services.Implementations
 
         // Register Tutor Schedule
         // Step 6: Create Schedule for Tutor
-        public async Task<IActionResult> CreateTutorSlotSchedule ( Guid tutorID, TutorRegistScheduleRequest tutorRegistScheduleRequest)
+        public async Task<IActionResult> CreateTutorSlotSchedule(TutorRegistScheduleRequest tutorRegistScheduleRequest)
         {
-            var tutor = await _context.Tutors.Where(x => x.TutorId == tutorID).FirstOrDefaultAsync();
+            var tutor = await _context.Tutors.Where(x => x.TutorId == tutorRegistScheduleRequest.TutorID).FirstOrDefaultAsync();
             if (tutor == null)
             {
-                throw new CrudException(HttpStatusCode.NotFound,"Tutor not found", "");
+                return new StatusCodeResult(404);
             }
             if (tutorRegistScheduleRequest.StartTime >= tutorRegistScheduleRequest.EndTime)
             {
-                throw new CrudException(HttpStatusCode.BadRequest, "Start time must be less than end time", "");
+                return new StatusCodeResult(400);
+            }
+            if(tutorRegistScheduleRequest.StartTime.TimeOfDay > tutorRegistScheduleRequest.EndTime.TimeOfDay)
+            {
+                return new StatusCodeResult(409);
             }
             try
             {
-                // Create a new TutorWeekAvailable
-                TutorWeekAvailable tutorWeekAvailable = new TutorWeekAvailable();
-                tutorWeekAvailable.TutorWeekAvailableId = Guid.NewGuid();
-                tutorWeekAvailable.TutorId = tutorID;
-                tutorWeekAvailable.StartTime = tutorRegistScheduleRequest.StartTime;
-                tutorWeekAvailable.EndTime = tutorRegistScheduleRequest.EndTime;
-                _context.TutorWeekAvailables.Add(tutorWeekAvailable);
-                await _context.SaveChangesAsync();
-                // Create a new TutorDateAvailable
-                foreach (var tutorRegistDate in tutorRegistScheduleRequest.dateList)
+                // Calculate the number of weeks between StartTime and EndTime
+                int weeks = (int)Math.Ceiling((tutorRegistScheduleRequest.EndTime - tutorRegistScheduleRequest.StartTime).TotalDays / 7);
+                DateTime startOfWeek = tutorRegistScheduleRequest.StartTime.Date;
+                DateTime endOfWeek;
+
+                // Create a new TutorWeekAvailable for each week
+                for (int i = 0; i < weeks; i++)
                 {
-                    TutorDateAvailable tutorDateAvailable = new TutorDateAvailable();
-                    tutorDateAvailable.TutorDateAvailableID = Guid.NewGuid();
-                    tutorDateAvailable.TutorID = tutorID;
-                    tutorDateAvailable.TutorWeekAvailableID = tutorWeekAvailable.TutorWeekAvailableId;
-                    tutorDateAvailable.Date = tutorRegistDate.Date;
-                    tutorDateAvailable.DayOfWeek = tutorRegistDate.DayOfWeek;
-                    tutorDateAvailable.StartTime = tutorRegistDate.StartTime;
-                    tutorDateAvailable.EndTime = tutorRegistDate.EndTime;
-                    _context.TutorDateAvailables.Add(tutorDateAvailable);
-                    await _context.SaveChangesAsync();
-                    // Generate Slot Based On Date
-                    var slotList = await generateSlotBasedOnProvidedDate(tutorID, tutorDateAvailable);
+                    endOfWeek = startOfWeek.AddDays(6); // End of the week is 6 days after the start of the week
+
+                    TutorWeekAvailable tutorWeekAvailable = new TutorWeekAvailable();
+                    tutorWeekAvailable.TutorWeekAvailableId = Guid.NewGuid();
+                    tutorWeekAvailable.TutorId = tutorRegistScheduleRequest.TutorID;
+                    tutorWeekAvailable.StartTime = startOfWeek;
+                    tutorWeekAvailable.EndTime = endOfWeek < tutorRegistScheduleRequest.EndTime ? endOfWeek : tutorRegistScheduleRequest.EndTime;
+                    _context.TutorWeekAvailables.Add(tutorWeekAvailable);
+
+                    // Create a new TutorDateAvailable for each day in the current week
+                    for (var date = startOfWeek; date <= tutorWeekAvailable.EndTime; date = date.AddDays(1))
+                    {
+                        TutorDateAvailable tutorDateAvailable = new TutorDateAvailable();
+                        tutorDateAvailable.TutorDateAvailableID = Guid.NewGuid();
+                        tutorDateAvailable.TutorID = tutorRegistScheduleRequest.TutorID;
+                        tutorDateAvailable.TutorWeekAvailableID = tutorWeekAvailable.TutorWeekAvailableId;
+                        tutorDateAvailable.Date = date;
+                        tutorDateAvailable.DayOfWeek = (int)date.DayOfWeek;
+                        tutorDateAvailable.StartTime = tutorRegistScheduleRequest.StartTime.TimeOfDay;
+                        tutorDateAvailable.EndTime = tutorRegistScheduleRequest.EndTime.TimeOfDay;
+                        _context.TutorDateAvailables.Add(tutorDateAvailable);
+                        await _context.SaveChangesAsync();
+                        // Generate Slot Based On Date
+                        var slotList = await generateSlotBasedOnProvidedDate(tutorRegistScheduleRequest.TutorID, tutorDateAvailable);
+                    }
+
+                    startOfWeek = startOfWeek.AddDays(7); // Move to the next week
                 }
-                throw new CrudException(HttpStatusCode.Created, "Tutor Schedule Created", "");
-            }
-            catch (CrudException ex)
-            {
-                throw ex;
+
+                await _context.SaveChangesAsync();
+                return new StatusCodeResult(201);
             }
             catch (Exception ex)
             {
                 throw new Exception(ex.ToString());
             }
         }
+
+
 
         // Get Tutor Register Information --- Đây là nơi để dành cho những người xử lý tutor và duyệt request
         /*Đây là phần để lấy thông tin để admin hay moderator có thể hiểu và kiểm tra*/
@@ -334,16 +342,16 @@ namespace Services.Implementations
         }
 
         // Approval Tutor Register 
-        public async Task<IActionResult> ApproveTheTutorRegister(Guid tutorActionId, Guid approvalID)
+        public async Task<IActionResult> ApproveTheTutorRegister(TutorApprovalRequest request)
         {
             try
             {
-                TutorAction tutorAction = _context.TutorActions.FirstOrDefault(ta => ta.TutorActionId == tutorActionId);
+                TutorAction tutorAction = _context.TutorActions.FirstOrDefault(ta => ta.TutorActionId == request.TutorActionId);
                 if (tutorAction == null)
                 {
-                    throw new CrudException(HttpStatusCode.BadRequest, "Not Found TutorAction", "");
+                    return new StatusCodeResult(404);
                 }
-                tutorAction.ModeratorId = approvalID;
+                tutorAction.ModeratorId = request.ApprovalID;
                 tutorAction.ReponseDate = DateTime.Now;
                 tutorAction.Status = (Int32)TutorActionEnum.Accept;
                 await _context.SaveChangesAsync();
@@ -359,34 +367,30 @@ namespace Services.Implementations
                 notification.UserId = tutor.UserId;
                 notification.Title = "Yêu cầu xét duyệt trở thành gia sư đã được chấp nhận";
                 notification.Content = "Yêu cầu của bạn đã được chấp nhận. Bạn đã trở thành gia sư trên hệ thống";
-                notification.CreatedAt = DateTime.Now;
+                notification.CreatedAt = DateTime.UtcNow;
                 notification.Status = (Int32)NotificationEnum.Active;
                 await _context.Notifications.AddAsync(notification);
                 await _context.SaveChangesAsync();
-                throw new CrudException(HttpStatusCode.OK, "Tutor Approved", "");
-            }
-            catch (CrudException ex)
-            {
-                throw ex;
+                return new StatusCodeResult(200);
             }
             catch (Exception ex)
             {
-                throw new CrudException(HttpStatusCode.InternalServerError, "System Error", "");
+                throw new Exception(ex.ToString());
             }
         }
 
         // Deny Tutor Register
-        public async Task<IActionResult> DenyTheTutorRegister (Guid tutorActionId, Guid denyID)
+        public async Task<IActionResult> DenyTheTutorRegister (TutorApprovalRequest request)
         {
             try
             {
-                TutorAction tutorAction = _context.TutorActions.FirstOrDefault(ta => ta.TutorActionId == tutorActionId);
+                TutorAction tutorAction = _context.TutorActions.FirstOrDefault(ta => ta.TutorActionId == request.TutorActionId);
                 if (tutorAction == null)
                 {
-                    throw new CrudException(HttpStatusCode.BadRequest, "Not Found TutorAction", "");
+                    return new StatusCodeResult(404);
                 }
-                tutorAction.ModeratorId = denyID;
-                tutorAction.ReponseDate = DateTime.Now;
+                tutorAction.ModeratorId = request.ApprovalID;
+                tutorAction.ReponseDate = DateTime.UtcNow;
                 tutorAction.Status = (Int32)TutorActionEnum.Reject;
                 await _context.SaveChangesAsync();
 
@@ -405,15 +409,11 @@ namespace Services.Implementations
                 notification.Status = (Int32)NotificationEnum.Deleted;
                 await _context.Notifications.AddAsync(notification);
                 await _context.SaveChangesAsync();
-                throw new CrudException(HttpStatusCode.OK, "Tutor Denied", "");
-            }
-            catch (CrudException ex)
-            {
-                throw ex;
+                return new StatusCodeResult(200);
             }
             catch (Exception ex)
             {
-                throw new CrudException(HttpStatusCode.InternalServerError, "System Error", "");
+                throw new Exception(ex.ToString());
             }
         }   
 
