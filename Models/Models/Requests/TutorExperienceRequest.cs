@@ -14,4 +14,8 @@ namespace Models.Models.Requests
         public DateTime StartDate { get; set; }
         public DateTime EndYear { get; set; }
     }
+    public class UpdateTutorExperienceRequest : TutorExperienceRequest
+    {
+        public Guid TutorExperienceId { get; set; }
+    }
 }

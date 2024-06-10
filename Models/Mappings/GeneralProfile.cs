@@ -71,6 +71,11 @@ namespace Models.Mappings
             CreateMap<BookingTransaction, BookingTransactionView>();
             CreateMap<CourseTransaction, CourseTransactionView>();
             CreateMap<WalletTransaction, WalletTransactionView>();
+            CreateMap<TutorExperience, UpdateTutorExperienceRequest>();
+            CreateMap<TutorExperience, TutorExperienceRequest>();
+            CreateMap<TutorRating, TutorRatingRequest>();
+            CreateMap<TutorRating, UpdateTutorRatingRequest>();
+            CreateMap<TutorSubject, UpdateTutorSubjectRequest>();
         }
     }
 }

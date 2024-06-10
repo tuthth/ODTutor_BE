@@ -98,6 +98,134 @@ namespace Services.Implementations
                 throw new Exception(ex.ToString());
             }
         }
-
+        public async Task<IActionResult> UpdateTutorExperience(UpdateTutorExperienceRequest request)
+        {
+            var tutorExperience = await _context.TutorExperiences.Where(x => x.TutorExperienceId == request.TutorExperienceId).FirstOrDefaultAsync();
+            if (tutorExperience == null)
+            {
+                return new StatusCodeResult(404);
+            }
+            try
+            {
+                _mapper.Map(request, tutorExperience);
+                _context.TutorExperiences.Update(tutorExperience);
+                await _context.SaveChangesAsync();
+                return new StatusCodeResult(200);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.ToString());
+            }
+        }
+        public async Task<IActionResult> DeleteTutorExperience(Guid id)
+        {
+            var tutorExperience = await _context.TutorExperiences.Where(x => x.TutorExperienceId == id).FirstOrDefaultAsync();
+            if (tutorExperience == null)
+            {
+                return new StatusCodeResult(404);
+            }
+            try
+            {
+                _context.TutorExperiences.Remove(tutorExperience);
+                await _context.SaveChangesAsync();
+                return new StatusCodeResult(204);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.ToString());
+            }
+        }
+        public async Task<IActionResult> DeleteRatingImage(Guid id)
+        {
+            var ratingImage = await _context.TutorRatingImages.Where(x => x.TutorRatingImageId == id).FirstOrDefaultAsync();
+            if (ratingImage == null)
+            {
+                return new StatusCodeResult(404);
+            }
+            try
+            {
+                _context.TutorRatingImages.Remove(ratingImage);
+                await _context.SaveChangesAsync();
+                return new StatusCodeResult(204);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.ToString());
+            }
+        }
+        public async Task<IActionResult> DeleteTutorCertificate(Guid id)
+        {
+            var tutorCertificate = await _context.TutorCertificates.Where(x => x.TutorCertificateId == id).FirstOrDefaultAsync();
+            if (tutorCertificate == null)
+            {
+                return new StatusCodeResult(404);
+            }
+            try
+            {
+                _context.TutorCertificates.Remove(tutorCertificate);
+                await _context.SaveChangesAsync();
+                return new StatusCodeResult(204);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.ToString());
+            }
+        }
+        public async Task<IActionResult> DeleteTutorSubject(Guid id)
+        {
+            var tutorSubject = await _context.TutorSubjects.Where(x => x.TutorSubjectId == id).FirstOrDefaultAsync();
+            if (tutorSubject == null)
+            {
+                return new StatusCodeResult(404);
+            }
+            try
+            {
+                _context.TutorSubjects.Remove(tutorSubject);
+                await _context.SaveChangesAsync();
+                return new StatusCodeResult(204);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.ToString());
+            }
+        }
+        public async Task<IActionResult> UpdateTutorCertificate(UpdateTutorCertificateRequest request)
+        {
+            var tutorCertificate = await _context.TutorCertificates.Where(x => x.TutorCertificateId == request.TutorCertificateId).FirstOrDefaultAsync();
+            if (tutorCertificate == null)
+            {
+                return new StatusCodeResult(404);
+            }
+            try
+            {
+                _mapper.Map(request, tutorCertificate);
+                _context.TutorCertificates.Update(tutorCertificate);
+                await _context.SaveChangesAsync();
+                return new StatusCodeResult(200);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.ToString());
+            }
+        }
+        public async Task<IActionResult> UpdateTutorSubject(UpdateTutorSubjectRequest request)
+        {
+            var tutorSubject = await _context.TutorSubjects.Where(x => x.TutorSubjectId == request.TutorSubjectId).FirstOrDefaultAsync();
+            if (tutorSubject == null)
+            {
+                return new StatusCodeResult(404);
+            }
+            try
+            {
+                _mapper.Map(request, tutorSubject);
+                _context.TutorSubjects.Update(tutorSubject);
+                await _context.SaveChangesAsync();
+                return new StatusCodeResult(200);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.ToString());
+            }
+        }
     }
 }

@@ -13,5 +13,12 @@ namespace Services.Interfaces
         Task<IActionResult> DeleteSlotInTimeRange(TutorDateRemoveRangeRequest request);
         Task<IActionResult> DeleteSlotInTimeRangeInDate(TutorDateRemoveSlotRequest request);
         Task<IActionResult> DeleteTutorSlots(List<Guid> tutorSlotAvailableIDs);
+        Task<IActionResult> UpdateTutorExperience(UpdateTutorExperienceRequest request);
+        Task<IActionResult> DeleteTutorExperience(Guid id);
+        Task<IActionResult> UpdateTutorSubject(UpdateTutorSubjectRequest request);
+        Task<IActionResult> DeleteTutorSubject(Guid id);
+        Task<IActionResult> UpdateTutorCertificate(UpdateTutorCertificateRequest request);
+        Task<IActionResult> DeleteTutorCertificate(Guid id);
+        Task<IActionResult> DeleteRatingImage(Guid id);
     }
 }
