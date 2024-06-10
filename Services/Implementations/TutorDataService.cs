@@ -29,6 +29,7 @@ namespace Services.Implementations
        .Where(t => t.UserNavigation.Banned == false)
        .Select(t => new TutorAccountResponse
        {
+           UserId = t.UserId,
            TutorId = t.TutorId,
            Level = t.Level,
            PricePerHour = t.PricePerHour.Value,
@@ -67,6 +68,7 @@ namespace Services.Implementations
                     .Where(t => t.UserNavigation.Banned == false)
                     .Select(t => new TutorAccountResponse
                     {
+                        UserId = t.UserId,
                         TutorId = t.TutorId,
                         Level = t.Level,
                         PricePerHour = t.PricePerHour.Value,
@@ -109,9 +111,10 @@ namespace Services.Implementations
         public async Task<ActionResult<TutorAccountResponse>> GetTutorById(Guid tutorId)
         {
             var tutor = await _context.Tutors
-      .Where(t => t.TutorId == tutorId && t.UserNavigation.Banned == false)
+      .Where(t => (t.TutorId == tutorId || t.UserId == tutorId) && t.UserNavigation.Banned == false)
       .Select(t => new TutorAccountResponse
       {
+          UserId = t.UserId,
           TutorId = t.TutorId,
           Level = t.Level,
           PricePerHour = t.PricePerHour.Value,
