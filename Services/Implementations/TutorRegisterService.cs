@@ -332,6 +332,7 @@ namespace Services.Implementations
                     response.Name = user.Name;
                     response.Subjects = subjectList;
                     response.ImagesCertificateUrl = imagesUrlList;
+                    response.Status = tutor.Status;
                 }
                 return response;
             }
@@ -365,6 +366,7 @@ namespace Services.Implementations
                         response.Name = user.Name;
                         response.Subjects = subjectList;
                         response.ImagesCertificateUrl = imagesUrlList;
+                        response.Status = tutor.Status;
                         responses.Add(response);
                     }
                 }
