@@ -340,6 +340,42 @@ namespace Services.Implementations
                 throw new Exception(ex.Message);
             }
         }
+        public async Task<ActionResult<List<TutorRegisterReponse>>> GetAllTutorRegisterInformation()
+        {
+            List<TutorRegisterReponse> responses = new List<TutorRegisterReponse>();
+            try
+            {
+                List<Tutor> tutors = await _context.Tutors.ToListAsync();
+                foreach (var tutor in tutors)
+                {
+                    TutorRegisterReponse response = new TutorRegisterReponse();
+                    List<string> subjectList = await getAllSubjectOfTutor(tutor.TutorId);
+                    List<string> imagesUrlList = await getAllImagesUrlOfTutor(tutor.TutorId);
+
+                    User user = await _context.Users.Where(x => x.Id == tutor.UserId).FirstOrDefaultAsync();
+                    if (user != null)
+                    {
+                        response.IdentityNumber = tutor.IdentityNumber;
+                        response.Level = tutor.Level;
+                        response.Description = tutor.Description.Replace("\n", "");
+                        response.PricePerHour = tutor.PricePerHour.Value;
+                        response.Email = user.Email;
+                        response.Username = user.Username;
+                        response.ImageUrl = user.ImageUrl;
+                        response.Name = user.Name;
+                        response.Subjects = subjectList;
+                        response.ImagesCertificateUrl = imagesUrlList;
+                        responses.Add(response);
+                    }
+                }
+                return responses;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
 
         // Approval Tutor Register 
         public async Task<IActionResult> ApproveTheTutorRegister(TutorApprovalRequest request)

@@ -22,5 +22,6 @@ namespace Services.Interfaces
         Task<IActionResult> CreateTutorSlotSchedule(TutorRegistScheduleRequest tutorRegistScheduleRequest);
         Task<IActionResult> ApproveTheTutorRegister(TutorApprovalRequest request);
         Task<IActionResult> DenyTheTutorRegister(TutorApprovalRequest request);
+        Task<ActionResult<List<TutorRegisterReponse>>> GetAllTutorRegisterInformation();
     }   
 }

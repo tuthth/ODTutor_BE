@@ -166,6 +166,14 @@ namespace API.Controllers
             if ((IActionResult)result.Result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, exception.ToString());
             throw new Exception("Xảy ra lỗi không xác định");
         }
+        [HttpGet("get/tutor-registers")]
+        public async Task<ActionResult<List<TutorRegisterReponse>>> getAllTutorRegisterInformation()
+        {
+            var result = await _tutorRegisterService.GetAllTutorRegisterInformation();
+            if (result is ActionResult<List<TutorRegisterReponse>> tutorRegisterReponses && tutorRegisterReponses.Value.Count > 0) return Ok(tutorRegisterReponses);
+            if ((IActionResult)result.Result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
+            throw new Exception("Lỗi không xác định");
+        }
 
         // Approve Tutor Register
         [HttpPost("approve")]
