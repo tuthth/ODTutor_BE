@@ -261,7 +261,7 @@ namespace Services.Implementations
                 new Claim(ClaimTypes.Email, user.Email ?? string.Empty),
                 new Claim(ClaimTypes.Role,"Student")
             }),
-                    Expires = DateTime.UtcNow.AddMinutes(2),
+                    Expires = DateTime.UtcNow.AddMinutes(45),
                     SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
                 };
             }
@@ -278,7 +278,7 @@ namespace Services.Implementations
                 new Claim(ClaimTypes.Email, user.Email ?? string.Empty),
                 new Claim(ClaimTypes.Role, "Moderator")
             }),
-                    Expires = DateTime.UtcNow.AddMinutes(2),
+                    Expires = DateTime.UtcNow.AddMinutes(45),
                     SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
                 };
             }
@@ -295,7 +295,7 @@ namespace Services.Implementations
                 new Claim(ClaimTypes.Email, user.Email ?? string.Empty),
                 new Claim(ClaimTypes.Role, "Tutor")
             }),
-                    Expires = DateTime.UtcNow.AddMinutes(2),
+                    Expires = DateTime.UtcNow.AddMinutes(45),
                     SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
                 };
             }
