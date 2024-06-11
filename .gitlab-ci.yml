@@ -1,0 +1,17 @@
+stages:
+  - deploy
+
+deploy:
+  stage: deploy
+  script:
+  - echo '------------------------------------------BUILD IMAGE------------------------------------------'
+  - docker build -t tutor_be -f API/Dockerfile .
+  - docker images | grep "tutor_be" | grep -v "latest" | awk '{print $3}' | xargs docker rmi  || true        #xóa tất cả các images ngoại trừ image mới nhất
+  - echo '--------------------------------------------DEPLOY------------------------------------------'
+  - docker stop tutor_be_con  || true
+  - docker run --rm -d --name tutor_be_con -p 5260:5260 tutor_be
+  only:
+    - master
+  tags:
+    - linux
+

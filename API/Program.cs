@@ -15,6 +15,10 @@ namespace API
         {
             var builder = WebApplication.CreateBuilder(args);
 
+            if (!builder.Environment.IsDevelopment())
+                builder.WebHost.ConfigureKestrel(serverOptions => { serverOptions.ListenAnyIP(5260); });
+
+
             // Add services to the container.
 
             builder.Services.AddControllers();
