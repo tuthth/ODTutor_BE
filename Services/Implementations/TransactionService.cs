@@ -460,6 +460,19 @@ namespace Services.Implementations
                 else if (choice == (Int32)UpdateTransactionType.Wallet)
                 {
                     wallet.Status = (int)VNPayType.APPROVE;
+
+                    //update wallet for sender and receiver
+                    wallet.SenderWalletNavigation.Amount -= wallet.Amount;
+                    wallet.SenderWalletNavigation.LastBalanceUpdate = DateTime.UtcNow;
+                    wallet.SenderWalletNavigation.PendingAmount -= wallet.Amount;
+                    wallet.SenderWalletNavigation.AvalaibleAmount -= wallet.Amount;
+
+                    wallet.ReceiverWalletNavigation.Amount += wallet.Amount;
+                    wallet.ReceiverWalletNavigation.LastBalanceUpdate = DateTime.UtcNow;
+                    wallet.ReceiverWalletNavigation.AvalaibleAmount += wallet.Amount;
+                    wallet.ReceiverWalletNavigation.PendingAmount -= wallet.Amount;
+
+
                     _context.WalletTransactions.Update(wallet);
                     await _appExtension.SendMail(new MailContent()
                     {
@@ -537,6 +550,14 @@ namespace Services.Implementations
                 else if (choice == (Int32)UpdateTransactionType.Wallet)
                 {
                     wallet.Status = (int)VNPayType.REJECT;
+
+                    //update wallet for sender and receiver
+                    wallet.SenderWalletNavigation.LastBalanceUpdate = DateTime.UtcNow;
+                    wallet.SenderWalletNavigation.PendingAmount -= wallet.Amount;
+
+                    wallet.ReceiverWalletNavigation.LastBalanceUpdate = DateTime.UtcNow;
+                    wallet.ReceiverWalletNavigation.PendingAmount -= wallet.Amount;
+
                     _context.WalletTransactions.Update(wallet);
                     await _appExtension.SendMail(new MailContent()
                     {
