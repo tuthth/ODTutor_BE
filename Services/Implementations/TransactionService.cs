@@ -380,8 +380,8 @@ namespace Services.Implementations
         public async Task<IActionResult> UpdateTransaction(Guid walletTransactionId, int choice, int updateStatus)
         {
             var wallet = await _context.WalletTransactions.FirstOrDefaultAsync(w => w.WalletTransactionId == walletTransactionId);
-            var sender = await _context.Users.FirstOrDefaultAsync(u => u.WalletNavigation.WalletId == wallet.SenderWalletId);
-            var receiver = await _context.Users.FirstOrDefaultAsync(u => u.WalletNavigation.WalletId == wallet.ReceiverWalletId);
+            var sender = await _context.Users.Include(c => c.WalletNavigation).FirstOrDefaultAsync(u => u.WalletNavigation.WalletId == wallet.SenderWalletId);
+            var receiver = await _context.Users.Include(c => c.WalletNavigation).FirstOrDefaultAsync(u => u.WalletNavigation.WalletId == wallet.ReceiverWalletId);
             //only accept pending transaction
             if (wallet == null)
             {
