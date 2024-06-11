@@ -8,8 +8,11 @@ namespace Models.Models.Requests
 {
     public class TutorRegisterCertificateRequest
     {
-        public string CertificateType { get; set; }
-        public DateTime CreateAt { get; set; }
-        public string CertificateImages {get; set;}
+        public string? ImageUrl { get; set; }
+        public string CertificateName { get; set; }
+        public string CertificateDescription { get; set; }
+        public string CertificateFrom { get; set; }
+        public string StartYear { get; set; }
+        public string EndYear { get; set; }
     }
 }

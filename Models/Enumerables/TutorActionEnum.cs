@@ -13,4 +13,9 @@ namespace Models.Enumerables
             Reject = 2,
             Pending = 3
         }
+        
+    public enum TutorActionTypeEnum
+    {
+        TutorRegister = 1,
+    }
 }

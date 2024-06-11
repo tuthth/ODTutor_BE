@@ -76,6 +76,8 @@ namespace Models.Mappings
             CreateMap<TutorRating, TutorRatingRequest>();
             CreateMap<TutorRating, UpdateTutorRatingRequest>();
             CreateMap<TutorSubject, UpdateTutorSubjectRequest>();
+            CreateMap<Tutor, TutorSubInformationRequest>();
+
         }
     }
 }

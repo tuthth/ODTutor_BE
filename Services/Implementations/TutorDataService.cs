@@ -31,7 +31,6 @@ namespace Services.Implementations
        {
            UserId = t.UserId,
            TutorId = t.TutorId,
-           Level = t.Level,
            PricePerHour = t.PricePerHour.Value,
            Description = t.Description,
            Status = t.Status,
@@ -70,7 +69,6 @@ namespace Services.Implementations
                     {
                         UserId = t.UserId,
                         TutorId = t.TutorId,
-                        Level = t.Level,
                         PricePerHour = t.PricePerHour.Value,
                         Description = t.Description,
                         Status = t.Status,
@@ -116,7 +114,6 @@ namespace Services.Implementations
       {
           UserId = t.UserId,
           TutorId = t.TutorId,
-          Level = t.Level,
           PricePerHour = t.PricePerHour.Value,
           Description = t.Description,
           Status = t.Status,

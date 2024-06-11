@@ -13,8 +13,7 @@ namespace Services.Interfaces
 {
     public interface ITutorRegisterService
     {
-        Task<ActionResult<TutorRegisterStepOneResponse>> RegisterTutorInformation(TutorInformationRequest tutorRequest);
-        Task<IActionResult> RegisterTutorSubject(Guid tutorID, List<Guid> subjectIDs);
+        Task<ActionResult<TutorRegisterStepOneResponse>> RegisterTutorInformation(TutorInformationRequest tutorRequest, List<Guid> tutorSubjectId);
         Task<IActionResult> TutorCertificatesRegister(Guid tutorID, List<TutorRegisterCertificateRequest> tutorCertificateRequest);
         Task<IActionResult> RegisterTutorExperience(Guid tutorID, List<TutorExperienceRequest> tutorExperienceRegistList);
         Task<IActionResult> CheckConfirmTutorInformationAndSendNotification(TutorConfirmRequest request);
@@ -23,5 +22,6 @@ namespace Services.Interfaces
         Task<IActionResult> ApproveTheTutorRegister(TutorApprovalRequest request);
         Task<IActionResult> DenyTheTutorRegister(TutorApprovalRequest request);
         Task<ActionResult<List<TutorRegisterReponse>>> GetAllTutorRegisterInformation();
+        Task<IActionResult> CreateTutorSlotInRegisterTutorStep(Guid TutorId, List<TutorRegisterSlotRequest> request);
     }   
 }

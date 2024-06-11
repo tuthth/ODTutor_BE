@@ -11,6 +11,7 @@ namespace Models.Models.Requests
         public string Title { get; set; }
         public string Description { get; set; }
         public string Location { get; set; }
+        public string? imageUrl { get; set; }
         public DateTime StartDate { get; set; }
         public DateTime EndYear { get; set; }
     }
