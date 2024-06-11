@@ -263,7 +263,7 @@ namespace Services.Implementations
         {
             try
             {
-                var tutorCertificates = await _context.TutorCertificates.OrderByDescending(c => c.CreateAt).ToListAsync();
+                var tutorCertificates = await _context.TutorCertificates.ToListAsync();
                 if (tutorCertificates == null)
                 {
                     return new StatusCodeResult(404);
@@ -295,7 +295,7 @@ namespace Services.Implementations
         {
             try
             {
-                var tutorCertificates = await _context.TutorCertificates.Where(c => c.TutorId == id).OrderByDescending(c => c.CreateAt).ToListAsync();
+                var tutorCertificates = await _context.TutorCertificates.Where(c => c.TutorId == id).ToListAsync();
                 if (tutorCertificates == null)
                 {
                     return new StatusCodeResult(404);
@@ -311,7 +311,7 @@ namespace Services.Implementations
         {
             try
             {
-                var tutorCertificates = await _context.TutorCertificates.Where(c => c.TutorId == id).OrderByDescending(c => c.CreateAt).ToListAsync();
+                var tutorCertificates = await _context.TutorCertificates.Where(c => c.TutorId == id).ToListAsync();
                 if (tutorCertificates == null)
                 {
                     return new StatusCodeResult(404);
