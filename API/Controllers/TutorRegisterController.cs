@@ -22,14 +22,13 @@ namespace API.Controllers
             _tutorRegisterService = tutorRegisterService;
         }
         /// <summary>
-        /// step 1 FE
+        /// Step 1: Notice: "Get 3 fields: Fullname, Image, Email from Api Account" ,"Get Subject List from Api Get All Subject in System"
         /// </summary>
-        
         // Add Informtion
         [HttpPost("register")]
-        public async Task<IActionResult> addRegisterInformationOfTutor([FromBody] TutorInformationRequest tutorRequest)
+        public async Task<IActionResult> addRegisterInformationOfTutor([FromBody] TutorInformationRequest tutorRequest, [FromQuery]List<Guid> tutorSubjectID)
         {
-            var response = await _tutorRegisterService.RegisterTutorInformation(tutorRequest);
+            var response = await _tutorRegisterService.RegisterTutorInformation(tutorRequest, tutorSubjectID);
             if (response is ActionResult<TutorRegisterStepOneResponse> tutorRegisterStepOneResponse && response.Value != null)
             {
                 return Ok(tutorRegisterStepOneResponse.Value);
@@ -46,9 +45,8 @@ namespace API.Controllers
             throw new Exception("Xảy ra lỗi không xác định");
         }
         /// <summary>
-        /// step 3 fe
+        /// Step 2: Add Certificate
         /// </summary>
-       
         // Add Certificate
         [HttpPost("register/certificate/{tutorID}")]
         public async Task<IActionResult> addRegisterCertificateOfTutor(Guid tutorID, List<TutorRegisterCertificateRequest> certificateRequest)
@@ -66,32 +64,27 @@ namespace API.Controllers
             }
             throw new Exception("Xảy ra lỗi không xác định");
         }
-        /// <summary>
-        /// chua ro?
-        /// </summary>
-        
 
-        // Add Subject
-        [HttpPost("register/subjects/{tutorID}")]
-        public async Task<IActionResult> addRegisterSubjectOfTutor(Guid tutorID, List<Guid> subjectIDs)
-        {
-            var result = await _tutorRegisterService.RegisterTutorSubject(tutorID, subjectIDs);
-            if(result is StatusCodeResult statusCodeResult)
-            {
-                if (statusCodeResult.StatusCode == 201) return StatusCode(StatusCodes.Status201Created, new { Message = "Đăng ký môn học thành công" });
-                if (statusCodeResult.StatusCode == 400) return BadRequest(new { Message = "Vui lòng kiểm tra lại dữ liệu môn học ở nhập liệu đầu vào" });
-                if (statusCodeResult.StatusCode == 404) return NotFound(new { Message = "Không tìm thấy thông tin gia sư" });
-            }
-            if (result is Exception exception)
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
-            }
-            throw new Exception("Xảy ra lỗi không xác định");
-        }
+        /*        // Add Subject
+                [HttpPost("register/subjects/{tutorID}")]
+                public async Task<IActionResult> addRegisterSubjectOfTutor(Guid tutorID, List<Guid> subjectIDs)
+                {
+                    var result = await _tutorRegisterService.RegisterTutorSubject(tutorID, subjectIDs);
+                    if(result is StatusCodeResult statusCodeResult)
+                    {
+                        if (statusCodeResult.StatusCode == 201) return StatusCode(StatusCodes.Status201Created, new { Message = "Đăng ký môn học thành công" });
+                        if (statusCodeResult.StatusCode == 400) return BadRequest(new { Message = "Vui lòng kiểm tra lại dữ liệu môn học ở nhập liệu đầu vào" });
+                        if (statusCodeResult.StatusCode == 404) return NotFound(new { Message = "Không tìm thấy thông tin gia sư" });
+                    }
+                    if (result is Exception exception)
+                    {
+                        return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
+                    }
+                    throw new Exception("Xảy ra lỗi không xác định");
+                }*/
         /// <summary>
-        /// step 4 fe
+        /// step 3: Add Experience 
         /// </summary>
-
         // Add Experience
         [HttpPost("register/experiences/{tutorID}")]
         public async Task<IActionResult> addRegisterExperienceOfTutor(Guid tutorID, List<TutorExperienceRequest> tutorExperiences)
@@ -110,9 +103,21 @@ namespace API.Controllers
             throw new Exception("Xảy ra lỗi không xác định");
         }
         /// <summary>
-        /// step 7 fe
+        /// Step 4: Create Tutor Slot In Register Tutor Step
         /// </summary>
-       
+        /// <param name="tutorID"></param>
+        /// <param name="request"></param>
+        /// <returns></returns>
+        // Create Tutor Slot In Register Tutor Step
+        [HttpPost("create/slot-schedule-v2/{tutorID}")]
+        public async Task<IActionResult> createTutorSlotScheduleV2(Guid tutorID, List<TutorRegisterSlotRequest> request)
+        {
+            var response = await _tutorRegisterService.CreateTutorSlotInRegisterTutorStep(tutorID, request);
+            return response;
+        }
+        /// <summary>
+        /// Step 5 : Add Money + Confirm
+        /// </summary>
         // Confirm and Create Notification
         [HttpPost("confirm")]
         public async Task<IActionResult> confirmRegisterFormAndCreateNoti([FromBody]TutorConfirmRequest request)
@@ -133,7 +138,6 @@ namespace API.Controllers
         /// <summary>
         /// step 6 fe, lưu ý ko cố tình tạo 1 khoảng quá dài tránh thời gian xử lý request lâu hơn 1 phút
         /// </summary>
-        
         //Create Tutor Slot Schedule
         [HttpPost("create/slot-schedule")]
         public async Task<IActionResult> createTutorSlotSchedule([FromBody] TutorRegistScheduleRequest tutorRegistScheduleRequest)

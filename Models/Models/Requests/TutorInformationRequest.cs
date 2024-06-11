@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Models.Entities;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -9,14 +10,10 @@ namespace Models.Models.Requests
 {
     public class TutorInformationRequest
     {
-        [Required]   
+        [Required]
         public Guid UserId { get; set; }
         [Required]
         public string IdentityNumber { get; set; }
-        [Required]
-        public string Level { get; set; }
-        [Required]
-        public string Description { get; set; }
         [Required]
         public string VideoUrl { get; set; }
     }

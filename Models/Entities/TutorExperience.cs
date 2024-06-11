@@ -15,7 +15,7 @@ namespace Models.Entities
         public string Location { get;set;}
         public DateTime StartDate { get; set; }
         public DateTime EndYear { get;set; }
-
+        public string? imageUrl { get; set; }
         // Navigation properties
         public virtual Tutor TutorNavigation { get; set; }
     }

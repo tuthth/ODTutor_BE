@@ -40,96 +40,102 @@ namespace Services.Implementations
         /*Register Tutor Step By Step*/
         // Register Tutor Information
         // Step 1 : Get Information
-        public async Task<ActionResult<TutorRegisterStepOneResponse>> RegisterTutorInformation(TutorInformationRequest tutorRequest)
+        public async Task<ActionResult<TutorRegisterStepOneResponse>> RegisterTutorInformation(TutorInformationRequest tutorRequest, List<Guid> tutorSubjectId)
         {
             try
             {
                 var user = findUserByUserID(tutorRequest.UserId);
                 if (user == null)
                 {
-                    return new StatusCodeResult(404);
+                    throw new CrudException(HttpStatusCode.NotFound, "User not found", "");
                 }
                 // check the avatar photo
                 if (!await checkPhotoAvatar(user.ImageUrl))
                 {
-                    return new StatusCodeResult(400);
+                    throw new CrudException(HttpStatusCode.BadRequest, "Avatar photo is invalid", "");
                 }
                 //Map and save tutor information
                 Tutor tutor = _mapper.Map<Tutor>(tutorRequest);
                 tutor.TutorId = Guid.NewGuid();
-                tutor.Status = 0; // "0" is Pending
-                if (tutor == null)
+                tutor.Status = (Int32)TutorEnum.Inprocessing; // "2" is InProcessing
+                _context.Tutors.Add(tutor);
+                await _context.SaveChangesAsync();
+                // Add Tutor Subject List
+                List<TutorSubject> tutorSubject = new List<TutorSubject>();
+                foreach (var subjectID in tutorSubjectId)
                 {
-                    return new StatusCodeResult(404);
+                    TutorSubject tutorSubject1 = new TutorSubject();
+                    tutorSubject1.TutorSubjectId = Guid.NewGuid();
+                    tutorSubject1.TutorId = tutor.TutorId;
+                    tutorSubject1.SubjectId = subjectID;
+                    tutorSubject1.CreatedAt = DateTime.Now;
+                    tutorSubject.Add(tutorSubject1);
+                }
+                if (tutorSubject.Count < 0)
+                {
+                    throw new CrudException(HttpStatusCode.BadRequest, "You have to choose at least 1 subject", "");
                 }
                 else
                 {
-                    _context.Tutors.Add(tutor);
+                    _context.TutorSubjects.AddRange(tutorSubject);
                     await _context.SaveChangesAsync();
-                    await _appExtension.SendMail(new MailContent()
-                    {
-                        To = user.Email,
-                        Subject = "Yêu cầu xét duyệt trở thành gia sư",
-                        Body = "Yêu cầu của bạn đã được gửi. Vui lòng đợi phản hồi qua email hoặc thông báo của hệ thống"
-                    });
-                    var response = new TutorRegisterStepOneResponse()
-                    {
-                        TutorID = tutor.TutorId
-                    };
-                    return response;
                 }
+                var response = new TutorRegisterStepOneResponse()
+                {
+                    TutorID = tutor.TutorId
+                };
+                return response;
             }
             catch (Exception ex)
             {
                 throw new Exception(ex.ToString());
             }
         }
-
-        // Register Tutor Subject
-        // Step 2:  Get Subject
-        public async Task<IActionResult> RegisterTutorSubject(Guid tutorID, List<Guid> subjectIDs)
-        {
-            var tutor = await _context.Tutors.Where(x => x.TutorId == tutorID).FirstOrDefaultAsync();
-            if (tutor == null)
-            {
-                return new StatusCodeResult(404);
-            }
-            List<TutorSubject> tutorSubjects = new List<TutorSubject>();
-            try
-            {
-                foreach (var subjectID in subjectIDs)
+        /*        // Register Tutor Subject
+                // Step 2:  Get Subject
+                public async Task<IActionResult> RegisterTutorSubject(Guid tutorID, List<Guid> subjectIDs)
                 {
-                    TutorSubject tutorSubject = new TutorSubject();
-                    tutorSubject.TutorSubjectId = Guid.NewGuid();
-                    tutorSubject.TutorId = tutorID;
-                    tutorSubject.SubjectId = subjectID;
-                    tutorSubject.CreatedAt = DateTime.Now;
-                    tutorSubjects.Add(tutorSubject);
-                }
-                if (tutorSubjects.Count < 0)
-                {
-                    return new StatusCodeResult(400);
-                }
-                else
-                {
-                    _context.TutorSubjects.AddRange(tutorSubjects);
-                    await _context.SaveChangesAsync();
-                    return new StatusCodeResult(201);
-                }
-            }
-            catch (CrudException ex)
-            {
-                throw ex;
-            }
-            catch (Exception ex)
-            {
-                throw new Exception(ex.ToString()); // Replace 'StatusCodeResult' with 'BadRequestResult'
-            }
-        }
+                    var tutor = await _context.Tutors.Where(x => x.TutorId == tutorID).FirstOrDefaultAsync();
+                    if (tutor == null)
+                    {
+                        return new StatusCodeResult(404);
+                    }
+                    List<TutorSubject> tutorSubjects = new List<TutorSubject>();
+                    try
+                    {
+                        foreach (var subjectID in subjectIDs)
+                        {
+                            TutorSubject tutorSubject = new TutorSubject();
+                            tutorSubject.TutorSubjectId = Guid.NewGuid();
+                            tutorSubject.TutorId = tutorID;
+                            tutorSubject.SubjectId = subjectID;
+                            tutorSubject.CreatedAt = DateTime.Now;
+                            tutorSubjects.Add(tutorSubject);
+                        }
+                        if (tutorSubjects.Count < 0)
+                        {
+                            return new StatusCodeResult(400);
+                        }
+                        else
+                        {
+                            _context.TutorSubjects.AddRange(tutorSubjects);
+                            await _context.SaveChangesAsync();
+                            return new StatusCodeResult(201);
+                        }
+                    }
+                    catch (CrudException ex)
+                    {
+                        throw ex;
+                    }
+                    catch (Exception ex)
+                    {
+                        throw new Exception(ex.ToString()); // Replace 'StatusCodeResult' with 'BadRequestResult'
+                    }
+                }*/
 
         // Register Tutor Certificate
-        // Step 3 : Get Certificate
-        public async Task<IActionResult> TutorCertificatesRegister( Guid tutorID,List<TutorRegisterCertificateRequest> tutorCertificateRequest )
+        // Step 2 : Get Certificate
+        public async Task<IActionResult> TutorCertificatesRegister(Guid tutorID, List<TutorRegisterCertificateRequest> tutorCertificateRequest)
         {
             var tutor = await _context.Tutors.Where(x => x.TutorId == tutorID).FirstOrDefaultAsync();
             if (tutor == null)
@@ -143,13 +149,20 @@ namespace Services.Implementations
                 {
                     TutorCertificate certificate = new TutorCertificate();
                     certificate.TutorId = tutorID;
-                    certificate.ImageUrl = urlLink.CertificateImages;
-                    certificate.CertificateType = urlLink.CertificateType;
-                    certificate.CreateAt = urlLink.CreateAt;
+                    certificate.ImageUrl = urlLink.ImageUrl;
+                    certificate.CertificateFrom = urlLink.CertificateFrom;
+                    certificate.CertificateName = urlLink.CertificateName;
+                    certificate.CertificateDescription = urlLink.CertificateDescription;
+                    certificate.StartYear = urlLink.StartYear;
+                    certificate.EndYear = urlLink.EndYear;
                     _context.TutorCertificates.Add(certificate);
                     await _context.SaveChangesAsync();
                 }
-                return new StatusCodeResult(201);
+                throw new CrudException(HttpStatusCode.Created, "Certificate is created", "");
+            }
+            catch (CrudException ex)
+            {
+                throw ex;
             }
             catch (Exception ex)
             {
@@ -158,7 +171,7 @@ namespace Services.Implementations
         }
 
         // Register Tutor Experience
-        // Step 4 : Get Experience
+        // Step 3 : Get Experience
         public async Task<IActionResult> RegisterTutorExperience(Guid tutorID, List<TutorExperienceRequest> tutorExperienceRegistList)
         {
             var tutor = await _context.Tutors.Where(x => x.TutorId == tutorID).FirstOrDefaultAsync();
@@ -176,7 +189,32 @@ namespace Services.Implementations
                     _context.TutorExperiences.Add(tutorExperience);
                 }
                 await _context.SaveChangesAsync();
-                return new StatusCodeResult(201);
+                throw new CrudException(HttpStatusCode.Created, "Experience evidences are saved!", "");
+            }
+            catch (CrudException ex)
+            {
+                throw ex;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.ToString());
+            }
+        }
+
+        //Register Tutor Sub Information
+        // Step 4: Get Sub Information
+        public async Task<IActionResult> RegisterSubTutorInformation(Guid tutorId, TutorSubInformationRequest tutorSubInformationRequest)
+        {
+            var tutor = await _context.Tutors.Where(x => x.TutorId == tutorId).FirstOrDefaultAsync();
+            if (tutor == null)
+            {
+                throw new CrudException(HttpStatusCode.NotFound, "Not Found Tutor", "");
+            }
+            try
+            {
+                tutor = _mapper.Map<Tutor>(tutorSubInformationRequest);
+                await _context.SaveChangesAsync();
+                throw new CrudException(HttpStatusCode.Created, "Tutor Sub Information is saved", "");
             }
             catch (CrudException ex)
             {
@@ -189,7 +227,7 @@ namespace Services.Implementations
         }
 
         // Check, Confirm and Send Notification
-        // Step 5: Check, Confirm and Send Notification
+        // Step 6: Check, Confirm and Send Notification
         public async Task<IActionResult> CheckConfirmTutorInformationAndSendNotification(TutorConfirmRequest request)
         {
             try
@@ -212,8 +250,8 @@ namespace Services.Implementations
                 tutorRegister.TutorId = request.TutorID;
                 tutorRegister.CreateAt = DateTime.Now;
                 tutorRegister.Description = "Xử lý xét duyệt gia sư";
-                tutorRegister.ActionType = 1; // "1" is Register
-                tutorRegister.Status = 0; // "0" is Pending
+                tutorRegister.ActionType = (Int32)TutorActionTypeEnum.TutorRegister;
+                tutorRegister.Status = (Int32)TutorActionEnum.Pending;
                 await _context.TutorActions.AddAsync(tutorRegister);
                 await _context.SaveChangesAsync();
                 // Create a notification for user who want to become a tutor
@@ -239,7 +277,7 @@ namespace Services.Implementations
         }
 
         // Register Tutor Schedule
-        // Step 6: Create Schedule for Tutor
+        // Step 5: Create Schedule for Tutor
         public async Task<IActionResult> CreateTutorSlotSchedule(TutorRegistScheduleRequest tutorRegistScheduleRequest)
         {
             var tutor = await _context.Tutors.Where(x => x.TutorId == tutorRegistScheduleRequest.TutorID).FirstOrDefaultAsync();
@@ -251,7 +289,7 @@ namespace Services.Implementations
             {
                 return new StatusCodeResult(400);
             }
-            if(tutorRegistScheduleRequest.StartTime.TimeOfDay > tutorRegistScheduleRequest.EndTime.TimeOfDay)
+            if (tutorRegistScheduleRequest.StartTime.TimeOfDay > tutorRegistScheduleRequest.EndTime.TimeOfDay)
             {
                 return new StatusCodeResult(409);
             }
@@ -303,8 +341,75 @@ namespace Services.Implementations
             }
         }
 
+        // Create Tutor Schedule Part 2
+        // Step 5: Create Schedule for Tutor
+        public async Task<IActionResult> CreateTutorSlotInRegisterTutorStep(Guid TutorId, List<TutorRegisterSlotRequest> request)
+        {
+            try
+            {
+                TimeZoneInfo vietnamTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
 
+                // Get Viet Nam Time 
+                DateTime currentDateTimeUtc = DateTime.UtcNow;
+                DateTime currentDateTimeVietNam = TimeZoneInfo.ConvertTimeFromUtc(currentDateTimeUtc, vietnamTimeZone);
 
+                // Caculate the nearest Monday 
+                DateTime nextMonday = GetNextMonday(currentDateTimeVietNam);
+                List<DateTime> WeekDayFromMonday = new List<DateTime>();
+                for (int i = 0; i < 7; i++)
+                {
+                    WeekDayFromMonday.Add(nextMonday.AddDays(i));
+                }
+                // Create Week Available
+                TutorWeekAvailable tutorWeekAvailable = new TutorWeekAvailable();
+                tutorWeekAvailable.TutorWeekAvailableId = Guid.NewGuid();
+                tutorWeekAvailable.TutorId = TutorId;
+                tutorWeekAvailable.StartTime = WeekDayFromMonday[0];
+                tutorWeekAvailable.EndTime = WeekDayFromMonday[6];
+                await _context.TutorWeekAvailables.AddAsync(tutorWeekAvailable);
+                await _context.SaveChangesAsync();
+                // Create Date Availble
+                List<TutorDateAvailable> tutorDateAvailables = new List<TutorDateAvailable>();
+                foreach (var date in WeekDayFromMonday)
+                {
+                    int dayOfWeek = (int)date.DayOfWeek == 0 ? 7 : (int)date.DayOfWeek;
+                    var requestDate = request.FirstOrDefault(x => x.DayOfWeek == dayOfWeek);
+                    if (requestDate != null)
+                    {
+                        foreach (var timeSlot in requestDate.TutorStartTimeEndTimRegisterRequests)
+                        {
+                            TutorDateAvailable tutorDateAvailable = new TutorDateAvailable
+                            {
+                                TutorDateAvailableID = Guid.NewGuid(),
+                                TutorID = TutorId,
+                                TutorWeekAvailableID = tutorWeekAvailable.TutorWeekAvailableId,
+                                Date = date,
+                                DayOfWeek = dayOfWeek,
+                                StartTime = timeSlot.StartTime,
+                                EndTime = timeSlot.EndTime
+                            };
+                            await _context.TutorDateAvailables.AddAsync(tutorDateAvailable);
+                            await _context.SaveChangesAsync();
+                            // Generate Slot Based On Date
+                            var slotList = await generateSlotBasedOnProvidedDate(TutorId, tutorDateAvailable);
+                        }
+                    }
+                    else
+                    {
+                        continue;
+                    }
+                }
+                throw new CrudException(HttpStatusCode.Created, "Slot is created", "");
+            }
+            catch (CrudException ex)
+            {
+                throw ex;
+            }
+            catch (Exception ex)
+            {
+                throw new CrudException(HttpStatusCode.InternalServerError, ex.Message, "");
+            }
+        }
         // Get Tutor Register Information --- Đây là nơi để dành cho những người xử lý tutor và duyệt request
         /*Đây là phần để lấy thông tin để admin hay moderator có thể hiểu và kiểm tra*/
         public async Task<ActionResult<TutorRegisterReponse>> GetTutorRegisterInformtaion(Guid tutorID)
@@ -323,7 +428,6 @@ namespace Services.Implementations
                 else
                 {
                     response.IdentityNumber = tutor.IdentityNumber;
-                    response.Level = tutor.Level;
                     response.Description = tutor.Description;
                     response.PricePerHour = tutor.PricePerHour.Value;
                     response.Email = user.Email;
@@ -341,6 +445,7 @@ namespace Services.Implementations
                 throw new Exception(ex.Message);
             }
         }
+
         public async Task<ActionResult<List<TutorRegisterReponse>>> GetAllTutorRegisterInformation()
         {
             List<TutorRegisterReponse> responses = new List<TutorRegisterReponse>();
@@ -357,7 +462,6 @@ namespace Services.Implementations
                     if (user != null)
                     {
                         response.IdentityNumber = tutor.IdentityNumber;
-                        response.Level = tutor.Level;
                         response.Description = tutor.Description.Replace("\n", "");
                         response.PricePerHour = tutor.PricePerHour.Value;
                         response.Email = user.Email;
@@ -377,7 +481,6 @@ namespace Services.Implementations
                 throw new Exception(ex.Message);
             }
         }
-
 
         // Approval Tutor Register 
         public async Task<IActionResult> ApproveTheTutorRegister(TutorApprovalRequest request)
@@ -418,7 +521,7 @@ namespace Services.Implementations
         }
 
         // Deny Tutor Register
-        public async Task<IActionResult> DenyTheTutorRegister (TutorApprovalRequest request)
+        public async Task<IActionResult> DenyTheTutorRegister(TutorApprovalRequest request)
         {
             try
             {
@@ -434,7 +537,7 @@ namespace Services.Implementations
 
                 // Change the Status Of Tutor
                 Tutor tutor = _context.Tutors.FirstOrDefault(t => t.TutorId == tutorAction.TutorId);
-                tutor.Status = (Int32)TutorEnum.Inactive;
+                tutor.Status = (Int32)TutorEnum.Denny;
                 await _context.SaveChangesAsync();
 
                 // Create a notification for Tutor
@@ -453,7 +556,7 @@ namespace Services.Implementations
             {
                 throw new Exception(ex.ToString());
             }
-        }   
+        }
 
         /*-------Internal Site---------*/
 
@@ -509,27 +612,34 @@ namespace Services.Implementations
             {
                 throw new CrudException(HttpStatusCode.BadRequest, "Invalid base64 string", "");
             }
-
             if (fileBytes.Length > 5 * 1024 * 1024)
             {
                 throw new CrudException(HttpStatusCode.BadRequest, "Photo is too large", "");
             }
-
-            using (var ms = new MemoryStream(fileBytes))
+            try
             {
-                Bitmap bitmap = new Bitmap(ms);
-                Image<Bgr, byte> image = bitmap.ToImage<Bgr, byte>();
-                string facePath = Path.Combine(_env.WebRootPath, "haarcascade_frontalface_default.xml");
-
-                if (!System.IO.File.Exists(facePath))
+                using (var ms = new MemoryStream(fileBytes))
                 {
-                    throw new CrudException(HttpStatusCode.InternalServerError, "Face detection file not found", "");
-                }
+                    using (Bitmap bitmap = new Bitmap(ms))
+                    {
+                        var image = bitmap.ToImage<Bgr, byte>();
+                        string facePath = Path.Combine(_env.WebRootPath, "haarcascade_frontalface_default.xml");
 
-                var faceCascade = new CascadeClassifier(facePath);
-                var grayImage = image.Convert<Gray, byte>();
-                var faces = faceCascade.DetectMultiScale(grayImage, 1.1, 10, Size.Empty);
-                return faces.Length > 0;
+                        if (!System.IO.File.Exists(facePath))
+                        {
+                            throw new CrudException(HttpStatusCode.InternalServerError, "Face detection file not found", "");
+                        }
+
+                        var faceCascade = new CascadeClassifier(facePath);
+                        var grayImage = image.Convert<Gray, byte>();
+                        var faces = faceCascade.DetectMultiScale(grayImage, 1.1, 10, Size.Empty);
+                        return faces.Length > 0;
+                    }
+                }
+            }
+            catch (ArgumentException)
+            {
+                throw new CrudException(HttpStatusCode.BadRequest, "Invalid image data", "");
             }
         }
 
@@ -582,8 +692,8 @@ namespace Services.Implementations
         }
 
         // Create Tutor Slot Based On Date 
-        private async Task<List<TutorSlotAvailable>> generateSlotBasedOnProvidedDate( Guid tutorID,TutorDateAvailable date)
-        {   
+        private async Task<List<TutorSlotAvailable>> generateSlotBasedOnProvidedDate(Guid tutorID, TutorDateAvailable date)
+        {
             List<TutorSlotAvailable> slotList = new List<TutorSlotAvailable>();
             try
             {
@@ -596,7 +706,7 @@ namespace Services.Implementations
                     tutorSlot.TutorDateAvailableID = date.TutorDateAvailableID;
                     tutorSlot.TutorID = tutorID;
                     tutorSlot.StartTime = StartTime;
-                    tutorSlot.Status = 0; // "0" is Available
+                    tutorSlot.Status = (Int32)TutorSlotAvailabilityEnum.Available;
                     tutorSlot.IsBooked = false;
 
                     slotList.Add(tutorSlot);
@@ -613,14 +723,25 @@ namespace Services.Implementations
                 await _context.SaveChangesAsync();
                 return slotList;
             }
-            catch(CrudException ex)
+            catch (CrudException ex)
             {
                 throw ex;
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 throw new Exception(ex.Message);
             }
+        }
+
+        // Get the nearest Monday in Vietnam 
+        private DateTime GetNextMonday(DateTime date)
+        {
+            int daysUntilMonday = ((int)DayOfWeek.Monday - (int)date.DayOfWeek + 7) % 7;
+            if (daysUntilMonday == 0)
+            {
+                daysUntilMonday = 7;
+            }
+            return date.AddDays(daysUntilMonday);
         }
     }
 }
