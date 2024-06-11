@@ -591,7 +591,7 @@ namespace Services.Implementations
         {
             try
             {
-                var bookingTransactions = await _context.BookingTransactions.ToListAsync();
+                var bookingTransactions = await _context.BookingTransactions.OrderByDescending(c => c.CreatedAt).ToListAsync();
                 if (bookingTransactions == null)
                 {
                     return new StatusCodeResult(404);
@@ -607,7 +607,7 @@ namespace Services.Implementations
         {
             try
             {
-                var bookingTransactions = await _context.BookingTransactions.Where(c => c.SenderWalletId == id).ToListAsync();
+                var bookingTransactions = await _context.BookingTransactions.Where(c => c.SenderWalletId == id).OrderByDescending(c => c.CreatedAt).ToListAsync();
                 if (bookingTransactions == null)
                 {
                     return new StatusCodeResult(404);
@@ -623,7 +623,7 @@ namespace Services.Implementations
         {
             try
             {
-                var bookingTransactions = await _context.BookingTransactions.Where(c => c.ReceiverWalletId == id).ToListAsync();
+                var bookingTransactions = await _context.BookingTransactions.Where(c => c.ReceiverWalletId == id).OrderByDescending(c => c.CreatedAt).ToListAsync();
                 if (bookingTransactions == null)
                 {
                     return new StatusCodeResult(404);
@@ -639,7 +639,7 @@ namespace Services.Implementations
         {
             try
             {
-                var bookingTransactions = await _context.BookingTransactions.Where(c => c.BookingId == id).ToListAsync();
+                var bookingTransactions = await _context.BookingTransactions.Where(c => c.BookingId == id).OrderByDescending(c => c.CreatedAt).ToListAsync();
                 if (bookingTransactions == null)
                 {
                     return new StatusCodeResult(404);
@@ -655,7 +655,7 @@ namespace Services.Implementations
         {
             try
             {
-                var walletTransactions = await _context.WalletTransactions.ToListAsync();
+                var walletTransactions = await _context.WalletTransactions.OrderByDescending(c => c.CreatedAt).ToListAsync();
                 if (walletTransactions == null)
                 {
                     return new StatusCodeResult(404);
@@ -671,7 +671,7 @@ namespace Services.Implementations
         {
             try
             {
-                var walletTransactions = await _context.WalletTransactions.Where(c => c.WalletTransactionId == id).ToListAsync();
+                var walletTransactions = await _context.WalletTransactions.Where(c => c.WalletTransactionId == id).OrderByDescending(c => c.CreatedAt).ToListAsync();
                 if (walletTransactions == null)
                 {
                     return new StatusCodeResult(404);
@@ -703,7 +703,7 @@ namespace Services.Implementations
         {
             try
             {
-                var walletTransactions = await _context.WalletTransactions.Where(c => c.SenderWalletId == id).ToListAsync();
+                var walletTransactions = await _context.WalletTransactions.Where(c => c.SenderWalletId == id).OrderByDescending(c => c.CreatedAt).ToListAsync();
                 if (walletTransactions == null)
                 {
                     return new StatusCodeResult(404);
@@ -719,7 +719,7 @@ namespace Services.Implementations
         {
             try
             {
-                var walletTransactions = await _context.WalletTransactions.Where(c => c.ReceiverWalletId == id).ToListAsync();
+                var walletTransactions = await _context.WalletTransactions.Where(c => c.ReceiverWalletId == id).OrderByDescending(c => c.CreatedAt).ToListAsync();
                 if (walletTransactions == null)
                 {
                     return new StatusCodeResult(404);
@@ -767,7 +767,7 @@ namespace Services.Implementations
         {
             try
             {
-                var courseTransactions = await _context.CourseTransactions.Where(c => c.SenderWalletId == id).ToListAsync();
+                var courseTransactions = await _context.CourseTransactions.Where(c => c.SenderWalletId == id).OrderByDescending(c => c.CreatedAt).ToListAsync();
                 if (courseTransactions == null)
                 {
                     return new StatusCodeResult(404);
@@ -783,7 +783,7 @@ namespace Services.Implementations
         {
             try
             {
-                var courseTransactions = await _context.CourseTransactions.Where(c => c.ReceiverWalletId == id).ToListAsync();
+                var courseTransactions = await _context.CourseTransactions.Where(c => c.ReceiverWalletId == id).OrderByDescending(c => c.CreatedAt).ToListAsync();
                 if (courseTransactions == null)
                 {
                     return new StatusCodeResult(404);
@@ -799,7 +799,7 @@ namespace Services.Implementations
         {
             try
             {
-                var courseTransactions = await _context.CourseTransactions.Where(c => c.CourseId == id).ToListAsync();
+                var courseTransactions = await _context.CourseTransactions.Where(c => c.CourseId == id).OrderByDescending(c => c.CreatedAt).ToListAsync();
                 if (courseTransactions == null)
                 {
                     return new StatusCodeResult(404);

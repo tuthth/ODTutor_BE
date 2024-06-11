@@ -209,7 +209,7 @@ namespace Services.Implementations
             try
             {
                 List<UserAccountResponse> response = new List<UserAccountResponse>();
-                response = _context.Users.Select(s => new UserAccountResponse
+                response = _context.Users.OrderByDescending(c => c.CreatedAt).Select(s => new UserAccountResponse
                 {
                     UserID = s.Id,
                     Email = s.Email,

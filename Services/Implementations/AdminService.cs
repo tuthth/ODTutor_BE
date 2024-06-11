@@ -22,7 +22,7 @@ namespace Services.Implementations
         {
             try
             {
-                var users = await _context.Users.ToListAsync();
+                var users = await _context.Users.OrderByDescending(c => c.CreatedAt).ToListAsync();
                 if (users == null)
                 {
                     return new StatusCodeResult(404);
@@ -55,7 +55,7 @@ namespace Services.Implementations
         {
             try
             {
-                var students = await _context.Students.ToListAsync();
+                var students = await _context.Students.OrderByDescending(c => c.UserNavigation.CreatedAt).ToListAsync();
                 if (students == null)
                 {
                     return new StatusCodeResult(404);
@@ -87,7 +87,7 @@ namespace Services.Implementations
         {
             try
             {
-                var tutors = await _context.Tutors.ToListAsync();
+                var tutors = await _context.Tutors.OrderByDescending(c => c.UserNavigation.CreatedAt).ToListAsync();
                 if (tutors == null)
                 {
                     return new StatusCodeResult(404);
@@ -151,7 +151,7 @@ namespace Services.Implementations
         {
             try
             {
-                var schedules = await _context.Schedules.ToListAsync();
+                var schedules = await _context.Schedules.OrderByDescending(c => c.StartAt).ToListAsync();
                 if (schedules == null)
                 {
                     return new StatusCodeResult(404);
@@ -183,7 +183,7 @@ namespace Services.Implementations
         {
             try
             {
-                var schedules = await _context.Schedules.Where(c => c.StudentCourseId == id).ToListAsync();
+                var schedules = await _context.Schedules.Where(c => c.StudentCourseId == id).OrderByDescending(c => c.StartAt).ToListAsync();
                 if (schedules == null)
                 {
                     return new StatusCodeResult(404);
@@ -199,7 +199,7 @@ namespace Services.Implementations
         {
             try
             {
-                var studentCourses = await _context.StudentCourses.ToListAsync();
+                var studentCourses = await _context.StudentCourses.OrderByDescending(c => c.CreatedAt).ToListAsync();
                 if (studentCourses == null)
                 {
                     return new StatusCodeResult(404);
@@ -231,7 +231,7 @@ namespace Services.Implementations
         {
             try
             {
-                var studentCourses = await _context.StudentCourses.Where(c => c.CourseId == id).ToListAsync();
+                var studentCourses = await _context.StudentCourses.Where(c => c.CourseId == id).OrderByDescending(c => c.CreatedAt).ToListAsync();
                 if (studentCourses == null)
                 {
                     return new StatusCodeResult(404);
@@ -247,7 +247,7 @@ namespace Services.Implementations
         {
             try
             {
-                var studentCourses = await _context.StudentCourses.Where(c => c.StudentId == id).ToListAsync();
+                var studentCourses = await _context.StudentCourses.Where(c => c.StudentId == id).OrderByDescending(c => c.CreatedAt).ToListAsync();
                 if (studentCourses == null)
                 {
                     return new StatusCodeResult(404);
@@ -263,7 +263,7 @@ namespace Services.Implementations
         {
             try
             {
-                var tutorCertificates = await _context.TutorCertificates.ToListAsync();
+                var tutorCertificates = await _context.TutorCertificates.OrderByDescending(c => c.CreateAt).ToListAsync();
                 if (tutorCertificates == null)
                 {
                     return new StatusCodeResult(404);
@@ -295,7 +295,7 @@ namespace Services.Implementations
         {
             try
             {
-                var tutorCertificates = await _context.TutorCertificates.Where(c => c.TutorId == id).ToListAsync();
+                var tutorCertificates = await _context.TutorCertificates.Where(c => c.TutorId == id).OrderByDescending(c => c.CreateAt).ToListAsync();
                 if (tutorCertificates == null)
                 {
                     return new StatusCodeResult(404);
@@ -311,7 +311,7 @@ namespace Services.Implementations
         {
             try
             {
-                var tutorCertificates = await _context.TutorCertificates.Where(c => c.TutorId == id).ToListAsync();
+                var tutorCertificates = await _context.TutorCertificates.Where(c => c.TutorId == id).OrderByDescending(c => c.CreateAt).ToListAsync();
                 if (tutorCertificates == null)
                 {
                     return new StatusCodeResult(404);
@@ -327,7 +327,7 @@ namespace Services.Implementations
         {
             try
             {
-                var tutorSubjects = await _context.TutorSubjects.ToListAsync();
+                var tutorSubjects = await _context.TutorSubjects.OrderByDescending(c => c.CreatedAt).ToListAsync();
                 if (tutorSubjects == null)
                 {
                     return new StatusCodeResult(404);
@@ -359,7 +359,7 @@ namespace Services.Implementations
         {
             try
             {
-                var tutorSubjects = await _context.TutorSubjects.Where(c => c.TutorId == id).ToListAsync();
+                var tutorSubjects = await _context.TutorSubjects.Where(c => c.TutorId == id).OrderByDescending(c => c.CreatedAt).ToListAsync();
                 if (tutorSubjects == null)
                 {
                     return new StatusCodeResult(404);
@@ -375,7 +375,7 @@ namespace Services.Implementations
         {
             try
             {
-                var tutorSubjects = await _context.TutorSubjects.Where(c => c.SubjectId == id).ToListAsync();
+                var tutorSubjects = await _context.TutorSubjects.Where(c => c.SubjectId == id).OrderByDescending(c => c.CreatedAt).ToListAsync();
                 if (tutorSubjects == null)
                 {
                     return new StatusCodeResult(404);
@@ -391,7 +391,7 @@ namespace Services.Implementations
         {
             try
             {
-                var tutorRatings = await _context.TutorRatings.ToListAsync();
+                var tutorRatings = await _context.TutorRatings.OrderByDescending(c => c.CreatedAt).ToListAsync();
                 if (tutorRatings == null)
                 {
                     return new StatusCodeResult(404);
@@ -423,7 +423,7 @@ namespace Services.Implementations
         {
             try
             {
-                var tutorRatings = await _context.TutorRatings.Where(c => c.TutorId == id).ToListAsync();
+                var tutorRatings = await _context.TutorRatings.Where(c => c.TutorId == id).OrderByDescending(c => c.CreatedAt).ToListAsync();
                 if (tutorRatings == null)
                 {
                     return new StatusCodeResult(404);
@@ -439,7 +439,7 @@ namespace Services.Implementations
         {
             try
             {
-                var tutorRatings = await _context.TutorRatings.Where(c => c.StudentId == id).ToListAsync();
+                var tutorRatings = await _context.TutorRatings.Where(c => c.StudentId == id).OrderByDescending(c => c.CreatedAt).ToListAsync();
                 if (tutorRatings == null)
                 {
                     return new StatusCodeResult(404);
@@ -488,7 +488,7 @@ namespace Services.Implementations
         {
             try
             {
-                var moderators = await _context.Moderators.ToListAsync();
+                var moderators = await _context.Moderators.OrderByDescending(c => c.UserNavigation.CreatedAt).ToListAsync();
                 if (moderators == null)
                 {
                     return new StatusCodeResult(404);
@@ -520,7 +520,7 @@ namespace Services.Implementations
         {
             try
             {
-                var notifications = await _context.Notifications.ToListAsync();
+                var notifications = await _context.Notifications.OrderByDescending(c => c.CreatedAt).ToListAsync();
                 if (notifications == null)
                 {
                     return new StatusCodeResult(404);
@@ -536,7 +536,7 @@ namespace Services.Implementations
         {
             try
             {
-                var notifications = await _context.Notifications.Where(c => c.UserId == id).ToListAsync();
+                var notifications = await _context.Notifications.Where(c => c.UserId == id).OrderByDescending(c => c.CreatedAt).ToListAsync();
                 if (notifications == null)
                 {
                     return new StatusCodeResult(404);

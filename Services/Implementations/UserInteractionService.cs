@@ -86,7 +86,7 @@ namespace Services.Implementations
         {
             try
             {
-                var userBlocks = await _context.UserBlocks.Where(c => c.CreateUserId == id).ToListAsync();
+                var userBlocks = await _context.UserBlocks.Where(c => c.CreateUserId == id).OrderByDescending(c => c.CreatedAt).ToListAsync();
                 if (userBlocks == null)
                 {
                     return new StatusCodeResult(404);
@@ -102,7 +102,7 @@ namespace Services.Implementations
         {
             try
             {
-                var userBlocks = await _context.UserBlocks.Where(c => c.TargetUserId == id).ToListAsync();
+                var userBlocks = await _context.UserBlocks.Where(c => c.TargetUserId == id).OrderByDescending(c => c.CreatedAt).ToListAsync();
                 if (userBlocks == null)
                 {
                     return new StatusCodeResult(404);
@@ -118,7 +118,7 @@ namespace Services.Implementations
         {
             try
             {
-                var userFollows = await _context.UserFollows.ToListAsync();
+                var userFollows = await _context.UserFollows.OrderByDescending(c => c.CreatedAt).ToListAsync();
                 if (userFollows == null)
                 {
                     return new StatusCodeResult(404);
@@ -134,7 +134,7 @@ namespace Services.Implementations
         {
             try
             {
-                var userFollows = await _context.UserFollows.Where(c => c.CreateUserId == id).ToListAsync();
+                var userFollows = await _context.UserFollows.Where(c => c.CreateUserId == id).OrderByDescending(c => c.CreatedAt).ToListAsync();
                 if (userFollows == null)
                 {
                     return new StatusCodeResult(404);
@@ -150,7 +150,7 @@ namespace Services.Implementations
         {
             try
             {
-                var userFollows = await _context.UserFollows.Where(c => c.TargetUserId == id).ToListAsync();
+                var userFollows = await _context.UserFollows.Where(c => c.TargetUserId == id).OrderByDescending(c => c.CreatedAt).ToListAsync();
                 if (userFollows == null)
                 {
                     return new StatusCodeResult(404);

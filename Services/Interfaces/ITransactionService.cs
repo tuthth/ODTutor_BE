@@ -36,5 +36,6 @@ namespace Services.Interfaces
         Task<ActionResult<List<CourseTransaction>>> GetCourseTransactionsBySenderId(Guid id);
         Task<ActionResult<List<CourseTransaction>>> GetCourseTransactionsByReceiverId(Guid id);
         Task<ActionResult<List<CourseTransaction>>> GetCourseTransactionsByCourseId(Guid id);
+        Task<ActionResult<List<WalletTransaction>>> GetWalletTransactionByWalletId(Guid id);
     }
 }

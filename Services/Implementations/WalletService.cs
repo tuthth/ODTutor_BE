@@ -19,7 +19,7 @@ namespace Services.Implementations
         {
             try
             {
-                var wallets = await _context.Wallets.ToListAsync();
+                var wallets = await _context.Wallets.OrderByDescending(c => c.LastBalanceUpdate).ToListAsync();
                 if (wallets == null)
                 {
                     return new StatusCodeResult(404);

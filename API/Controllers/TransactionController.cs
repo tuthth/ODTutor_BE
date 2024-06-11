@@ -197,6 +197,22 @@ namespace API.Controllers
             if ((IActionResult)result.Result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
             throw new Exception("Lỗi không xác định");
         }
+        [HttpGet("get/course-transactions/course/{courseID}")]
+        public async Task<ActionResult<List<CourseTransactionView>>> GetCourseTransactionsByCourseID(Guid courseID)
+        {
+            var result = await _transactionService.GetCourseTransactionsByCourseId(courseID);
+            if (result is ActionResult<List<CourseTransaction>> courseTransactions && result.Value != null)
+            {
+                var courseTransactionViews = _mapper.Map<List<CourseTransactionView>>(courseTransactions.Value);
+                return Ok(courseTransactionViews);
+            }
+            if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
+            {
+                if (statusCodeResult.StatusCode == 404) { return NotFound(new { Message = "Không tìm thấy giao dịch khóa học" }); }
+            }
+            if ((IActionResult)result.Result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
+            throw new Exception("Lỗi không xác định");
+        }
 
         [HttpGet("get/course-transactions/sender/{senderID}")]
         public async Task<ActionResult<List<CourseTransactionView>>> GetCourseTransactionsBySenderID(Guid senderID)
@@ -324,6 +340,22 @@ namespace API.Controllers
             {
                 var walletTransactionView = _mapper.Map<List<WalletTransactionView>>(walletTransaction.Value);
                 return Ok(walletTransactionView);
+            }
+            if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
+            {
+                if (statusCodeResult.StatusCode == 404) { return NotFound(new { Message = "Không tìm thấy giao dịch ví" }); }
+            }
+            if ((IActionResult)result.Result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
+            throw new Exception("Lỗi không xác định");
+        }
+        [HttpGet("get/wallet-transactions/wallet/{walletID}")]
+        public async Task<ActionResult<List<WalletTransactionView>>> GetWalletTransactionsByWalletID(Guid walletID)
+        {
+            var result = await _transactionService.GetWalletTransactionByWalletId(walletID);
+            if (result is ActionResult<List<WalletTransaction>> walletTransactions && result.Value != null)
+            {
+                var walletTransactionViews = _mapper.Map<List<WalletTransactionView>>(walletTransactions.Value);
+                return Ok(walletTransactionViews);
             }
             if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
             {
