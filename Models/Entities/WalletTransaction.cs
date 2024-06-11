@@ -14,6 +14,7 @@ namespace Models.Entities
         public DateTime CreatedAt { get; set; }
         public decimal Amount { get; set; }
         public int Status { get; set; }
+        public string? Note { get; set; }
 
         public virtual Wallet? SenderWalletNavigation { get; set; }
         public virtual Wallet? ReceiverWalletNavigation { get; set; }

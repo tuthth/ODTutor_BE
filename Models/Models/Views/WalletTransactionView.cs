@@ -14,6 +14,6 @@ namespace Models.Models.Views
         public DateTime CreatedAt { get; set; }
         public decimal Amount { get; set; }
         public int Status { get; set; }
-
+        public string? Note { get; set; }
     }
 }
