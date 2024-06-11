@@ -51,6 +51,7 @@ namespace Services.Implementations
                     CreatedAt = DateTime.UtcNow,
                     Amount = transactionCreate.Amount,
                     Status = (int)VNPayType.PENDING,
+                    Note = "Nạp tiền vào tài khoản"
                 };
                 var receiveWallet = _context.Wallets.FirstOrDefault(w => w.WalletId == transactionCreate.ReceiverId);
                 receiveWallet.PendingAmount += transactionCreate.Amount;
@@ -112,6 +113,7 @@ namespace Services.Implementations
                     CreatedAt = DateTime.UtcNow,
                     Amount = transactionCreate.Amount,
                     Status = (int)VNPayType.PENDING,
+                    Note = "Rút tiền từ tài khoản"
                 };
                 var sendWallet = _context.Wallets.FirstOrDefault(w => w.WalletId == transactionCreate.SenderId);
                 if (sendWallet.Amount < transactionCreate.Amount)
@@ -250,7 +252,8 @@ namespace Services.Implementations
                 ReceiverWalletId = (Guid)transactionCreate.ReceiverId,
                 Amount = transactionCreate.Amount,
                 CreatedAt = DateTime.UtcNow,
-                Status = (int)VNPayType.PENDING
+                Status = (int)VNPayType.PENDING,
+                Note = "Giao dịch book giáo viên"
             };
             var sendWallet = _context.Wallets.FirstOrDefault(w => w.WalletId == transactionCreate.SenderId);
             var receiveWallet = _context.Wallets.FirstOrDefault(w => w.WalletId == transactionCreate.ReceiverId);
@@ -312,7 +315,8 @@ namespace Services.Implementations
                 ReceiverWalletId = (Guid)transactionCreate.ReceiverId,
                 Amount = transactionCreate.Amount,
                 CreatedAt = DateTime.UtcNow,
-                Status = (int)VNPayType.PENDING
+                Status = (int)VNPayType.PENDING,
+                Note = "Giao dịch đặt khóa học"
             };
             var sendWallet = _context.Wallets.FirstOrDefault(w => w.WalletId == transactionCreate.SenderId);
             var receiveWallet = _context.Wallets.FirstOrDefault(w => w.WalletId == transactionCreate.ReceiverId);
@@ -668,6 +672,22 @@ namespace Services.Implementations
             try
             {
                 var walletTransactions = await _context.WalletTransactions.Where(c => c.WalletTransactionId == id).ToListAsync();
+                if (walletTransactions == null)
+                {
+                    return new StatusCodeResult(404);
+                }
+                return walletTransactions;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.ToString());
+            }
+        }
+        public async Task<ActionResult<List<WalletTransaction>>> GetWalletTransactionByWalletId(Guid id)
+        {
+            try
+            {
+                var walletTransactions = await _context.WalletTransactions.Where(c => (c.SenderWalletId == id || c.ReceiverWalletId == id)).ToListAsync();
                 if (walletTransactions == null)
                 {
                     return new StatusCodeResult(404);
