@@ -51,8 +51,8 @@ namespace Models.Entities
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             // Use your preferred connection string here
-            //optionsBuilder.UseSqlServer(GetConnectionStrings()).EnableSensitiveDataLogging();
-            optionsBuilder.UseSqlServer("Server=database.monoinfinity.net;uid=sa;pwd=1234567890Aa;Database=ODTutor;Encrypt=false;TrustServerCertificate=true;");
+            optionsBuilder.UseSqlServer(GetConnectionStrings()).EnableSensitiveDataLogging();
+            //optionsBuilder.UseSqlServer("Server=14.225.205.28;uid=sa;pwd=Abc@123123;Database=ODTutor;Encrypt=false;TrustServerCertificate=true;");
             //optionsBuilder.UseSqlServer("Server=(local);uid=sa;pwd=12345;Database=ODTutor;Encrypt=false;TrustServerCertificate=true;");
             //optionsBuilder.UseSqlServer(GetConnectionStrings());
         }
