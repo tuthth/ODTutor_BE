@@ -19,6 +19,8 @@ namespace Models.Entities
         public string PhoneNumber { get; set; }
         public DateTime DateOfBirth { get; set; }
         public int Status { get; set; }
+        public string? Fcm { get;set; }
+        public string? GoogleId { get; set; }
         public Boolean Active { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public Boolean IsPremium { get; set; }

@@ -6,6 +6,8 @@ using Models.Mappings;
 using Services;
 using Services.Implementations;
 using Services.Interfaces;
+using FirebaseAdmin;
+using Google.Apis.Auth.OAuth2;
 
 namespace API
 {
@@ -18,7 +20,13 @@ namespace API
             if (!builder.Environment.IsDevelopment())
                 builder.WebHost.ConfigureKestrel(serverOptions => { serverOptions.ListenAnyIP(5260); });
 
-
+            //FCM
+            System.Environment.SetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS", "capstone-c0906-283c0b5bc14f.json");
+            FirebaseApp.Create(new AppOptions()
+            {
+                Credential = GoogleCredential.GetApplicationDefault(),
+                ProjectId = builder.Configuration.GetValue<string>("Firebase:ProjectId")
+            });
             // Add services to the container.
 
             builder.Services.AddControllers();

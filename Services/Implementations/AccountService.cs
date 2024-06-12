@@ -115,16 +115,16 @@ namespace Services.Implementations
                     {
                         FullName = payload.Name,
                         Email = payload.Email,
-                        Password = passwordTemplate, // Google không cung cấp mật khẩu, bạn cần xử lý phần này
-                        ConfirmPassword = passwordTemplate, // Google không cung cấp mật khẩu, bạn cần xử lý phần này
-                        DateOfBirth = DateTime.Now, // Google không cung cấp ngày sinh, bạn cần xử lý phần này
-                        PhoneNumber = "00000" // Google không cung cấp số điện thoại, bạn cần xử lý phần này
+                        Password = passwordTemplate,
+                        ConfirmPassword = passwordTemplate, 
+                        DateOfBirth = DateTime.Now, 
+                        PhoneNumber = "00000"
                     };
                     await createAccount(registerRequest);
                     return await _userService.LoginV2(new LoginRequest
                     {
-                        Email = payload.Email,
-                        Password = passwordTemplate
+                        Email = user.Email,
+                        Password = user.Password
                     });
                 }
                 else

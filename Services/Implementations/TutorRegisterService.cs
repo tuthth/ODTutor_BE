@@ -58,6 +58,8 @@ namespace Services.Implementations
                 Tutor tutor = _mapper.Map<Tutor>(tutorRequest);
                 tutor.TutorId = Guid.NewGuid();
                 tutor.Status = (Int32)TutorEnum.Inprocessing; // "2" is InProcessing
+                tutor.CreateAt = DateTime.Now;
+                tutor.UpdateAt = DateTime.Now;
                 _context.Tutors.Add(tutor);
                 await _context.SaveChangesAsync();
                 // Add Tutor Subject List
