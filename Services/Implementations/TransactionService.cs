@@ -48,7 +48,7 @@ namespace Services.Implementations
                     WalletTransactionId = Guid.NewGuid(),
                     SenderWalletId = (Guid)transactionCreate.SenderId,
                     ReceiverWalletId = (Guid)transactionCreate.ReceiverId,
-                    CreatedAt = DateTime.UtcNow,
+                    CreatedAt = DateTime.Now,
                     Amount = transactionCreate.Amount,
                     Status = (int)VNPayType.PENDING,
                     Note = "Nạp tiền vào tài khoản"
@@ -110,7 +110,7 @@ namespace Services.Implementations
                     WalletTransactionId = Guid.NewGuid(),
                     SenderWalletId = (Guid)transactionCreate.SenderId,
                     ReceiverWalletId = (Guid)transactionCreate.ReceiverId, // This should be the admin's wallet ID
-                    CreatedAt = DateTime.UtcNow,
+                    CreatedAt = DateTime.Now,
                     Amount = transactionCreate.Amount,
                     Status = (int)VNPayType.PENDING,
                     Note = "Rút tiền từ tài khoản"
@@ -195,7 +195,7 @@ namespace Services.Implementations
                 WalletTransactionId = Guid.NewGuid(),
                 SenderWalletId = (Guid)transactionCreate.SenderId,
                 ReceiverWalletId = (Guid)transactionCreate.ReceiverId,
-                CreatedAt = DateTime.UtcNow,
+                CreatedAt = DateTime.Now,
                 Amount = transactionCreate.Amount,
                 Status = (int)VNPayType.APPROVE,
             };
@@ -240,7 +240,7 @@ namespace Services.Implementations
                 SenderWalletId = (Guid)transactionCreate.SenderId,
                 ReceiverWalletId = (Guid)transactionCreate.ReceiverId,
                 BookingId = transactionCreate.BookingId,
-                CreatedAt = DateTime.UtcNow,
+                CreatedAt = DateTime.Now,
                 Amount = transactionCreate.Amount,
                 Status = (int)VNPayType.PENDING,
             };
@@ -251,7 +251,7 @@ namespace Services.Implementations
                 SenderWalletId = (Guid)transactionCreate.SenderId,
                 ReceiverWalletId = (Guid)transactionCreate.ReceiverId,
                 Amount = transactionCreate.Amount,
-                CreatedAt = DateTime.UtcNow,
+                CreatedAt = DateTime.Now,
                 Status = (int)VNPayType.PENDING,
                 Note = "Giao dịch book giáo viên"
             };
@@ -303,7 +303,7 @@ namespace Services.Implementations
                 SenderWalletId = (Guid)transactionCreate.SenderId,
                 ReceiverWalletId = (Guid)transactionCreate.ReceiverId,
                 CourseId = transactionCreate.CourseId,
-                CreatedAt = DateTime.UtcNow,
+                CreatedAt = DateTime.Now,
                 Amount = transactionCreate.Amount,
                 Status = (int)VNPayType.PENDING,
             };
@@ -314,7 +314,7 @@ namespace Services.Implementations
                 SenderWalletId = (Guid)transactionCreate.SenderId,
                 ReceiverWalletId = (Guid)transactionCreate.ReceiverId,
                 Amount = transactionCreate.Amount,
-                CreatedAt = DateTime.UtcNow,
+                CreatedAt = DateTime.Now,
                 Status = (int)VNPayType.PENDING,
                 Note = "Giao dịch đặt khóa học"
             };
@@ -405,12 +405,12 @@ namespace Services.Implementations
 
                     //update wallet for sender and receiver
                     wallet.SenderWalletNavigation.Amount -= booking.Amount;
-                    wallet.SenderWalletNavigation.LastBalanceUpdate = DateTime.UtcNow;
+                    wallet.SenderWalletNavigation.LastBalanceUpdate = DateTime.Now;
                     wallet.SenderWalletNavigation.PendingAmount -= booking.Amount;
                     wallet.SenderWalletNavigation.AvalaibleAmount -= booking.Amount;
 
                     wallet.ReceiverWalletNavigation.Amount += booking.Amount;
-                    wallet.ReceiverWalletNavigation.LastBalanceUpdate = DateTime.UtcNow;
+                    wallet.ReceiverWalletNavigation.LastBalanceUpdate = DateTime.Now;
                     wallet.ReceiverWalletNavigation.AvalaibleAmount += booking.Amount;
                     wallet.ReceiverWalletNavigation.PendingAmount -= booking.Amount;
 
@@ -437,12 +437,12 @@ namespace Services.Implementations
 
                     //update wallet for sender and receiver
                     wallet.SenderWalletNavigation.Amount -= course.Amount;
-                    wallet.SenderWalletNavigation.LastBalanceUpdate = DateTime.UtcNow;
+                    wallet.SenderWalletNavigation.LastBalanceUpdate = DateTime.Now;
                     wallet.SenderWalletNavigation.PendingAmount -= course.Amount;
                     wallet.SenderWalletNavigation.AvalaibleAmount -= course.Amount;
 
                     wallet.ReceiverWalletNavigation.Amount += course.Amount;
-                    wallet.ReceiverWalletNavigation.LastBalanceUpdate = DateTime.UtcNow;
+                    wallet.ReceiverWalletNavigation.LastBalanceUpdate = DateTime.Now;
                     wallet.ReceiverWalletNavigation.AvalaibleAmount += course.Amount;
                     wallet.ReceiverWalletNavigation.PendingAmount -= course.Amount;
 
@@ -467,12 +467,12 @@ namespace Services.Implementations
 
                     //update wallet for sender and receiver
                     wallet.SenderWalletNavigation.Amount -= wallet.Amount;
-                    wallet.SenderWalletNavigation.LastBalanceUpdate = DateTime.UtcNow;
+                    wallet.SenderWalletNavigation.LastBalanceUpdate = DateTime.Now;
                     wallet.SenderWalletNavigation.PendingAmount -= wallet.Amount;
                     wallet.SenderWalletNavigation.AvalaibleAmount -= wallet.Amount;
 
                     wallet.ReceiverWalletNavigation.Amount += wallet.Amount;
-                    wallet.ReceiverWalletNavigation.LastBalanceUpdate = DateTime.UtcNow;
+                    wallet.ReceiverWalletNavigation.LastBalanceUpdate = DateTime.Now;
                     wallet.ReceiverWalletNavigation.AvalaibleAmount += wallet.Amount;
                     wallet.ReceiverWalletNavigation.PendingAmount -= wallet.Amount;
 
@@ -502,10 +502,10 @@ namespace Services.Implementations
                     booking.Status = (int)VNPayType.REJECT;
 
                     //update wallet for sender and receiver
-                    wallet.SenderWalletNavigation.LastBalanceUpdate = DateTime.UtcNow;
+                    wallet.SenderWalletNavigation.LastBalanceUpdate = DateTime.Now;
                     wallet.SenderWalletNavigation.PendingAmount -= booking.Amount;
 
-                    wallet.ReceiverWalletNavigation.LastBalanceUpdate = DateTime.UtcNow;
+                    wallet.ReceiverWalletNavigation.LastBalanceUpdate = DateTime.Now;
                     wallet.ReceiverWalletNavigation.PendingAmount -= booking.Amount;
 
                     _context.BookingTransactions.Update(booking);
@@ -530,10 +530,10 @@ namespace Services.Implementations
                     course.Status = (int)VNPayType.REJECT;
 
                     //update wallet for sender and receiver
-                    wallet.SenderWalletNavigation.LastBalanceUpdate = DateTime.UtcNow;
+                    wallet.SenderWalletNavigation.LastBalanceUpdate = DateTime.Now;
                     wallet.SenderWalletNavigation.PendingAmount -= course.Amount;
 
-                    wallet.ReceiverWalletNavigation.LastBalanceUpdate = DateTime.UtcNow;
+                    wallet.ReceiverWalletNavigation.LastBalanceUpdate = DateTime.Now;
                     wallet.ReceiverWalletNavigation.PendingAmount -= course.Amount;
 
                     _context.CourseTransactions.Update(course);
@@ -556,10 +556,10 @@ namespace Services.Implementations
                     wallet.Status = (int)VNPayType.REJECT;
 
                     //update wallet for sender and receiver
-                    wallet.SenderWalletNavigation.LastBalanceUpdate = DateTime.UtcNow;
+                    wallet.SenderWalletNavigation.LastBalanceUpdate = DateTime.Now;
                     wallet.SenderWalletNavigation.PendingAmount -= wallet.Amount;
 
-                    wallet.ReceiverWalletNavigation.LastBalanceUpdate = DateTime.UtcNow;
+                    wallet.ReceiverWalletNavigation.LastBalanceUpdate = DateTime.Now;
                     wallet.ReceiverWalletNavigation.PendingAmount -= wallet.Amount;
 
                     _context.WalletTransactions.Update(wallet);

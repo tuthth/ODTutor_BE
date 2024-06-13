@@ -11,6 +11,6 @@ namespace Models.Models.Views
         public int Id { get; set; }
         public int? StudentId { get; set; }
         public decimal? Balance { get; set; }
-        public DateTime LastBalanceUpdate { get; set; } = DateTime.UtcNow;
+        public DateTime LastBalanceUpdate { get; set; } = DateTime.Now;
     }
 }

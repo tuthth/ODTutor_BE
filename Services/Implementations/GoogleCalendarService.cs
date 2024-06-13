@@ -37,7 +37,7 @@ namespace Services.Implementations
             {
                 return new StatusCodeResult(400);
             }
-            if(setting.Start < DateTime.UtcNow)
+            if(setting.Start < DateTime.Now)
             {
                 return new StatusCodeResult(409);
             }

@@ -45,7 +45,7 @@ namespace Services.Implementations
                         Id = Guid.NewGuid(),
                         UserId = checkEmail.Id,
                         EmailToken = tokenEmail,
-                        EmailTokenExpiry = DateTime.UtcNow.AddMinutes(15)
+                        EmailTokenExpiry = DateTime.Now.AddMinutes(15)
                     };
 
                     _context.UserAuthentications.Add(userAuthentication);

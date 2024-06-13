@@ -12,7 +12,7 @@ namespace Models.Entities
         public Guid CourseId { get; set; }
         public Guid StudentId { get; set; }
         public int Status {  get; set; }
-        public DateTime CreatedAt {  get; set; } = DateTime.UtcNow;
+        public DateTime CreatedAt {  get; set; } = DateTime.Now;
         public string? GoogleMeetUrl { get; set; }
         public virtual Course? CourseNavigation { get; set; }
         public virtual Student? StudentNavigation { get; set; }

@@ -133,10 +133,10 @@ namespace Services.Implementations
             if (user == null) return new StatusCodeResult(404); //user not found
             if (user.Banned == true) return new StatusCodeResult(403); //user is banned
             var userAuthentication = _context.UserAuthentications
-                .Where(ua => ua.UserId == user.Id && ua.EmailTokenExpiry >= DateTime.UtcNow).OrderByDescending(ua => ua.EmailTokenExpiry).FirstOrDefault();
+                .Where(ua => ua.UserId == user.Id && ua.EmailTokenExpiry >= DateTime.Now).OrderByDescending(ua => ua.EmailTokenExpiry).FirstOrDefault();
             if (userAuthentication == null) return new StatusCodeResult(404); //no OTP request found
             if (userAuthentication.EmailToken != otp) return new StatusCodeResult(400); //wrong OTP
-            if (userAuthentication.EmailTokenExpiry < DateTime.UtcNow) return new StatusCodeResult(408); //OTP expired
+            if (userAuthentication.EmailTokenExpiry < DateTime.Now) return new StatusCodeResult(408); //OTP expired
             user.Active = true;
             user.EmailConfirmed = true;
             _context.Users.Update(user);
@@ -158,10 +158,10 @@ namespace Services.Implementations
             if (user == null) return new StatusCodeResult(404); //user not found
             if (user.Banned == true) return new StatusCodeResult(403); //user is banned
             var userAuthentication = _context.UserAuthentications
-                .Where(ua => ua.UserId == user.Id && ua.EmailTokenExpiry >= DateTime.UtcNow).OrderByDescending(ua => ua.EmailTokenExpiry).FirstOrDefault();
+                .Where(ua => ua.UserId == user.Id && ua.EmailTokenExpiry >= DateTime.Now).OrderByDescending(ua => ua.EmailTokenExpiry).FirstOrDefault();
             if (userAuthentication == null) return new StatusCodeResult(404); //no OTP request found
             if (userAuthentication.EmailToken != otp) return new StatusCodeResult(400); //wrong OTP
-            if (userAuthentication.EmailTokenExpiry < DateTime.UtcNow) return new StatusCodeResult(408); //OTP expired
+            if (userAuthentication.EmailTokenExpiry < DateTime.Now) return new StatusCodeResult(408); //OTP expired
 
             if (!_appExtension.VerifyPasswordHash(oldPassword, user.Password)) return new StatusCodeResult(406); //wrong old password
             if (newPassword != confirmNewPassword) return new StatusCodeResult(409); //new password and confirm password not match
@@ -186,10 +186,10 @@ namespace Services.Implementations
             if (user == null) return new StatusCodeResult(404); //user not found
             if (user.Banned == true) return new StatusCodeResult(403); //user is banned
             var userAuthentication = _context.UserAuthentications
-                .Where(ua => ua.UserId == user.Id && ua.EmailTokenExpiry >= DateTime.UtcNow).OrderByDescending(ua => ua.EmailTokenExpiry).FirstOrDefault();
+                .Where(ua => ua.UserId == user.Id && ua.EmailTokenExpiry >= DateTime.Now).OrderByDescending(ua => ua.EmailTokenExpiry).FirstOrDefault();
             if (userAuthentication == null) return new StatusCodeResult(404); //no OTP request found
             if (userAuthentication.EmailToken != otp) return new StatusCodeResult(400); //wrong OTP
-            if (userAuthentication.EmailTokenExpiry < DateTime.UtcNow) return new StatusCodeResult(408); //OTP expired
+            if (userAuthentication.EmailTokenExpiry < DateTime.Now) return new StatusCodeResult(408); //OTP expired
 
             if (newPassword != confirmNewPassword) return new StatusCodeResult(409); //new password and confirm password not match
 
@@ -210,7 +210,7 @@ namespace Services.Implementations
         //Remove Expired
         public async Task<IActionResult> RemoveExpiredOTP()
         {
-            var expiredOTP = _context.UserAuthentications.Where(ua => ua.EmailTokenExpiry < DateTime.UtcNow);
+            var expiredOTP = _context.UserAuthentications.Where(ua => ua.EmailTokenExpiry < DateTime.Now);
             if (expiredOTP.Count() == 0) return new StatusCodeResult(404); //no expired OTP found
             _context.UserAuthentications.RemoveRange(expiredOTP);
             await _context.SaveChangesAsync();
@@ -261,7 +261,7 @@ namespace Services.Implementations
                 new Claim(ClaimTypes.Email, user.Email ?? string.Empty),
                 new Claim(ClaimTypes.Role,"Student")
             }),
-                    Expires = DateTime.UtcNow.AddMinutes(45),
+                    Expires = DateTime.Now.AddMinutes(45),
                     SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
                 };
             }
@@ -278,7 +278,7 @@ namespace Services.Implementations
                 new Claim(ClaimTypes.Email, user.Email ?? string.Empty),
                 new Claim(ClaimTypes.Role, "Moderator")
             }),
-                    Expires = DateTime.UtcNow.AddMinutes(45),
+                    Expires = DateTime.Now.AddMinutes(45),
                     SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
                 };
             }
@@ -295,7 +295,7 @@ namespace Services.Implementations
                 new Claim(ClaimTypes.Email, user.Email ?? string.Empty),
                 new Claim(ClaimTypes.Role, "Tutor")
             }),
-                    Expires = DateTime.UtcNow.AddMinutes(45),
+                    Expires = DateTime.Now.AddMinutes(45),
                     SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
                 };
             }
@@ -336,7 +336,7 @@ namespace Services.Implementations
                 new Claim(ClaimTypes.Email, user.Email ?? string.Empty),
                 new Claim(ClaimTypes.Role, "Admin")
             }),
-                    Expires = DateTime.UtcNow.AddHours(1),
+                    Expires = DateTime.Now.AddHours(1),
                     SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
                 };
             var token = tokenHandler.CreateToken(tokenDescriptor);

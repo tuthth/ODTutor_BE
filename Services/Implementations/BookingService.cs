@@ -37,7 +37,7 @@ namespace Services.Implementations
             }
             var booking = _mapper.Map<Booking>(bookingRequest);
             booking.BookingId = Guid.NewGuid();
-            booking.CreatedAt = DateTime.UtcNow;
+            booking.CreatedAt = DateTime.Now;
             _context.Bookings.Add(booking);
             await _context.SaveChangesAsync();
             await _appExtension.SendMail(new MailContent()

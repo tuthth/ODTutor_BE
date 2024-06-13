@@ -25,7 +25,7 @@ namespace Services.Implementations
                 return new StatusCodeResult(403);
             }
             var userFollow = _mapper.Map<UserFollow>(request);
-            userFollow.CreatedAt = DateTime.UtcNow;
+            userFollow.CreatedAt = DateTime.Now;
             _context.UserFollows.Add(userFollow);
             await _context.SaveChangesAsync();
             return new StatusCodeResult(201);
@@ -50,7 +50,7 @@ namespace Services.Implementations
                 await _context.SaveChangesAsync();
             }
             var userBlock = _mapper.Map<UserBlock>(request);
-            userBlock.CreatedAt = DateTime.UtcNow;
+            userBlock.CreatedAt = DateTime.Now;
             _context.UserBlocks.Add(userBlock);
             await _context.SaveChangesAsync();
             return new StatusCodeResult(201);

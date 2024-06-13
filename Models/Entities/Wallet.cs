@@ -13,7 +13,7 @@ namespace Models.Entities
         public decimal? Amount { get; set; }
         public decimal? AvalaibleAmount { get; set; }
         public decimal? PendingAmount { get; set; }
-        public DateTime LastBalanceUpdate { get; set; } = DateTime.UtcNow;
+        public DateTime LastBalanceUpdate { get; set; } = DateTime.Now;
         public int Status { get; set; }
         public virtual ICollection<BookingTransaction>? SenderBookingTransactionsNavigation { get; set; }
         public virtual ICollection<BookingTransaction>? ReceiverBookingTransactionsNavigation { get; set; }
