@@ -10,6 +10,7 @@ deploy:
   - echo '--------------------------------------------DEPLOY------------------------------------------'
   - docker stop tutor_be_con  || true
   - docker run --rm -d --name tutor_be_con -p 5260:5260 tutor_be
+  - docker system prune -f
   only:
     - master
   tags:
