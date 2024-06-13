@@ -11,6 +11,7 @@ namespace API.Controllers
     public class AuthController : ControllerBase
     {
         private readonly IUserService _userService;
+        private readonly IAccountService _accountService;
 
         public AuthController(IUserService userService)
         {
@@ -147,6 +148,16 @@ namespace API.Controllers
             {
                 return BadRequest(ex.Message);
             }
+        }
+
+        /// <summary>
+        ///  Login By Email Token  (Get Token from FE )
+        /// </summary>
+        [HttpPost("login-by-email-token")]
+        public async Task<LoginAccountResponse> LoginByEmailToken([FromBody] string idToken)
+        {
+            LoginAccountResponse response = await _accountService.GoogleLoginOrRegister(idToken);
+            return (response);
         }
     }
 }
