@@ -23,5 +23,6 @@ namespace Services.Interfaces
         Task<IActionResult> DenyTheTutorRegister(TutorApprovalRequest request);
         Task<ActionResult<List<TutorRegisterReponse>>> GetAllTutorRegisterInformation();
         Task<IActionResult> CreateTutorSlotInRegisterTutorStep(Guid TutorId, List<TutorRegisterSlotRequest> request);
+        Task<IActionResult> RegisterSubTutorInformation(Guid tutorId, TutorSubInformationRequest tutorSubInformationRequest);
     }   
 }

@@ -65,23 +65,6 @@ namespace API.Controllers
             throw new Exception("Xảy ra lỗi không xác định");
         }
 
-        /*        // Add Subject
-                [HttpPost("register/subjects/{tutorID}")]
-                public async Task<IActionResult> addRegisterSubjectOfTutor(Guid tutorID, List<Guid> subjectIDs)
-                {
-                    var result = await _tutorRegisterService.RegisterTutorSubject(tutorID, subjectIDs);
-                    if(result is StatusCodeResult statusCodeResult)
-                    {
-                        if (statusCodeResult.StatusCode == 201) return StatusCode(StatusCodes.Status201Created, new { Message = "Đăng ký môn học thành công" });
-                        if (statusCodeResult.StatusCode == 400) return BadRequest(new { Message = "Vui lòng kiểm tra lại dữ liệu môn học ở nhập liệu đầu vào" });
-                        if (statusCodeResult.StatusCode == 404) return NotFound(new { Message = "Không tìm thấy thông tin gia sư" });
-                    }
-                    if (result is Exception exception)
-                    {
-                        return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
-                    }
-                    throw new Exception("Xảy ra lỗi không xác định");
-                }*/
         /// <summary>
         /// step 3: Add Experience 
         /// </summary>
@@ -102,8 +85,20 @@ namespace API.Controllers
             }
             throw new Exception("Xảy ra lỗi không xác định");
         }
+
         /// <summary>
-        /// Step 4: Create Tutor Slot In Register Tutor Step
+        /// Step 4 : Add Sub Tutor Inforamtion
+        /// </summary>
+        // Add Sub Tutor Inforamtion
+        [HttpPost("register/sub-tutor/{tutorID}")]
+        public async Task<IActionResult> addSubInformation(Guid tutorId, [FromBody] TutorSubInformationRequest request)
+        {
+            var response = await _tutorRegisterService.RegisterSubTutorInformation(tutorId, request);
+            return response;
+        }
+
+        /// <summary>
+        /// Step 5: Create Tutor Slot In Register Tutor Step
         /// </summary>
         /// <param name="tutorID"></param>
         /// <param name="request"></param>
@@ -116,7 +111,7 @@ namespace API.Controllers
             return response;
         }
         /// <summary>
-        /// Step 5 : Add Money + Confirm
+        /// Step 6 : Add Money + Confirm, Tutor Status :Pending = 0, Active = 1, Inprocessing = 2,Denny = 3, Banned = 4,
         /// </summary>
         // Confirm and Create Notification
         [HttpPost("confirm")]

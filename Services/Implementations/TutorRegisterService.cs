@@ -93,47 +93,6 @@ namespace Services.Implementations
                 throw new Exception(ex.ToString());
             }
         }
-        /*        // Register Tutor Subject
-                // Step 2:  Get Subject
-                public async Task<IActionResult> RegisterTutorSubject(Guid tutorID, List<Guid> subjectIDs)
-                {
-                    var tutor = await _context.Tutors.Where(x => x.TutorId == tutorID).FirstOrDefaultAsync();
-                    if (tutor == null)
-                    {
-                        return new StatusCodeResult(404);
-                    }
-                    List<TutorSubject> tutorSubjects = new List<TutorSubject>();
-                    try
-                    {
-                        foreach (var subjectID in subjectIDs)
-                        {
-                            TutorSubject tutorSubject = new TutorSubject();
-                            tutorSubject.TutorSubjectId = Guid.NewGuid();
-                            tutorSubject.TutorId = tutorID;
-                            tutorSubject.SubjectId = subjectID;
-                            tutorSubject.CreatedAt = DateTime.Now;
-                            tutorSubjects.Add(tutorSubject);
-                        }
-                        if (tutorSubjects.Count < 0)
-                        {
-                            return new StatusCodeResult(400);
-                        }
-                        else
-                        {
-                            _context.TutorSubjects.AddRange(tutorSubjects);
-                            await _context.SaveChangesAsync();
-                            return new StatusCodeResult(201);
-                        }
-                    }
-                    catch (CrudException ex)
-                    {
-                        throw ex;
-                    }
-                    catch (Exception ex)
-                    {
-                        throw new Exception(ex.ToString()); // Replace 'StatusCodeResult' with 'BadRequestResult'
-                    }
-                }*/
 
         // Register Tutor Certificate
         // Step 2 : Get Certificate
@@ -245,6 +204,7 @@ namespace Services.Implementations
                 }
                 //Update Tutor Money
                 tutor.PricePerHour = request.Price;
+                tutor.Status = (Int32)TutorEnum.Pending;
                 await _context.SaveChangesAsync();
                 // Create a Tutor Action Log
                 TutorAction tutorRegister = new TutorAction();
@@ -453,7 +413,7 @@ namespace Services.Implementations
             List<TutorRegisterReponse> responses = new List<TutorRegisterReponse>();
             try
             {
-                List<Tutor> tutors = await _context.Tutors.ToListAsync();
+                List<Tutor> tutors = await _context.Tutors.Where(t => t.Status == (Int32)TutorEnum.Pending).ToListAsync();
                 foreach (var tutor in tutors)
                 {
                     TutorRegisterReponse response = new TutorRegisterReponse();
