@@ -312,7 +312,7 @@ namespace Services.Implementations
                 TimeZoneInfo vietnamTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
 
                 // Get Viet Nam Time 
-                DateTime currentDateTimeUtc = DateTime.UtcNow;
+                DateTime currentDateTimeUtc = DateTime.Now;
                 DateTime currentDateTimeVietNam = TimeZoneInfo.ConvertTimeFromUtc(currentDateTimeUtc, vietnamTimeZone);
 
                 // Caculate the nearest Monday 
@@ -470,7 +470,7 @@ namespace Services.Implementations
                 notification.UserId = tutor.UserId;
                 notification.Title = "Yêu cầu xét duyệt trở thành gia sư đã được chấp nhận";
                 notification.Content = "Yêu cầu của bạn đã được chấp nhận. Bạn đã trở thành gia sư trên hệ thống";
-                notification.CreatedAt = DateTime.UtcNow;
+                notification.CreatedAt = DateTime.Now;
                 notification.Status = (Int32)NotificationEnum.Active;
                 await _context.Notifications.AddAsync(notification);
                 await _context.SaveChangesAsync();
@@ -493,7 +493,7 @@ namespace Services.Implementations
                     return new StatusCodeResult(404);
                 }
                 tutorAction.ModeratorId = request.ApprovalID;
-                tutorAction.ReponseDate = DateTime.UtcNow;
+                tutorAction.ReponseDate = DateTime.Now;
                 tutorAction.Status = (Int32)TutorActionEnum.Reject;
                 await _context.SaveChangesAsync();
 

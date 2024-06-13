@@ -81,7 +81,7 @@ namespace Services.Implementations
                     Amount = 0,
                     AvalaibleAmount = 0,
                     PendingAmount = 0,
-                    LastBalanceUpdate = DateTime.UtcNow
+                    LastBalanceUpdate = DateTime.Now
                 };
                 _context.Wallets.Add(wallet);
                 await _context.SaveChangesAsync();

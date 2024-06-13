@@ -31,7 +31,7 @@ namespace Services.Implementations
                 return new StatusCodeResult(403);
             }
             var studentRequest = _mapper.Map<StudentRequest>(request);
-            studentRequest.CreatedAt = DateTime.UtcNow;
+            studentRequest.CreatedAt = DateTime.Now;
             studentRequest.StudentRequestId = Guid.NewGuid();
             studentRequest.Status = (Int32)StudentRequestEnum.Pending;
             _context.StudentRequests.Add(studentRequest);
