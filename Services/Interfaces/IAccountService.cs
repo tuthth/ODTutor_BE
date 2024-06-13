@@ -16,6 +16,7 @@ namespace Services.Interfaces
         Task<List<UserAccountResponse>> GetAllUser();
         Task<IActionResult> updateUserAccount(UpdateAccountRequest request);
         Task<LoginAccountResponse> GoogleLoginOrRegister(string idToken);
+        Task<LoginAccountResponse> LoginGoogle(LoginGoogleRequest request);
     }
 }
  

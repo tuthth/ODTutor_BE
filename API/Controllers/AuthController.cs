@@ -13,9 +13,10 @@ namespace API.Controllers
         private readonly IUserService _userService;
         private readonly IAccountService _accountService;
 
-        public AuthController(IUserService userService)
+        public AuthController(IUserService userService, IAccountService accountService)
         {
             _userService = userService;
+            _accountService = accountService;
         }
 
         // Login V2
@@ -154,9 +155,9 @@ namespace API.Controllers
         ///  Login By Email Token  (Get Token from FE )
         /// </summary>
         [HttpPost("login-by-email-token")]
-        public async Task<LoginAccountResponse> LoginByEmailToken([FromBody] string idToken)
+        public async Task<LoginAccountResponse> LoginByEmailToken([FromBody] LoginGoogleRequest request)
         {
-            LoginAccountResponse response = await _accountService.GoogleLoginOrRegister(idToken);
+            LoginAccountResponse response = await _accountService.LoginGoogle(request);
             return (response);
         }
     }

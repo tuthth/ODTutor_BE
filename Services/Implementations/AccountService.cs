@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Emgu.CV.Features2D;
 using Google.Apis.Auth;
 using MailKit.Security;
 using Microsoft.AspNetCore.Identity;
@@ -62,9 +63,10 @@ namespace Services.Implementations
                 account.EmailConfirmed = false;
                 account.DateOfBirth = accountRegisterRequest.DateOfBirth;
                 account.PhoneNumber = accountRegisterRequest.PhoneNumber;
+                account.Fcm = "";
+                account.GoogleId = "";
                 account.Status = 1;
                 account.Banned = false;
-                account.ImageUrl = "https://firebasestorage.googleapis.com/v0/b/capstone-c0906.appspot.com/o/defaultAva%2FDefaultAva.png?alt=media&token=7f4275d1-05c3-41ca-9ec4-091800bb5895&fbclid=IwZXh0bgNhZW0CMTAAAR1hdvcHNcUznHSgIdEFztHYFX2i1Pij9mEoDLqPBNHaSvbaNJYBdCcqox8_aem_AY0mhUEaiU6HcPLEIXQs3nX8vbFyboGsM08NUkK3knIHfrChNERi9W7lt1cxDwx6-gmGX5jX1yh-14x27xQA1TjF";
                 account.Id = new Guid();
                 _context.Users.Add(account);
                 _context.Students.Add(new Student
@@ -136,6 +138,56 @@ namespace Services.Implementations
                     };
                     return await _userService.LoginV2(loginRequest);
                 }
+            }
+            catch (Exception ex)
+            {
+                throw new CrudException(HttpStatusCode.InternalServerError, ex.Message, "");
+            }
+        }
+        
+        // Google Login V2
+        public async Task<LoginAccountResponse> LoginGoogle (LoginGoogleRequest request)
+        {
+            try
+            {
+                if (request.Email == null || request.Email == "" || request.Name == null || request.Name == "" ||
+                    request.GoogleId == null || request.GoogleId == "")
+                    throw new CrudException(HttpStatusCode.BadRequest, "Information is Required", "");
+                var user = _context.Users.FirstOrDefault(u => u.Email == request.Email);
+                if (user == null)
+                {   
+                    var account = await createAccountByGoogle(request);
+                    if (account != null)
+                    {
+                        return await _userService.LoginV2(new LoginRequest
+                        {
+                            Email = account.Email,
+                            Password = request.GoogleId
+                        });
+                    }
+                    else
+                    {
+                        throw new CrudException(HttpStatusCode.InternalServerError, "Fail to Login", "");
+                    }
+                }
+                else
+                {   
+                    if (user.GoogleId == null || user.GoogleId == "")
+                    {
+                        user.GoogleId = request.GoogleId;
+                        _context.Users.Update(user);
+                        await _context.SaveChangesAsync();
+                    }
+                    LoginRequest loginRequest = new LoginRequest
+                    {
+                        Email = user.Email,
+                        Password = user.Password
+                    };
+                    return await _userService.LoginV2(loginRequest);
+                }
+            } catch(CrudException ex)
+            {
+                throw ex;
             }
             catch (Exception ex)
             {
@@ -242,6 +294,61 @@ namespace Services.Implementations
             return _context.Users.FirstOrDefault(s => s.Id.Equals(UserID));
         }
 
+        //RegisterAccount
+        private async Task<AccountResponse> createAccountByGoogle(LoginGoogleRequest accountRegisterRequest)
+        {
+            try
+            {
+                if (accountRegisterRequest.Name == null || accountRegisterRequest.Email == null || accountRegisterRequest.GoogleId == null
+                    || accountRegisterRequest.GoogleId == "" || accountRegisterRequest.Name == ""
+                    || accountRegisterRequest.Email == "")
+                    throw new CrudException(HttpStatusCode.BadRequest, "Information is Required", "");
+                var s = _context.Users.FirstOrDefault(a => a.Email.Equals(accountRegisterRequest.Email.ToUpper().Trim()));
+                if (s != null)
+                {
+                    throw new CrudException(HttpStatusCode.Conflict, "Email is already exist", "");
+                }
+                var account = _mapper.Map<User>(accountRegisterRequest);
+                account.Password = _appExtension.CreateHashPassword(accountRegisterRequest.GoogleId);
+                account.Active = true; // Default is true
+                account.EmailConfirmed = false;
+                account.DateOfBirth = DateTime.Now;
+                account.PhoneNumber = "123456789";
+                account.Status = 1;
+                account.Fcm ="";
+                account.Banned = false;
+                account.Id = new Guid();
+                _context.Users.Add(account);
+                _context.Students.Add(new Student
+                {
+                    StudentId = new Guid(),
+                    UserId = account.Id
+                });
+                await _context.SaveChangesAsync();
+                //create base wallet for new account
+                Wallet wallet = new Wallet
+                {
+                    WalletId = new Guid(),
+                    UserId = account.Id,
+                    Amount = 0,
+                    AvalaibleAmount = 0,
+                    PendingAmount = 0,
+                    LastBalanceUpdate = DateTime.Now
+                };
+                _context.Wallets.Add(wallet);
+                await _context.SaveChangesAsync();
+                var accountResponse = _mapper.Map<AccountResponse>(account);
+                return accountResponse;
+            }
+            catch(CrudException ex)
+            {
+                throw ex;
+            }
+            catch (Exception ex)
+            {
+                throw new CrudException(HttpStatusCode.InternalServerError,ex.Message,"");
+            }
+        }
 
     }
 }
