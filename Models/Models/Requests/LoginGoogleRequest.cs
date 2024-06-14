@@ -10,7 +10,7 @@ namespace Models.Models.Requests
     public class LoginGoogleRequest
     {
         public string GoogleId { get; set; }
-        public string Avatar { get; set; }
+        public string ImageUrl { get; set; }
         public string Name { get; set; } = null!;
         [EmailAddress]
         public string Email { get; set; } = null!;
