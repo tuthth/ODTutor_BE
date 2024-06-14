@@ -181,7 +181,7 @@ namespace Services.Implementations
                     LoginRequest loginRequest = new LoginRequest
                     {
                         Email = user.Email,
-                        Password = user.Password
+                        Password = request.GoogleId
                     };
                     return await _userService.LoginV2(loginRequest);
                 }
@@ -311,7 +311,6 @@ namespace Services.Implementations
                 var account = _mapper.Map<User>(accountRegisterRequest);
                 account.Password = _appExtension.CreateHashPassword(accountRegisterRequest.GoogleId);
                 account.Active = true; // Default is true
-                account.EmailConfirmed = false;
                 account.DateOfBirth = DateTime.Now;
                 account.PhoneNumber = "123456789";
                 account.Status = 1;

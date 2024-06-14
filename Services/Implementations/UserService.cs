@@ -69,12 +69,15 @@ namespace Services.Implementations
                 {
                     throw new CrudException(HttpStatusCode.Forbidden, "User is banned", "");
                 }
-                if (!_appExtension.VerifyPasswordHash(loginRequest.Password.Trim(), user.Password))
+                // Check password or googleID 
+                bool isPasswordValid = _appExtension.VerifyPasswordHash(loginRequest.Password, user.Password);
+                bool isGoogleIDValid = user.GoogleId == loginRequest.Password;
+                if (!isPasswordValid && !isGoogleIDValid)
                 {
-                    throw new CrudException(HttpStatusCode.BadRequest, "Incorrect Password!", "");
+                    throw new CrudException(HttpStatusCode.BadRequest, "Email or Password is incorrect", "");
                 }
                 var response = GenerateJwtTokenV2(user);
-                response.studentID = user.StudentNavigation.StudentId;
+                response.studentID = user.StudentNavigation.StudentId;  
                 return response;
             }
             catch (CrudException ex)
