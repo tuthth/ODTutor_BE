@@ -69,7 +69,7 @@ namespace Services.Implementations
                     {
                         UserId = t.UserId,
                         TutorId = t.TutorId,
-                        PricePerHour = t.PricePerHour.Value,
+                        PricePerHour = t.PricePerHour.GetValueOrDefault(),
                         Description = t.Description,
                         Status = t.Status,
                         VideoUrl = t.VideoUrl,
@@ -114,7 +114,7 @@ namespace Services.Implementations
       {
           UserId = t.UserId,
           TutorId = t.TutorId,
-          PricePerHour = t.PricePerHour.Value,
+          PricePerHour = t.PricePerHour.GetValueOrDefault(),
           Description = t.Description,
           Status = t.Status,
           VideoUrl = t.VideoUrl,
