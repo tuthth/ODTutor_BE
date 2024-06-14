@@ -49,11 +49,11 @@ namespace Services.Implementations
                 {
                     throw new CrudException(HttpStatusCode.NotFound, "User not found", "");
                 }
-                // check the avatar photo
+/*                // check the avatar photo
                 if (!await checkPhotoAvatar(user.ImageUrl))
                 {
                     throw new CrudException(HttpStatusCode.BadRequest, "Avatar photo is invalid", "");
-                }
+                }*/
                 //Map and save tutor information
                 Tutor tutor = _mapper.Map<Tutor>(tutorRequest);
                 tutor.TutorId = Guid.NewGuid();
@@ -554,7 +554,7 @@ namespace Services.Implementations
             return imagesUrlList;
         }
 
-        // Check the Photo of Account
+/*        // Check the Photo of Account
         private async Task<bool> checkPhotoAvatar(string base64Photo)
         {
             if (string.IsNullOrEmpty(base64Photo))
@@ -603,7 +603,7 @@ namespace Services.Implementations
             {
                 throw new CrudException(HttpStatusCode.BadRequest, "Invalid image data", "");
             }
-        }
+        }*/
 
         // Find User By UserID 
         private User findUserByUserID(Guid userID)
