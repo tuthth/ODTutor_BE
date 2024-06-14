@@ -15,7 +15,7 @@ namespace API.Controllers
     {
         private readonly IWalletService _walletService;
         private readonly ITransactionService _transactionService;
-        //private readonly IUserService _userService;
+        //private readonly IUserService _userServic;
         private readonly VNPaySetting vnPaySetting;
 
         public WalletController(IWalletService walletService, IOptions<VNPaySetting> options, ITransactionService transactionService)
