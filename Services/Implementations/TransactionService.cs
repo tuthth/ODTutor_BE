@@ -141,7 +141,7 @@ namespace Services.Implementations
                 vnpay.AddRequestData("vnp_CurrCode", "VND");
                 vnpay.AddRequestData("vnp_IpAddr", Utils.GetIpAddress(_httpContextAccessor));
                 vnpay.AddRequestData("vnp_Locale", "vn");
-                vnpay.AddRequestData("vnp_OrderInfo", "Thanh toan don hang " + transaction.WalletTransactionId.ToString().Replace("-", ""));
+                vnpay.AddRequestData("vnp_OrderInfo", transaction.WalletTransactionId.ToString());
                 vnpay.AddRequestData("vnp_OrderType", "other");
                 vnpay.AddRequestData("vnp_ReturnUrl", vnp_Returnurl);
                 vnpay.AddRequestData("vnp_TxnRef", DateTime.Now.Ticks.ToString());
