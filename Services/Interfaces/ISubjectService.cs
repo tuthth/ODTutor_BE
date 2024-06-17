@@ -13,5 +13,7 @@ namespace Services.Interfaces
         Task<List<Subject>> GetAllSubjects();
         Task<Subject> GetSubjectById(Guid subjectId);
         Task<Subject> AddNewSubject(SubjectAddNewRequest subject);
+        Task<Subject> UpdateSubject(UpdateSubject subjectRequest);
+        Task<bool> DeleteSubject(Guid subjectId);
     }
 }

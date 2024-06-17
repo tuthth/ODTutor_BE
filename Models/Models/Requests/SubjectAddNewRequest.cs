@@ -13,4 +13,8 @@ namespace Models.Models.Requests
         public string Content { get; set; }
         public string Note { get; set; }
     }
+    public class  UpdateSubject : SubjectAddNewRequest
+    {
+        public Guid SubjectId { get; set; }
+    }
 }

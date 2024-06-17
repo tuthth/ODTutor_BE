@@ -19,13 +19,6 @@ namespace Services.Interfaces
         Task<ActionResult<Tutor>> GetTutor(Guid id);
         Task<ActionResult<List<Subject>>> GetAllSubjects();
         Task<ActionResult<Subject>> GetSubject(Guid id);
-        Task<ActionResult<List<Schedule>>> GetAllSchedules();
-        Task<ActionResult<Schedule>> GetSchedule(Guid id);
-        Task<ActionResult<List<Schedule>>> GetSchedulesByStudentCourseId(Guid id);
-        Task<ActionResult<List<StudentCourse>>> GetAllStudentCourses();
-        Task<ActionResult<StudentCourse>> GetStudentCourse(Guid id);
-        Task<ActionResult<List<StudentCourse>>> GetStudentCoursesByCourseId(Guid id);
-        Task<ActionResult<List<StudentCourse>>> GetStudentCoursesByStudentId(Guid id);
         Task<ActionResult<List<TutorCertificate>>> GetAllTutorCertificates();
         Task<ActionResult<TutorCertificate>> GetTutorCertificate(Guid id);
         Task<ActionResult<List<TutorCertificate>>> GetTutorCertificatesByTutorId(Guid id);

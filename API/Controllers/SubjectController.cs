@@ -24,7 +24,7 @@ namespace API.Controllers
         }
 
         // Get Each Subject By ID
-        [HttpGet("get/subject/{subjectId}")]
+        [HttpGet("get/{subjectId}")]
         public async Task<IActionResult> GetSubjectById(Guid subjectId)
         {
             var subject = await _subjectService.GetSubjectById(subjectId);
@@ -32,11 +32,23 @@ namespace API.Controllers
         }
 
         // Add New Subject
-        [HttpPost("add/subject")]
+        [HttpPost("add")]
         public async Task<IActionResult> AddNewSubject([FromBody] SubjectAddNewRequest subject)
         {
             var newSubject = await _subjectService.AddNewSubject(subject);
             return Ok(newSubject);
+        }
+        [HttpPut("update")]
+        public async Task<IActionResult> UpdateSubject([FromBody] UpdateSubject subject)
+        {
+            var updatedSubject = await _subjectService.UpdateSubject(subject);
+            return Ok(updatedSubject);
+        }
+        [HttpDelete("delete/{subjectId}")]
+        public async Task<IActionResult> DeleteSubject(Guid subjectId)
+        {
+            var result = await _subjectService.DeleteSubject(subjectId);
+            return Ok(result);
         }
     }
 }

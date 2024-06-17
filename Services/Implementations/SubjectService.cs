@@ -36,5 +36,29 @@ namespace Services.Implementations
             await _context.SaveChangesAsync();
             return subject;
         }
+        // Update Subject
+        public async Task<Subject> UpdateSubject(UpdateSubject subjectRequest)
+        {
+            var subject = await _context.Subjects.FirstOrDefaultAsync(x => x.SubjectId == subjectRequest.SubjectId);
+            if (subject == null)
+            {
+                return null;
+            }
+            _mapper.Map(subjectRequest, subject);
+            await _context.SaveChangesAsync();
+            return subject;
+        }
+        // Delete Subject
+        public async Task<bool> DeleteSubject(Guid subjectId)
+        {
+            var subject = await _context.Subjects.FirstOrDefaultAsync(x => x.SubjectId == subjectId);
+            if (subject == null)
+            {
+                return false;
+            }
+            _context.Subjects.Remove(subject);
+            await _context.SaveChangesAsync();
+            return true;
+        }
     }
 }

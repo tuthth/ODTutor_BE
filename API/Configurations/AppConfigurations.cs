@@ -68,6 +68,8 @@ namespace API.Configurations
             services.AddScoped<ICourseService, CourseService>();
             services.AddScoped<ITutorManageService, TutorManageService>();
             services.AddScoped<IFirebaseMessagingService, FirebaseMessagingService>();
+            services.AddScoped<IStudentCourseService, StudentCourseService>();
+            services.AddScoped<IScheduleService, ScheduleService>();
         }
 
         public static void AddSwagger(this IServiceCollection services)
