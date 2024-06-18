@@ -53,7 +53,10 @@ namespace Models.Mappings
             CreateMap<TutorExperience, TutorExperienceRequest>();
             CreateMap<TutorExperience, TutorExperienceView>();
             CreateMap<TutorExperience, UpdateTutorExperienceRequest>();
+            CreateMap<TutorExperienceRequest, TutorExperience>();
             CreateMap<TutorInformationRequest, Tutor>();
+            CreateMap<TutorSubInformationRequest, Tutor>();
+            CreateMap<Tutor, TutorView>();
             CreateMap<TutorRating, TutorRatingRequest>();
             CreateMap<TutorRating, TutorRatingView>();
             CreateMap<TutorRatingImage, TutorRatingImageView>();

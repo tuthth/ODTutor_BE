@@ -73,17 +73,7 @@ namespace API.Controllers
         public async Task<IActionResult> addRegisterExperienceOfTutor(Guid tutorID, List<TutorExperienceRequest> tutorExperiences)
         {
             var result = await _tutorRegisterService.RegisterTutorExperience(tutorID, tutorExperiences);
-            if(result is StatusCodeResult statusCodeResult)
-            {
-                if (statusCodeResult.StatusCode == 201) return StatusCode(StatusCodes.Status201Created, new { Message = "Đăng ký kinh nghiệm dạy học thành công" });
-                if (statusCodeResult.StatusCode == 400) return BadRequest(new { Message = "Vui lòng kiểm tra lại dữ liệu kinh nghiệm ở nhập liệu đầu vào" });
-                if (statusCodeResult.StatusCode == 404) return NotFound(new { Message = "Không tìm thấy thông tin gia sư" });
-            }
-            if (result is Exception exception)
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
-            }
-            throw new Exception("Xảy ra lỗi không xác định");
+            return result;
         }
 
         /// <summary>
@@ -91,16 +81,16 @@ namespace API.Controllers
         /// </summary>
         // Add Sub Tutor Inforamtion
         [HttpPost("register/sub-tutor/{tutorID}")]
-        public async Task<IActionResult> addSubInformation(Guid tutorId, [FromBody] TutorSubInformationRequest request)
+        public async Task<IActionResult> addSubInformation( Guid tutorID, [FromBody] TutorSubInformationRequest request)
         {
-            var response = await _tutorRegisterService.RegisterSubTutorInformation(tutorId, request);
+            var response = await _tutorRegisterService.RegisterSubTutorInformation(tutorID, request);
             return response;
         }
 
         /// <summary>
         /// Step 5: Create Tutor Slot In Register Tutor Step
         /// </summary>
-        /// <param name="tutorID"></param>
+        /// <param name="tutorID"></param>  
         /// <param name="request"></param>
         /// <returns></returns>
         // Create Tutor Slot In Register Tutor Step

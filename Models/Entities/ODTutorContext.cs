@@ -56,6 +56,7 @@ namespace Models.Entities
             //optionsBuilder.UseSqlServer("Server=(local);uid=sa;pwd=12345;Database=ODTutor;Encrypt=false;TrustServerCertificate=true;");
             //optionsBuilder.UseSqlServer(GetConnectionStrings());
             //optionsBuilder.UseSqlServer("Server=(local);uid=sa;pwd=12345;Database=ODTutor;Encrypt=false;TrustServerCertificate=true;");
+
         }
 
         private string GetConnectionStrings()

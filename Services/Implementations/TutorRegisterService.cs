@@ -138,7 +138,7 @@ namespace Services.Implementations
             var tutor = await _context.Tutors.Where(x => x.TutorId == tutorID).FirstOrDefaultAsync();
             if (tutor == null)
             {
-                return new StatusCodeResult(404);
+                throw new CrudException(HttpStatusCode.NotFound, "Not Found Tutor", "");
             }
             try
             {
@@ -164,7 +164,7 @@ namespace Services.Implementations
 
         //Register Tutor Sub Information
         // Step 4: Get Sub Information
-        public async Task<IActionResult> RegisterSubTutorInformation(Guid tutorId, TutorSubInformationRequest tutorSubInformationRequest)
+        public async Task<IActionResult> RegisterSubTutorInformation( Guid tutorId, TutorSubInformationRequest tutorSubInformationRequest)
         {
             var tutor = await _context.Tutors.Where(x => x.TutorId == tutorId).FirstOrDefaultAsync();
             if (tutor == null)
@@ -312,7 +312,7 @@ namespace Services.Implementations
                 TimeZoneInfo vietnamTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
 
                 // Get Viet Nam Time 
-                DateTime currentDateTimeUtc = DateTime.Now;
+                DateTime currentDateTimeUtc = DateTime.UtcNow;
                 DateTime currentDateTimeVietNam = TimeZoneInfo.ConvertTimeFromUtc(currentDateTimeUtc, vietnamTimeZone);
 
                 // Caculate the nearest Monday 

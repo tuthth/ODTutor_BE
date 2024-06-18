@@ -296,6 +296,7 @@ namespace Services.Implementations
                 new Claim("TutorId", tutor.TutorId.ToString()),
                 new Claim(ClaimTypes.Name, user.Username ?? string.Empty),
                 new Claim(ClaimTypes.Email, user.Email ?? string.Empty),
+                new Claim("TutorStatus", tutorInfo.Status.ToString()),
                 new Claim(ClaimTypes.Role, "Tutor")
             }),
                     Expires = DateTime.Now.AddMinutes(45),
