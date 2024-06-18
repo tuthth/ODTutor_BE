@@ -12,6 +12,7 @@ using Models.Enumerables;
 using Models.Models.Emails;
 using Models.Models.Requests;
 using Models.Models.Views;
+using Models.PageHelper;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Services.Interfaces;
@@ -437,6 +438,25 @@ namespace Services.Implementations
                     }
                 }
                 return responses;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+        // Get Tutor Actions
+        public async Task<ActionResult<PageResults<TutorAction>>> GetTutorActionByTutorId(Guid id, int size, int pageSize)
+        {
+            var tutor = await _context.Tutors.Where(x => x.TutorId == id).FirstOrDefaultAsync();
+            if (tutor == null)
+            {
+                return null;
+            }
+            try
+            {
+                var tutorActions = await _context.TutorActions.Where(x => x.TutorId == id).OrderByDescending(x => x.CreateAt).ToListAsync();
+                var pageResults = PagingHelper<TutorAction>.Paging(tutorActions, size, pageSize);
+                return pageResults;
             }
             catch (Exception ex)
             {

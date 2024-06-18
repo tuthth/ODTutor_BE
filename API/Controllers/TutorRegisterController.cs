@@ -199,6 +199,18 @@ namespace API.Controllers
             }
             throw new Exception("Xảy ra lỗi không xác định");
         }
+        [HttpGet("get/tutor-actions/{tutorID}")]
+        public async Task<ActionResult<PageResults<TutorAction>>> getTutorActionByTutorId(Guid id, int size, int pageSize)
+        {
+            var result = await _tutorRegisterService.GetTutorActionByTutorId(id, size, pageSize);
+            if (result is ActionResult<PageResults<TutorAction>> tutorActions)
+            {
+                if (tutorActions.Value == null) return NotFound("Không tìm thấy thông tin gia sư");
+                return Ok(tutorActions.Value);
+            }
+            if ((IActionResult)result.Result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, exception.ToString());
+            throw new Exception("Xảy ra lỗi không xác định");
+        }
     }
 
 }
