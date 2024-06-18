@@ -424,7 +424,7 @@ namespace Services.Implementations
                     if (user != null)
                     {
                         response.IdentityNumber = tutor.IdentityNumber;
-                        response.Description = tutor.Description.Replace("\n", "");
+                        response.Description = tutor.Description?.Replace("\n", "") ?? "";
                         response.PricePerHour = tutor.PricePerHour.Value;
                         response.Email = user.Email;
                         response.Username = user.Username;
