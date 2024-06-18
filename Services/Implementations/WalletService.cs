@@ -1,9 +1,12 @@
 ﻿using AutoMapper;
 using AutoMapper.QueryableExtensions;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Models.Entities;
+using Models.Models.Requests;
 using Models.Models.Views;
+using Models.PageHelper;
 using Services.Interfaces;
 using System.Web.Mvc;
 
@@ -63,5 +66,29 @@ namespace Services.Implementations
                 throw new Exception(ex.ToString());
             }
         }
+        public async Task<ActionResult<PageResults<Wallet>>> GetAllWalletsPaging(PagingRequest request)
+        {
+            try
+            {
+                var walletsList = await _context.Wallets.OrderByDescending(c => c.LastBalanceUpdate).ToListAsync();
+                if (walletsList == null || !walletsList.Any())
+                {
+                    return new StatusCodeResult(404);
+                }
+
+                var paginatedWallets = PagingHelper<Wallet>.Paging(walletsList, request.Page, request.PageSize);
+                if (paginatedWallets == null)
+                {
+                    return new StatusCodeResult(400);
+                }
+
+                return paginatedWallets;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.ToString());
+            }
+        }
+
     }
 }

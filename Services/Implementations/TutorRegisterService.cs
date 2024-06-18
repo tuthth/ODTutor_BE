@@ -390,7 +390,7 @@ namespace Services.Implementations
                 else
                 {
                     response.IdentityNumber = tutor.IdentityNumber;
-                    response.Description = tutor.Description;
+                    response.Description = tutor.Description?.Replace("\n", "") ?? "";
                     response.PricePerHour = tutor.PricePerHour.Value;
                     response.Email = user.Email;
                     response.Username = user.Username;

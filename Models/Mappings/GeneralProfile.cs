@@ -81,6 +81,31 @@ namespace Models.Mappings
             CreateMap<LoginGoogleRequest, User>();
             CreateMap<Subject, UpdateSubject>();
             CreateMap<Subject, SubjectAddNewRequest>();
+            CreateMap<PageResults<Wallet>, PageResults<WalletView>>();
+            CreateMap<PageResults<User>, PageResults<UserView>>();
+            CreateMap<PageResults<Student>, PageResults<StudentView>>();
+            CreateMap<PageResults<Tutor>, PageResults<TutorView>>();
+            CreateMap<PageResults<Subject>, PageResults<SubjectView>>();
+            CreateMap<PageResults<Schedule>, PageResults<ScheduleView>>();
+            CreateMap<PageResults<StudentCourse>, PageResults<StudentCourseView>>();
+            CreateMap<PageResults<TutorCertificate>, PageResults<TutorCertificateView>>();
+            CreateMap<PageResults<TutorExperience>, PageResults<TutorExperienceView>>();
+            CreateMap<PageResults<TutorSubject>, PageResults<TutorSubjectView>>();
+            CreateMap<PageResults<TutorRating>, PageResults<TutorRatingView>>();
+            CreateMap<PageResults<TutorRatingImage>, PageResults<TutorRatingImageView>>();
+            CreateMap<PageResults<Moderator>, PageResults<ModeratorView>>();
+            CreateMap<PageResults<Booking>, PageResults<BookingView>>();
+            CreateMap<PageResults<Course>, PageResults<CourseView>>();
+            CreateMap<PageResults<CourseOutline>, PageResults<CourseOutlineView>>();
+            CreateMap<PageResults<CoursePromotion>, PageResults<CoursePromotionView>>();
+            CreateMap<PageResults<Report>, PageResults<ReportView>>();
+            CreateMap<PageResults<Promotion>, PageResults<PromotionView>>();
+            CreateMap<PageResults<UserBlock>, PageResults<UserBlockView>>();
+            CreateMap<PageResults<UserFollow>, PageResults<UserFollowView>>();
+            CreateMap<PageResults<StudentRequest>, PageResults<StudentRequestView>>();
+            CreateMap<PageResults<BookingTransaction>, PageResults<BookingTransactionView>>();
+            CreateMap<PageResults<CourseTransaction>, PageResults<CourseTransactionView>>();
+            CreateMap<PageResults<WalletTransaction>, PageResults<WalletTransactionView>>();
         }
     }
 }

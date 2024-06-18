@@ -8,9 +8,12 @@ namespace Models.Models.Views
 {
     public class WalletView
     {
-        public int Id { get; set; }
-        public int? StudentId { get; set; }
-        public decimal? Balance { get; set; }
+        public Guid WalletId { get; set; }
+        public Guid UserId { get; set; }
+        public decimal? Amount { get; set; }
+        public decimal? AvalaibleAmount { get; set; }
+        public decimal? PendingAmount { get; set; }
         public DateTime LastBalanceUpdate { get; set; } = DateTime.Now;
+        public int Status { get; set; }
     }
 }
