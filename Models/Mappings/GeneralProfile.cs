@@ -76,11 +76,13 @@ namespace Models.Mappings
             CreateMap<TutorRating, TutorRatingRequest>();
             CreateMap<TutorRating, UpdateTutorRatingRequest>();
             CreateMap<TutorSubject, UpdateTutorSubjectRequest>();
-            CreateMap<Tutor, TutorSubInformationRequest>();
+            //CreateMap<Tutor, TutorSubInformationRequest>();
+            CreateMap<TutorSubInformationRequest, Tutor>();
             CreateMap<User, LoginGoogleRequest>();
             CreateMap<LoginGoogleRequest, User>();
             CreateMap<Subject, UpdateSubject>();
             CreateMap<Subject, SubjectAddNewRequest>();
+            CreateMap<TutorAction, TutorActionView>();
             CreateMap<PageResults<Wallet>, PageResults<WalletView>>();
             CreateMap<PageResults<User>, PageResults<UserView>>();
             CreateMap<PageResults<Student>, PageResults<StudentView>>();
@@ -106,6 +108,7 @@ namespace Models.Mappings
             CreateMap<PageResults<BookingTransaction>, PageResults<BookingTransactionView>>();
             CreateMap<PageResults<CourseTransaction>, PageResults<CourseTransactionView>>();
             CreateMap<PageResults<WalletTransaction>, PageResults<WalletTransactionView>>();
+            CreateMap<PageResults<TutorAction>, PageResults<TutorActionView>>();
         }
     }
 }

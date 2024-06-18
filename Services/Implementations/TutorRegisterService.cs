@@ -174,7 +174,7 @@ namespace Services.Implementations
             }
             try
             {
-                tutor = _mapper.Map<Tutor>(tutorSubInformationRequest);
+                _mapper.Map(tutorSubInformationRequest, tutor); //error here, use for update
                 await _context.SaveChangesAsync();
                 throw new CrudException(HttpStatusCode.Created, "Tutor Sub Information is saved", "");
             }
