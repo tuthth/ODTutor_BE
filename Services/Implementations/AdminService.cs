@@ -1,8 +1,11 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Models.Entities;
 using Models.Models.Requests;
+using Models.Models.Views;
+using Models.PageHelper;
 using Services.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -28,6 +31,29 @@ namespace Services.Implementations
                     return new StatusCodeResult(404);
                 }
                 return users;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.ToString());
+            }
+        }
+        public async Task<ActionResult<PageResults<User>>> GetAllUsersPaging(PagingRequest request)
+        {
+            try
+            {
+                var usersList = await _context.Users.OrderByDescending(c => c.CreatedAt).ToListAsync();
+                if (usersList == null || !usersList.Any())
+                {
+                    return new StatusCodeResult(404);
+                }
+
+                var paginatedUsers = PagingHelper<User>.Paging(usersList, request.Page, request.PageSize);
+                if (paginatedUsers == null)
+                {
+                    return new StatusCodeResult(400);
+                }
+
+                return paginatedUsers;
             }
             catch (Exception ex)
             {
@@ -61,6 +87,29 @@ namespace Services.Implementations
                     return new StatusCodeResult(404);
                 }
                 return students;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.ToString());
+            }
+        }
+        public async Task<ActionResult<PageResults<Student>>> GetAllStudentsPaging(PagingRequest request)
+        {
+            try
+            {
+                var studentsList = await _context.Students.OrderByDescending(c => c.UserNavigation.CreatedAt).ToListAsync();
+                if (studentsList == null || !studentsList.Any())
+                {
+                    return new StatusCodeResult(404);
+                }
+
+                var paginatedStudents = PagingHelper<Student>.Paging(studentsList, request.Page, request.PageSize);
+                if (paginatedStudents == null)
+                {
+                    return new StatusCodeResult(400);
+                }
+
+                return paginatedStudents;
             }
             catch (Exception ex)
             {

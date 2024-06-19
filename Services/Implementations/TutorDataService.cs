@@ -31,22 +31,36 @@ namespace Services.Implementations
        {
            UserId = t.UserId,
            TutorId = t.TutorId,
-           PricePerHour = t.PricePerHour.Value,
+           PricePerHour = t.PricePerHour.GetValueOrDefault(),
            Description = t.Description,
            Status = t.Status,
            VideoUrl = t.VideoUrl,
            Courses = t.CoursesNavigation.Select(c => new Course
            {
-               CourseId = c.CourseId
+               CourseId = c.CourseId,
+               Description = c.Description
+
+           }).ToList(),
+           Subjects = t.TutorSubjectsNavigation.Select(ts => new Subject
+           {
+               SubjectId = ts.SubjectId,
+               Title = _context.Subjects.FirstOrDefault(s => s.SubjectId == ts.SubjectId).Title,
+               Content = _context.Subjects.FirstOrDefault(s => s.SubjectId == ts.SubjectId).Content,
+               Note = _context.Subjects.FirstOrDefault(s => s.SubjectId == ts.SubjectId).Note
            }).ToList(),
            TutorCertificates = t.TutorCertificatesNavigation.Select(tc => new TutorCertificate
            {
                TutorCertificateId = tc.TutorCertificateId,
+               CertificateName = tc.CertificateName,
+               CertificateFrom = tc.CertificateFrom,
+               StartYear = tc.StartYear,
+               EndYear = tc.EndYear
            }).ToList(),
-           Subjects = t.TutorSubjectsNavigation.Select(ts => new TutorSubject
+           TutorSubjects = t.TutorSubjectsNavigation.Select(ts => new TutorSubject
            {
                TutorSubjectId = ts.TutorSubjectId,
-               SubjectId = ts.SubjectId
+               SubjectId = ts.SubjectId,
+
            }).ToList(),
            Ratings = t.TutorRatingsNavigation.Select(tr => new TutorRating
            {
@@ -75,16 +89,30 @@ namespace Services.Implementations
                         VideoUrl = t.VideoUrl,
                         Courses = t.CoursesNavigation.Select(c => new Course
                         {
-                            CourseId = c.CourseId
+                            CourseId = c.CourseId,
+                            Description = c.Description
+                            
+                        }).ToList(),
+                        Subjects = t.TutorSubjectsNavigation.Select(ts => new Subject
+                        {
+                            SubjectId = ts.SubjectId,
+                            Title = _context.Subjects.FirstOrDefault(s => s.SubjectId == ts.SubjectId).Title,
+                            Content = _context.Subjects.FirstOrDefault(s => s.SubjectId == ts.SubjectId).Content,
+                            Note = _context.Subjects.FirstOrDefault(s => s.SubjectId == ts.SubjectId).Note
                         }).ToList(),
                         TutorCertificates = t.TutorCertificatesNavigation.Select(tc => new TutorCertificate
                         {
                             TutorCertificateId = tc.TutorCertificateId,
+                            CertificateName = tc.CertificateName,
+                            CertificateFrom = tc.CertificateFrom,
+                            StartYear = tc.StartYear,
+                            EndYear = tc.EndYear
                         }).ToList(),
-                        Subjects = t.TutorSubjectsNavigation.Select(ts => new TutorSubject
+                        TutorSubjects = t.TutorSubjectsNavigation.Select(ts => new TutorSubject
                         {
                             TutorSubjectId = ts.TutorSubjectId,
-                            SubjectId = ts.SubjectId
+                            SubjectId = ts.SubjectId,
+
                         }).ToList(),
                         Ratings = t.TutorRatingsNavigation.Select(tr => new TutorRating
                         {
@@ -120,16 +148,30 @@ namespace Services.Implementations
           VideoUrl = t.VideoUrl,
           Courses = t.CoursesNavigation.Select(c => new Course
           {
-              CourseId = c.CourseId
+              CourseId = c.CourseId,
+              Description = c.Description
+
+          }).ToList(),
+          Subjects = t.TutorSubjectsNavigation.Select(ts => new Subject
+          {
+              SubjectId = ts.SubjectId,
+              Title = _context.Subjects.FirstOrDefault(s => s.SubjectId == ts.SubjectId).Title,
+              Content = _context.Subjects.FirstOrDefault(s => s.SubjectId == ts.SubjectId).Content,
+              Note = _context.Subjects.FirstOrDefault(s => s.SubjectId == ts.SubjectId).Note
           }).ToList(),
           TutorCertificates = t.TutorCertificatesNavigation.Select(tc => new TutorCertificate
           {
               TutorCertificateId = tc.TutorCertificateId,
+              CertificateName = tc.CertificateName,
+              CertificateFrom = tc.CertificateFrom,
+              StartYear = tc.StartYear,
+              EndYear = tc.EndYear
           }).ToList(),
-          Subjects = t.TutorSubjectsNavigation.Select(ts => new TutorSubject
+          TutorSubjects = t.TutorSubjectsNavigation.Select(ts => new TutorSubject
           {
               TutorSubjectId = ts.TutorSubjectId,
-              SubjectId = ts.SubjectId
+              SubjectId = ts.SubjectId,
+
           }).ToList(),
           Ratings = t.TutorRatingsNavigation.Select(tr => new TutorRating
           {

@@ -15,6 +15,8 @@ using Models.Enumerables;
 using Microsoft.EntityFrameworkCore;
 using Models.Models.Emails;
 using NuGet.Protocol.Plugins;
+using Models.Models.Views;
+using Models.PageHelper;
 
 namespace Services.Implementations
 {
@@ -347,40 +349,6 @@ namespace Services.Implementations
             });
             return new StatusCodeResult(201);
         }
-        public async Task<ActionResult<List<WalletTransaction>>> GetWalletTransactionByAccountId()
-        {
-            var user = _httpContextAccessor.HttpContext.User?.Claims?.FirstOrDefault(c => c.Type == "UserId")?.Value;
-            var findUser = _context.Users.FirstOrDefault(u => u.Id == Guid.Parse(user));
-            if (findUser == null)
-            {
-                return new StatusCodeResult(405);
-            }
-            var walletTransaction = await _context.WalletTransactions.Where(a => a.SenderWalletId == Guid.Parse(user) || a.ReceiverWalletId == Guid.Parse(user)).ToListAsync();
-            if (walletTransaction == null)
-            {
-                return new StatusCodeResult(404);
-            }
-            return walletTransaction;
-        }
-        public async Task UpdateBookingTransactionInfoInDatabase(BookingTransaction transaction)
-        {
-            _context.BookingTransactions.Update(transaction);
-            await _context.SaveChangesAsync();
-        }
-        public async Task UpdateCourseTransactionInfoInDatabase(CourseTransaction transaction)
-        {
-            _context.CourseTransactions.Update(transaction);
-            await _context.SaveChangesAsync();
-        }
-        public async Task UpdateWalletTransactionInfoInDatabase(WalletTransaction transaction)
-        {
-            _context.WalletTransactions.Update(transaction);
-            await _context.SaveChangesAsync();
-        }
-        public async Task<List<BookingTransaction>> GetAllBooking() => await _context.BookingTransactions.ToListAsync();
-        public async Task<List<CourseTransaction>> GetAllCourse() => await _context.CourseTransactions.ToListAsync();
-        public async Task<List<WalletTransaction>> GetAllWallet() => await _context.WalletTransactions.ToListAsync();
-
         public async Task<IActionResult> UpdateTransaction(Guid walletTransactionId, int choice, int updateStatus)
         {
             var wallet = await _context.WalletTransactions.FirstOrDefaultAsync(w => w.WalletTransactionId == walletTransactionId);
@@ -586,6 +554,47 @@ namespace Services.Implementations
             await _context.SaveChangesAsync();
             return new StatusCodeResult(200);
         }
+        public async Task<ActionResult<List<WalletTransaction>>> GetWalletTransactionByAccountId(Guid id)
+        {
+            var findUser = _context.Users.FirstOrDefault(u => u.Id == id);
+            if (findUser == null)
+            {
+                return new StatusCodeResult(405);
+            }
+            var wallet = await _context.Wallets.FirstOrDefaultAsync(w => w.UserId == id);
+            var walletTransaction = await _context.WalletTransactions.Where(a => a.SenderWalletId == wallet.WalletId || a.ReceiverWalletId == wallet.WalletId).ToListAsync();
+            if (walletTransaction == null)
+            {
+                return new StatusCodeResult(404);
+            }
+            return walletTransaction;
+        }
+        public async Task<ActionResult<PageResults<WalletTransaction>>> GetWalletTransactionByAccountIdPaging(Guid accountId, PagingRequest request)
+        {
+            var findUser = _context.Users.FirstOrDefault(u => u.Id == accountId);
+            if (findUser == null)
+            {
+                return new StatusCodeResult(404);
+            }
+            var wallet = await _context.Wallets.FirstOrDefaultAsync(w => w.UserId == accountId);
+            var walletTransactionsList = await _context.WalletTransactions
+                .Where(a => a.SenderWalletId == wallet.WalletId || a.ReceiverWalletId == wallet.WalletId)
+                .OrderByDescending(c => c.CreatedAt)
+                .ToListAsync();
+
+            if (walletTransactionsList == null || !walletTransactionsList.Any())
+            {
+                return new StatusCodeResult(404);
+            }
+
+            var paginatedWalletTransactions = PagingHelper<WalletTransaction>.Paging(walletTransactionsList, request.Page, request.PageSize);
+            if (paginatedWalletTransactions == null)
+            {
+                return new StatusCodeResult(400);
+            }
+
+            return paginatedWalletTransactions;
+        }
 
         public async Task<ActionResult<List<BookingTransaction>>> GetAllBookingTransactions()
         {
@@ -603,6 +612,30 @@ namespace Services.Implementations
                 throw new Exception(ex.ToString());
             }
         }
+        public async Task<ActionResult<PageResults<BookingTransaction>>> GetAllBookingTransactionsPaging(PagingRequest request)
+        {
+            try
+            {
+                var bookingTransactionsList = await _context.BookingTransactions.OrderByDescending(c => c.CreatedAt).ToListAsync();
+                if (bookingTransactionsList == null || !bookingTransactionsList.Any())
+                {
+                    return new StatusCodeResult(404);
+                }
+
+                var paginatedBookingTransactions = PagingHelper<BookingTransaction>.Paging(bookingTransactionsList, request.Page, request.PageSize);
+                if (paginatedBookingTransactions == null)
+                {
+                    return new StatusCodeResult(400);
+                }
+
+                return paginatedBookingTransactions;
+            }
+            catch (Exception ex)
+            {
+               throw new Exception(ex.ToString());
+            }
+        }
+
         public async Task<ActionResult<List<BookingTransaction>>> GetBookingTransactionsBySenderId(Guid id)
         {
             try
@@ -619,6 +652,34 @@ namespace Services.Implementations
                 throw new Exception(ex.ToString());
             }
         }
+        public async Task<ActionResult<PageResults<BookingTransaction>>> GetBookingTransactionsBySenderIdPaging(Guid id, PagingRequest request)
+        {
+            try
+            {
+                var bookingTransactionsList = await _context.BookingTransactions
+                    .Where(c => c.SenderWalletId == id)
+                    .OrderByDescending(c => c.CreatedAt)
+                    .ToListAsync();
+
+                if (bookingTransactionsList == null || !bookingTransactionsList.Any())
+                {
+                    return new StatusCodeResult(404);
+                }
+
+                var paginatedBookingTransactions = PagingHelper<BookingTransaction>.Paging(bookingTransactionsList, request.Page, request.PageSize);
+                if (paginatedBookingTransactions == null)
+                {
+                    return new StatusCodeResult(400);
+                }
+
+                return paginatedBookingTransactions;
+            }
+            catch (Exception ex)
+            {
+               throw new Exception(ex.ToString());
+            }
+        }
+
         public async Task<ActionResult<List<BookingTransaction>>> GetBookingTransactionsByReceiverId(Guid id)
         {
             try
@@ -629,6 +690,33 @@ namespace Services.Implementations
                     return new StatusCodeResult(404);
                 }
                 return bookingTransactions;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.ToString());
+            }
+        }
+        public async Task<ActionResult<PageResults<BookingTransaction>>> GetBookingTransactionsByReceiverIdPaging(Guid id, PagingRequest request)
+        {
+            try
+            {
+                var bookingTransactionsList = await _context.BookingTransactions
+                    .Where(c => c.ReceiverWalletId == id)
+                    .OrderByDescending(c => c.CreatedAt)
+                    .ToListAsync();
+
+                if (bookingTransactionsList == null || !bookingTransactionsList.Any())
+                {
+                    return new StatusCodeResult(404);
+                }
+
+                var paginatedBookingTransactions = PagingHelper<BookingTransaction>.Paging(bookingTransactionsList, request.Page, request.PageSize);
+                if (paginatedBookingTransactions == null)
+                {
+                    return new StatusCodeResult(400);
+                }
+
+                return paginatedBookingTransactions;
             }
             catch (Exception ex)
             {
@@ -651,6 +739,33 @@ namespace Services.Implementations
                 throw new Exception(ex.ToString());
             }
         }
+        public async Task<ActionResult<PageResults<BookingTransaction>>> GetBookingTransactionsByBookingIdPaging(Guid id, PagingRequest request)
+        {
+            try
+            {
+                var bookingTransactionsList = await _context.BookingTransactions
+                    .Where(c => c.BookingId == id)
+                    .OrderByDescending(c => c.CreatedAt)
+                    .ToListAsync();
+
+                if (bookingTransactionsList == null || !bookingTransactionsList.Any())
+                {
+                    return new StatusCodeResult(404);
+                }
+
+                var paginatedBookingTransactions = PagingHelper<BookingTransaction>.Paging(bookingTransactionsList, request.Page, request.PageSize);
+                if (paginatedBookingTransactions == null)
+                {
+                    return new StatusCodeResult(400);
+                }
+
+                return paginatedBookingTransactions;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.ToString());
+            }
+        }
         public async Task<ActionResult<List<WalletTransaction>>> GetAllWalletTransactions()
         {
             try
@@ -661,6 +776,29 @@ namespace Services.Implementations
                     return new StatusCodeResult(404);
                 }
                 return walletTransactions;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.ToString());
+            }
+        }
+        public async Task<ActionResult<PageResults<WalletTransaction>>> GetAllWalletTransactionsPaging(PagingRequest request)
+        {
+            try
+            {
+                var walletTransactionsList = await _context.WalletTransactions.OrderByDescending(c => c.CreatedAt).ToListAsync();
+                if (walletTransactionsList == null || !walletTransactionsList.Any())
+                {
+                    return new StatusCodeResult(404);
+                }
+
+                var paginatedWalletTransactions = PagingHelper<WalletTransaction>.Paging(walletTransactionsList, request.Page, request.PageSize);
+                if (paginatedWalletTransactions == null)
+                {
+                    return new StatusCodeResult(400);
+                }
+
+                return paginatedWalletTransactions;
             }
             catch (Exception ex)
             {
@@ -683,6 +821,33 @@ namespace Services.Implementations
                 throw new Exception(ex.ToString());
             }
         }
+        public async Task<ActionResult<PageResults<WalletTransaction>>> GetWalletTransactionsByWalletTransactionIdPaging(Guid id, PagingRequest request)
+        {
+            try
+            {
+                var walletTransactionsList = await _context.WalletTransactions
+                    .Where(c => c.WalletTransactionId == id)
+                    .OrderByDescending(c => c.CreatedAt)
+                    .ToListAsync();
+
+                if (walletTransactionsList == null || !walletTransactionsList.Any())
+                {
+                    return new StatusCodeResult(404);
+                }
+
+                var paginatedWalletTransactions = PagingHelper<WalletTransaction>.Paging(walletTransactionsList, request.Page, request.PageSize);
+                if (paginatedWalletTransactions == null)
+                {
+                    return new StatusCodeResult(400);
+                }
+
+                return paginatedWalletTransactions;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.ToString());
+            }
+        }
         public async Task<ActionResult<List<WalletTransaction>>> GetWalletTransactionByWalletId(Guid id)
         {
             try
@@ -693,6 +858,33 @@ namespace Services.Implementations
                     return new StatusCodeResult(404);
                 }
                 return walletTransactions;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.ToString());
+            }
+        }
+        public async Task<ActionResult<PageResults<WalletTransaction>>> GetWalletTransactionByWalletIdPaging(Guid id, PagingRequest request)
+        {
+            try
+            {
+                var walletTransactionsList = await _context.WalletTransactions
+                    .Where(c => c.SenderWalletId == id || c.ReceiverWalletId == id)
+                    .OrderByDescending(c => c.CreatedAt)
+                    .ToListAsync();
+
+                if (walletTransactionsList == null || !walletTransactionsList.Any())
+                {
+                    return new StatusCodeResult(404);
+                }
+
+                var paginatedWalletTransactions = PagingHelper<WalletTransaction>.Paging(walletTransactionsList, request.Page, request.PageSize);
+                if (paginatedWalletTransactions == null)
+                {
+                    return new StatusCodeResult(400);
+                }
+
+                return paginatedWalletTransactions;
             }
             catch (Exception ex)
             {
@@ -715,6 +907,33 @@ namespace Services.Implementations
                 throw new Exception(ex.ToString());
             }
         }
+        public async Task<ActionResult<PageResults<WalletTransaction>>> GetWalletTransactionsBySenderIdPaging(Guid id, PagingRequest request)
+        {
+            try
+            {
+                var walletTransactionsList = await _context.WalletTransactions
+                    .Where(c => c.SenderWalletId == id)
+                    .OrderByDescending(c => c.CreatedAt)
+                    .ToListAsync();
+
+                if (walletTransactionsList == null || !walletTransactionsList.Any())
+                {
+                    return new StatusCodeResult(404);
+                }
+
+                var paginatedWalletTransactions = PagingHelper<WalletTransaction>.Paging(walletTransactionsList, request.Page, request.PageSize);
+                if (paginatedWalletTransactions == null)
+                {
+                    return new StatusCodeResult(400);
+                }
+
+                return paginatedWalletTransactions;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.ToString());
+            }
+        }
         public async Task<ActionResult<List<WalletTransaction>>> GetWalletTransactionsByReceiverId(Guid id)
         {
             try
@@ -725,6 +944,33 @@ namespace Services.Implementations
                     return new StatusCodeResult(404);
                 }
                 return walletTransactions;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.ToString());
+            }
+        }
+        public async Task<ActionResult<PageResults<WalletTransaction>>> GetWalletTransactionsByReceiverIdPaging(Guid id, PagingRequest request)
+        {
+            try
+            {
+                var walletTransactionsList = await _context.WalletTransactions
+                    .Where(c => c.ReceiverWalletId == id)
+                    .OrderByDescending(c => c.CreatedAt)
+                    .ToListAsync();
+
+                if (walletTransactionsList == null || !walletTransactionsList.Any())
+                {
+                    return new StatusCodeResult(404);
+                }
+
+                var paginatedWalletTransactions = PagingHelper<WalletTransaction>.Paging(walletTransactionsList, request.Page, request.PageSize);
+                if (paginatedWalletTransactions == null)
+                {
+                    return new StatusCodeResult(400);
+                }
+
+                return paginatedWalletTransactions;
             }
             catch (Exception ex)
             {
@@ -747,6 +993,29 @@ namespace Services.Implementations
                 throw new Exception(ex.ToString());
             }
         }
+        public async Task<ActionResult<PageResults<CourseTransaction>>> GetAllCourseTransactionsPaging(PagingRequest request)
+        {
+            try
+            {
+                var courseTransactionsList = await _context.CourseTransactions.OrderByDescending(c => c.CreatedAt).ToListAsync();
+                if (courseTransactionsList == null || !courseTransactionsList.Any())
+                {
+                    return new StatusCodeResult(404);
+                }
+
+                var paginatedCourseTransactions = PagingHelper<CourseTransaction>.Paging(courseTransactionsList, request.Page, request.PageSize);
+                if (paginatedCourseTransactions == null)
+                {
+                    return new StatusCodeResult(400);
+                }
+
+                return paginatedCourseTransactions;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.ToString());
+            }
+        }
         public async Task<ActionResult<CourseTransaction>> GetCourseTransaction(Guid id)
         {
             try
@@ -757,6 +1026,38 @@ namespace Services.Implementations
                     return new StatusCodeResult(404);
                 }
                 return courseTransaction;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.ToString());
+            }
+        }
+        public async Task<ActionResult<BookingTransaction>> GetBookingTransaction(Guid id)
+        {
+            try
+            {
+                var bookingTransaction = await _context.BookingTransactions.FirstOrDefaultAsync(c => c.BookingTransactionId == id);
+                if (bookingTransaction == null)
+                {
+                    return new StatusCodeResult(404);
+                }
+                return bookingTransaction;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.ToString());
+            }
+        }
+        public async Task<ActionResult<WalletTransaction>> GetWalletTransaction(Guid id)
+        {
+            try
+            {
+                var walletTransaction = await _context.WalletTransactions.FirstOrDefaultAsync(c => c.WalletTransactionId == id);
+                if (walletTransaction == null)
+                {
+                    return new StatusCodeResult(404);
+                }
+                return walletTransaction;
             }
             catch (Exception ex)
             {
@@ -779,6 +1080,33 @@ namespace Services.Implementations
                 throw new Exception(ex.ToString());
             }
         }
+        public async Task<ActionResult<PageResults<CourseTransaction>>> GetCourseTransactionBySenderIdPaging(Guid id, PagingRequest request)
+        {
+            try
+            {
+                var courseTransactionsList = await _context.CourseTransactions
+                    .Where(c => c.SenderWalletId == id)
+                    .OrderByDescending(c => c.CreatedAt)
+                    .ToListAsync();
+
+                if (courseTransactionsList == null || !courseTransactionsList.Any())
+                {
+                    return new StatusCodeResult(404);
+                }
+
+                var paginatedCourseTransactions = PagingHelper<CourseTransaction>.Paging(courseTransactionsList, request.Page, request.PageSize);
+                if (paginatedCourseTransactions == null)
+                {
+                    return new StatusCodeResult(400);
+                }
+
+                return paginatedCourseTransactions;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.ToString());
+            }
+        }
         public async Task<ActionResult<List<CourseTransaction>>> GetCourseTransactionsByReceiverId(Guid id)
         {
             try
@@ -795,6 +1123,33 @@ namespace Services.Implementations
                 throw new Exception(ex.ToString());
             }
         }
+        public async Task<ActionResult<PageResults<CourseTransaction>>> GetCourseTransactionsByReceiverIdPaging(Guid id, PagingRequest request)
+        {
+            try
+            {
+                var courseTransactionsList = await _context.CourseTransactions
+                    .Where(c => c.ReceiverWalletId == id)
+                    .OrderByDescending(c => c.CreatedAt)
+                    .ToListAsync();
+
+                if (courseTransactionsList == null || !courseTransactionsList.Any())
+                {
+                    return new StatusCodeResult(404);
+                }
+
+                var paginatedCourseTransactions = PagingHelper<CourseTransaction>.Paging(courseTransactionsList, request.Page, request.PageSize);
+                if (paginatedCourseTransactions == null)
+                {
+                    return new StatusCodeResult(400);
+                }
+
+                return paginatedCourseTransactions;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.ToString());
+            }
+        }
         public async Task<ActionResult<List<CourseTransaction>>> GetCourseTransactionsByCourseId(Guid id)
         {
             try
@@ -805,6 +1160,33 @@ namespace Services.Implementations
                     return new StatusCodeResult(404);
                 }
                 return courseTransactions;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.ToString());
+            }
+        }
+        public async Task<ActionResult<PageResults<CourseTransaction>>> GetCourseTransactionsByCourseIdPaging(Guid id, PagingRequest request)
+        {
+            try
+            {
+                var courseTransactionsList = await _context.CourseTransactions
+                    .Where(c => c.CourseId == id)
+                    .OrderByDescending(c => c.CreatedAt)
+                    .ToListAsync();
+
+                if (courseTransactionsList == null || !courseTransactionsList.Any())
+                {
+                    return new StatusCodeResult(404);
+                }
+
+                var paginatedCourseTransactions = PagingHelper<CourseTransaction>.Paging(courseTransactionsList, request.Page, request.PageSize);
+                if (paginatedCourseTransactions == null)
+                {
+                    return new StatusCodeResult(400);
+                }
+
+                return paginatedCourseTransactions;
             }
             catch (Exception ex)
             {

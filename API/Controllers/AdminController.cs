@@ -36,6 +36,28 @@ namespace API.Controllers
             if ((IActionResult)result.Result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
             throw new Exception("Lỗi không xác định");
         }
+        [HttpGet("get/users/paging")]
+        public async Task<ActionResult<PageResults<UserView>>> GetAllUsersPaging(int page, int pageSize)
+        {
+            var request = new PagingRequest
+            {
+                Page = page,
+                PageSize = pageSize
+            };
+            var result = await _adminService.GetAllUsersPaging(request);
+            if (result is ActionResult<PageResults<User>> users && result.Value != null)
+            {
+                var userViews = _mapper.Map<PageResults<User>, PageResults<UserView>>(users.Value);
+                return Ok(userViews);
+            }
+            if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
+            {
+                if (statusCodeResult.StatusCode == 404) { return NotFound(new { Message = "Không tìm thấy người dùng" }); }
+                if (statusCodeResult.StatusCode == 400) { return BadRequest(new { Message = "Dữ liệu không hợp lệ" }); }
+            }
+            if ((IActionResult)result.Result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
+            throw new Exception("Lỗi không xác định");
+        }
 
         [HttpGet("get/user/{userID}")]
         public async Task<ActionResult<UserView>> GetUser(Guid userID)
@@ -65,6 +87,28 @@ namespace API.Controllers
             if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
             {
                 if (statusCodeResult.StatusCode == 404) { return NotFound(new { Message = "Không tìm thấy sinh viên" }); }
+            }
+            if ((IActionResult)result.Result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
+            throw new Exception("Lỗi không xác định");
+        }
+        [HttpGet("get/students/paging")]
+        public async Task<ActionResult<PageResults<StudentView>>> GetAllStudentsPaging(int page, int pageSize)
+        {
+            var request = new PagingRequest
+            {
+                Page = page,
+                PageSize = pageSize
+            };
+            var result = await _adminService.GetAllStudentsPaging(request);
+            if (result is ActionResult<PageResults<Student>> users && result.Value != null)
+            {
+                var userViews = _mapper.Map<PageResults<Student>, PageResults<StudentView>>(users.Value);
+                return Ok(userViews);
+            }
+            if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
+            {
+                if (statusCodeResult.StatusCode == 404) { return NotFound(new { Message = "Không tìm thấy người dùng" }); }
+                if (statusCodeResult.StatusCode == 400) { return BadRequest(new { Message = "Dữ liệu không hợp lệ" }); }
             }
             if ((IActionResult)result.Result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
             throw new Exception("Lỗi không xác định");
@@ -346,7 +390,7 @@ namespace API.Controllers
             var result = await _adminService.GetTutorRatingsByStudentId(studentID);
             if (result is ActionResult<List<TutorRating>> tutorRatings && result.Value != null)
             {
-               var tutorRatingViews = _mapper.Map<List<TutorRatingView>>(tutorRatings.Value);
+                var tutorRatingViews = _mapper.Map<List<TutorRatingView>>(tutorRatings.Value);
                 return Ok(tutorRatingViews);
             }
             if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)

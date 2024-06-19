@@ -8,6 +8,7 @@ using Services.Interfaces;
 using Emgu.CV.CvEnum;
 using Emgu.CV.Util;
 using System.Drawing;
+using AutoMapper;
 
 namespace API.Controllers
 {
@@ -17,9 +18,11 @@ namespace API.Controllers
     public class TutorRegisterController : ControllerBase
     {
         private readonly ITutorRegisterService _tutorRegisterService;
-        public TutorRegisterController(ITutorRegisterService tutorRegisterService)
+        private readonly IMapper _mapper;
+        public TutorRegisterController(ITutorRegisterService tutorRegisterService, IMapper mapper)
         {
             _tutorRegisterService = tutorRegisterService;
+            _mapper = mapper;
         }
         /// <summary>
         /// Step 1: Notice: "Get 3 fields: Fullname, Image, Email from Api Account" ,"Get Subject List from Api Get All Subject in System"
@@ -197,6 +200,19 @@ namespace API.Controllers
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
             }
+            throw new Exception("Xảy ra lỗi không xác định");
+        }
+        [HttpGet("get/tutor-actions/{tutorId}")]
+        public async Task<ActionResult<PageResults<TutorActionView>>> getTutorActionByTutorId(Guid tutorId, int size, int pageSize)
+        {
+            var result = await _tutorRegisterService.GetTutorActionByTutorId(tutorId, size, pageSize);
+            if (result is ActionResult<PageResults<TutorAction>> tutorActions)
+            {
+                if (tutorActions.Value == null) return NotFound("Không tìm thấy thông tin gia sư");
+                var tutorActionViews = _mapper.Map<PageResults<TutorAction>, PageResults<TutorActionView>>(tutorActions.Value);
+                return Ok(tutorActionViews);
+            }
+            if ((IActionResult)result.Result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, exception.ToString());
             throw new Exception("Xảy ra lỗi không xác định");
         }
 

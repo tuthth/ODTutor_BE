@@ -18,7 +18,8 @@ namespace Models.Models.Views
         public string? VideoUrl { get; set; }
         public List<Course> Courses { get; set; }
         public List<TutorCertificate> TutorCertificates { get; set; }
-        public List<TutorSubject> Subjects { get; set; }
+        public List<Subject> Subjects { get; set; }
+        public List<TutorSubject> TutorSubjects { get; set; }
         public List<TutorRating> Ratings { get; set; }
     }
 }

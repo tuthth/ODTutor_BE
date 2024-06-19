@@ -12,7 +12,7 @@ namespace Models.Entities
         public Guid UserId { get; set; }
         public string IdentityNumber {  get; set; }
         public decimal? PricePerHour { get; set; }
-        public string ?Description { get; set;}
+        public string? Description { get; set;}
         public int Status {get; set;}
         public string? EducationExperience { get; set; }
         public string? Motivation { get; set; }
