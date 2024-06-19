@@ -199,6 +199,84 @@ namespace API.Controllers
             }
             throw new Exception("Xảy ra lỗi không xác định");
         }
+
+        /// <summary>
+        /// Get Step 1 Tutor Information
+        /// </summary>
+        /// <param name="tutorID"></param>
+        /// <returns></returns>
+        // Get Tutor Step 1 By Tutor ID
+        [HttpGet("get/tutor-step1/{tutorID}")]
+        public async Task<ActionResult<TutorRegisterStep1Response>> GetTutorStep1Response (Guid tutorID)
+        {
+            var result = await _tutorRegisterService.GetTutorStep1ByTutorID(tutorID);
+            return result;
+        }
+
+        /// <summary>
+        /// Get Step 2 Tutor Certificate
+        /// </summary>
+        /// <param name="tutorID"></param>
+        /// <returns></returns>
+        // Get Tutor Step 2 By Tutor ID
+        [HttpGet("get/tutor-step2/{tutorID}")]
+        public async Task<ActionResult<List<TutorRegisterStep2Response>>> GetTutorStep2Response(Guid tutorID)
+        {
+            var result = await _tutorRegisterService.GetTutorStep2ByTutorID(tutorID);
+            return result;
+        }
+
+        /// <summary>
+        /// Get Step 3 Tutor Experience
+        /// </summary>
+        /// <param name="tutorID"></param>
+        /// <returns></returns>
+        // Get Tutor Step 3 By Tutor ID
+        [HttpGet("get/tutor-step3/{tutorID}")]
+        public async Task<ActionResult<List<TutorRegisterStep3Response>>> GetTutorStep3Response(Guid tutorID)
+        {
+            var result = await _tutorRegisterService.GetTutorStep3ByTutorID(tutorID);
+            return result;
+        }
+
+        /// <summary>
+        /// Get Step 4 Tutor Sub Information
+        /// </summary>
+        /// <param name="tutorID"></param>
+        /// <returns></returns>
+        //Get Tutor Step 4 By Tutor ID
+        [HttpGet("get/tutor-step4/{tutorID}")]
+        public async Task<ActionResult<TutorRegisterStep4Response>> GetTutorStep4Response(Guid tutorID)
+        {
+            var result = await _tutorRegisterService.GetTutorStep4ByTutorID(tutorID);
+            return result;
+        }
+
+        /// <summary>
+        /// Get Step 5 Tutor Schedule
+        /// </summary>
+        /// <param name="tutorID"></param>
+        /// <returns></returns>
+        // Get Tutor Step 5 By Tutor ID
+        [HttpGet("get/tutor-step5/{tutorID}")]
+        public async Task<ActionResult<List<TutorRegisterStep5Reponse>>> GetTutorStep5Response(Guid tutorID)
+        {
+            var result = await _tutorRegisterService.GetTutorStep5ByTutorID(tutorID);
+            return result;
+        }
+
+        /// <summary>
+        /// Get Step 6 Tutor Price
+        /// </summary>
+        /// <param name="tutorID"></param>
+        /// <returns></returns>
+        // Get Tutor Step 6 By Tutor ID
+        [HttpGet("get/tutor-step6/{tutorID}")]
+        public async Task<ActionResult<TutorRegisterStep6Response>> GetTutorStep6Response(Guid tutorID)
+        {
+            var result = await _tutorRegisterService.GetTutorStep6TutorID(tutorID);
+            return result;
+        }
     }
 
 }

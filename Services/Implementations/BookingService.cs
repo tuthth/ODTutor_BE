@@ -11,50 +11,61 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using RestSharp;
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Net;
+using Emgu.CV.XPhoto;
+using Models.Models.Views;
 
 namespace Services.Implementations
 {
     public class BookingService : BaseService, IBookingService
     {
+        private TutorDataService _tds;
         public BookingService(ODTutorContext context, IMapper mapper) : base(context, mapper)
         {
         }
-        public async Task<IActionResult> CreateBooking(BookingRequest bookingRequest)
+        // Step 1: Create Booing (By Choose from Calendar Tutor)
+        public async Task<BookingStep1Response> CreateBooking(BookingRequest bookingRequest)
         {
-            var student = _context.Users.FirstOrDefault(x => x.Id == bookingRequest.StudentId);
-            var tutor = _context.Users.FirstOrDefault(x => x.Id == bookingRequest.TutorId);
-            if(student.Banned == true || tutor.Banned == true)
+            try
             {
-                return new StatusCodeResult(406);
+                BookingStep1Response response = new BookingStep1Response();
+                var student = _context.Users.FirstOrDefault(x => x.Id == bookingRequest.StudentId);
+                var tutor = _context.Users.FirstOrDefault(x => x.Id == bookingRequest.TutorId);
+                if (student.Banned == true || tutor.Banned == true)
+                {
+                    throw new CrudException(HttpStatusCode.Forbidden, "User is banned", "");
+                }
+                if (student.Active == false || tutor.Active == false)
+                {
+                    throw new CrudException(HttpStatusCode.Forbidden, "User is not active", "");
+                }
+                if (student.EmailConfirmed == false || tutor.EmailConfirmed == false)
+                {
+                    throw new CrudException(HttpStatusCode.Forbidden, "User is not confirmed email", "");
+                }
+                var booking = _mapper.Map<Booking>(bookingRequest);
+                booking.BookingId = Guid.NewGuid();
+                booking.CreatedAt = DateTime.Now;
+                response.BookingId = booking.BookingId;
+                _context.Bookings.Add(booking);
+                await _context.SaveChangesAsync();
+                return response;
             }
-            if(student.Active == false || tutor.Active == false)
+            catch (CrudException ex)
             {
-                return new StatusCodeResult(406);
+                throw ex;
             }
-            if(bookingRequest.Status != (Int32)BookingEnum.Pending)
+            catch (Exception ex)
             {
-                return new StatusCodeResult(409);
+                throw new Exception(ex.ToString());
             }
-            var booking = _mapper.Map<Booking>(bookingRequest);
-            booking.BookingId = Guid.NewGuid();
-            booking.CreatedAt = DateTime.Now;
-            _context.Bookings.Add(booking);
-            await _context.SaveChangesAsync();
-            await _appExtension.SendMail(new MailContent()
-            {
-                To = student.Email,
-                Subject = "[ODTutor] Tạo buổi học thành công",
-                Body = "Chúc mừng bạn đã tạo buổi học thành công. Bạn có thể sử dụng tài khoản của mình để kiểm tra thông tin khóa học."
-            });
-            await _appExtension.SendMail(new MailContent()
-            {
-                To = tutor.Email,
-                Subject = "[ODTutor] Tạo buổi học thành công",
-                Body = "Chúc mừng bạn đã tạo buổi học thành công. Bạn có thể sử dụng tài khoản của mình để kiểm tra thông tin khóa học."
-            });
-            return new StatusCodeResult(201);
         }
-        public async Task<IActionResult> UpdateBooking(UpdateBookingRequest updateBookingRequest)
+
+        /*public async Task<IActionResult> UpdateBooking(UpdateBookingRequest updateBookingRequest)
         {
             var booking = _context.Bookings.FirstOrDefault(x => x.BookingId == updateBookingRequest.BookingId);
             if (booking == null)
@@ -71,11 +82,11 @@ namespace Services.Implementations
             {
                 return new StatusCodeResult(406);
             }
-            if(booking.Status == (Int32)BookingEnum.Deleted || booking.Status == (Int32)BookingEnum.Finished || booking.Status == (Int32)BookingEnum.Unknown)
+            if (booking.Status == (Int32)BookingEnum.Deleted || booking.Status == (Int32)BookingEnum.Finished || booking.Status == (Int32)BookingEnum.Unknown)
             {
                 return new StatusCodeResult(409);
             }
-            if(updateBookingRequest.Status!=null && updateBookingRequest.Status!=booking.Status)
+            if (updateBookingRequest.Status != null && updateBookingRequest.Status != booking.Status)
             {
                 booking.Status = updateBookingRequest.Status;
             }
@@ -106,7 +117,30 @@ namespace Services.Implementations
             _context.Bookings.Update(booking);
             await _context.SaveChangesAsync();
             return new StatusCodeResult(200);
-        }
+        }*/
+
+/*        public async Task<IActionResult> UpdateBooking(UpdateBookingRequest updateBookingRequest)
+        {
+            var booking = _context.Bookings.FirstOrDefault(x => x.BookingId == updateBookingRequest.BookingId);
+            if (booking == null)
+            {
+                return new StatusCodeResult(404);
+            }
+            var student = _context.Users.FirstOrDefault(x => x.Id == updateBookingRequest.StudentId);
+            var tutor = _context.Users.FirstOrDefault(x => x.Id == updateBookingRequest.TutorId);
+            if (student.Banned == true || tutor.Banned == true)
+            {
+                return new StatusCodeResult(406);
+            }
+            if (student.Active == false || tutor.Active == false)
+            {
+                return new StatusCodeResult(406);
+            }
+            
+            _context.Bookings.Update(booking);
+            await _context.SaveChangesAsync();
+            return new StatusCodeResult(200);
+        }*/
         public async Task<IActionResult> RateBookings(TutorRatingRequest tutorRatingRequest)
         {
             var booking = _context.Bookings.FirstOrDefault(x => x.BookingId == tutorRatingRequest.BookingId);

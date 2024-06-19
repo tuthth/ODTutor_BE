@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Models.Entities;
 using Models.Models.Requests;
+using Models.Models.Views;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,8 +12,8 @@ namespace Services.Interfaces
 {
     public interface IBookingService
     {
-        Task<IActionResult> CreateBooking(BookingRequest bookingRequest);
-        Task<IActionResult> UpdateBooking(UpdateBookingRequest updateBookingRequest);
+        Task<BookingStep1Response> CreateBooking(BookingRequest bookingRequest);
+        /*Task<IActionResult> UpdateBooking(UpdateBookingRequest updateBookingRequest);*/
         Task<ActionResult<List<Booking>>> GetAllBookings();
         Task<ActionResult<Booking>> GetBooking(Guid id);
         Task<ActionResult<List<Booking>>> GetBookingsByStudentId(Guid id);

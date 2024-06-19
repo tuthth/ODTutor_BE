@@ -11,14 +11,7 @@ namespace Models.Models.Requests
     {
         public Guid StudentId { get; set; }
         public Guid TutorId { get; set; }
-        public TimeSpan Duration { get; set; }
-        public DateTime ActualEndTime { get; set; }
-        public string? Message { get; set; }
-        public decimal TotalPrice { get; set; }
-        public int Status { get; set; }
-        public string? Description { get; set; }
-        [RegularExpression(@"^https:\/\/meet\.google\.com\/[a-zA-Z0-9\-]{12}$", ErrorMessage = "Google Meet URL không hợp lệ")]
-        public string? GoogleMeetUrl { get; set; }
+        public DateTime StudyTime { get;set; }
     }
     public class UpdateBookingRequest : BookingRequest
     {

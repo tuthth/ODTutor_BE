@@ -24,5 +24,11 @@ namespace Services.Interfaces
         Task<ActionResult<List<TutorRegisterReponse>>> GetAllTutorRegisterInformation();
         Task<IActionResult> CreateTutorSlotInRegisterTutorStep(Guid TutorId, List<TutorRegisterSlotRequest> request);
         Task<IActionResult> RegisterSubTutorInformation(Guid tutorId, TutorSubInformationRequest tutorSubInformationRequest);
+        Task<ActionResult<TutorRegisterStep1Response>> GetTutorStep1ByTutorID(Guid tutorID);
+        Task<ActionResult<List<TutorRegisterStep2Response>>> GetTutorStep2ByTutorID(Guid tutorID);
+        Task<ActionResult<List<TutorRegisterStep3Response>>> GetTutorStep3ByTutorID(Guid tutorID);
+        Task<ActionResult<TutorRegisterStep4Response>> GetTutorStep4ByTutorID(Guid tutorID);
+        Task<ActionResult<List<TutorRegisterStep5Reponse>>> GetTutorStep5ByTutorID(Guid tutorID);
+        Task<ActionResult<TutorRegisterStep6Response>> GetTutorStep6TutorID(Guid tutorID);
     }   
 }

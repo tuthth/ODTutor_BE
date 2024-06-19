@@ -11,7 +11,7 @@ namespace Models.Enumerables
         Unknown = 0,
         Learning = 1,
         Finished = 2,
-        Deleted = 3,
+        Denny = 3,
         Pending = 4,
         Accepted = 5,
     }

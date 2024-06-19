@@ -49,11 +49,6 @@ namespace Services.Implementations
                 {
                     throw new CrudException(HttpStatusCode.NotFound, "User not found", "");
                 }
-/*                // check the avatar photo
-                if (!await checkPhotoAvatar(user.ImageUrl))
-                {
-                    throw new CrudException(HttpStatusCode.BadRequest, "Avatar photo is invalid", "");
-                }*/
                 //Map and save tutor information
                 Tutor tutor = _mapper.Map<Tutor>(tutorRequest);
                 tutor.TutorId = Guid.NewGuid();
@@ -407,7 +402,8 @@ namespace Services.Implementations
                 throw new Exception(ex.Message);
             }
         }
-
+        
+        // Get All Tutor Information
         public async Task<ActionResult<List<TutorRegisterReponse>>> GetAllTutorRegisterInformation()
         {
             List<TutorRegisterReponse> responses = new List<TutorRegisterReponse>();
@@ -520,6 +516,201 @@ namespace Services.Implementations
             }
         }
 
+        // Get Tutor Step 1 By Tutor ID 
+        public async Task<ActionResult<TutorRegisterStep1Response>> GetTutorStep1ByTutorID(Guid tutorID)
+        {
+            try
+            {   
+                TutorRegisterStep1Response response = new TutorRegisterStep1Response();
+                User user = await _context.Users.Where(x => x.TutorNavigation.TutorId == tutorID).FirstOrDefaultAsync();
+                if(user == null)
+                {
+                    throw new CrudException(HttpStatusCode.NotFound, "User not found", "");
+                }
+                Tutor tutor = await _context.Tutors.Where(x => x.TutorId == tutorID).FirstOrDefaultAsync();
+                if (tutor == null)
+                {
+                    throw new CrudException(HttpStatusCode.NotFound, "Tutor not found", "");
+                }
+                response.Email = user.Email;
+                response.identifyNumber = tutor.IdentityNumber;
+                response.imageUrl = user.ImageUrl;
+                response.Name = user.Name;
+                response.Subjects =  await getAllSubjectOfTutor(tutorID);
+                response.videoUrl = tutor.VideoUrl;
+                return response;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
+        // Get Tutor Step 2 By Tutor ID
+        public async Task<ActionResult<List<TutorRegisterStep2Response>>> GetTutorStep2ByTutorID(Guid tutorID)
+        {
+            try
+            {   
+                List<TutorRegisterStep2Response> response = new List<TutorRegisterStep2Response>();
+                User user = await _context.Users.Where(x => x.TutorNavigation.TutorId == tutorID).FirstOrDefaultAsync();
+                Tutor tutor = await _context.Tutors.Where(x => x.TutorId == tutorID).FirstOrDefaultAsync();
+                if (user == null || tutor == null)
+                {
+                    throw new CrudException(HttpStatusCode.NotFound, "Tutor not found", "");
+                }
+                List<TutorCertificate> tutorCertificateList = await _context.TutorCertificates.Where(x => x.TutorId == tutorID).ToListAsync();
+                foreach (var cert in tutorCertificateList)
+                {
+                    response.Add(new TutorRegisterStep2Response
+                    {
+                        imageUrl = cert.ImageUrl,
+                        CertificateDescription = cert.CertificateDescription,
+                        CertifiateForm = cert.CertificateFrom,
+                        CertificateName = cert.CertificateName,
+                        StartYear = cert.StartYear,
+                        EndYear = cert.EndYear
+                    });
+                }
+                if(response.Count == 0)
+                {
+                    throw new CrudException(HttpStatusCode.NotFound, "Không ghi nhận chứng chỉ từ gia sư", "");
+                }
+                return response;
+            } catch (CrudException ex)
+            {
+                throw ex;
+            } catch (Exception ex)
+            {
+                throw new CrudException(HttpStatusCode.InternalServerError, ex.Message, "");
+            }
+        }
+
+        // Get Tutor Step 3 By Tutor ID
+        public async Task<ActionResult<List<TutorRegisterStep3Response>>> GetTutorStep3ByTutorID (Guid tutorID)
+        {
+            try
+            {
+                List<TutorRegisterStep3Response> response = new List<TutorRegisterStep3Response>();
+                User user = await _context.Users.Where(x => x.TutorNavigation.TutorId == tutorID).FirstOrDefaultAsync();
+                Tutor tutor = await _context.Tutors.Where(x => x.TutorId == tutorID).FirstOrDefaultAsync();
+                if (user == null || tutor == null)
+                {
+                    throw new CrudException(HttpStatusCode.NotFound, "Tutor not found", "");
+                }
+                List<TutorExperience> tutorExperiencesList = await _context.TutorExperiences.Where(x => x.TutorId == tutorID).ToListAsync();
+                foreach (var experience in tutorExperiencesList)
+                {
+                    response.Add(new TutorRegisterStep3Response
+                    {
+                        imageUrl = experience.imageUrl,
+                        Title = experience.Title,
+                        Description = experience.Description,
+                        Location = experience.Location,
+                        StartDate = experience.StartDate,
+                        EndYear = experience.EndYear
+                    });
+                }
+                if (response.Count == 0)
+                {
+                    throw new CrudException(HttpStatusCode.NotFound, "Không ghi nhận kinh nghiệm từ gia sư", "");
+                }
+                return response;
+            }
+            catch (CrudException ex)
+            {
+                throw ex;
+            } catch (Exception ex)
+            {
+                throw new CrudException(HttpStatusCode.InternalServerError, ex.Message, "");
+            }
+        }
+
+        // Get Tutor Step 4 By Tutor ID
+        public async Task<ActionResult<TutorRegisterStep4Response>> GetTutorStep4ByTutorID (Guid tutorID)
+        {
+            try
+            {
+                TutorRegisterStep4Response response = new TutorRegisterStep4Response();
+                Tutor tutor = await _context.Tutors.Where(x => x.TutorId == tutorID).FirstOrDefaultAsync();
+                if (tutor == null)
+                {
+                    throw new CrudException(HttpStatusCode.NotFound, "Tutor not found", "");
+                }
+                response.Description = tutor.Description;
+                response.EducationExperience = tutor.EducationExperience;
+                response.Motivation = tutor.Motivation;
+                response.AttractiveTitle = tutor.AttractiveTitle;
+                return response;
+            }
+            catch (CrudException ex)
+            {
+                throw ex;
+            }catch(Exception ex)
+            {
+                throw new CrudException(HttpStatusCode.InternalServerError, ex.Message, "");
+            }
+        }
+
+        // Get Tutor Step 5 By TutorID
+        public async Task <ActionResult<List<TutorRegisterStep5Reponse>>> GetTutorStep5ByTutorID (Guid tutorID)
+        {
+            try
+            {
+                List<TutorRegisterStep5Reponse> response = new List<TutorRegisterStep5Reponse>();
+                Tutor tutor = await _context.Tutors.Where(x => x.TutorId == tutorID).FirstOrDefaultAsync();
+                if (tutor == null)
+                {
+                    throw new CrudException(HttpStatusCode.NotFound, "Tutor not found", "");
+                }
+                List<TutorDateAvailable> tutorDateAvailableList = await _context.TutorDateAvailables.Where(x => x.TutorID == tutorID).ToListAsync();
+                if (tutorDateAvailableList.Count == 0)
+                {
+                    throw new CrudException(HttpStatusCode.NotFound, "Chưa ghi nhận thời gian đăng ký của Tutor", "");
+                }
+                foreach (var date in tutorDateAvailableList)
+                {
+                    response.Add(new TutorRegisterStep5Reponse
+                    {
+                        dayOfWeek = date.DayOfWeek,
+                        startTime = date.StartTime,
+                        endTime = date.EndTime
+                    });
+                }
+                return response;
+            } catch(CrudException ex)
+            {
+                throw ex;
+            } catch (Exception ex)
+            {
+                throw new CrudException(HttpStatusCode.InternalServerError, ex.Message, "");
+            }
+        }
+
+        // Get Tutor Step 6 By TutorID
+        public async Task <ActionResult<TutorRegisterStep6Response>> GetTutorStep6TutorID (Guid tutorID)
+        {
+            try
+            {
+                TutorRegisterStep6Response response = new TutorRegisterStep6Response();
+                Tutor tutor = await _context.Tutors.Where(x => x.TutorId == tutorID).FirstOrDefaultAsync();
+                if(tutor == null)
+                {
+                    throw new CrudException(HttpStatusCode.NotFound, "Tutor not found", "");
+                }
+                response.price = tutor.PricePerHour;
+                if (tutor.PricePerHour == null)
+                {
+                    throw new CrudException(HttpStatusCode.NotFound, "Chưa ghi nhận giá tiền đăng ký", "");
+                }
+                return response;
+            } catch (CrudException ex)
+            {
+                throw ex;
+            } catch (Exception ex)
+            {
+                throw new CrudException(HttpStatusCode.InternalServerError, ex.Message, "");
+            }
+        }
         /*-------Internal Site---------*/
 
         // Get All Tutor Subject List
@@ -553,57 +744,6 @@ namespace Services.Implementations
             }
             return imagesUrlList;
         }
-
-/*        // Check the Photo of Account
-        private async Task<bool> checkPhotoAvatar(string base64Photo)
-        {
-            if (string.IsNullOrEmpty(base64Photo))
-            {
-                throw new CrudException(HttpStatusCode.BadRequest, "Photo is required", "");
-            }
-            // Chuyển đổi chuỗi base64 thành mảng byte
-            byte[] fileBytes;
-            try
-            {
-                using (var httpClient = new HttpClient())
-                {
-                    fileBytes = await httpClient.GetByteArrayAsync(base64Photo);
-                }
-            }
-            catch (FormatException)
-            {
-                throw new CrudException(HttpStatusCode.BadRequest, "Invalid base64 string", "");
-            }
-            if (fileBytes.Length > 5 * 1024 * 1024)
-            {
-                throw new CrudException(HttpStatusCode.BadRequest, "Photo is too large", "");
-            }
-            try
-            {
-                using (var ms = new MemoryStream(fileBytes))
-                {
-                    using (Bitmap bitmap = new Bitmap(ms))
-                    {
-                        var image = bitmap.ToImage<Bgr, byte>();
-                        string facePath = Path.Combine(_env.WebRootPath, "haarcascade_frontalface_default.xml");
-
-                        if (!System.IO.File.Exists(facePath))
-                        {
-                            throw new CrudException(HttpStatusCode.InternalServerError, "Face detection file not found", "");
-                        }
-
-                        var faceCascade = new CascadeClassifier(facePath);
-                        var grayImage = image.Convert<Gray, byte>();
-                        var faces = faceCascade.DetectMultiScale(grayImage, 1.1, 10, Size.Empty);
-                        return faces.Length > 0;
-                    }
-                }
-            }
-            catch (ArgumentException)
-            {
-                throw new CrudException(HttpStatusCode.BadRequest, "Invalid image data", "");
-            }
-        }*/
 
         // Find User By UserID 
         private User findUserByUserID(Guid userID)

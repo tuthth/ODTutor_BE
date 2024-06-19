@@ -12,17 +12,17 @@ namespace Models.Entities
         public Guid StudentId { get; set; }
         public Guid TutorId { get; set; }
         public DateTime CreatedAt { get; set; }
-        public TimeSpan Duration { get; set; }
-        public DateTime ActualEndTime { get; set; }
+        public TimeSpan? Duration { get; set; }
+        public DateTime? ActualEndTime { get; set; }
         public string? Message { get; set; }
-        public decimal TotalPrice { get; set; }
+        public decimal ?TotalPrice { get; set; }
         public int Status { get; set; }
+        public DateTime ?StudyTime { get;set; }
         public string? Description { get; set; }
         public string? GoogleMeetUrl {get; set;}
         public virtual Student? StudentNavigation {  get; set; }
         public virtual Tutor? TutorNavigation { get; set; }
         public virtual ICollection<TutorRating>? TutorRatingsNavigation { get; set; }
         public virtual BookingTransaction? BookingTransactionNavigation { get; set; }
-
     }
 }

@@ -108,7 +108,7 @@ namespace API.Controllers
             }
             throw new Exception("Lỗi không xác định");
         }
-        [HttpPut("update/booking")]
+/*        [HttpPut("update/booking")]
         public async Task<IActionResult> UpdateBooking(UpdateBookingRequest bookingRequest)
         {
             var result = await _bookingService.UpdateBooking(bookingRequest);
@@ -123,7 +123,7 @@ namespace API.Controllers
                 if (actionResult is Exception exception) StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
             }
             throw new Exception("Lỗi không xác định");
-        }
+        }*/
         [HttpPost("rate/booking/create")]
         public async Task<IActionResult> RateBooking(TutorRatingRequest ratingRequest)
         {
