@@ -8,6 +8,7 @@ namespace Models.Models.Views
 {
     public class TutorRegisterReponse
     {
+        public Guid? TutorId { get; set; }
         public string? Name { get; set; }
         public string? Email { get; set; }
         public string? Username { get; set; }

@@ -31,5 +31,6 @@ namespace Services.Interfaces
         Task<ActionResult<List<TutorRegisterStep5Reponse>>> GetTutorStep5ByTutorID(Guid tutorID);
         Task<ActionResult<TutorRegisterStep6Response>> GetTutorStep6TutorID(Guid tutorID);
         Task<ActionResult<PageResults<TutorAction>>> GetTutorActionByTutorId(Guid id, int size, int pageSize);
+        Task<ActionResult<TutorAction>> GetTutorActionById(Guid id);
     }   
 }

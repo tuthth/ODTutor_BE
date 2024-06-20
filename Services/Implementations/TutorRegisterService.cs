@@ -385,6 +385,7 @@ namespace Services.Implementations
                 }
                 else
                 {
+                    response.TutorId = tutor.TutorId;
                     response.IdentityNumber = tutor.IdentityNumber;
                     response.Description = tutor.Description?.Replace("\n", "") ?? "";
                     response.PricePerHour = tutor.PricePerHour.Value;
@@ -420,6 +421,7 @@ namespace Services.Implementations
                     User user = await _context.Users.Where(x => x.Id == tutor.UserId).FirstOrDefaultAsync();
                     if (user != null)
                     {
+                        response.TutorId = tutor.TutorId;
                         response.IdentityNumber = tutor.IdentityNumber;
                         response.Description = tutor.Description?.Replace("\n", "") ?? "";
                         response.PricePerHour = tutor.PricePerHour.Value;
@@ -439,6 +441,15 @@ namespace Services.Implementations
             {
                 throw new Exception(ex.Message);
             }
+        }
+        public async Task<ActionResult<TutorAction>> GetTutorActionById(Guid id)
+        {
+            var tutorAction = await _context.TutorActions.Where(x => x.TutorActionId == id).FirstOrDefaultAsync();
+            if (tutorAction == null)
+            {
+                return null;
+            }
+            return tutorAction;
         }
         // Get Tutor Actions
         public async Task<ActionResult<PageResults<TutorAction>>> GetTutorActionByTutorId(Guid id, int size, int pageSize)

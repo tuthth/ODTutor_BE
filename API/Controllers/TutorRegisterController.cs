@@ -162,7 +162,7 @@ namespace API.Controllers
         public async Task<ActionResult<List<TutorRegisterReponse>>> getAllTutorRegisterInformation()
         {
             var result = await _tutorRegisterService.GetAllTutorRegisterInformation();
-            if (result is ActionResult<List<TutorRegisterReponse>> tutorRegisterReponses && tutorRegisterReponses.Value.Count > 0) return Ok(tutorRegisterReponses);
+            if (result is ActionResult<List<TutorRegisterReponse>> tutorRegisterReponses && tutorRegisterReponses.Value.Count > 0) return Ok(tutorRegisterReponses.Value);
             if ((IActionResult)result.Result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
             throw new Exception("Lỗi không xác định");
         }
@@ -215,7 +215,19 @@ namespace API.Controllers
             if ((IActionResult)result.Result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, exception.ToString());
             throw new Exception("Xảy ra lỗi không xác định");
         }
-
+        [HttpGet("get/tutor-action/{id}")]
+        public async Task<ActionResult<TutorActionView>> getTutorActionById(Guid id)
+        {
+            var result = await _tutorRegisterService.GetTutorActionById(id);
+            if (result is ActionResult<TutorAction> tutorAction)
+            {
+                if (tutorAction.Value == null) return NotFound("Không tìm thấy thông tin gia sư");
+                var tutorActionView = _mapper.Map<TutorAction, TutorActionView>(tutorAction.Value);
+                return Ok(tutorActionView);
+            }
+            if ((IActionResult)result.Result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, exception.ToString());
+            throw new Exception("Xảy ra lỗi không xác định");
+        }
         /// <summary>
         /// Get Step 1 Tutor Information
         /// </summary>
