@@ -190,14 +190,6 @@ namespace Services.Implementations
             try
             {
                 var tutor = await _context.Tutors.Where(x => x.TutorId == request.TutorID).FirstOrDefaultAsync();
-                if (!await checkTutorCertificate(request.TutorID))
-                {
-                    return new StatusCodeResult(400);
-                }
-                if (!await checkTutorSubject(request.TutorID))
-                {
-                    return new StatusCodeResult(400);
-                }
                 //Update Tutor Money
                 tutor.PricePerHour = request.Price;
                 tutor.Status = (Int32)TutorEnum.Pending;
