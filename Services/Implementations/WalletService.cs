@@ -66,6 +66,22 @@ namespace Services.Implementations
                 throw new Exception(ex.ToString());
             }
         }
+        public async Task<ActionResult<WalletTransaction>> GetLastTransaction(Guid id)
+        {
+            try
+            {
+                var walletTransaction = await _context.WalletTransactions.Where(c => c.SenderWalletId == id || c.ReceiverWalletId == id).OrderByDescending(c => c.CreatedAt).FirstOrDefaultAsync();
+                if (walletTransaction == null)
+                {
+                    return new StatusCodeResult(404);
+                }
+                return walletTransaction;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.ToString());
+            }
+        }
         public async Task<ActionResult<PageResults<Wallet>>> GetAllWalletsPaging(PagingRequest request)
         {
             try

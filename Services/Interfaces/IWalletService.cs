@@ -16,5 +16,6 @@ namespace Services.Interfaces
         Task<ActionResult<Wallet>> GetWalletByWalletId(Guid id);
         Task<ActionResult<Wallet>> GetWalletByUserId(Guid id);
         Task<ActionResult<PageResults<Wallet>>> GetAllWalletsPaging(PagingRequest request);
+        Task<ActionResult<WalletTransaction>> GetLastTransaction(Guid id);
     }
 }
