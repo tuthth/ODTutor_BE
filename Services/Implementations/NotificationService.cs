@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Models.Entities;
 using Models.Models.Requests;
+using Models.Models.Views;
 using Services.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -33,8 +34,8 @@ namespace Services.Implementations
                     CreatedAt = DateTime.Now,
                     Status = 0
                 };
-                await _firebaseRealtimeDatabaseService.SetAsync($"notifications/{request.UserId}/{notification.NotificationId}", notification);
-                return new StatusCodeResult(201);
+                await _firebaseRealtimeDatabaseService.SetAsync<Notification>($"notifications/{request.UserId}/{notification.NotificationId}", notification);
+                throw new CrudException(System.Net.HttpStatusCode.Created, "Tạo thông báo thành công", "");
             } catch(CrudException ex)
             {
                 throw ex;
@@ -44,5 +45,39 @@ namespace Services.Implementations
             }   
         }
 
+
+        // Get Notification By UserId
+        public async Task<List<NotificationResponse>> GetNotificationByUserId(Guid userId)
+        {
+            try
+            {
+                var response = await _firebaseRealtimeDatabaseService.GetAsync<Dictionary<string, Notification>>($"notifications/{userId}");
+
+                List<Notification> list = new List<Notification>();
+                if (response != null)
+                {
+                    foreach (var item in response)
+                    {
+                        list.Add(item.Value);
+                    }
+                }
+                var notificationResponses = list.Select(notification => new NotificationResponse
+                {
+                    Title = notification.Title,
+                    Content = notification.Content,
+                    UserID = notification.UserId,
+                    CreatedAt = notification.CreatedAt,
+                }).ToList();
+                return notificationResponses;
+            }
+            catch (CrudException ex)
+            {
+                throw ex;
+            }
+            catch (Exception ex)
+            {
+                throw new CrudException(System.Net.HttpStatusCode.InternalServerError, ex.Message, "");
+            }
+        }
     }
 }
