@@ -264,7 +264,7 @@ namespace Services.Implementations
                 new Claim(ClaimTypes.Email, user.Email ?? string.Empty),
                 new Claim(ClaimTypes.Role,"Student")
             }),
-                    Expires = DateTime.Now.AddMinutes(45),
+                    Expires = DateTime.Now.AddHours(1),
                     SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
                 };
             }
@@ -281,7 +281,24 @@ namespace Services.Implementations
                 new Claim(ClaimTypes.Email, user.Email ?? string.Empty),
                 new Claim(ClaimTypes.Role, "Moderator")
             }),
-                    Expires = DateTime.Now.AddMinutes(45),
+                    Expires = DateTime.Now.AddHours(1),
+                    SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
+                };
+            }
+            else if (tutor.Status == (Int32)TutorEnum.Inprocessing || tutor.Status == (Int32) TutorEnum.Pending || tutor.Status == (Int32) TutorEnum.Denny)
+            {
+                var studentInfo = _context.Students.FirstOrDefault(s => s.UserId == user.Id);
+                tokenDescriptor = new SecurityTokenDescriptor
+                {
+                    Subject = new ClaimsIdentity(new[]
+                {
+                new Claim("UserId", user.Id.ToString()),
+                new Claim("StudentId", student.StudentId.ToString()),
+                new Claim(ClaimTypes.Name, user.Username ?? string.Empty),
+                new Claim(ClaimTypes.Email, user.Email ?? string.Empty),
+                new Claim(ClaimTypes.Role,"Student")
+            }),
+                    Expires = DateTime.Now.AddHours(1),
                     SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
                 };
             }
@@ -299,7 +316,7 @@ namespace Services.Implementations
                 new Claim("TutorStatus", tutorInfo.Status.ToString()),
                 new Claim(ClaimTypes.Role, "Tutor")
             }),
-                    Expires = DateTime.Now.AddMinutes(45),
+                    Expires = DateTime.Now.AddHours(1),
                     SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
                 };
             }

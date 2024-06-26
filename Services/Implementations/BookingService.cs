@@ -129,6 +129,7 @@ namespace Services.Implementations
                 bookingTransaction.CreatedAt = DateTime.Now;
                 bookingTransaction.Status = (Int32)BookingEnum.WaitingPayment;
                 _context.BookingTransactions.Add(bookingTransaction);
+
                 // Xử lý notification 
                 Notification notification = new Notification();
                 notification.NotificationId = Guid.NewGuid();

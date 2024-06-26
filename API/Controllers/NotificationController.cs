@@ -39,6 +39,16 @@ namespace API.Controllers
             var response = await _notificationService.GetNotificationByUserId(userId);
             return response;
         }
+
+        /// <summary>
+        /// Update Read or Unread Notification
+        /// </summary>
+        [HttpPut("update/{userId}/{notificationId}")]
+        public async Task<IActionResult> SetNotificationStatus(Guid userId, Guid notificationId)
+        {
+            var response = await _notificationService.SetNotificationStatus(userId, notificationId);
+            return response;
+        }
     }
 
 }

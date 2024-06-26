@@ -9,7 +9,7 @@ namespace Models.Enumerables
     public enum NotificationEnum
     {
         Unknown = 0,
-        Active = 1,
+        UnRead = 1,
         Read = 2,
         Deleted = 3
     }

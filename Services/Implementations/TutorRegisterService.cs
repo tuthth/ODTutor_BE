@@ -490,7 +490,7 @@ namespace Services.Implementations
                 notification.Title = "Yêu cầu xét duyệt trở thành gia sư đã được chấp nhận";
                 notification.Content = "Yêu cầu của bạn đã được chấp nhận. Bạn đã trở thành gia sư trên hệ thống";
                 notification.CreatedAt = DateTime.Now;
-                notification.Status = (Int32)NotificationEnum.Active;
+                notification.Status = (Int32)NotificationEnum.UnRead;
                 await _context.Notifications.AddAsync(notification);
                 await _context.SaveChangesAsync();
                 return new StatusCodeResult(200);

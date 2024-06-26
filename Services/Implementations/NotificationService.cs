@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Models.Entities;
+using Models.Enumerables;
 using Models.Models.Requests;
 using Models.Models.Views;
 using Services.Interfaces;
@@ -32,9 +33,11 @@ namespace Services.Implementations
                     Content = request.Content,
                     UserId = request.UserId,
                     CreatedAt = DateTime.Now,
-                    Status = 0
+                    Status = (Int32)NotificationEnum.UnRead
                 };
                 await _firebaseRealtimeDatabaseService.SetAsync<Notification>($"notifications/{request.UserId}/{notification.NotificationId}", notification);
+                await _context.Notifications.AddAsync(notification);
+                await _context.SaveChangesAsync();
                 throw new CrudException(System.Net.HttpStatusCode.Created, "Tạo thông báo thành công", "");
             } catch(CrudException ex)
             {
@@ -69,6 +72,33 @@ namespace Services.Implementations
                     CreatedAt = notification.CreatedAt,
                 }).ToList();
                 return notificationResponses;
+            }
+            catch (CrudException ex)
+            {
+                throw ex;
+            }
+            catch (Exception ex)
+            {
+                throw new CrudException(System.Net.HttpStatusCode.InternalServerError, ex.Message, "");
+            }
+        }
+
+        // Set Notification Read, Unread
+        public async Task<IActionResult> SetNotificationStatus(Guid userId, Guid notificationId)
+        {
+            try
+            {
+                var notification = await _firebaseRealtimeDatabaseService.GetAsync<Notification>($"notifications/{userId}/{notificationId}");
+                if (notification == null)
+                {
+                    throw new CrudException(System.Net.HttpStatusCode.NotFound, "Không tìm thấy thông báo", "");
+                }
+                notification.Status = (Int32) NotificationEnum.Read;
+                await _firebaseRealtimeDatabaseService.SetAsync<Notification>($"notifications/{userId}/{notificationId}", notification);
+                Notification noti = await _context.Notifications.FindAsync(notificationId);
+                noti.Status = (Int32)NotificationEnum.Read;
+                await _context.SaveChangesAsync();
+                throw new CrudException(System.Net.HttpStatusCode.OK, "Cập nhật trạng thái thông báo thành công", "");
             }
             catch (CrudException ex)
             {

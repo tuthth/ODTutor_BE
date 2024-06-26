@@ -14,5 +14,6 @@ namespace Services.Interfaces
     {
         Task<IActionResult> CreateNotification(NotificationRequest request);
         Task<List<NotificationResponse>> GetNotificationByUserId(Guid userId);
+        Task<IActionResult> SetNotificationStatus(Guid userId, Guid notificationId);
     }
 }
