@@ -15,7 +15,6 @@ namespace Models.Entities
         public DateTime? ReponseDate {get;set;}
         public string? MeetingLink { get; set; }
         public string Description { get; set; }
-        public DateTime CreatedAt { get; set; }
         public int ActionType { get; set; }
         public int Status { get; set; }
 
