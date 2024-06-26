@@ -25,9 +25,11 @@ namespace Services.Implementations
     {
         private TutorDataService _tds;
         private readonly IFirebaseRealtimeDatabaseService _firebaseRealtimeDatabaseService;
-        public BookingService(ODTutorContext context, IFirebaseRealtimeDatabaseService firebaseRealtimeDatabaseService, IMapper mapper) : base(context, mapper)
+        private readonly ITransactionService _transactionService;
+        public BookingService(ODTutorContext context, IFirebaseRealtimeDatabaseService firebaseRealtimeDatabaseService, ITransactionService transactionService, IMapper mapper) : base(context, mapper)
         {
             _firebaseRealtimeDatabaseService = firebaseRealtimeDatabaseService;
+            _transactionService = transactionService;
         }
         // Step 1: Create Booing (By Choose from Calendar Tutor)
         public async Task<BookingStep1Response> CreateBooking(BookingRequest bookingRequest)
@@ -122,14 +124,16 @@ namespace Services.Implementations
                 tutorSlotAvailable.IsBooked = true;
                 booking.Status = (Int32)TutorSlotAvailabilityEnum.NotAvailable;
 
-                // Xử lý booking Transaction 
-                BookingTransaction bookingTransaction = new BookingTransaction();
-                bookingTransaction.BookingTransactionId = Guid.NewGuid();
-                bookingTransaction.BookingId = booking.BookingId;
-                bookingTransaction.CreatedAt = DateTime.Now;
-                bookingTransaction.Status = (Int32)BookingEnum.WaitingPayment;
-                _context.BookingTransactions.Add(bookingTransaction);
-
+                // Xử lý booking Transaction
+                var bookingTransactionCreate = new BookingTransactionCreate
+                {
+                    Amount = (decimal)booking.TotalPrice,
+                    BookingId = booking.BookingId,
+                    RedirectUrl = "https://localhost:3000/payment-success",  //cai nay de choi thoi, khong phai nap rut redirect lam gi
+                    SenderId = studentWallet.WalletId,
+                    ReceiverId = tutorWallet.WalletId
+                };
+                await _transactionService.CreateDepositVnPayBooking(bookingTransactionCreate);
                 // Xử lý notification 
                 Notification notification = new Notification();
                 notification.NotificationId = Guid.NewGuid();
