@@ -79,6 +79,7 @@ namespace Services.Implementations
             {
                 var tutors = await _context.Tutors
                     .Where(t => t.UserNavigation.Banned == false)
+                    .Where(t => t.Equals(TutorEnum.Active))
                     .Select(t => new TutorAccountResponse
                     {
                         UserId = t.UserId,

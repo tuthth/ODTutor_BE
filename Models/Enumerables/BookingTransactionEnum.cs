@@ -5,13 +5,10 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace Models.Enumerables
-{
-    public enum BookingEnum
+{ 
+    public enum BookingTransactionEnum
     {
-        WaitingPayment = 0,
-        Learning = 1,
-        Finished = 2,
-        Cancled = 3,
-        Success = 4,
+        Success = 0,
+        Failed = 1,
     }
 }

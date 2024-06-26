@@ -13,6 +13,7 @@ namespace Models.Enumerables
         Inprocessing = 2,
         Denny = 3,
         Banned = 4,
+        Pause = 5,
     }
     public enum TutorSlotAvailabilityEnum
     {   

@@ -24,8 +24,10 @@ namespace Services.Implementations
     public class BookingService : BaseService, IBookingService
     {
         private TutorDataService _tds;
-        public BookingService(ODTutorContext context, IMapper mapper) : base(context, mapper)
+        private readonly IFirebaseRealtimeDatabaseService _firebaseRealtimeDatabaseService;
+        public BookingService(ODTutorContext context, IFirebaseRealtimeDatabaseService firebaseRealtimeDatabaseService, IMapper mapper) : base(context, mapper)
         {
+            _firebaseRealtimeDatabaseService = firebaseRealtimeDatabaseService;
         }
         // Step 1: Create Booing (By Choose from Calendar Tutor)
         public async Task<BookingStep1Response> CreateBooking(BookingRequest bookingRequest)
@@ -50,6 +52,7 @@ namespace Services.Implementations
                 var booking = _mapper.Map<Booking>(bookingRequest);
                 booking.BookingId = Guid.NewGuid();
                 booking.CreatedAt = DateTime.Now;
+                booking.Status = (Int32)BookingEnum.WaitingPayment;
                 response.BookingId = booking.BookingId;
                 _context.Bookings.Add(booking);
                 await _context.SaveChangesAsync();
@@ -65,6 +68,88 @@ namespace Services.Implementations
             }
         }
 
+        // Step 2 : Payment Booking
+        public async Task<IActionResult> PaymentForBooking (Guid bookingID)
+        {
+            try
+            {
+                Booking booking = _context.Bookings.FirstOrDefault(x => x.BookingId == bookingID);
+                if (booking == null)
+                {
+                    throw new CrudException(HttpStatusCode.NotFound, "Booking not found", "");
+                }
+                if (booking.Status != (Int32)BookingEnum.WaitingPayment)
+                {
+                    throw new CrudException(HttpStatusCode.Conflict, "Booking is not waiting for payment", "");
+                }
+                TimeSpan bookingTime = new TimeSpan(booking.StudyTime.Value.Hour, booking.StudyTime.Value.Minute, 0);
+                Student student = _context.Students.FirstOrDefault(x => x.StudentId == booking.StudentId);
+                if (student == null)
+                {
+                    throw new CrudException(HttpStatusCode.NotFound, "Student not found", "");
+                }
+                Tutor tutor = _context.Tutors.FirstOrDefault(x => x.TutorId == booking.TutorId);
+                Wallet studentWallet = _context.Wallets.FirstOrDefault(x => x.UserId == student.UserId);
+                Wallet tutorWallet = _context.Wallets.FirstOrDefault(x => x.UserId == tutor.UserId);
+                if (studentWallet == null)
+                {
+                    throw new CrudException(HttpStatusCode.NotFound, "Student wallet not found", "");
+                }
+                if (tutorWallet == null)
+                {
+                    throw new CrudException(HttpStatusCode.NotFound, "Tutor wallet not found", "");
+                }
+                if (studentWallet.AvalaibleAmount < booking.TotalPrice)
+                {
+                    throw new CrudException(HttpStatusCode.Conflict, "Student wallet is not enough", "");
+                }
+                // Find the tutor available slot
+                TutorDateAvailable tutorDateAvailable = _context.TutorDateAvailables.FirstOrDefault(x => x.TutorID == tutor.TutorId && x.Date.Date == booking.StudyTime);
+                if(tutorDateAvailable == null)
+                {
+                    throw new CrudException(HttpStatusCode.NotFound, "Tutor date available not found", "");
+                }
+                // Find the tutor slot available match the booking time
+                TutorSlotAvailable tutorSlotAvailable = _context.TutorSlotAvailables.FirstOrDefault(x => x.TutorDateAvailableID == tutorDateAvailable.TutorDateAvailableID && x.StartTime == bookingTime);
+                if (tutorSlotAvailable == null)
+                {
+                    throw new CrudException(HttpStatusCode.NotFound, "Tutor slot available not found", "");
+                }
+                if (tutorSlotAvailable.IsBooked == true)
+                {
+                    throw new CrudException(HttpStatusCode.Conflict, "Tutor slot available is booked", "");
+                }
+                tutorSlotAvailable.IsBooked = true;
+                booking.Status = (Int32)TutorSlotAvailabilityEnum.NotAvailable;
+
+                // Xử lý booking Transaction 
+                BookingTransaction bookingTransaction = new BookingTransaction();
+                bookingTransaction.BookingTransactionId = Guid.NewGuid();
+                bookingTransaction.BookingId = booking.BookingId;
+                bookingTransaction.CreatedAt = DateTime.Now;
+                bookingTransaction.Status = (Int32)BookingEnum.WaitingPayment;
+                _context.BookingTransactions.Add(bookingTransaction);
+                // Xử lý notification 
+                Notification notification = new Notification();
+                notification.NotificationId = Guid.NewGuid();
+                notification.UserId = student.UserId;
+                notification.Title = "Đặt lịch thành công";
+                notification.Content = "Bạn đã đặt lịch học thành công";
+                notification.CreatedAt = DateTime.Now;
+                _context.Notifications.Add(notification);
+                // Lưu notification vào firestore
+                _firebaseRealtimeDatabaseService.SetAsync("Notifications/" + notification.NotificationId, notification);
+                // Lưu tất cả thay đổi vào cơ sở dữ liệu
+                await _context.SaveChangesAsync();
+                throw new CrudException(HttpStatusCode.Created, "Payment for booking successfully", "");
+            } catch(CrudException ex)
+            {
+                throw ex;
+            } catch (Exception ex)
+            {
+                throw new Exception(ex.ToString());
+            }
+        }
         /*public async Task<IActionResult> UpdateBooking(UpdateBookingRequest updateBookingRequest)
         {
             var booking = _context.Bookings.FirstOrDefault(x => x.BookingId == updateBookingRequest.BookingId);
@@ -119,7 +204,7 @@ namespace Services.Implementations
             return new StatusCodeResult(200);
         }*/
 
-/*        public async Task<IActionResult> UpdateBooking(UpdateBookingRequest updateBookingRequest)
+        /*        public async Task<IActionResult> UpdateBooking(UpdateBookingRequest updateBookingRequest)
         {
             var booking = _context.Bookings.FirstOrDefault(x => x.BookingId == updateBookingRequest.BookingId);
             if (booking == null)

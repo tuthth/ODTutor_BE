@@ -70,6 +70,8 @@ namespace API.Configurations
             services.AddScoped<IFirebaseMessagingService, FirebaseMessagingService>();
             services.AddScoped<IStudentCourseService, StudentCourseService>();
             services.AddScoped<IScheduleService, ScheduleService>();
+            services.AddScoped<IFirebaseRealtimeDatabaseService, FirebaseRealtimeDatabaseService>();
+            services.AddScoped<INotificationService, NotificationService>();
         }
 
         public static void AddSwagger(this IServiceCollection services)
