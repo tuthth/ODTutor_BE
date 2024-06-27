@@ -77,9 +77,9 @@ namespace Services.Implementations
         {
             try
             {
+                //.Where(t => t.Equals(TutorEnum.Active) || t.Equals(TutorEnum.Inprocessing))
                 var tutors = await _context.Tutors
                     .Where(t => t.UserNavigation.Banned == false)
-                    .Where(t => t.Equals(TutorEnum.Active) || t.Equals(TutorEnum.Inprocessing))
                     .Select(t => new TutorAccountResponse
                     {
                         UserId = t.UserId,
