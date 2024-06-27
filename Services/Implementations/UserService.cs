@@ -373,7 +373,7 @@ namespace Services.Implementations
         // Get Role 
         private string GetRoleName(Tutor tutor, Moderator moderator)
         {
-            if (tutor != null)
+            if (tutor != null && tutor.Status == (Int32)TutorEnum.Active)
             {
                 return "Tutor";
             }
