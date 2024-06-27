@@ -25,10 +25,11 @@ namespace Services.Implementations
         private readonly VNPaySetting _vnPaySetting;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IFirebaseRealtimeDatabaseService _firebaseRealtimeDatabaseService;
-        public TransactionService(ODTutorContext _context, IMapper mapper, IOptions<VNPaySetting> options, IHttpContextAccessor httpContextAccessor) : base(_context, mapper)
+        public TransactionService(ODTutorContext _context, IMapper mapper, IOptions<VNPaySetting> options, IHttpContextAccessor httpContextAccessor, IFirebaseRealtimeDatabaseService firebaseRealtimeDatabaseService) : base(_context, mapper)
         {
             _vnPaySetting = options.Value;
             _httpContextAccessor = httpContextAccessor;
+            _firebaseRealtimeDatabaseService = firebaseRealtimeDatabaseService;
         }
 
         public async Task<IActionResult> CreateDepositToAccount(WalletTransactionCreate transactionCreate)

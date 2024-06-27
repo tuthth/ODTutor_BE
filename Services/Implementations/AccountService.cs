@@ -30,10 +30,10 @@ namespace Services.Implementations
         private readonly IUserService _userService;
         private readonly IFirebaseRealtimeDatabaseService _firebaseRealtimeDatabaseService;
 
-        public AccountService(ODTutorContext context, IMapper mapper, IUserService userService) : base(context, mapper)
+        public AccountService(ODTutorContext context, IMapper mapper, IUserService userService, IFirebaseRealtimeDatabaseService firebaseRealtimeDatabaseService) : base(context, mapper)
         {
             _userService = userService;
-            
+            _firebaseRealtimeDatabaseService = firebaseRealtimeDatabaseService;
         }
 
         /*============External Site===========*/
