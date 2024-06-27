@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using MimeKit;
 using Models.Entities;
+using Models.Enumerables;
 using Models.Models.Emails;
 using Services.Interfaces;
 using Settings.Mail;
@@ -19,10 +20,12 @@ namespace Services.Implementations
     public class SendMailService : BaseService, ISendMailService
     {
         private readonly MailSetting mailSettings;
+        private readonly IFirebaseRealtimeDatabaseService _firebaseRealtimeDatabaseService;
 
-        public SendMailService(ODTutorContext context, IMapper mapper, IOptions<MailSetting> _mailSettings) : base(context, mapper)
+        public SendMailService(ODTutorContext context, IMapper mapper, IOptions<MailSetting> _mailSettings, IFirebaseRealtimeDatabaseService firebaseRealtimeDatabaseService) : base(context, mapper)
         {
             mailSettings = _mailSettings.Value;
+            _firebaseRealtimeDatabaseService = firebaseRealtimeDatabaseService;
         }
         
         public async Task<IActionResult> SendEmailTokenAsync(string email)
@@ -47,7 +50,17 @@ namespace Services.Implementations
                         EmailToken = tokenEmail,
                         EmailTokenExpiry = DateTime.Now.AddMinutes(15)
                     };
-
+                    var notification = new Notification
+                    {
+                        NotificationId = Guid.NewGuid(),
+                        Title = "Mã xác thực OTP",
+                        Content = "Hãy vào hộp thư email để kiểm tra chi tiết",
+                        UserId = checkEmail.Id,
+                        CreatedAt = DateTime.Now,
+                        Status = (Int32)NotificationEnum.UnRead
+                    };
+                    _context.Notifications.Add(notification);
+                    _firebaseRealtimeDatabaseService.SetAsync("Notifications/" + notification.NotificationId, notification);
                     _context.UserAuthentications.Add(userAuthentication);
                     await _context.SaveChangesAsync();
                     try
@@ -56,7 +69,7 @@ namespace Services.Implementations
                         {
                             To = email,
                             Subject = "[ODTutor] Mã xác thực OTP",
-                            Body = "Đây là mã xác thực OTP của bạn" + ".\n Mã này sẽ hết hạn vào " + userAuthentication.EmailTokenExpiry + " GMT +0",
+                            Body = "Đây là mã xác thực OTP của bạn" + ".\n Mã này sẽ hết hạn vào " + userAuthentication.EmailTokenExpiry + " GMT +7",
                             OTP = tokenEmail
                         });   
                     }

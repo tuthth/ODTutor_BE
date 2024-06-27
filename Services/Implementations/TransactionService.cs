@@ -24,6 +24,7 @@ namespace Services.Implementations
     {
         private readonly VNPaySetting _vnPaySetting;
         private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly IFirebaseRealtimeDatabaseService _firebaseRealtimeDatabaseService;
         public TransactionService(ODTutorContext _context, IMapper mapper, IOptions<VNPaySetting> options, IHttpContextAccessor httpContextAccessor) : base(_context, mapper)
         {
             _vnPaySetting = options.Value;
@@ -59,6 +60,19 @@ namespace Services.Implementations
                 receiveWallet.PendingAmount += transactionCreate.Amount;
                 _context.Wallets.Update(receiveWallet);
                 _context.WalletTransactions.Add(transaction);
+
+                var notification = new Notification
+                {
+                    NotificationId = Guid.NewGuid(),
+                    Title = "Nạp tiền vào tài khoản",
+                    Content = "Bạn đã nhận được một giao dịch nạp tiền vào tài khoản với số tiền là " + transactionCreate.Amount + " VND. Mã giao dịch: " + transaction.WalletTransactionId,
+                    UserId = findUser.Id,
+                    CreatedAt = DateTime.Now,
+                    Status = (int)NotificationEnum.UnRead
+                };
+
+                _context.Notifications.Add(notification);
+                _firebaseRealtimeDatabaseService.SetAsync("Notifications/" + notification.NotificationId, notification);
                 await _context.SaveChangesAsync();
 
                 string vnp_Returnurl = transactionCreate.RedirectUrl;
@@ -125,6 +139,18 @@ namespace Services.Implementations
                 sendWallet.PendingAmount -= transactionCreate.Amount; // Deduct the amount from the sender's wallet
                 _context.Wallets.Update(sendWallet);
                 _context.WalletTransactions.Add(transaction);
+
+                var notification = new Notification
+                {
+                    NotificationId = Guid.NewGuid(),
+                    Title = "Rút tiền từ tài khoản",
+                    Content = "Bạn đã tạo một giao dịch rút tiền từ tài khoản với số tiền là " + transactionCreate.Amount + " VND. Mã giao dịch: " + transaction.WalletTransactionId,
+                    UserId = findUser.Id,
+                    CreatedAt = DateTime.Now,
+                    Status = (int)NotificationEnum.UnRead
+                };
+                _context.Notifications.Add(notification);
+                _firebaseRealtimeDatabaseService.SetAsync("Notifications/" + notification.NotificationId, notification);
                 await _context.SaveChangesAsync();
 
                 string vnp_Returnurl = transactionCreate.RedirectUrl;
@@ -172,6 +198,18 @@ namespace Services.Implementations
                 Subject = "Xác nhận giao dịch",
                 Body = "Giao dịch không hợp lệ, vui lòng kiểm tra lại thông tin."
             });
+            var notificationError = new Notification
+            {
+                NotificationId = Guid.NewGuid(),
+                Title = "Giao dịch",
+                Content = "Giao dịch không hợp lệ, vui lòng kiểm tra lại thông tin.",
+                UserId = findUser.Id,
+                CreatedAt = DateTime.Now,
+                Status = (int)NotificationEnum.UnRead
+            };
+            _context.Notifications.Add(notificationError);
+            _firebaseRealtimeDatabaseService.SetAsync("Notifications/" + notificationError.NotificationId, notificationError);
+            await _context.SaveChangesAsync();
             return new StatusCodeResult(500);
         }
 
@@ -211,6 +249,18 @@ namespace Services.Implementations
             _context.Wallets.Update(sendWallet);
             findUser.IsPremium = true;
             _context.Users.Update(findUser);
+
+            var notification = new Notification
+            {
+                NotificationId = Guid.NewGuid(),
+                Title = "Nâng cấp tài khoản",
+                Content = "Tài khoản",
+                UserId = findUser.Id,
+                CreatedAt = DateTime.Now,
+                Status = (int)NotificationEnum.UnRead
+            };
+            _context.Notifications.Add(notification);
+            _firebaseRealtimeDatabaseService.SetAsync("Notifications/" + notification.NotificationId, notification);
             await _context.SaveChangesAsync();
             await _appExtension.SendMail(new MailContent()
             {
@@ -267,6 +317,17 @@ namespace Services.Implementations
                     Subject = "Xác nhận giao dịch",
                     Body = "Giao dịch booking không hợp lệ, vui lòng kiểm tra lại thông tin."
                 });
+                var notificationError = new Notification
+                {
+                    NotificationId = Guid.NewGuid(),
+                    Title = "Giao dịch booking",
+                    Content = "Giao dịch booking không hợp lệ, vui lòng kiểm tra lại thông tin.",
+                    UserId = findUser.Id,
+                    CreatedAt = DateTime.Now,
+                    Status = (int)NotificationEnum.UnRead
+                };
+                _context.Notifications.Add(notificationError);
+                _firebaseRealtimeDatabaseService.SetAsync("Notifications/" + notificationError.NotificationId, notificationError);
                 return new StatusCodeResult(409);
             }
             sendWallet.PendingAmount -= transactionCreate.Amount;
@@ -276,6 +337,18 @@ namespace Services.Implementations
             _context.Wallets.Update(receiveWallet);
             _context.BookingTransactions.Add(transaction);
             _context.WalletTransactions.Add(senderTransaction);
+
+            var notification = new Notification
+            {
+                NotificationId = Guid.NewGuid(),
+                Title = "Giao dịch booking",
+                Content = "Bạn đã nhận được một giao dịch booking với số tiền là " + transactionCreate.Amount + " VND. Mã giao dịch: " + transaction.BookingTransactionId,
+                UserId = findUser.Id,
+                CreatedAt = DateTime.Now,
+                Status = (int)NotificationEnum.UnRead
+            };
+            _context.Notifications.Add(notification);
+            _firebaseRealtimeDatabaseService.SetAsync("Notifications/" + notification.NotificationId, notification);
             await _context.SaveChangesAsync();
             await _appExtension.SendMail(new MailContent()
             {
@@ -396,6 +469,29 @@ namespace Services.Implementations
                         Subject = "Xác nhận giao dịch",
                         Body = "Giao dịch booking của bạn đã được xác nhận. Mã giao dịch: " + wallet.WalletTransactionId
                     });
+                    var notification1 = new Notification
+                    {
+                        NotificationId = Guid.NewGuid(),
+                        Title = "Giao dịch booking",
+                        Content = "Giao dịch booking của bạn đã được xác nhận. Mã giao dịch: " + wallet.WalletTransactionId,
+                        UserId = sender.Id,
+                        CreatedAt = DateTime.Now,
+                        Status = (int)NotificationEnum.UnRead
+                    };
+                    var notification2 = new Notification
+                    {
+                        NotificationId = Guid.NewGuid(),
+                        Title = "Giao dịch booking",
+                        Content = "Giao dịch booking của bạn đã được xác nhận. Mã giao dịch: " + wallet.WalletTransactionId,
+                        UserId = receiver.Id,
+                        CreatedAt = DateTime.Now,
+                        Status = (int)NotificationEnum.UnRead
+                    };
+                    _context.Notifications.Add(notification1);
+                    _context.Notifications.Add(notification2);
+                    _firebaseRealtimeDatabaseService.SetAsync("Notifications/" + notification1.NotificationId, notification1);
+                    _firebaseRealtimeDatabaseService.SetAsync("Notifications/" + notification2.NotificationId, notification2);
+
                 }
                 else if (choice == (Int32)UpdateTransactionType.Course)
                 {
@@ -428,6 +524,28 @@ namespace Services.Implementations
                         Subject = "Xác nhận giao dịch",
                         Body = "Giao dịch course của bạn đã được xác nhận. Mã giao dịch: " + wallet.WalletTransactionId
                     });
+                    var notification1 = new Notification
+                    {
+                        NotificationId = Guid.NewGuid(),
+                        Title = "Giao dịch course",
+                        Content = "Giao dịch course của bạn đã được xác nhận. Mã giao dịch: " + wallet.WalletTransactionId,
+                        UserId = sender.Id,
+                        CreatedAt = DateTime.Now,
+                        Status = (int)NotificationEnum.UnRead
+                    };
+                    var notification2 = new Notification
+                    {
+                        NotificationId = Guid.NewGuid(),
+                        Title = "Giao dịch course",
+                        Content = "Giao dịch course của bạn đã được xác nhận. Mã giao dịch: " + wallet.WalletTransactionId,
+                        UserId = receiver.Id,
+                        CreatedAt = DateTime.Now,
+                        Status = (int)NotificationEnum.UnRead
+                    };
+                    _context.Notifications.Add(notification1);
+                    _context.Notifications.Add(notification2);
+                    _firebaseRealtimeDatabaseService.SetAsync("Notifications/" + notification1.NotificationId, notification1);
+                    _firebaseRealtimeDatabaseService.SetAsync("Notifications/" + notification2.NotificationId, notification2);
                 }
                 else if (choice == (Int32)UpdateTransactionType.Wallet)
                 {
@@ -458,6 +576,28 @@ namespace Services.Implementations
                         Subject = "Xác nhận giao dịch",
                         Body = "Giao dịch ví của bạn đã được xác nhận. Mã giao dịch: " + wallet.WalletTransactionId
                     });
+                    var notification1 = new Notification
+                    {
+                        NotificationId = Guid.NewGuid(),
+                        Title = "Giao dịch ví",
+                        Content = "Giao dịch ví của bạn đã được xác nhận. Mã giao dịch: " + wallet.WalletTransactionId,
+                        UserId = sender.Id,
+                        CreatedAt = DateTime.Now,
+                        Status = (int)NotificationEnum.UnRead
+                    };
+                    var notification2 = new Notification
+                    {
+                        NotificationId = Guid.NewGuid(),
+                        Title = "Giao dịch ví",
+                        Content = "Giao dịch ví của bạn đã được xác nhận. Mã giao dịch: " + wallet.WalletTransactionId,
+                        UserId = receiver.Id,
+                        CreatedAt = DateTime.Now,
+                        Status = (int)NotificationEnum.UnRead
+                    };
+                    _context.Notifications.Add(notification1);
+                    _context.Notifications.Add(notification2);
+                    _firebaseRealtimeDatabaseService.SetAsync("Notifications/" + notification1.NotificationId, notification1);
+                    _firebaseRealtimeDatabaseService.SetAsync("Notifications/" + notification2.NotificationId, notification2);
                 }
                 else if (choice == (Int32)UpdateTransactionType.Unknown) { return new StatusCodeResult(406); }
             }
@@ -490,6 +630,28 @@ namespace Services.Implementations
                         Subject = "Xác nhận giao dịch",
                         Body = "Giao dịch booking của bạn đã được hủy bỏ. Mã giao dịch: " + wallet.WalletTransactionId
                     });
+                    var notification1 = new Notification
+                    {
+                        NotificationId = Guid.NewGuid(),
+                        Title = "Giao dịch booking",
+                        Content = "Giao dịch booking của bạn đã được hủy bỏ. Mã giao dịch: " + wallet.WalletTransactionId,
+                        UserId = sender.Id,
+                        CreatedAt = DateTime.Now,
+                        Status = (int)NotificationEnum.UnRead
+                    };
+                    var notification2 = new Notification
+                    {
+                        NotificationId = Guid.NewGuid(),
+                        Title = "Giao dịch booking",
+                        Content = "Giao dịch booking của bạn đã được hủy bỏ. Mã giao dịch: " + wallet.WalletTransactionId,
+                        UserId = receiver.Id,
+                        CreatedAt = DateTime.Now,
+                        Status = (int)NotificationEnum.UnRead
+                    };
+                    _context.Notifications.Add(notification1);
+                    _context.Notifications.Add(notification2);
+                    _firebaseRealtimeDatabaseService.SetAsync("Notifications/" + notification1.NotificationId, notification1);
+                    _firebaseRealtimeDatabaseService.SetAsync("Notifications/" + notification2.NotificationId, notification2);
                 }
                 else if (choice == (Int32)UpdateTransactionType.Course)
                 {
@@ -518,6 +680,28 @@ namespace Services.Implementations
                         Subject = "Xác nhận giao dịch",
                         Body = "Giao dịch course của bạn đã được hủy bỏ. Mã giao dịch: " + wallet.WalletTransactionId
                     });
+                    var notification1 = new Notification
+                    {
+                        NotificationId = Guid.NewGuid(),
+                        Title = "Giao dịch course",
+                        Content = "Giao dịch course của bạn đã được hủy bỏ. Mã giao dịch: " + wallet.WalletTransactionId,
+                        UserId = sender.Id,
+                        CreatedAt = DateTime.Now,
+                        Status = (int)NotificationEnum.UnRead
+                    };
+                    var notification2 = new Notification
+                    {
+                        NotificationId = Guid.NewGuid(),
+                        Title = "Giao dịch course",
+                        Content = "Giao dịch course của bạn đã được hủy bỏ. Mã giao dịch: " + wallet.WalletTransactionId,
+                        UserId = receiver.Id,
+                        CreatedAt = DateTime.Now,
+                        Status = (int)NotificationEnum.UnRead
+                    };
+                    _context.Notifications.Add(notification1);
+                    _context.Notifications.Add(notification2);
+                    _firebaseRealtimeDatabaseService.SetAsync("Notifications/" + notification1.NotificationId, notification1);
+                    _firebaseRealtimeDatabaseService.SetAsync("Notifications/" + notification2.NotificationId, notification2);
                 }
                 else if (choice == (Int32)UpdateTransactionType.Wallet)
                 {
@@ -543,6 +727,28 @@ namespace Services.Implementations
                         Subject = "Xác nhận giao dịch",
                         Body = "Giao dịch ví của bạn đã được hủy bỏ. Mã giao dịch: " + wallet.WalletTransactionId
                     });
+                    var notification1 = new Notification
+                    {
+                        NotificationId = Guid.NewGuid(),
+                        Title = "Giao dịch ví",
+                        Content = "Giao dịch ví của bạn đã được hủy bỏ. Mã giao dịch: " + wallet.WalletTransactionId,
+                        UserId = sender.Id,
+                        CreatedAt = DateTime.Now,
+                        Status = (int)NotificationEnum.UnRead
+                    };
+                    var notification2 = new Notification
+                    {
+                        NotificationId = Guid.NewGuid(),
+                        Title = "Giao dịch ví",
+                        Content = "Giao dịch ví của bạn đã được hủy bỏ. Mã giao dịch: " + wallet.WalletTransactionId,
+                        UserId = receiver.Id,
+                        CreatedAt = DateTime.Now,
+                        Status = (int)NotificationEnum.UnRead
+                    };
+                    _context.Notifications.Add(notification1);
+                    _context.Notifications.Add(notification2);
+                    _firebaseRealtimeDatabaseService.SetAsync("Notifications/" + notification1.NotificationId, notification1);
+                    _firebaseRealtimeDatabaseService.SetAsync("Notifications/" + notification2.NotificationId, notification2);
                 }
                 else if (choice == (Int32)UpdateTransactionType.Unknown) { return new StatusCodeResult(406); }
             }

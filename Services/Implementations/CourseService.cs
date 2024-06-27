@@ -17,8 +17,10 @@ namespace Services.Implementations
 {
     public class CourseService : BaseService, ICourseService
     {
-        public CourseService(ODTutorContext context, IMapper mapper) : base(context, mapper)
+        private readonly IFirebaseRealtimeDatabaseService _firebaseRealtimeDatabaseService;
+        public CourseService(ODTutorContext context, IMapper mapper, IFirebaseRealtimeDatabaseService firebaseRealtimeDatabaseService) : base(context, mapper)
         {
+            _firebaseRealtimeDatabaseService = firebaseRealtimeDatabaseService;
         }
         public async Task<IActionResult> CreateCourse(CourseRequest courseRequest)
         {
@@ -34,6 +36,17 @@ namespace Services.Implementations
             var course = _mapper.Map<Course>(courseRequest);
             course.CourseId = Guid.NewGuid();
             _context.Courses.Add(course);
+            var notification = new Notification
+            {
+                NotificationId = Guid.NewGuid(),
+                Title = "Tạo khóa học thành công",
+                Content = "Chúc mừng bạn đã tạo khóa học thành công. Bạn có thể sử dụng tài khoản của mình để kiểm tra thông tin khóa học.",
+                UserId = tutor.UserId,
+                CreatedAt = DateTime.Now,
+                Status = (Int32)NotificationEnum.UnRead
+            };
+            _context.Notifications.Add(notification);
+            _firebaseRealtimeDatabaseService.SetAsync("Notifications/" + notification.NotificationId, notification);
             await _context.SaveChangesAsync();
             await _appExtension.SendMail(new MailContent()
             {
@@ -45,7 +58,7 @@ namespace Services.Implementations
         }
         public async Task<IActionResult> UpdateCourse(UpdateCourseRequest courseRequest)
         {
-            var tutor = await _context.Tutors.FirstOrDefaultAsync(c => c.TutorId == courseRequest.TutorId);
+            var tutor = await _context.Tutors.Include(c => c.UserNavigation).FirstOrDefaultAsync(c => c.TutorId == courseRequest.TutorId);
             var course = await _context.Courses.FirstOrDefaultAsync(c => c.CourseId == courseRequest.CourseId);
             if (tutor == null || course == null)
             {
@@ -77,6 +90,17 @@ namespace Services.Implementations
                 course.Status = courseRequest.Status;
             }
             _context.Courses.Update(course);
+            var notification = new Notification
+            {
+                NotificationId = Guid.NewGuid(),
+                Title = "Cập nhật khóa học thành công",
+                Content = "Chúc mừng bạn đã cập nhật khóa học thành công. Bạn có thể sử dụng tài khoản của mình để kiểm tra thông tin khóa học.",
+                UserId = tutor.UserId,
+                CreatedAt = DateTime.Now,
+                Status = (Int32)NotificationEnum.UnRead
+            };
+            _context.Notifications.Add(notification);
+            _firebaseRealtimeDatabaseService.SetAsync("Notifications/" + notification.NotificationId, notification);
             await _context.SaveChangesAsync();
             await _appExtension.SendMail(new MailContent()
             {
@@ -90,7 +114,7 @@ namespace Services.Implementations
         {
             try
             {
-                var course = await _context.Courses.FirstOrDefaultAsync(c => c.CourseId == id);
+                var course = await _context.Courses.Include(c => c.TutorNavigation).FirstOrDefaultAsync(c => c.CourseId == id);
                 if (course == null)
                 {
                     return new StatusCodeResult(404);
@@ -125,6 +149,17 @@ namespace Services.Implementations
                             studentCourse.Status = (Int32)CourseEnum.Deleted;
                             _context.StudentCourses.Update(studentCourse);
                         }
+                        var notification = new Notification
+                        {
+                            NotificationId = Guid.NewGuid(),
+                            Title = "Xóa khóa học khỏi tìm kiếm thành công",
+                            Content = "Khóa học đã được xóa khỏi tìm kiếm. Bạn có thể sử dụng tài khoản của mình để kiểm tra thông tin khóa học. Học viên đã từng đăng ký vẫn có thể truy cập để lấy tài liệu.",
+                            UserId = course.TutorNavigation.UserId,
+                            CreatedAt = DateTime.Now,
+                            Status = (Int32)NotificationEnum.UnRead
+                        };
+                        _context.Notifications.Add(notification);
+                        _firebaseRealtimeDatabaseService.SetAsync("Notifications/" + notification.NotificationId, notification);
                         await _context.SaveChangesAsync();
                         await _appExtension.SendMail(new MailContent()
                         {
@@ -156,6 +191,17 @@ namespace Services.Implementations
                         _context.Schedules.RemoveRange(schedules);
                         _context.StudentCourses.Remove(studentCourse);
                     }
+                    var notification = new Notification
+                    {
+                        NotificationId = Guid.NewGuid(),
+                        Title = "Xóa khóa học thành công",
+                        Content = "Khóa học đã được xóa thành công. Bạn có thể sử dụng tài khoản của mình để kiểm tra thông tin khóa học.",
+                        UserId = course.TutorNavigation.UserId,
+                        CreatedAt = DateTime.Now,
+                        Status = (Int32)NotificationEnum.UnRead
+                    };
+                    _context.Notifications.Add(notification);
+                    _firebaseRealtimeDatabaseService.SetAsync("Notifications/" + notification.NotificationId, notification);
                     await _context.SaveChangesAsync();
                     await _appExtension.SendMail(new MailContent()
                     {
@@ -175,7 +221,7 @@ namespace Services.Implementations
         }
         public async Task<IActionResult> CreateCourseOutline(CourseOutlineRequest courseOutlineRequest)
         {
-            var course = await _context.Courses.FirstOrDefaultAsync(c => c.CourseId == courseOutlineRequest.CourseId && c.Status == (Int32)CourseEnum.Active);
+            var course = await _context.Courses.Include(c => c.TutorNavigation).FirstOrDefaultAsync(c => c.CourseId == courseOutlineRequest.CourseId && c.Status == (Int32)CourseEnum.Active);
             if (course == null)
             {
                 return new StatusCodeResult(404);
@@ -183,6 +229,15 @@ namespace Services.Implementations
             var courseOutline = _mapper.Map<CourseOutline>(courseOutlineRequest);
             courseOutline.CourseOutlineId = Guid.NewGuid();
             _context.CourseOutlines.Add(courseOutline);
+            var notification = new Notification
+            {
+                NotificationId = Guid.NewGuid(),
+                Title = "Tạo đề cương khóa học thành công",
+                Content = "Đề cương được tạo thành công. Vui lòng kiểm tra thông tin đề cương tại mục Khóa học.",
+                UserId = course.TutorNavigation.UserId,
+                CreatedAt = DateTime.Now,
+                Status = (Int32)NotificationEnum.UnRead
+            };
             await _context.SaveChangesAsync();
             await _appExtension.SendMail(new MailContent()
             {
@@ -194,7 +249,7 @@ namespace Services.Implementations
         }
         public async Task<IActionResult> UpdateCourseOutline(UpdateCourseOutlineRequest courseOutlineRequest)
         {
-            var course = await _context.Courses.FirstOrDefaultAsync(c => c.CourseId == courseOutlineRequest.CourseId && c.Status == (Int32)CourseEnum.Active);
+            var course = await _context.Courses.Include(c => c.TutorNavigation).FirstOrDefaultAsync(c => c.CourseId == courseOutlineRequest.CourseId && c.Status == (Int32)CourseEnum.Active);
             var courseOutline = await _context.CourseOutlines.FirstOrDefaultAsync(c => c.CourseOutlineId == courseOutlineRequest.CourseOutlineId && c.Status != (Int32)CourseEnum.Deleted);
             if (course == null || courseOutline == null)
             {
@@ -214,6 +269,17 @@ namespace Services.Implementations
                 courseOutline.Status = courseOutlineRequest.Status;
             }
             _context.CourseOutlines.Update(courseOutline);
+            var notification = new Notification
+            {
+                NotificationId = Guid.NewGuid(),
+                Title = "Cập nhật đề cương khóa học thành công",
+                Content = "Đề cương được cập nhật thành công. Vui lòng kiểm tra thông tin đề cương tại mục Khóa học.",
+                UserId = course.TutorNavigation.UserId,
+                CreatedAt = DateTime.Now,
+                Status = (Int32)NotificationEnum.UnRead
+            };
+            _context.Notifications.Add(notification);
+            _firebaseRealtimeDatabaseService.SetAsync("Notifications/" + notification.NotificationId, notification);
             await _context.SaveChangesAsync();
             await _appExtension.SendMail(new MailContent()
             {
@@ -226,7 +292,7 @@ namespace Services.Implementations
         public async Task<IActionResult> DeleteCourseOutline(Guid id)
         {
             var courseOutline = await _context.CourseOutlines.FirstOrDefaultAsync(c => c.CourseOutlineId == id);
-            var course = await _context.Courses.FirstOrDefaultAsync(c => c.CourseId == courseOutline.CourseId);
+            var course = await _context.Courses.Include(c => c.TutorNavigation).ThenInclude(c => c.UserNavigation).FirstOrDefaultAsync(c => c.CourseId == courseOutline.CourseId);
             var transactions = await _context.CourseTransactions.AnyAsync(c => c.CourseId == id);
             if (courseOutline == null || course == null)
             {
@@ -242,6 +308,17 @@ namespace Services.Implementations
                 {
                     courseOutline.Status = (Int32)CourseEnum.Deleted;
                     _context.CourseOutlines.Update(courseOutline);
+                    var notification = new Notification
+                    {
+                        NotificationId = Guid.NewGuid(),
+                        Title = "Xóa đề cương khóa học khỏi tìm kiếm thành công",
+                        Content = "Đề cương được xóa khỏi tìm kiếm thành công. Các tài khoản đã đăng kí khóa học vẫn có thể truy cập vào nguồn tài liệu.",
+                        UserId = course.TutorNavigation.UserId,
+                        CreatedAt = DateTime.Now,
+                        Status = (Int32)NotificationEnum.UnRead
+                    };
+                    _context.Notifications.Add(notification);
+                    _firebaseRealtimeDatabaseService.SetAsync("Notifications/" + notification.NotificationId, notification);
                     await _context.SaveChangesAsync();
                     await _appExtension.SendMail(new MailContent()
                     {
@@ -255,6 +332,17 @@ namespace Services.Implementations
             else
             {
                 _context.CourseOutlines.Remove(courseOutline);
+                var notification = new Notification
+                {
+                    NotificationId = Guid.NewGuid(),
+                    Title = "Xóa đề cương khóa học thành công",
+                    Content = "Đề cương được xóa khỏi hệ thống thành công.",
+                    UserId = course.TutorNavigation.UserId,
+                    CreatedAt = DateTime.Now,
+                    Status = (Int32)NotificationEnum.UnRead
+                };
+                _context.Notifications.Add(notification);
+                _firebaseRealtimeDatabaseService.SetAsync("Notifications/" + notification.NotificationId, notification);
                 await _context.SaveChangesAsync();
                 await _appExtension.SendMail(new MailContent()
                 {
@@ -268,7 +356,7 @@ namespace Services.Implementations
         }
         public async Task<IActionResult> CreateCoursePromotion(CoursePromotionRequest coursePromotionRequest)
         {
-            var course = await _context.Courses.FirstOrDefaultAsync(c => c.CourseId == coursePromotionRequest.CourseId && c.Status == (Int32)CourseEnum.Active);
+            var course = await _context.Courses.Include(c => c.TutorNavigation).ThenInclude(c => c.UserNavigation).FirstOrDefaultAsync(c => c.CourseId == coursePromotionRequest.CourseId && c.Status == (Int32)CourseEnum.Active);
             var promotion = await _context.Promotions.FirstOrDefaultAsync(c => c.PromotionId == coursePromotionRequest.PromotionId);
             if (course == null || promotion == null)
             {
@@ -276,6 +364,17 @@ namespace Services.Implementations
             }
             var coursePromotion = _mapper.Map<CoursePromotion>(coursePromotionRequest);
             _context.CoursePromotions.Add(coursePromotion);
+            var notification = new Notification
+            {
+                NotificationId = Guid.NewGuid(),
+                Title = "Tạo mã giảm giá cho khóa học thành công",
+                Content = "Mã giảm giá được tạo thành công. Vui lòng kiểm tra thông tin tại mục Mã giảm giá.",
+                UserId = course.TutorNavigation.UserId,
+                CreatedAt = DateTime.Now,
+                Status = (Int32)NotificationEnum.UnRead
+            };
+            _context.Notifications.Add(notification);
+            _firebaseRealtimeDatabaseService.SetAsync("Notifications/" + notification.NotificationId, notification);
             await _context.SaveChangesAsync();
             await _appExtension.SendMail(new MailContent()
             {
@@ -287,12 +386,23 @@ namespace Services.Implementations
         }
         public async Task<IActionResult> DeleteCoursePromotion(CoursePromotionRequest coursePromotionRequest)
         {
-            var coursePromotion = await _context.CoursePromotions.FirstOrDefaultAsync(c => c.CourseId == coursePromotionRequest.CourseId && c.PromotionId == coursePromotionRequest.PromotionId);
+            var coursePromotion = await _context.CoursePromotions.Include(c => c.CourseNavigation).ThenInclude(c => c.TutorNavigation).ThenInclude(c => c.UserNavigation).FirstOrDefaultAsync(c => c.CourseId == coursePromotionRequest.CourseId && c.PromotionId == coursePromotionRequest.PromotionId);
             if (coursePromotion == null)
             {
                 return new StatusCodeResult(404);
             }
             _context.CoursePromotions.Remove(coursePromotion);
+            var notification = new Notification
+            {
+                NotificationId = Guid.NewGuid(),
+                Title = "Xóa mã giảm giá khóa học thành công",
+                Content = "Mã giảm giá được xóa thành công.",
+                UserId = coursePromotion.CourseNavigation.TutorNavigation.UserId,
+                CreatedAt = DateTime.Now,
+                Status = (Int32)NotificationEnum.UnRead
+            };
+            _context.Notifications.Add(notification);
+            _firebaseRealtimeDatabaseService.SetAsync("Notifications/" + notification.NotificationId, notification);
             await _context.SaveChangesAsync();
             await _appExtension.SendMail(new MailContent()
             {
@@ -304,13 +414,24 @@ namespace Services.Implementations
         }
         public async Task<IActionResult> UpdateCoursePromotion(CoursePromotionRequest coursePromotionRequest)
         {
-            var coursePromotion = await _context.CoursePromotions.FirstOrDefaultAsync(c => c.CourseId == coursePromotionRequest.CourseId && c.PromotionId == coursePromotionRequest.PromotionId);
+            var coursePromotion = await _context.CoursePromotions.Include(c => c.CourseNavigation).ThenInclude(c => c.TutorNavigation).ThenInclude(c => c.UserNavigation).FirstOrDefaultAsync(c => c.CourseId == coursePromotionRequest.CourseId && c.PromotionId == coursePromotionRequest.PromotionId);
             if (coursePromotion == null)
             {
                 return new StatusCodeResult(404);
             }
             coursePromotion.PromotionId = coursePromotionRequest.PromotionId;
             _context.CoursePromotions.Update(coursePromotion);
+            var notification = new Notification
+            {
+                NotificationId = Guid.NewGuid(),
+                Title = "Cập nhật mã giảm giá khóa học thành công",
+                Content = "Mã giảm giá được cập nhật thành công. Vui lòng kiểm tra thông tin tại mục Mã giảm giá.",
+                UserId = coursePromotion.CourseNavigation.TutorNavigation.UserId,
+                CreatedAt = DateTime.Now,
+                Status = (Int32)NotificationEnum.UnRead
+            };
+            _context.Notifications.Add(notification);
+            _firebaseRealtimeDatabaseService.SetAsync("Notifications/" + notification.NotificationId, notification);
             await _context.SaveChangesAsync();
             await _appExtension.SendMail(new MailContent()
             {
@@ -322,7 +443,7 @@ namespace Services.Implementations
         }
         public async Task<IActionResult> CreatePromotion(CreatePromotion createPromotion)
         {
-            var promotionExist = await _context.Promotions.AnyAsync(c => c.PromotionCode == createPromotion.PromotionCode); //moi ma 1 loai phan tram thoi. Ex: VARLUOTDIOLE, PEREZMUATAI
+            var promotionExist = await _context.Promotions.Include(c => c.TutorNavigation).ThenInclude(c => c.UserNavigation).AnyAsync(c => c.PromotionCode == createPromotion.PromotionCode); //moi ma 1 loai phan tram thoi. Ex: VARLUOTDIOLE, PEREZMUATAI
             if (promotionExist)
             {
                 return new StatusCodeResult(409);
@@ -330,6 +451,17 @@ namespace Services.Implementations
             var promotion = _mapper.Map<Promotion>(createPromotion);
             promotion.PromotionId = Guid.NewGuid();
             _context.Promotions.Add(promotion);
+            var notification = new Notification
+            {
+                NotificationId = Guid.NewGuid(),
+                Title = "Tạo mã giảm giá thành công",
+                Content = "Mã giảm giá được tạo thành công. Vui lòng kiểm tra thông tin tại mục Mã giảm giá.",
+                UserId = promotion.TutorNavigation.UserId,
+                CreatedAt = DateTime.Now,
+                Status = (Int32)NotificationEnum.UnRead
+            };
+            _context.Notifications.Add(notification);
+            _firebaseRealtimeDatabaseService.SetAsync("Notifications/" + notification.NotificationId, notification);
             await _context.SaveChangesAsync();
             await _appExtension.SendMail(new MailContent()
             {
@@ -341,7 +473,7 @@ namespace Services.Implementations
         }
         public async Task<IActionResult> UpdatePromotion(UpdatePromotion updatePromotion)
         {
-            var promotion = await _context.Promotions.FirstOrDefaultAsync(c => c.PromotionId == updatePromotion.PromotionId);
+            var promotion = await _context.Promotions.Include(c => c.TutorNavigation).ThenInclude(c => c.UserNavigation).FirstOrDefaultAsync(c => c.PromotionId == updatePromotion.PromotionId);
             if (promotion == null)
             {
                 return new StatusCodeResult(404);
@@ -349,6 +481,17 @@ namespace Services.Implementations
             promotion.PromotionCode = updatePromotion.PromotionCode.ToUpper();
             promotion.Percentage = updatePromotion.Percentage;
             _context.Promotions.Update(promotion);
+            var notification = new Notification
+            {
+                NotificationId = Guid.NewGuid(),
+                Title = "Cập nhật mã giảm giá thành công",
+                Content = "Mã giảm giá được cập nhật thành công. Vui lòng kiểm tra thông tin tại mục Mã giảm giá.",
+                UserId = promotion.TutorNavigation.UserId,
+                CreatedAt = DateTime.Now,
+                Status = (Int32)NotificationEnum.UnRead
+            };
+            _context.Notifications.Add(notification);
+            _firebaseRealtimeDatabaseService.SetAsync("Notifications/" + notification.NotificationId, notification);
             await _context.SaveChangesAsync();
             await _appExtension.SendMail(new MailContent()
             {
@@ -360,12 +503,23 @@ namespace Services.Implementations
         }
         public async Task<IActionResult> DeletePromotion(Guid id)
         {
-            var promotion = await _context.Promotions.FirstOrDefaultAsync(c => c.PromotionId == id);
+            var promotion = await _context.Promotions.Include(c => c.TutorNavigation).ThenInclude(c => c.UserNavigation).FirstOrDefaultAsync(c => c.PromotionId == id);
             if (promotion == null)
             {
                 return new StatusCodeResult(404);
             }
             _context.Promotions.Remove(promotion);
+            var notification = new Notification
+            {
+                NotificationId = Guid.NewGuid(),
+                Title = "Xóa mã giảm giá thành công",
+                Content = "Mã giảm giá được xóa thành công",
+                UserId = promotion.TutorNavigation.UserId,
+                CreatedAt = DateTime.Now,
+                Status = (Int32)NotificationEnum.UnRead
+            };
+            _context.Notifications.Add(notification);
+            _firebaseRealtimeDatabaseService.SetAsync("Notifications/" + notification.NotificationId, notification);
             await _context.SaveChangesAsync();
             await _appExtension.SendMail(new MailContent()
             {

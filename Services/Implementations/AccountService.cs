@@ -9,6 +9,7 @@ using Microsoft.Extensions.Options;
 using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages.Manage;
 using MimeKit;
 using Models.Entities;
+using Models.Enumerables;
 using Models.Models.Emails;
 using Models.Models.Requests;
 using Models.Models.Views;
@@ -27,7 +28,8 @@ namespace Services.Implementations
     public class AccountService : BaseService, IAccountService
     {
         private readonly IUserService _userService;
-        
+        private readonly IFirebaseRealtimeDatabaseService _firebaseRealtimeDatabaseService;
+
         public AccountService(ODTutorContext context, IMapper mapper, IUserService userService) : base(context, mapper)
         {
             _userService = userService;
@@ -86,6 +88,17 @@ namespace Services.Implementations
                     LastBalanceUpdate = DateTime.Now
                 };
                 _context.Wallets.Add(wallet);
+                var notification = new Notification
+                {
+                    NotificationId = Guid.NewGuid(),
+                    Title = "Chào mừng bạn đến với ODTutor",
+                    Content = "Chào mừng bạn đến với ODTutor, vui lòng xác thực tài khoản của bạn để có thể trải nghiệm đầy đủ nhất.",
+                    UserId = account.Id,
+                    CreatedAt = DateTime.Now,
+                    Status = (Int32)NotificationEnum.UnRead
+                };
+                _context.Notifications.Add(notification);
+                _firebaseRealtimeDatabaseService.SetAsync<Notification>($"notifications/{account.Id}/{notification.NotificationId}", notification);
                 await _context.SaveChangesAsync();
                 var accountResponse = _mapper.Map<AccountResponse>(account);
                 // Return information of account
