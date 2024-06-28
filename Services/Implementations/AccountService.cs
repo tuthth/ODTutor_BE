@@ -85,7 +85,7 @@ namespace Services.Implementations
                     Amount = 0,
                     AvalaibleAmount = 0,
                     PendingAmount = 0,
-                    LastBalanceUpdate = DateTime.Now
+                    LastBalanceUpdate = DateTime.UtcNow.AddHours(7)
                 };
                 _context.Wallets.Add(wallet);
                 var notification = new Notification
@@ -94,7 +94,7 @@ namespace Services.Implementations
                     Title = "Chào mừng bạn đến với ODTutor",
                     Content = "Chào mừng bạn đến với ODTutor, vui lòng xác thực tài khoản của bạn để có thể trải nghiệm đầy đủ nhất.",
                     UserId = account.Id,
-                    CreatedAt = DateTime.Now,
+                    CreatedAt = DateTime.UtcNow.AddHours(7),
                     Status = (Int32)NotificationEnum.UnRead
                 };
                 _context.Notifications.Add(notification);
@@ -132,7 +132,7 @@ namespace Services.Implementations
                         Email = payload.Email,
                         Password = passwordTemplate,
                         ConfirmPassword = passwordTemplate, 
-                        DateOfBirth = DateTime.Now, 
+                        DateOfBirth = DateTime.UtcNow.AddHours(7), 
                         PhoneNumber = "00000"
                     };
                     await createAccount(registerRequest);
@@ -324,7 +324,7 @@ namespace Services.Implementations
                 var account = _mapper.Map<User>(accountRegisterRequest);
                 account.Password = _appExtension.CreateHashPassword(accountRegisterRequest.GoogleId);
                 account.Active = true; // Default is true
-                account.DateOfBirth = DateTime.Now;
+                account.DateOfBirth = DateTime.UtcNow.AddHours(7);
                 account.PhoneNumber = "123456789";
                 account.Status = 1;
                 account.Fcm ="";
@@ -345,7 +345,7 @@ namespace Services.Implementations
                     Amount = 0,
                     AvalaibleAmount = 0,
                     PendingAmount = 0,
-                    LastBalanceUpdate = DateTime.Now
+                    LastBalanceUpdate = DateTime.UtcNow.AddHours(7)
                 };
                 _context.Wallets.Add(wallet);
                 await _context.SaveChangesAsync();

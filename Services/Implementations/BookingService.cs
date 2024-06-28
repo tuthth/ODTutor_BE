@@ -53,7 +53,7 @@ namespace Services.Implementations
                 }
                 var booking = _mapper.Map<Booking>(bookingRequest);
                 booking.BookingId = Guid.NewGuid();
-                booking.CreatedAt = DateTime.Now;
+                booking.CreatedAt = DateTime.UtcNow.AddHours(7);
                 booking.Status = (Int32)BookingEnum.WaitingPayment;
                 response.BookingId = booking.BookingId;
                 _context.Bookings.Add(booking);
@@ -140,7 +140,7 @@ namespace Services.Implementations
                 notification.UserId = student.UserId;
                 notification.Title = "Đặt lịch thành công";
                 notification.Content = "Bạn đã đặt lịch học thành công";
-                notification.CreatedAt = DateTime.Now;
+                notification.CreatedAt = DateTime.UtcNow.AddHours(7);
                 _context.Notifications.Add(notification);
                 // Lưu notification vào firestore
                 _firebaseRealtimeDatabaseService.SetAsync("Notifications/" + notification.NotificationId, notification);

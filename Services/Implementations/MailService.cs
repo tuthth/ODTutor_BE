@@ -48,7 +48,7 @@ namespace Services.Implementations
                         Id = Guid.NewGuid(),
                         UserId = checkEmail.Id,
                         EmailToken = tokenEmail,
-                        EmailTokenExpiry = DateTime.Now.AddMinutes(15)
+                        EmailTokenExpiry = DateTime.UtcNow.AddHours(7).AddMinutes(15)
                     };
                     var notification = new Notification
                     {
@@ -56,7 +56,7 @@ namespace Services.Implementations
                         Title = "Mã xác thực OTP",
                         Content = "Hãy vào hộp thư email để kiểm tra chi tiết",
                         UserId = checkEmail.Id,
-                        CreatedAt = DateTime.Now,
+                        CreatedAt = DateTime.UtcNow.AddHours(7),
                         Status = (Int32)NotificationEnum.UnRead
                     };
                     _context.Notifications.Add(notification);

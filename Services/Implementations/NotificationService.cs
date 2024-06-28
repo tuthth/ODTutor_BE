@@ -32,7 +32,7 @@ namespace Services.Implementations
                     Title = request.Title,
                     Content = request.Content,
                     UserId = request.UserId,
-                    CreatedAt = DateTime.Now,
+                    CreatedAt = DateTime.UtcNow.AddHours(7),
                     Status = (Int32)NotificationEnum.UnRead
                 };
                 await _firebaseRealtimeDatabaseService.SetAsync<Notification>($"notifications/{request.UserId}/{notification.NotificationId}", notification);

@@ -13,7 +13,7 @@ namespace Models.Validation
         {
             if (value is DateTime date)
             {
-                return date < DateTime.Now;
+                return date < DateTime.UtcNow.AddHours(7);
             }
             return true;
         }

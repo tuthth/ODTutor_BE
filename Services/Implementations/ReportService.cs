@@ -28,8 +28,8 @@ namespace Services.Implementations
             var report = _mapper.Map<Report>(reportRequest);
             var sender = _context.Users.FirstOrDefault(x => x.Id == reportRequest.SenderUserId);
             var target = _context.Users.FirstOrDefault(x => x.Id == reportRequest.TargetId);
-            report.CreatedAt = DateTime.Now;
-            report.UpdatedAt = DateTime.Now;
+            report.CreatedAt = DateTime.UtcNow.AddHours(7);
+            report.UpdatedAt = DateTime.UtcNow.AddHours(7);
             report.ReportId = Guid.NewGuid();
             report.Status = (Int32)ReportEnum.Processing;
 
@@ -167,7 +167,7 @@ namespace Services.Implementations
             var target = _context.Users.FirstOrDefault(x => x.Id == report.TargetId);
 
             if (report.Status != (Int32)ReportEnum.Finished) return new StatusCodeResult(409);
-            DateTime finishedTime = DateTime.Now;
+            DateTime finishedTime = DateTime.UtcNow.AddHours(7);
             if(action.Status == (Int32)ReportActionEnum.SevenDays)
             {
                 finishedTime = finishedTime.AddDays(7);

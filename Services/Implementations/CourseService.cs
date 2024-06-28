@@ -42,7 +42,7 @@ namespace Services.Implementations
                 Title = "Tạo khóa học thành công",
                 Content = "Chúc mừng bạn đã tạo khóa học thành công. Bạn có thể sử dụng tài khoản của mình để kiểm tra thông tin khóa học.",
                 UserId = tutor.UserId,
-                CreatedAt = DateTime.Now,
+                CreatedAt = DateTime.UtcNow.AddHours(7),
                 Status = (Int32)NotificationEnum.UnRead
             };
             _context.Notifications.Add(notification);
@@ -96,7 +96,7 @@ namespace Services.Implementations
                 Title = "Cập nhật khóa học thành công",
                 Content = "Chúc mừng bạn đã cập nhật khóa học thành công. Bạn có thể sử dụng tài khoản của mình để kiểm tra thông tin khóa học.",
                 UserId = tutor.UserId,
-                CreatedAt = DateTime.Now,
+                CreatedAt = DateTime.UtcNow.AddHours(7),
                 Status = (Int32)NotificationEnum.UnRead
             };
             _context.Notifications.Add(notification);
@@ -155,7 +155,7 @@ namespace Services.Implementations
                             Title = "Xóa khóa học khỏi tìm kiếm thành công",
                             Content = "Khóa học đã được xóa khỏi tìm kiếm. Bạn có thể sử dụng tài khoản của mình để kiểm tra thông tin khóa học. Học viên đã từng đăng ký vẫn có thể truy cập để lấy tài liệu.",
                             UserId = course.TutorNavigation.UserId,
-                            CreatedAt = DateTime.Now,
+                            CreatedAt = DateTime.UtcNow.AddHours(7),
                             Status = (Int32)NotificationEnum.UnRead
                         };
                         _context.Notifications.Add(notification);
@@ -197,7 +197,7 @@ namespace Services.Implementations
                         Title = "Xóa khóa học thành công",
                         Content = "Khóa học đã được xóa thành công. Bạn có thể sử dụng tài khoản của mình để kiểm tra thông tin khóa học.",
                         UserId = course.TutorNavigation.UserId,
-                        CreatedAt = DateTime.Now,
+                        CreatedAt = DateTime.UtcNow.AddHours(7),
                         Status = (Int32)NotificationEnum.UnRead
                     };
                     _context.Notifications.Add(notification);
@@ -235,7 +235,7 @@ namespace Services.Implementations
                 Title = "Tạo đề cương khóa học thành công",
                 Content = "Đề cương được tạo thành công. Vui lòng kiểm tra thông tin đề cương tại mục Khóa học.",
                 UserId = course.TutorNavigation.UserId,
-                CreatedAt = DateTime.Now,
+                CreatedAt = DateTime.UtcNow.AddHours(7),
                 Status = (Int32)NotificationEnum.UnRead
             };
             await _context.SaveChangesAsync();
@@ -275,7 +275,7 @@ namespace Services.Implementations
                 Title = "Cập nhật đề cương khóa học thành công",
                 Content = "Đề cương được cập nhật thành công. Vui lòng kiểm tra thông tin đề cương tại mục Khóa học.",
                 UserId = course.TutorNavigation.UserId,
-                CreatedAt = DateTime.Now,
+                CreatedAt = DateTime.UtcNow.AddHours(7),
                 Status = (Int32)NotificationEnum.UnRead
             };
             _context.Notifications.Add(notification);
@@ -314,7 +314,7 @@ namespace Services.Implementations
                         Title = "Xóa đề cương khóa học khỏi tìm kiếm thành công",
                         Content = "Đề cương được xóa khỏi tìm kiếm thành công. Các tài khoản đã đăng kí khóa học vẫn có thể truy cập vào nguồn tài liệu.",
                         UserId = course.TutorNavigation.UserId,
-                        CreatedAt = DateTime.Now,
+                        CreatedAt = DateTime.UtcNow.AddHours(7),
                         Status = (Int32)NotificationEnum.UnRead
                     };
                     _context.Notifications.Add(notification);
@@ -338,7 +338,7 @@ namespace Services.Implementations
                     Title = "Xóa đề cương khóa học thành công",
                     Content = "Đề cương được xóa khỏi hệ thống thành công.",
                     UserId = course.TutorNavigation.UserId,
-                    CreatedAt = DateTime.Now,
+                    CreatedAt = DateTime.UtcNow.AddHours(7),
                     Status = (Int32)NotificationEnum.UnRead
                 };
                 _context.Notifications.Add(notification);
@@ -370,7 +370,7 @@ namespace Services.Implementations
                 Title = "Tạo mã giảm giá cho khóa học thành công",
                 Content = "Mã giảm giá được tạo thành công. Vui lòng kiểm tra thông tin tại mục Mã giảm giá.",
                 UserId = course.TutorNavigation.UserId,
-                CreatedAt = DateTime.Now,
+                CreatedAt = DateTime.UtcNow.AddHours(7),
                 Status = (Int32)NotificationEnum.UnRead
             };
             _context.Notifications.Add(notification);
@@ -398,7 +398,7 @@ namespace Services.Implementations
                 Title = "Xóa mã giảm giá khóa học thành công",
                 Content = "Mã giảm giá được xóa thành công.",
                 UserId = coursePromotion.CourseNavigation.TutorNavigation.UserId,
-                CreatedAt = DateTime.Now,
+                CreatedAt = DateTime.UtcNow.AddHours(7),
                 Status = (Int32)NotificationEnum.UnRead
             };
             _context.Notifications.Add(notification);
@@ -427,7 +427,7 @@ namespace Services.Implementations
                 Title = "Cập nhật mã giảm giá khóa học thành công",
                 Content = "Mã giảm giá được cập nhật thành công. Vui lòng kiểm tra thông tin tại mục Mã giảm giá.",
                 UserId = coursePromotion.CourseNavigation.TutorNavigation.UserId,
-                CreatedAt = DateTime.Now,
+                CreatedAt = DateTime.UtcNow.AddHours(7),
                 Status = (Int32)NotificationEnum.UnRead
             };
             _context.Notifications.Add(notification);
@@ -457,7 +457,7 @@ namespace Services.Implementations
                 Title = "Tạo mã giảm giá thành công",
                 Content = "Mã giảm giá được tạo thành công. Vui lòng kiểm tra thông tin tại mục Mã giảm giá.",
                 UserId = promotion.TutorNavigation.UserId,
-                CreatedAt = DateTime.Now,
+                CreatedAt = DateTime.UtcNow.AddHours(7),
                 Status = (Int32)NotificationEnum.UnRead
             };
             _context.Notifications.Add(notification);
@@ -487,7 +487,7 @@ namespace Services.Implementations
                 Title = "Cập nhật mã giảm giá thành công",
                 Content = "Mã giảm giá được cập nhật thành công. Vui lòng kiểm tra thông tin tại mục Mã giảm giá.",
                 UserId = promotion.TutorNavigation.UserId,
-                CreatedAt = DateTime.Now,
+                CreatedAt = DateTime.UtcNow.AddHours(7),
                 Status = (Int32)NotificationEnum.UnRead
             };
             _context.Notifications.Add(notification);
@@ -515,7 +515,7 @@ namespace Services.Implementations
                 Title = "Xóa mã giảm giá thành công",
                 Content = "Mã giảm giá được xóa thành công",
                 UserId = promotion.TutorNavigation.UserId,
-                CreatedAt = DateTime.Now,
+                CreatedAt = DateTime.UtcNow.AddHours(7),
                 Status = (Int32)NotificationEnum.UnRead
             };
             _context.Notifications.Add(notification);

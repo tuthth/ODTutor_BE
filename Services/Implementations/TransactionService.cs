@@ -53,7 +53,7 @@ namespace Services.Implementations
                     WalletTransactionId = Guid.NewGuid(),
                     SenderWalletId = (Guid)transactionCreate.SenderId,
                     ReceiverWalletId = (Guid)transactionCreate.ReceiverId,
-                    CreatedAt = DateTime.Now,
+                    CreatedAt = DateTime.UtcNow.AddHours(7),
                     Amount = transactionCreate.Amount,
                     Status = (int)VNPayType.PENDING,
                     Note = "Nạp tiền vào tài khoản"
@@ -74,7 +74,7 @@ namespace Services.Implementations
                     Title = "Nạp tiền vào tài khoản",
                     Content = "Bạn đã nhận được một giao dịch nạp tiền vào tài khoản với số tiền là " + transactionCreate.Amount + " VND. Mã giao dịch: " + transaction.WalletTransactionId,
                     UserId = findUser.Id,
-                    CreatedAt = DateTime.Now,
+                    CreatedAt = DateTime.UtcNow.AddHours(7),
                     Status = (int)NotificationEnum.UnRead
                 };
 
@@ -94,14 +94,14 @@ namespace Services.Implementations
                 vnpay.AddRequestData("vnp_TmnCode", vnp_TmnCode);
                 vnpay.AddRequestData("vnp_Amount", Math.Floor(decimal.Parse(transactionCreate.Amount.ToString()) * 100).ToString());
                 vnpay.AddRequestData("vnp_BankCode", "VNBANK");
-                vnpay.AddRequestData("vnp_CreateDate", DateTime.Now.ToString("yyyyMMddHHmmss"));
+                vnpay.AddRequestData("vnp_CreateDate", DateTime.UtcNow.AddHours(7).ToString("yyyyMMddHHmmss"));
                 vnpay.AddRequestData("vnp_CurrCode", "VND");
                 vnpay.AddRequestData("vnp_IpAddr", Utils.GetIpAddress(_httpContextAccessor));
                 vnpay.AddRequestData("vnp_Locale", "vn");
                 vnpay.AddRequestData("vnp_OrderInfo", transaction.WalletTransactionId.ToString());
                 vnpay.AddRequestData("vnp_OrderType", "other");
                 vnpay.AddRequestData("vnp_ReturnUrl", vnp_Returnurl);
-                vnpay.AddRequestData("vnp_TxnRef", DateTime.Now.Ticks.ToString());
+                vnpay.AddRequestData("vnp_TxnRef", DateTime.UtcNow.AddHours(7).Ticks.ToString());
 
                 string paymentUrl = vnpay.CreateRequestUrl(vnp_Url, vnp_HashSecret);
                 await _appExtension.SendMail(new MailContent()
@@ -134,7 +134,7 @@ namespace Services.Implementations
                     WalletTransactionId = Guid.NewGuid(),
                     SenderWalletId = (Guid)transactionCreate.SenderId,
                     ReceiverWalletId = (Guid)transactionCreate.ReceiverId, // This should be the admin's wallet ID
-                    CreatedAt = DateTime.Now,
+                    CreatedAt = DateTime.UtcNow.AddHours(7),
                     Amount = transactionCreate.Amount,
                     Status = (int)VNPayType.PENDING,
                     Note = "Rút tiền từ tài khoản"
@@ -158,7 +158,7 @@ namespace Services.Implementations
                     Title = "Rút tiền từ tài khoản",
                     Content = "Bạn đã tạo một giao dịch rút tiền từ tài khoản với số tiền là " + transactionCreate.Amount + " VND. Mã giao dịch: " + transaction.WalletTransactionId,
                     UserId = findUser.Id,
-                    CreatedAt = DateTime.Now,
+                    CreatedAt = DateTime.UtcNow.AddHours(7),
                     Status = (int)NotificationEnum.UnRead
                 };
                 _context.Notifications.Add(notification);
@@ -177,14 +177,14 @@ namespace Services.Implementations
                 vnpay.AddRequestData("vnp_TmnCode", vnp_TmnCode);
                 vnpay.AddRequestData("vnp_Amount", Math.Floor(decimal.Parse(transactionCreate.Amount.ToString()) * 100).ToString());
                 vnpay.AddRequestData("vnp_BankCode", "VNBANK");
-                vnpay.AddRequestData("vnp_CreateDate", DateTime.Now.ToString("yyyyMMddHHmmss"));
+                vnpay.AddRequestData("vnp_CreateDate", DateTime.UtcNow.AddHours(7).ToString("yyyyMMddHHmmss"));
                 vnpay.AddRequestData("vnp_CurrCode", "VND");
                 vnpay.AddRequestData("vnp_IpAddr", Utils.GetIpAddress(_httpContextAccessor));
                 vnpay.AddRequestData("vnp_Locale", "vn");
                 vnpay.AddRequestData("vnp_OrderInfo", transaction.WalletTransactionId.ToString());
                 vnpay.AddRequestData("vnp_OrderType", "other");
                 vnpay.AddRequestData("vnp_ReturnUrl", vnp_Returnurl);
-                vnpay.AddRequestData("vnp_TxnRef", DateTime.Now.Ticks.ToString());
+                vnpay.AddRequestData("vnp_TxnRef", DateTime.UtcNow.AddHours(7).Ticks.ToString());
 
                 string paymentUrl = vnpay.CreateRequestUrl(vnp_Url, vnp_HashSecret);
                 await _appExtension.SendMail(new MailContent()
@@ -216,7 +216,7 @@ namespace Services.Implementations
                 Title = "Giao dịch",
                 Content = "Giao dịch không hợp lệ, vui lòng kiểm tra lại thông tin.",
                 UserId = findUser.Id,
-                CreatedAt = DateTime.Now,
+                CreatedAt = DateTime.UtcNow.AddHours(7),
                 Status = (int)NotificationEnum.UnRead
             };
             _context.Notifications.Add(notificationError);
@@ -247,7 +247,7 @@ namespace Services.Implementations
                 WalletTransactionId = Guid.NewGuid(),
                 SenderWalletId = (Guid)transactionCreate.SenderId,
                 ReceiverWalletId = (Guid)transactionCreate.ReceiverId,
-                CreatedAt = DateTime.Now,
+                CreatedAt = DateTime.UtcNow.AddHours(7),
                 Amount = transactionCreate.Amount,
                 Status = (int)VNPayType.APPROVE,
             };
@@ -268,7 +268,7 @@ namespace Services.Implementations
                 Title = "Nâng cấp tài khoản",
                 Content = "Tài khoản",
                 UserId = findUser.Id,
-                CreatedAt = DateTime.Now,
+                CreatedAt = DateTime.UtcNow.AddHours(7),
                 Status = (int)NotificationEnum.UnRead
             };
             _context.Notifications.Add(notification);
@@ -304,7 +304,7 @@ namespace Services.Implementations
                 SenderWalletId = (Guid)transactionCreate.SenderId,
                 ReceiverWalletId = (Guid)transactionCreate.ReceiverId,
                 BookingId = transactionCreate.BookingId,
-                CreatedAt = DateTime.Now,
+                CreatedAt = DateTime.UtcNow.AddHours(7),
                 Amount = transactionCreate.Amount,
                 Status = (int)VNPayType.PENDING,
             };
@@ -315,7 +315,7 @@ namespace Services.Implementations
                 SenderWalletId = (Guid)transactionCreate.SenderId,
                 ReceiverWalletId = (Guid)transactionCreate.ReceiverId,
                 Amount = transactionCreate.Amount,
-                CreatedAt = DateTime.Now,
+                CreatedAt = DateTime.UtcNow.AddHours(7),
                 Status = (int)VNPayType.PENDING,
                 Note = "Giao dịch book giáo viên"
             };
@@ -335,7 +335,7 @@ namespace Services.Implementations
                     Title = "Giao dịch booking",
                     Content = "Giao dịch booking không hợp lệ, vui lòng kiểm tra lại thông tin.",
                     UserId = findUser.Id,
-                    CreatedAt = DateTime.Now,
+                    CreatedAt = DateTime.UtcNow.AddHours(7),
                     Status = (int)NotificationEnum.UnRead
                 };
                 _context.Notifications.Add(notificationError);
@@ -356,7 +356,7 @@ namespace Services.Implementations
                 Title = "Giao dịch booking",
                 Content = "Bạn đã nhận được một giao dịch booking với số tiền là " + transactionCreate.Amount + " VND. Mã giao dịch: " + transaction.BookingTransactionId,
                 UserId = findUser.Id,
-                CreatedAt = DateTime.Now,
+                CreatedAt = DateTime.UtcNow.AddHours(7),
                 Status = (int)NotificationEnum.UnRead
             };
             _context.Notifications.Add(notification);
@@ -390,7 +390,7 @@ namespace Services.Implementations
                 SenderWalletId = (Guid)transactionCreate.SenderId,
                 ReceiverWalletId = (Guid)transactionCreate.ReceiverId,
                 CourseId = transactionCreate.CourseId,
-                CreatedAt = DateTime.Now,
+                CreatedAt = DateTime.UtcNow.AddHours(7),
                 Amount = transactionCreate.Amount,
                 Status = (int)VNPayType.PENDING,
             };
@@ -401,7 +401,7 @@ namespace Services.Implementations
                 SenderWalletId = (Guid)transactionCreate.SenderId,
                 ReceiverWalletId = (Guid)transactionCreate.ReceiverId,
                 Amount = transactionCreate.Amount,
-                CreatedAt = DateTime.Now,
+                CreatedAt = DateTime.UtcNow.AddHours(7),
                 Status = (int)VNPayType.PENDING,
                 Note = "Giao dịch đặt khóa học"
             };
@@ -458,12 +458,12 @@ namespace Services.Implementations
 
                     //update wallet for sender and receiver
                     wallet.SenderWalletNavigation.Amount -= booking.Amount;
-                    wallet.SenderWalletNavigation.LastBalanceUpdate = DateTime.Now;
+                    wallet.SenderWalletNavigation.LastBalanceUpdate = DateTime.UtcNow.AddHours(7);
                     wallet.SenderWalletNavigation.PendingAmount += booking.Amount;
                     wallet.SenderWalletNavigation.AvalaibleAmount -= booking.Amount;
 
                     wallet.ReceiverWalletNavigation.Amount += booking.Amount;
-                    wallet.ReceiverWalletNavigation.LastBalanceUpdate = DateTime.Now;
+                    wallet.ReceiverWalletNavigation.LastBalanceUpdate = DateTime.UtcNow.AddHours(7);
                     wallet.ReceiverWalletNavigation.AvalaibleAmount += booking.Amount;
                     wallet.ReceiverWalletNavigation.PendingAmount -= booking.Amount;
 
@@ -487,7 +487,7 @@ namespace Services.Implementations
                         Title = "Giao dịch booking",
                         Content = "Giao dịch booking của bạn đã được xác nhận. Mã giao dịch: " + wallet.WalletTransactionId,
                         UserId = sender.Id,
-                        CreatedAt = DateTime.Now,
+                        CreatedAt = DateTime.UtcNow.AddHours(7),
                         Status = (int)NotificationEnum.UnRead
                     };
                     var notification2 = new Notification
@@ -496,7 +496,7 @@ namespace Services.Implementations
                         Title = "Giao dịch booking",
                         Content = "Giao dịch booking của bạn đã được xác nhận. Mã giao dịch: " + wallet.WalletTransactionId,
                         UserId = receiver.Id,
-                        CreatedAt = DateTime.Now,
+                        CreatedAt = DateTime.UtcNow.AddHours(7),
                         Status = (int)NotificationEnum.UnRead
                     };
                     _context.Notifications.Add(notification1);
@@ -513,12 +513,12 @@ namespace Services.Implementations
 
                     //update wallet for sender and receiver
                     wallet.SenderWalletNavigation.Amount -= course.Amount;
-                    wallet.SenderWalletNavigation.LastBalanceUpdate = DateTime.Now;
+                    wallet.SenderWalletNavigation.LastBalanceUpdate = DateTime.UtcNow.AddHours(7);
                     wallet.SenderWalletNavigation.PendingAmount += course.Amount;
                     wallet.SenderWalletNavigation.AvalaibleAmount -= course.Amount;
 
                     wallet.ReceiverWalletNavigation.Amount += course.Amount;
-                    wallet.ReceiverWalletNavigation.LastBalanceUpdate = DateTime.Now;
+                    wallet.ReceiverWalletNavigation.LastBalanceUpdate = DateTime.UtcNow.AddHours(7);
                     wallet.ReceiverWalletNavigation.AvalaibleAmount += course.Amount;
                     wallet.ReceiverWalletNavigation.PendingAmount -= course.Amount;
 
@@ -542,7 +542,7 @@ namespace Services.Implementations
                         Title = "Giao dịch course",
                         Content = "Giao dịch course của bạn đã được xác nhận. Mã giao dịch: " + wallet.WalletTransactionId,
                         UserId = sender.Id,
-                        CreatedAt = DateTime.Now,
+                        CreatedAt = DateTime.UtcNow.AddHours(7),
                         Status = (int)NotificationEnum.UnRead
                     };
                     var notification2 = new Notification
@@ -551,7 +551,7 @@ namespace Services.Implementations
                         Title = "Giao dịch course",
                         Content = "Giao dịch course của bạn đã được xác nhận. Mã giao dịch: " + wallet.WalletTransactionId,
                         UserId = receiver.Id,
-                        CreatedAt = DateTime.Now,
+                        CreatedAt = DateTime.UtcNow.AddHours(7),
                         Status = (int)NotificationEnum.UnRead
                     };
                     _context.Notifications.Add(notification1);
@@ -565,12 +565,12 @@ namespace Services.Implementations
 
                     //update wallet for sender and receiver
                     wallet.SenderWalletNavigation.Amount -= wallet.Amount;
-                    wallet.SenderWalletNavigation.LastBalanceUpdate = DateTime.Now;
+                    wallet.SenderWalletNavigation.LastBalanceUpdate = DateTime.UtcNow.AddHours(7);
                     wallet.SenderWalletNavigation.PendingAmount += wallet.Amount;
                     wallet.SenderWalletNavigation.AvalaibleAmount -= wallet.Amount;
 
                     wallet.ReceiverWalletNavigation.Amount += wallet.Amount;
-                    wallet.ReceiverWalletNavigation.LastBalanceUpdate = DateTime.Now;
+                    wallet.ReceiverWalletNavigation.LastBalanceUpdate = DateTime.UtcNow.AddHours(7);
                     wallet.ReceiverWalletNavigation.AvalaibleAmount += wallet.Amount;
                     wallet.ReceiverWalletNavigation.PendingAmount -= wallet.Amount;
 
@@ -594,7 +594,7 @@ namespace Services.Implementations
                         Title = "Giao dịch ví",
                         Content = "Giao dịch ví của bạn đã được xác nhận. Mã giao dịch: " + wallet.WalletTransactionId,
                         UserId = sender.Id,
-                        CreatedAt = DateTime.Now,
+                        CreatedAt = DateTime.UtcNow.AddHours(7),
                         Status = (int)NotificationEnum.UnRead
                     };
                     var notification2 = new Notification
@@ -603,7 +603,7 @@ namespace Services.Implementations
                         Title = "Giao dịch ví",
                         Content = "Giao dịch ví của bạn đã được xác nhận. Mã giao dịch: " + wallet.WalletTransactionId,
                         UserId = receiver.Id,
-                        CreatedAt = DateTime.Now,
+                        CreatedAt = DateTime.UtcNow.AddHours(7),
                         Status = (int)NotificationEnum.UnRead
                     };
                     _context.Notifications.Add(notification1);
@@ -622,14 +622,14 @@ namespace Services.Implementations
                     booking.Status = (int)VNPayType.REJECT;
 
                     //update wallet for sender and receiver
-                    wallet.SenderWalletNavigation.LastBalanceUpdate = DateTime.Now;
+                    wallet.SenderWalletNavigation.LastBalanceUpdate = DateTime.UtcNow.AddHours(7);
                     wallet.SenderWalletNavigation.PendingAmount += booking.Amount;
                     wallet.SenderWalletNavigation.AvalaibleAmount += booking.Amount;
                     wallet.SenderWalletNavigation.Amount += booking.Amount;
 
-                    wallet.ReceiverWalletNavigation.LastBalanceUpdate = DateTime.Now;
+                    wallet.ReceiverWalletNavigation.LastBalanceUpdate = DateTime.UtcNow.AddHours(7);
                     wallet.ReceiverWalletNavigation.PendingAmount -= booking.Amount;
-                    wallet.ReceiverWalletNavigation.AvalaibleAmount -= booking.Amount;
+
 
                     _context.BookingTransactions.Update(booking);
                     _context.WalletTransactions.Update(wallet);
@@ -651,7 +651,7 @@ namespace Services.Implementations
                         Title = "Giao dịch booking",
                         Content = "Giao dịch booking của bạn đã được hủy bỏ. Mã giao dịch: " + wallet.WalletTransactionId,
                         UserId = sender.Id,
-                        CreatedAt = DateTime.Now,
+                        CreatedAt = DateTime.UtcNow.AddHours(7),
                         Status = (int)NotificationEnum.UnRead
                     };
                     var notification2 = new Notification
@@ -660,7 +660,7 @@ namespace Services.Implementations
                         Title = "Giao dịch booking",
                         Content = "Giao dịch booking của bạn đã được hủy bỏ. Mã giao dịch: " + wallet.WalletTransactionId,
                         UserId = receiver.Id,
-                        CreatedAt = DateTime.Now,
+                        CreatedAt = DateTime.UtcNow.AddHours(7),
                         Status = (int)NotificationEnum.UnRead
                     };
                     _context.Notifications.Add(notification1);
@@ -675,14 +675,14 @@ namespace Services.Implementations
                     course.Status = (int)VNPayType.REJECT;
 
                     //update wallet for sender and receiver
-                    wallet.SenderWalletNavigation.LastBalanceUpdate = DateTime.Now;
+                    wallet.SenderWalletNavigation.LastBalanceUpdate = DateTime.UtcNow.AddHours(7);
                     wallet.SenderWalletNavigation.PendingAmount += course.Amount;
                     wallet.SenderWalletNavigation.AvalaibleAmount += course.Amount;
                     wallet.SenderWalletNavigation.Amount += course.Amount;
 
-                    wallet.ReceiverWalletNavigation.LastBalanceUpdate = DateTime.Now;
+                    wallet.ReceiverWalletNavigation.LastBalanceUpdate = DateTime.UtcNow.AddHours(7);
                     wallet.ReceiverWalletNavigation.PendingAmount -= course.Amount;
-                    wallet.ReceiverWalletNavigation.AvalaibleAmount -= course.Amount;
+                    
 
                     _context.CourseTransactions.Update(course);
                     _context.WalletTransactions.Update(wallet);
@@ -704,7 +704,7 @@ namespace Services.Implementations
                         Title = "Giao dịch course",
                         Content = "Giao dịch course của bạn đã được hủy bỏ. Mã giao dịch: " + wallet.WalletTransactionId,
                         UserId = sender.Id,
-                        CreatedAt = DateTime.Now,
+                        CreatedAt = DateTime.UtcNow.AddHours(7),
                         Status = (int)NotificationEnum.UnRead
                     };
                     var notification2 = new Notification
@@ -713,7 +713,7 @@ namespace Services.Implementations
                         Title = "Giao dịch course",
                         Content = "Giao dịch course của bạn đã được hủy bỏ. Mã giao dịch: " + wallet.WalletTransactionId,
                         UserId = receiver.Id,
-                        CreatedAt = DateTime.Now,
+                        CreatedAt = DateTime.UtcNow.AddHours(7),
                         Status = (int)NotificationEnum.UnRead
                     };
                     _context.Notifications.Add(notification1);
@@ -726,14 +726,14 @@ namespace Services.Implementations
                     wallet.Status = (int)VNPayType.REJECT;
 
                     //update wallet for sender and receiver
-                    wallet.SenderWalletNavigation.LastBalanceUpdate = DateTime.Now;
+                    wallet.SenderWalletNavigation.LastBalanceUpdate = DateTime.UtcNow.AddHours(7);
                     wallet.SenderWalletNavigation.PendingAmount += wallet.Amount;
                     wallet.SenderWalletNavigation.AvalaibleAmount += wallet.Amount;
                     wallet.SenderWalletNavigation.Amount += wallet.Amount;
 
-                    wallet.ReceiverWalletNavigation.LastBalanceUpdate = DateTime.Now;
+                    wallet.ReceiverWalletNavigation.LastBalanceUpdate = DateTime.UtcNow.AddHours(7);
                     wallet.ReceiverWalletNavigation.PendingAmount -= wallet.Amount;
-                    wallet.ReceiverWalletNavigation.AvalaibleAmount -= wallet.Amount;
+                    
 
                     _context.WalletTransactions.Update(wallet);
                     await _appExtension.SendMail(new MailContent()
@@ -754,7 +754,7 @@ namespace Services.Implementations
                         Title = "Giao dịch ví",
                         Content = "Giao dịch ví của bạn đã được hủy bỏ. Mã giao dịch: " + wallet.WalletTransactionId,
                         UserId = sender.Id,
-                        CreatedAt = DateTime.Now,
+                        CreatedAt = DateTime.UtcNow.AddHours(7),
                         Status = (int)NotificationEnum.UnRead
                     };
                     var notification2 = new Notification
@@ -763,7 +763,7 @@ namespace Services.Implementations
                         Title = "Giao dịch ví",
                         Content = "Giao dịch ví của bạn đã được hủy bỏ. Mã giao dịch: " + wallet.WalletTransactionId,
                         UserId = receiver.Id,
-                        CreatedAt = DateTime.Now,
+                        CreatedAt = DateTime.UtcNow.AddHours(7),
                         Status = (int)NotificationEnum.UnRead
                     };
                     _context.Notifications.Add(notification1);

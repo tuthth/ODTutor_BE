@@ -22,7 +22,7 @@ namespace Models.Entities
         public string? Fcm { get;set; }
         public string? GoogleId { get; set; }
         public Boolean Active { get; set; }
-        public DateTime CreatedAt { get; set; } = DateTime.Now;
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow.AddHours(7);
         public Boolean IsPremium { get; set; }
         public Boolean Banned { get; set; }
         public DateTime? BanExpiredAt { get; set; }
