@@ -50,7 +50,7 @@ namespace Services.Implementations
                         EmailToken = tokenEmail,
                         EmailTokenExpiry = DateTime.UtcNow.AddHours(7).AddMinutes(15)
                     };
-                    var notification = new Notification
+                    var notification = new Models.Entities.Notification
                     {
                         NotificationId = Guid.NewGuid(),
                         Title = "Mã xác thực OTP",
@@ -60,7 +60,7 @@ namespace Services.Implementations
                         Status = (Int32)NotificationEnum.UnRead
                     };
                     _context.Notifications.Add(notification);
-                    _firebaseRealtimeDatabaseService.SetAsync("Notifications/" + notification.NotificationId, notification);
+                    await _firebaseRealtimeDatabaseService.SetAsync<Models.Entities.Notification>($"notifications/{notification.UserId}/{notification.NotificationId}", notification);
                     _context.UserAuthentications.Add(userAuthentication);
                     await _context.SaveChangesAsync();
                     try

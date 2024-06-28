@@ -17,6 +17,7 @@ using Models.Models.Emails;
 using NuGet.Protocol.Plugins;
 using Models.Models.Views;
 using Models.PageHelper;
+using FirebaseAdmin.Messaging;
 
 namespace Services.Implementations
 {
@@ -68,7 +69,7 @@ namespace Services.Implementations
                 _context.Wallets.Update(receiveWallet);
                 _context.WalletTransactions.Add(transaction);
 
-                var notification = new Notification
+                var notification = new Models.Entities.Notification
                 {
                     NotificationId = Guid.NewGuid(),
                     Title = "Nạp tiền vào tài khoản",
@@ -152,7 +153,7 @@ namespace Services.Implementations
                 _context.Wallets.Update(receiveWallet);
                 _context.WalletTransactions.Add(transaction);
 
-                var notification = new Notification
+                var notification = new Models.Entities.Notification
                 {
                     NotificationId = Guid.NewGuid(),
                     Title = "Rút tiền từ tài khoản",
@@ -210,7 +211,7 @@ namespace Services.Implementations
                 Subject = "Xác nhận giao dịch",
                 Body = "Giao dịch không hợp lệ, vui lòng kiểm tra lại thông tin."
             });
-            var notificationError = new Notification
+            var notificationError = new Models.Entities.Notification
             {
                 NotificationId = Guid.NewGuid(),
                 Title = "Giao dịch",
@@ -262,7 +263,7 @@ namespace Services.Implementations
             findUser.IsPremium = true;
             _context.Users.Update(findUser);
 
-            var notification = new Notification
+            var notification = new Models.Entities.Notification
             {
                 NotificationId = Guid.NewGuid(),
                 Title = "Nâng cấp tài khoản",
@@ -329,7 +330,7 @@ namespace Services.Implementations
                     Subject = "Xác nhận giao dịch",
                     Body = "Giao dịch booking không hợp lệ, vui lòng kiểm tra lại thông tin."
                 });
-                var notificationError = new Notification
+                var notificationError = new Models.Entities.Notification
                 {
                     NotificationId = Guid.NewGuid(),
                     Title = "Giao dịch booking",
@@ -350,7 +351,7 @@ namespace Services.Implementations
             _context.BookingTransactions.Add(transaction);
             _context.WalletTransactions.Add(senderTransaction);
 
-            var notification = new Notification
+            var notification = new Models.Entities.Notification
             {
                 NotificationId = Guid.NewGuid(),
                 Title = "Giao dịch booking",
@@ -481,7 +482,7 @@ namespace Services.Implementations
                         Subject = "Xác nhận giao dịch",
                         Body = "Giao dịch booking của bạn đã được xác nhận. Mã giao dịch: " + wallet.WalletTransactionId
                     });
-                    var notification1 = new Notification
+                    var notification1 = new Models.Entities.Notification
                     {
                         NotificationId = Guid.NewGuid(),
                         Title = "Giao dịch booking",
@@ -490,7 +491,7 @@ namespace Services.Implementations
                         CreatedAt = DateTime.UtcNow.AddHours(7),
                         Status = (int)NotificationEnum.UnRead
                     };
-                    var notification2 = new Notification
+                    var notification2 = new Models.Entities.Notification
                     {
                         NotificationId = Guid.NewGuid(),
                         Title = "Giao dịch booking",
@@ -536,7 +537,7 @@ namespace Services.Implementations
                         Subject = "Xác nhận giao dịch",
                         Body = "Giao dịch course của bạn đã được xác nhận. Mã giao dịch: " + wallet.WalletTransactionId
                     });
-                    var notification1 = new Notification
+                    var notification1 = new Models.Entities.Notification
                     {
                         NotificationId = Guid.NewGuid(),
                         Title = "Giao dịch course",
@@ -545,7 +546,7 @@ namespace Services.Implementations
                         CreatedAt = DateTime.UtcNow.AddHours(7),
                         Status = (int)NotificationEnum.UnRead
                     };
-                    var notification2 = new Notification
+                    var notification2 = new Models.Entities.Notification
                     {
                         NotificationId = Guid.NewGuid(),
                         Title = "Giao dịch course",
@@ -556,8 +557,8 @@ namespace Services.Implementations
                     };
                     _context.Notifications.Add(notification1);
                     _context.Notifications.Add(notification2);
-                    _firebaseRealtimeDatabaseService.SetAsync("Notifications/" + notification1.NotificationId, notification1);
-                    _firebaseRealtimeDatabaseService.SetAsync("Notifications/" + notification2.NotificationId, notification2);
+                    await _firebaseRealtimeDatabaseService.SetAsync<Models.Entities.Notification>($"notifications/{notification1.UserId}/{notification1.NotificationId}", notification1);
+                    await _firebaseRealtimeDatabaseService.SetAsync<Models.Entities.Notification>($"notifications/{notification2.UserId}/{notification2.NotificationId}", notification2);
                 }
                 else if (choice == (Int32)UpdateTransactionType.Wallet)
                 {
@@ -588,7 +589,7 @@ namespace Services.Implementations
                         Subject = "Xác nhận giao dịch",
                         Body = "Giao dịch ví của bạn đã được xác nhận. Mã giao dịch: " + wallet.WalletTransactionId
                     });
-                    var notification1 = new Notification
+                    var notification1 = new Models.Entities.Notification
                     {
                         NotificationId = Guid.NewGuid(),
                         Title = "Giao dịch ví",
@@ -597,7 +598,7 @@ namespace Services.Implementations
                         CreatedAt = DateTime.UtcNow.AddHours(7),
                         Status = (int)NotificationEnum.UnRead
                     };
-                    var notification2 = new Notification
+                    var notification2 = new Models.Entities.Notification
                     {
                         NotificationId = Guid.NewGuid(),
                         Title = "Giao dịch ví",
@@ -645,7 +646,7 @@ namespace Services.Implementations
                         Subject = "Xác nhận giao dịch",
                         Body = "Giao dịch booking của bạn đã được hủy bỏ. Mã giao dịch: " + wallet.WalletTransactionId
                     });
-                    var notification1 = new Notification
+                    var notification1 = new Models.Entities.Notification
                     {
                         NotificationId = Guid.NewGuid(),
                         Title = "Giao dịch booking",
@@ -654,7 +655,7 @@ namespace Services.Implementations
                         CreatedAt = DateTime.UtcNow.AddHours(7),
                         Status = (int)NotificationEnum.UnRead
                     };
-                    var notification2 = new Notification
+                    var notification2 = new Models.Entities.Notification
                     {
                         NotificationId = Guid.NewGuid(),
                         Title = "Giao dịch booking",
@@ -665,8 +666,8 @@ namespace Services.Implementations
                     };
                     _context.Notifications.Add(notification1);
                     _context.Notifications.Add(notification2);
-                    _firebaseRealtimeDatabaseService.SetAsync("Notifications/" + notification1.NotificationId, notification1);
-                    _firebaseRealtimeDatabaseService.SetAsync("Notifications/" + notification2.NotificationId, notification2);
+                    await _firebaseRealtimeDatabaseService.SetAsync<Models.Entities.Notification>($"notifications/{notification1.UserId}/{notification1.NotificationId}", notification1);
+                    await _firebaseRealtimeDatabaseService.SetAsync<Models.Entities.Notification>($"notifications/{notification2.UserId}/{notification2.NotificationId}", notification2);
                 }
                 else if (choice == (Int32)UpdateTransactionType.Course)
                 {
@@ -698,7 +699,7 @@ namespace Services.Implementations
                         Subject = "Xác nhận giao dịch",
                         Body = "Giao dịch course của bạn đã được hủy bỏ. Mã giao dịch: " + wallet.WalletTransactionId
                     });
-                    var notification1 = new Notification
+                    var notification1 = new Models.Entities.Notification
                     {
                         NotificationId = Guid.NewGuid(),
                         Title = "Giao dịch course",
@@ -707,7 +708,7 @@ namespace Services.Implementations
                         CreatedAt = DateTime.UtcNow.AddHours(7),
                         Status = (int)NotificationEnum.UnRead
                     };
-                    var notification2 = new Notification
+                    var notification2 = new Models.Entities.Notification
                     {
                         NotificationId = Guid.NewGuid(),
                         Title = "Giao dịch course",
@@ -718,8 +719,8 @@ namespace Services.Implementations
                     };
                     _context.Notifications.Add(notification1);
                     _context.Notifications.Add(notification2);
-                    _firebaseRealtimeDatabaseService.SetAsync("Notifications/" + notification1.NotificationId, notification1);
-                    _firebaseRealtimeDatabaseService.SetAsync("Notifications/" + notification2.NotificationId, notification2);
+                    await _firebaseRealtimeDatabaseService.SetAsync<Models.Entities.Notification>($"notifications/{notification1.UserId}/{notification1.NotificationId}", notification1);
+                    await _firebaseRealtimeDatabaseService.SetAsync<Models.Entities.Notification>($"notifications/{notification2.UserId}/{notification2.NotificationId}", notification2);
                 }
                 else if (choice == (Int32)UpdateTransactionType.Wallet)
                 {
@@ -748,7 +749,7 @@ namespace Services.Implementations
                         Subject = "Xác nhận giao dịch",
                         Body = "Giao dịch ví của bạn đã được hủy bỏ. Mã giao dịch: " + wallet.WalletTransactionId
                     });
-                    var notification1 = new Notification
+                    var notification1 = new Models.Entities.Notification
                     {
                         NotificationId = Guid.NewGuid(),
                         Title = "Giao dịch ví",
@@ -757,7 +758,7 @@ namespace Services.Implementations
                         CreatedAt = DateTime.UtcNow.AddHours(7),
                         Status = (int)NotificationEnum.UnRead
                     };
-                    var notification2 = new Notification
+                    var notification2 = new Models.Entities.Notification
                     {
                         NotificationId = Guid.NewGuid(),
                         Title = "Giao dịch ví",
@@ -768,8 +769,8 @@ namespace Services.Implementations
                     };
                     _context.Notifications.Add(notification1);
                     _context.Notifications.Add(notification2);
-                    _firebaseRealtimeDatabaseService.SetAsync("Notifications/" + notification1.NotificationId, notification1);
-                    _firebaseRealtimeDatabaseService.SetAsync("Notifications/" + notification2.NotificationId, notification2);
+                    await _firebaseRealtimeDatabaseService.SetAsync<Models.Entities.Notification>($"notifications/{notification1.UserId}/{notification1.NotificationId}", notification1);
+                    await _firebaseRealtimeDatabaseService.SetAsync<Models.Entities.Notification>($"notifications/{notification2.UserId}/{notification2.NotificationId}", notification2);
                 }
                 else if (choice == (Int32)UpdateTransactionType.Unknown) { return new StatusCodeResult(406); }
             }
