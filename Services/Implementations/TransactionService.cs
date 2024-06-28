@@ -42,6 +42,7 @@ namespace Services.Implementations
                 {
                     return new StatusCodeResult(404);
                 }
+                var senderWallet = _context.Wallets.Include(w => w.SenderWalletTransactionsNavigation.FirstOrDefault(w => w.SenderWalletId.Equals(transactionCreate.SenderId)));
                 var receiverWallet = _context.Wallets.Include(w => w.ReceiverWalletTransactionsNavigation.FirstOrDefault(w => w.ReceiverWalletId.Equals(transactionCreate.ReceiverId)));
                 if (receiverWallet == null)
                 {
@@ -57,8 +58,13 @@ namespace Services.Implementations
                     Status = (int)VNPayType.PENDING,
                     Note = "Nạp tiền vào tài khoản"
                 };
+                var sendWallet = _context.Wallets.FirstOrDefault(w => w.WalletId == transactionCreate.SenderId);
+                sendWallet.PendingAmount -= transactionCreate.Amount;
+                sendWallet.AvalaibleAmount -= transactionCreate.Amount;
+                _context.Wallets.Update(sendWallet);
                 var receiveWallet = _context.Wallets.FirstOrDefault(w => w.WalletId == transactionCreate.ReceiverId);
                 receiveWallet.PendingAmount += transactionCreate.Amount;
+               
                 _context.Wallets.Update(receiveWallet);
                 _context.WalletTransactions.Add(transaction);
 
@@ -118,6 +124,7 @@ namespace Services.Implementations
                     return new StatusCodeResult(404);
                 }
                 var senderWallet = _context.Wallets.Include(w => w.SenderWalletTransactionsNavigation.FirstOrDefault(w => w.SenderWalletId.Equals(transactionCreate.SenderId)));
+                var receiverWallet = _context.Wallets.Include(w => w.ReceiverWalletTransactionsNavigation.FirstOrDefault(w => w.ReceiverWalletId.Equals(transactionCreate.ReceiverId)));
                 if (senderWallet == null)
                 {
                     return new StatusCodeResult(404);
@@ -138,7 +145,11 @@ namespace Services.Implementations
                     return new StatusCodeResult(409);
                 }
                 sendWallet.PendingAmount -= transactionCreate.Amount; // Deduct the amount from the sender's wallet
+                sendWallet.AvalaibleAmount -= transactionCreate.Amount;
                 _context.Wallets.Update(sendWallet);
+                var receiveWallet = _context.Wallets.FirstOrDefault(w => w.WalletId == transactionCreate.ReceiverId);
+                receiveWallet.PendingAmount += transactionCreate.Amount; // Add the amount to the admin's wallet
+                _context.Wallets.Update(receiveWallet);
                 _context.WalletTransactions.Add(transaction);
 
                 var notification = new Notification
