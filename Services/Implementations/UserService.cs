@@ -344,7 +344,7 @@ namespace Services.Implementations
             {
                 throw new CrudException(HttpStatusCode.NotFound, "User not found", "");
             }
-            var key = Encoding.ASCII.GetBytes(_configuration["AppSettings:SecretKey"]); // Lấy khóa bí mật từ cấu hình
+            var key = Encoding.ASCII.GetBytes(_configuration["AppSettings:SecretKey"]);
             var tokenHandler = new JwtSecurityTokenHandler();
             var secretKeyBytes = Encoding.UTF8.GetBytes(_jwtSetting.SecretKey);
             var tokenDescriptor = new SecurityTokenDescriptor();

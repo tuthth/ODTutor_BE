@@ -21,7 +21,7 @@ namespace API
                 builder.WebHost.ConfigureKestrel(serverOptions => { serverOptions.ListenAnyIP(5260); });
 
             //FCM
-            System.Environment.SetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS", "capstone-c0906-283c0b5bc14f.json");
+            System.Environment.SetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS", "capstone-c0906-firebase-adminsdk-kxbti-1521aadccf.json");
             FirebaseApp.Create(new AppOptions()
             {
                 Credential = GoogleCredential.GetApplicationDefault(),

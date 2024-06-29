@@ -72,8 +72,9 @@ namespace API.Configurations
             services.AddScoped<IScheduleService, ScheduleService>();
             services.AddScoped<IFirebaseRealtimeDatabaseService, FirebaseRealtimeDatabaseService>();
             services.AddScoped<INotificationService, NotificationService>();
+            services.AddScoped<ICloudFireStoreService, CloudFireStoreService>();
+            services.AddScoped<IMessageService, MessageService>();
         }
-
         public static void AddSwagger(this IServiceCollection services)
         {
             services.AddSwaggerGen(c =>
