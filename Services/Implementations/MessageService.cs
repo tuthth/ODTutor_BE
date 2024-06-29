@@ -88,6 +88,37 @@ namespace Services.Implementations
                 return false;
             }
         }
+
+        // Unblocked User
+        public async Task<bool> UnBlockUserAsync(string collection, string document, UserFirestoreRequest request)
+        {
+            Dictionary<string, object> data = await _cloudFireStoreService.GetAsync<Dictionary<string, object>>(collection, document);
+            if (data != null)
+            {
+                List<string> blockedUsers;
+
+                if (data.ContainsKey("blockedUser"))
+                {
+                    blockedUsers = ((List<object>)data["blockedUser"]).Cast<string>().ToList();
+                }
+                else
+                {
+                    blockedUsers = new List<string>();
+                }
+
+                if (blockedUsers.Contains(request.UserId.ToString()))
+                {
+                    blockedUsers.Remove(request.UserId.ToString());
+                    data["blockedUser"] = blockedUsers;
+                    await _cloudFireStoreService.SetAsync(collection, document, data);
+                }
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
         //------- Internal methods-------//
 
 

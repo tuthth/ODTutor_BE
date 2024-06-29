@@ -13,5 +13,6 @@ namespace Services.Interfaces
         Task CreateMessageAsync(string collection, string document, MessageRequest messageRequest);
         Task<UserFireStoreReponse> GetMessageAsync(string collection, string document);
         Task<bool> BlockUserAsync(string collection, string document, UserFirestoreRequest request);
+        Task<bool> UnBlockUserAsync(string collection, string document, UserFirestoreRequest request);
     }
 }

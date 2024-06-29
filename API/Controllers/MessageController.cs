@@ -7,7 +7,7 @@ namespace API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class MessageController : Controller
+    public class MessageController : ControllerBase
     {   
         private readonly IMessageService _messageService;
         public MessageController(IMessageService message)
@@ -35,7 +35,15 @@ namespace API.Controllers
         public async Task<IActionResult> BlockUser(string document, string collection, UserFirestoreRequest request)
         {
             await _messageService.BlockUserAsync(collection, document, request);
-            return Ok();
+            return Ok("Block Thành công");
+        }
+
+        // Unblock a User
+        [HttpPost("unblock")]
+        public async Task<IActionResult> UnBlockUser(string document, string collection, UserFirestoreRequest request)
+        {
+            await _messageService.UnBlockUserAsync(collection, document, request);
+            return Ok("Gỡ block Thành công");
         }
     }
 }
