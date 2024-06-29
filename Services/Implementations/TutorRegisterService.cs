@@ -54,8 +54,8 @@ namespace Services.Implementations
                 Tutor tutor = _mapper.Map<Tutor>(tutorRequest);
                 tutor.TutorId = Guid.NewGuid();
                 tutor.Status = (Int32)TutorEnum.Inprocessing; // "2" is InProcessing
-                tutor.CreateAt = DateTime.Now;
-                tutor.UpdateAt = DateTime.Now;
+                tutor.CreateAt = DateTime.UtcNow.AddHours(7);
+                tutor.UpdateAt = DateTime.UtcNow.AddHours(7);
                 _context.Tutors.Add(tutor);
                 await _context.SaveChangesAsync();
                 // Add Tutor Subject List
@@ -66,7 +66,7 @@ namespace Services.Implementations
                     tutorSubject1.TutorSubjectId = Guid.NewGuid();
                     tutorSubject1.TutorId = tutor.TutorId;
                     tutorSubject1.SubjectId = subjectID;
-                    tutorSubject1.CreatedAt = DateTime.Now;
+                    tutorSubject1.CreatedAt = DateTime.UtcNow.AddHours(7);
                     tutorSubject.Add(tutorSubject1);
                 }
                 if (tutorSubject.Count < 0)
@@ -198,7 +198,7 @@ namespace Services.Implementations
                 TutorAction tutorRegister = new TutorAction();
                 tutorRegister.TutorActionId = Guid.NewGuid();
                 tutorRegister.TutorId = request.TutorID;
-                tutorRegister.CreateAt = DateTime.Now;
+                tutorRegister.CreateAt = DateTime.UtcNow.AddHours(7);
                 tutorRegister.Description = "Xử lý xét duyệt gia sư";
                 tutorRegister.ActionType = (Int32)TutorActionTypeEnum.TutorRegister;
                 tutorRegister.Status = (Int32)TutorActionEnum.Pending;
@@ -210,7 +210,7 @@ namespace Services.Implementations
                 notification.UserId = tutor.UserId;
                 notification.Title = "Yêu cầu xét duyệt thành gia sư đã được gửi";
                 notification.Content = "Yêu cầu của bạn đã được gửi. Vui lòng đợi phản hồi qua email hoặc thông báo của hệ thống";
-                notification.CreatedAt = DateTime.Now;
+                notification.CreatedAt = DateTime.UtcNow.AddHours(7);
                 notification.Status = 1; // "1" is sent
                 await _context.Notifications.AddAsync(notification);
                 await _context.SaveChangesAsync();
@@ -474,7 +474,7 @@ namespace Services.Implementations
                     return new StatusCodeResult(404);
                 }
                 tutorAction.ModeratorId = request.ApprovalID;
-                tutorAction.ReponseDate = DateTime.Now;
+                tutorAction.ReponseDate = DateTime.UtcNow.AddHours(7);
                 tutorAction.Status = (Int32)TutorActionEnum.Accept;
                 await _context.SaveChangesAsync();
 
@@ -489,7 +489,7 @@ namespace Services.Implementations
                 notification.UserId = tutor.UserId;
                 notification.Title = "Yêu cầu xét duyệt trở thành gia sư đã được chấp nhận";
                 notification.Content = "Yêu cầu của bạn đã được chấp nhận. Bạn đã trở thành gia sư trên hệ thống";
-                notification.CreatedAt = DateTime.Now;
+                notification.CreatedAt = DateTime.UtcNow.AddHours(7);
                 notification.Status = (Int32)NotificationEnum.UnRead;
                 await _context.Notifications.AddAsync(notification);
                 await _context.SaveChangesAsync();
@@ -512,7 +512,7 @@ namespace Services.Implementations
                     return new StatusCodeResult(404);
                 }
                 tutorAction.ModeratorId = request.ApprovalID;
-                tutorAction.ReponseDate = DateTime.Now;
+                tutorAction.ReponseDate = DateTime.UtcNow.AddHours(7);
                 tutorAction.Status = (Int32)TutorActionEnum.Reject;
                 await _context.SaveChangesAsync();
 
@@ -527,7 +527,7 @@ namespace Services.Implementations
                 notification.UserId = tutor.UserId;
                 notification.Title = "Yêu cầu xét duyệt trở thành gia sư đã bị từ chối";
                 notification.Content = "Yêu cầu của bạn đã bị từ chối. Vui lòng liên hệ với hệ thống để biết thêm thông tin";
-                notification.CreatedAt = DateTime.Now;
+                notification.CreatedAt = DateTime.UtcNow.AddHours(7);
                 notification.Status = (Int32)NotificationEnum.Deleted;
                 await _context.Notifications.AddAsync(notification);
                 await _context.SaveChangesAsync();

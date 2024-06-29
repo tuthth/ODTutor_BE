@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using FirebaseAdmin.Messaging;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Models.Entities;
@@ -11,14 +12,17 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Notification = Models.Entities.Notification;
 
 
 namespace Services.Implementations
 {
     public class ReportService : BaseService, IReportService
     {
-        public ReportService(ODTutorContext context, IMapper mapper) : base(context, mapper)
+        private readonly IFirebaseRealtimeDatabaseService _firebaseRealtimeDatabaseService;
+        public ReportService(ODTutorContext context, IMapper mapper, IFirebaseRealtimeDatabaseService firebaseRealtimeDatabaseService) : base(context, mapper)
         {
+            _firebaseRealtimeDatabaseService = firebaseRealtimeDatabaseService;
         }
         public async Task<IActionResult> CreateReport(ReportRequest reportRequest)
         {
@@ -26,13 +30,13 @@ namespace Services.Implementations
             var report = _mapper.Map<Report>(reportRequest);
             var sender = _context.Users.FirstOrDefault(x => x.Id == reportRequest.SenderUserId);
             var target = _context.Users.FirstOrDefault(x => x.Id == reportRequest.TargetId);
-            report.CreatedAt = DateTime.Now;
-            report.UpdatedAt = DateTime.Now;
+            report.CreatedAt = DateTime.UtcNow.AddHours(7);
+            report.UpdatedAt = DateTime.UtcNow.AddHours(7);
             report.ReportId = Guid.NewGuid();
             report.Status = (Int32)ReportEnum.Processing;
 
             _context.Reports.Add(report);
-            Notification notification1 = new Notification()
+            Models.Entities.Notification notification1 = new Models.Entities.Notification()
             {
                 NotificationId = Guid.NewGuid(),
                 UserId = target.Id,
@@ -41,7 +45,7 @@ namespace Services.Implementations
                 CreatedAt = report.CreatedAt,
                 Status = 0
             };
-            Notification notification2 = new Notification()
+            Models.Entities.Notification notification2 = new Models.Entities.Notification()
             {
                 NotificationId = Guid.NewGuid(),
                 UserId = sender.Id,
@@ -52,6 +56,8 @@ namespace Services.Implementations
             };
             _context.Notifications.Add(notification1);
             _context.Notifications.Add(notification2);
+            await _firebaseRealtimeDatabaseService.SetAsync<Models.Entities.Notification>($"notifications/{notification1.UserId}/{notification1.NotificationId}", notification1);
+            await _firebaseRealtimeDatabaseService.SetAsync<Models.Entities.Notification>($"notifications/{notification2.UserId}/{notification2.NotificationId}", notification2);
             await _context.SaveChangesAsync();
             await _appExtension.SendMail(new MailContent()
             {
@@ -92,7 +98,7 @@ namespace Services.Implementations
                     Subject = "[ODTutor] Report đến bạn bị từ chối",
                     Body = "Hệ thống đã hoàn tất việc kiểm tra hành vi người dùng. \nReport Id: " + report.ReportId + "\nTrạng thái: " + (ReportEnum)report.Status + "\nNội dung: " + report.Content + "\nLý do: " + updateReportRequest.Reason
                 });
-                Notification notification1 = new Notification()
+                Models.Entities.Notification notification1 = new Models.Entities.Notification()
                 {
                     NotificationId = Guid.NewGuid(),
                     UserId = target.Id,
@@ -101,7 +107,7 @@ namespace Services.Implementations
                     CreatedAt = report.CreatedAt,
                     Status = 0
                 };
-                Notification notification2 = new Notification()
+                Models.Entities.Notification notification2 = new Models.Entities.Notification()
                 {
                     NotificationId = Guid.NewGuid(),
                     UserId = sender.Id,
@@ -112,6 +118,8 @@ namespace Services.Implementations
                 };
                 _context.Notifications.Add(notification1);
                 _context.Notifications.Add(notification2);
+                await _firebaseRealtimeDatabaseService.SetAsync<Models.Entities.Notification>($"notifications/{notification1.UserId}/{notification1.NotificationId}", notification1);
+                await _firebaseRealtimeDatabaseService.SetAsync<Models.Entities.Notification>($"notifications/{notification2.UserId}/{notification2.NotificationId}", notification2);
             }
             if (updateReportRequest.Status == (Int32)ReportEnum.Finished)
             {
@@ -127,7 +135,7 @@ namespace Services.Implementations
                     Subject = "[ODTutor] Report đến bạn được chấp thuận",
                     Body = "Hệ thống đã hoàn tất việc kiểm tra hành vi người dùng. \nReport Id: " + report.ReportId + "\nTrạng thái: " + (ReportEnum)report.Status + "\nNội dung: " + report.Content + "\nLý do: " + updateReportRequest.Reason + "\nChúng tôi sẽ thông báo kết quả trong thời gian sớm nhất."
                 });
-                Notification notification1 = new Notification()
+                Notification notification1 = new Models.Entities.Notification()
                 {
                     NotificationId = Guid.NewGuid(),
                     UserId = target.Id,
@@ -136,7 +144,7 @@ namespace Services.Implementations
                     CreatedAt = report.CreatedAt,
                     Status = 0
                 };
-                Notification notification2 = new Notification()
+                Notification notification2 = new Models.Entities.Notification()
                 {
                     NotificationId = Guid.NewGuid(),
                     UserId = sender.Id,
@@ -147,6 +155,8 @@ namespace Services.Implementations
                 };
                 _context.Notifications.Add(notification1);
                 _context.Notifications.Add(notification2);
+                await _firebaseRealtimeDatabaseService.SetAsync<Models.Entities.Notification>($"notifications/{notification1.UserId}/{notification1.NotificationId}", notification1);
+                await _firebaseRealtimeDatabaseService.SetAsync<Models.Entities.Notification>($"notifications/{notification2.UserId}/{notification2.NotificationId}", notification2);
             }
             await _context.SaveChangesAsync();
             return new StatusCodeResult(200);
@@ -159,7 +169,7 @@ namespace Services.Implementations
             var target = _context.Users.FirstOrDefault(x => x.Id == report.TargetId);
 
             if (report.Status != (Int32)ReportEnum.Finished) return new StatusCodeResult(409);
-            DateTime finishedTime = DateTime.Now;
+            DateTime finishedTime = DateTime.UtcNow.AddHours(7);
             if(action.Status == (Int32)ReportActionEnum.SevenDays)
             {
                 finishedTime = finishedTime.AddDays(7);
@@ -200,6 +210,28 @@ namespace Services.Implementations
                 Subject = "[ODTutor] Tài khoản bị đình chỉ",
                 Body = "Hệ thống đã hoàn tất việc kiểm tra hành vi người dùng. \nReport Id: " + report.ReportId + "\nTrạng thái: " + (ReportEnum)report.Status + "\nNội dung: " + report.Content + "\nThời hạn cấm: " + finishedTime + " GMT +0." + "\nĐể khiếu nại, vui lòng phản hồi lại email này. \nXin cảm ơn"
             });
+            var notification1 = new Models.Entities.Notification()
+            {
+                NotificationId = Guid.NewGuid(),
+                UserId = target.Id,
+                Title = "Tài khoản của bạn đã bị đình chỉ",
+                Content = "Hệ thống đã cấm tài khoản của bạn. Vui lòng đến mục Báo cáo để xem chi tiết",
+                CreatedAt = report.CreatedAt,
+                Status = 0
+            };
+            var notification2 = new Models.Entities.Notification()
+            {
+                NotificationId = Guid.NewGuid(),
+                UserId = sender.Id,
+                Title = "Report của bạn đã được chấp thuận",
+                Content = "Hệ thống đã cấm tài khoản của người dùng. Vui lòng đến mục Báo cáo để xem chi tiết",
+                CreatedAt = report.CreatedAt,
+                Status = 0
+            };
+            _context.Notifications.Add(notification1);
+            _context.Notifications.Add(notification2);
+            await _firebaseRealtimeDatabaseService.SetAsync<Models.Entities.Notification>($"notifications/{notification1.UserId}/{notification1.NotificationId}", notification1);
+            await _firebaseRealtimeDatabaseService.SetAsync<Models.Entities.Notification>($"notifications/{notification2.UserId}/{notification2.NotificationId}", notification2);
             _context.Users.Update(target);
             await _context.SaveChangesAsync();
             return new StatusCodeResult(200);

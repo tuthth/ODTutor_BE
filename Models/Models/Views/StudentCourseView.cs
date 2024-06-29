@@ -12,7 +12,7 @@ namespace Models.Models.Views
         public Guid CourseId { get; set; }
         public Guid StudentId { get; set; }
         public int Status { get; set; }
-        public DateTime CreatedAt { get; set; } = DateTime.Now;
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow.AddHours(7);
         public string? GoogleMeetUrl { get; set; }
     }
 }

@@ -17,6 +17,7 @@ using Models.Models.Emails;
 using NuGet.Protocol.Plugins;
 using Models.Models.Views;
 using Models.PageHelper;
+using FirebaseAdmin.Messaging;
 
 namespace Services.Implementations
 {
@@ -24,10 +25,12 @@ namespace Services.Implementations
     {
         private readonly VNPaySetting _vnPaySetting;
         private readonly IHttpContextAccessor _httpContextAccessor;
-        public TransactionService(ODTutorContext _context, IMapper mapper, IOptions<VNPaySetting> options, IHttpContextAccessor httpContextAccessor) : base(_context, mapper)
+        private readonly IFirebaseRealtimeDatabaseService _firebaseRealtimeDatabaseService;
+        public TransactionService(ODTutorContext _context, IMapper mapper, IOptions<VNPaySetting> options, IHttpContextAccessor httpContextAccessor, IFirebaseRealtimeDatabaseService firebaseRealtimeDatabaseService) : base(_context, mapper)
         {
             _vnPaySetting = options.Value;
             _httpContextAccessor = httpContextAccessor;
+            _firebaseRealtimeDatabaseService = firebaseRealtimeDatabaseService;
         }
 
         public async Task<IActionResult> CreateDepositToAccount(WalletTransactionCreate transactionCreate)
@@ -40,6 +43,7 @@ namespace Services.Implementations
                 {
                     return new StatusCodeResult(404);
                 }
+                var senderWallet = _context.Wallets.Include(w => w.SenderWalletTransactionsNavigation.FirstOrDefault(w => w.SenderWalletId.Equals(transactionCreate.SenderId)));
                 var receiverWallet = _context.Wallets.Include(w => w.ReceiverWalletTransactionsNavigation.FirstOrDefault(w => w.ReceiverWalletId.Equals(transactionCreate.ReceiverId)));
                 if (receiverWallet == null)
                 {
@@ -50,15 +54,33 @@ namespace Services.Implementations
                     WalletTransactionId = Guid.NewGuid(),
                     SenderWalletId = (Guid)transactionCreate.SenderId,
                     ReceiverWalletId = (Guid)transactionCreate.ReceiverId,
-                    CreatedAt = DateTime.Now,
+                    CreatedAt = DateTime.UtcNow.AddHours(7),
                     Amount = transactionCreate.Amount,
                     Status = (int)VNPayType.PENDING,
                     Note = "Nạp tiền vào tài khoản"
                 };
+                var sendWallet = _context.Wallets.FirstOrDefault(w => w.WalletId == transactionCreate.SenderId);
+                sendWallet.PendingAmount -= transactionCreate.Amount;
+                sendWallet.AvalaibleAmount -= transactionCreate.Amount;
+                _context.Wallets.Update(sendWallet);
                 var receiveWallet = _context.Wallets.FirstOrDefault(w => w.WalletId == transactionCreate.ReceiverId);
                 receiveWallet.PendingAmount += transactionCreate.Amount;
+               
                 _context.Wallets.Update(receiveWallet);
                 _context.WalletTransactions.Add(transaction);
+
+                var notification = new Models.Entities.Notification
+                {
+                    NotificationId = Guid.NewGuid(),
+                    Title = "Nạp tiền vào tài khoản",
+                    Content = "Bạn đã nhận được một giao dịch nạp tiền vào tài khoản với số tiền là " + transactionCreate.Amount + " VND. Mã giao dịch: " + transaction.WalletTransactionId,
+                    UserId = findUser.Id,
+                    CreatedAt = DateTime.UtcNow.AddHours(7),
+                    Status = (int)NotificationEnum.UnRead
+                };
+
+                _context.Notifications.Add(notification);
+                _firebaseRealtimeDatabaseService.SetAsync("Notifications/" + notification.NotificationId, notification);
                 await _context.SaveChangesAsync();
 
                 string vnp_Returnurl = transactionCreate.RedirectUrl;
@@ -73,14 +95,14 @@ namespace Services.Implementations
                 vnpay.AddRequestData("vnp_TmnCode", vnp_TmnCode);
                 vnpay.AddRequestData("vnp_Amount", Math.Floor(decimal.Parse(transactionCreate.Amount.ToString()) * 100).ToString());
                 vnpay.AddRequestData("vnp_BankCode", "VNBANK");
-                vnpay.AddRequestData("vnp_CreateDate", DateTime.Now.ToString("yyyyMMddHHmmss"));
+                vnpay.AddRequestData("vnp_CreateDate", DateTime.UtcNow.AddHours(7).ToString("yyyyMMddHHmmss"));
                 vnpay.AddRequestData("vnp_CurrCode", "VND");
                 vnpay.AddRequestData("vnp_IpAddr", Utils.GetIpAddress(_httpContextAccessor));
                 vnpay.AddRequestData("vnp_Locale", "vn");
                 vnpay.AddRequestData("vnp_OrderInfo", transaction.WalletTransactionId.ToString());
                 vnpay.AddRequestData("vnp_OrderType", "other");
                 vnpay.AddRequestData("vnp_ReturnUrl", vnp_Returnurl);
-                vnpay.AddRequestData("vnp_TxnRef", DateTime.Now.Ticks.ToString());
+                vnpay.AddRequestData("vnp_TxnRef", DateTime.UtcNow.AddHours(7).Ticks.ToString());
 
                 string paymentUrl = vnpay.CreateRequestUrl(vnp_Url, vnp_HashSecret);
                 await _appExtension.SendMail(new MailContent()
@@ -103,6 +125,7 @@ namespace Services.Implementations
                     return new StatusCodeResult(404);
                 }
                 var senderWallet = _context.Wallets.Include(w => w.SenderWalletTransactionsNavigation.FirstOrDefault(w => w.SenderWalletId.Equals(transactionCreate.SenderId)));
+                var receiverWallet = _context.Wallets.Include(w => w.ReceiverWalletTransactionsNavigation.FirstOrDefault(w => w.ReceiverWalletId.Equals(transactionCreate.ReceiverId)));
                 if (senderWallet == null)
                 {
                     return new StatusCodeResult(404);
@@ -112,7 +135,7 @@ namespace Services.Implementations
                     WalletTransactionId = Guid.NewGuid(),
                     SenderWalletId = (Guid)transactionCreate.SenderId,
                     ReceiverWalletId = (Guid)transactionCreate.ReceiverId, // This should be the admin's wallet ID
-                    CreatedAt = DateTime.Now,
+                    CreatedAt = DateTime.UtcNow.AddHours(7),
                     Amount = transactionCreate.Amount,
                     Status = (int)VNPayType.PENDING,
                     Note = "Rút tiền từ tài khoản"
@@ -123,8 +146,24 @@ namespace Services.Implementations
                     return new StatusCodeResult(409);
                 }
                 sendWallet.PendingAmount -= transactionCreate.Amount; // Deduct the amount from the sender's wallet
+                sendWallet.AvalaibleAmount -= transactionCreate.Amount;
                 _context.Wallets.Update(sendWallet);
+                var receiveWallet = _context.Wallets.FirstOrDefault(w => w.WalletId == transactionCreate.ReceiverId);
+                receiveWallet.PendingAmount += transactionCreate.Amount; // Add the amount to the admin's wallet
+                _context.Wallets.Update(receiveWallet);
                 _context.WalletTransactions.Add(transaction);
+
+                var notification = new Models.Entities.Notification
+                {
+                    NotificationId = Guid.NewGuid(),
+                    Title = "Rút tiền từ tài khoản",
+                    Content = "Bạn đã tạo một giao dịch rút tiền từ tài khoản với số tiền là " + transactionCreate.Amount + " VND. Mã giao dịch: " + transaction.WalletTransactionId,
+                    UserId = findUser.Id,
+                    CreatedAt = DateTime.UtcNow.AddHours(7),
+                    Status = (int)NotificationEnum.UnRead
+                };
+                _context.Notifications.Add(notification);
+                _firebaseRealtimeDatabaseService.SetAsync("Notifications/" + notification.NotificationId, notification);
                 await _context.SaveChangesAsync();
 
                 string vnp_Returnurl = transactionCreate.RedirectUrl;
@@ -139,14 +178,14 @@ namespace Services.Implementations
                 vnpay.AddRequestData("vnp_TmnCode", vnp_TmnCode);
                 vnpay.AddRequestData("vnp_Amount", Math.Floor(decimal.Parse(transactionCreate.Amount.ToString()) * 100).ToString());
                 vnpay.AddRequestData("vnp_BankCode", "VNBANK");
-                vnpay.AddRequestData("vnp_CreateDate", DateTime.Now.ToString("yyyyMMddHHmmss"));
+                vnpay.AddRequestData("vnp_CreateDate", DateTime.UtcNow.AddHours(7).ToString("yyyyMMddHHmmss"));
                 vnpay.AddRequestData("vnp_CurrCode", "VND");
                 vnpay.AddRequestData("vnp_IpAddr", Utils.GetIpAddress(_httpContextAccessor));
                 vnpay.AddRequestData("vnp_Locale", "vn");
                 vnpay.AddRequestData("vnp_OrderInfo", transaction.WalletTransactionId.ToString());
                 vnpay.AddRequestData("vnp_OrderType", "other");
                 vnpay.AddRequestData("vnp_ReturnUrl", vnp_Returnurl);
-                vnpay.AddRequestData("vnp_TxnRef", DateTime.Now.Ticks.ToString());
+                vnpay.AddRequestData("vnp_TxnRef", DateTime.UtcNow.AddHours(7).Ticks.ToString());
 
                 string paymentUrl = vnpay.CreateRequestUrl(vnp_Url, vnp_HashSecret);
                 await _appExtension.SendMail(new MailContent()
@@ -172,6 +211,18 @@ namespace Services.Implementations
                 Subject = "Xác nhận giao dịch",
                 Body = "Giao dịch không hợp lệ, vui lòng kiểm tra lại thông tin."
             });
+            var notificationError = new Models.Entities.Notification
+            {
+                NotificationId = Guid.NewGuid(),
+                Title = "Giao dịch",
+                Content = "Giao dịch không hợp lệ, vui lòng kiểm tra lại thông tin.",
+                UserId = findUser.Id,
+                CreatedAt = DateTime.UtcNow.AddHours(7),
+                Status = (int)NotificationEnum.UnRead
+            };
+            _context.Notifications.Add(notificationError);
+            _firebaseRealtimeDatabaseService.SetAsync("Notifications/" + notificationError.NotificationId, notificationError);
+            await _context.SaveChangesAsync();
             return new StatusCodeResult(500);
         }
 
@@ -197,7 +248,7 @@ namespace Services.Implementations
                 WalletTransactionId = Guid.NewGuid(),
                 SenderWalletId = (Guid)transactionCreate.SenderId,
                 ReceiverWalletId = (Guid)transactionCreate.ReceiverId,
-                CreatedAt = DateTime.Now,
+                CreatedAt = DateTime.UtcNow.AddHours(7),
                 Amount = transactionCreate.Amount,
                 Status = (int)VNPayType.APPROVE,
             };
@@ -211,6 +262,18 @@ namespace Services.Implementations
             _context.Wallets.Update(sendWallet);
             findUser.IsPremium = true;
             _context.Users.Update(findUser);
+
+            var notification = new Models.Entities.Notification
+            {
+                NotificationId = Guid.NewGuid(),
+                Title = "Nâng cấp tài khoản",
+                Content = "Tài khoản",
+                UserId = findUser.Id,
+                CreatedAt = DateTime.UtcNow.AddHours(7),
+                Status = (int)NotificationEnum.UnRead
+            };
+            _context.Notifications.Add(notification);
+            _firebaseRealtimeDatabaseService.SetAsync("Notifications/" + notification.NotificationId, notification);
             await _context.SaveChangesAsync();
             await _appExtension.SendMail(new MailContent()
             {
@@ -242,7 +305,7 @@ namespace Services.Implementations
                 SenderWalletId = (Guid)transactionCreate.SenderId,
                 ReceiverWalletId = (Guid)transactionCreate.ReceiverId,
                 BookingId = transactionCreate.BookingId,
-                CreatedAt = DateTime.Now,
+                CreatedAt = DateTime.UtcNow.AddHours(7),
                 Amount = transactionCreate.Amount,
                 Status = (int)VNPayType.PENDING,
             };
@@ -253,7 +316,7 @@ namespace Services.Implementations
                 SenderWalletId = (Guid)transactionCreate.SenderId,
                 ReceiverWalletId = (Guid)transactionCreate.ReceiverId,
                 Amount = transactionCreate.Amount,
-                CreatedAt = DateTime.Now,
+                CreatedAt = DateTime.UtcNow.AddHours(7),
                 Status = (int)VNPayType.PENDING,
                 Note = "Giao dịch book giáo viên"
             };
@@ -267,6 +330,17 @@ namespace Services.Implementations
                     Subject = "Xác nhận giao dịch",
                     Body = "Giao dịch booking không hợp lệ, vui lòng kiểm tra lại thông tin."
                 });
+                var notificationError = new Models.Entities.Notification
+                {
+                    NotificationId = Guid.NewGuid(),
+                    Title = "Giao dịch booking",
+                    Content = "Giao dịch booking không hợp lệ, vui lòng kiểm tra lại thông tin.",
+                    UserId = findUser.Id,
+                    CreatedAt = DateTime.UtcNow.AddHours(7),
+                    Status = (int)NotificationEnum.UnRead
+                };
+                _context.Notifications.Add(notificationError);
+                _firebaseRealtimeDatabaseService.SetAsync("Notifications/" + notificationError.NotificationId, notificationError);
                 return new StatusCodeResult(409);
             }
             sendWallet.PendingAmount -= transactionCreate.Amount;
@@ -276,6 +350,18 @@ namespace Services.Implementations
             _context.Wallets.Update(receiveWallet);
             _context.BookingTransactions.Add(transaction);
             _context.WalletTransactions.Add(senderTransaction);
+
+            var notification = new Models.Entities.Notification
+            {
+                NotificationId = Guid.NewGuid(),
+                Title = "Giao dịch booking",
+                Content = "Bạn đã nhận được một giao dịch booking với số tiền là " + transactionCreate.Amount + " VND. Mã giao dịch: " + transaction.BookingTransactionId,
+                UserId = findUser.Id,
+                CreatedAt = DateTime.UtcNow.AddHours(7),
+                Status = (int)NotificationEnum.UnRead
+            };
+            _context.Notifications.Add(notification);
+            _firebaseRealtimeDatabaseService.SetAsync("Notifications/" + notification.NotificationId, notification);
             await _context.SaveChangesAsync();
             await _appExtension.SendMail(new MailContent()
             {
@@ -305,7 +391,7 @@ namespace Services.Implementations
                 SenderWalletId = (Guid)transactionCreate.SenderId,
                 ReceiverWalletId = (Guid)transactionCreate.ReceiverId,
                 CourseId = transactionCreate.CourseId,
-                CreatedAt = DateTime.Now,
+                CreatedAt = DateTime.UtcNow.AddHours(7),
                 Amount = transactionCreate.Amount,
                 Status = (int)VNPayType.PENDING,
             };
@@ -316,7 +402,7 @@ namespace Services.Implementations
                 SenderWalletId = (Guid)transactionCreate.SenderId,
                 ReceiverWalletId = (Guid)transactionCreate.ReceiverId,
                 Amount = transactionCreate.Amount,
-                CreatedAt = DateTime.Now,
+                CreatedAt = DateTime.UtcNow.AddHours(7),
                 Status = (int)VNPayType.PENDING,
                 Note = "Giao dịch đặt khóa học"
             };
@@ -373,12 +459,12 @@ namespace Services.Implementations
 
                     //update wallet for sender and receiver
                     wallet.SenderWalletNavigation.Amount -= booking.Amount;
-                    wallet.SenderWalletNavigation.LastBalanceUpdate = DateTime.Now;
-                    wallet.SenderWalletNavigation.PendingAmount -= booking.Amount;
+                    wallet.SenderWalletNavigation.LastBalanceUpdate = DateTime.UtcNow.AddHours(7);
+                    wallet.SenderWalletNavigation.PendingAmount += booking.Amount;
                     wallet.SenderWalletNavigation.AvalaibleAmount -= booking.Amount;
 
                     wallet.ReceiverWalletNavigation.Amount += booking.Amount;
-                    wallet.ReceiverWalletNavigation.LastBalanceUpdate = DateTime.Now;
+                    wallet.ReceiverWalletNavigation.LastBalanceUpdate = DateTime.UtcNow.AddHours(7);
                     wallet.ReceiverWalletNavigation.AvalaibleAmount += booking.Amount;
                     wallet.ReceiverWalletNavigation.PendingAmount -= booking.Amount;
 
@@ -396,6 +482,29 @@ namespace Services.Implementations
                         Subject = "Xác nhận giao dịch",
                         Body = "Giao dịch booking của bạn đã được xác nhận. Mã giao dịch: " + wallet.WalletTransactionId
                     });
+                    var notification1 = new Models.Entities.Notification
+                    {
+                        NotificationId = Guid.NewGuid(),
+                        Title = "Giao dịch booking",
+                        Content = "Giao dịch booking của bạn đã được xác nhận. Mã giao dịch: " + wallet.WalletTransactionId,
+                        UserId = sender.Id,
+                        CreatedAt = DateTime.UtcNow.AddHours(7),
+                        Status = (int)NotificationEnum.UnRead
+                    };
+                    var notification2 = new Models.Entities.Notification
+                    {
+                        NotificationId = Guid.NewGuid(),
+                        Title = "Giao dịch booking",
+                        Content = "Giao dịch booking của bạn đã được xác nhận. Mã giao dịch: " + wallet.WalletTransactionId,
+                        UserId = receiver.Id,
+                        CreatedAt = DateTime.UtcNow.AddHours(7),
+                        Status = (int)NotificationEnum.UnRead
+                    };
+                    _context.Notifications.Add(notification1);
+                    _context.Notifications.Add(notification2);
+                    _firebaseRealtimeDatabaseService.SetAsync("Notifications/" + notification1.NotificationId, notification1);
+                    _firebaseRealtimeDatabaseService.SetAsync("Notifications/" + notification2.NotificationId, notification2);
+
                 }
                 else if (choice == (Int32)UpdateTransactionType.Course)
                 {
@@ -405,12 +514,12 @@ namespace Services.Implementations
 
                     //update wallet for sender and receiver
                     wallet.SenderWalletNavigation.Amount -= course.Amount;
-                    wallet.SenderWalletNavigation.LastBalanceUpdate = DateTime.Now;
-                    wallet.SenderWalletNavigation.PendingAmount -= course.Amount;
+                    wallet.SenderWalletNavigation.LastBalanceUpdate = DateTime.UtcNow.AddHours(7);
+                    wallet.SenderWalletNavigation.PendingAmount += course.Amount;
                     wallet.SenderWalletNavigation.AvalaibleAmount -= course.Amount;
 
                     wallet.ReceiverWalletNavigation.Amount += course.Amount;
-                    wallet.ReceiverWalletNavigation.LastBalanceUpdate = DateTime.Now;
+                    wallet.ReceiverWalletNavigation.LastBalanceUpdate = DateTime.UtcNow.AddHours(7);
                     wallet.ReceiverWalletNavigation.AvalaibleAmount += course.Amount;
                     wallet.ReceiverWalletNavigation.PendingAmount -= course.Amount;
 
@@ -428,6 +537,28 @@ namespace Services.Implementations
                         Subject = "Xác nhận giao dịch",
                         Body = "Giao dịch course của bạn đã được xác nhận. Mã giao dịch: " + wallet.WalletTransactionId
                     });
+                    var notification1 = new Models.Entities.Notification
+                    {
+                        NotificationId = Guid.NewGuid(),
+                        Title = "Giao dịch course",
+                        Content = "Giao dịch course của bạn đã được xác nhận. Mã giao dịch: " + wallet.WalletTransactionId,
+                        UserId = sender.Id,
+                        CreatedAt = DateTime.UtcNow.AddHours(7),
+                        Status = (int)NotificationEnum.UnRead
+                    };
+                    var notification2 = new Models.Entities.Notification
+                    {
+                        NotificationId = Guid.NewGuid(),
+                        Title = "Giao dịch course",
+                        Content = "Giao dịch course của bạn đã được xác nhận. Mã giao dịch: " + wallet.WalletTransactionId,
+                        UserId = receiver.Id,
+                        CreatedAt = DateTime.UtcNow.AddHours(7),
+                        Status = (int)NotificationEnum.UnRead
+                    };
+                    _context.Notifications.Add(notification1);
+                    _context.Notifications.Add(notification2);
+                    await _firebaseRealtimeDatabaseService.SetAsync<Models.Entities.Notification>($"notifications/{notification1.UserId}/{notification1.NotificationId}", notification1);
+                    await _firebaseRealtimeDatabaseService.SetAsync<Models.Entities.Notification>($"notifications/{notification2.UserId}/{notification2.NotificationId}", notification2);
                 }
                 else if (choice == (Int32)UpdateTransactionType.Wallet)
                 {
@@ -435,12 +566,12 @@ namespace Services.Implementations
 
                     //update wallet for sender and receiver
                     wallet.SenderWalletNavigation.Amount -= wallet.Amount;
-                    wallet.SenderWalletNavigation.LastBalanceUpdate = DateTime.Now;
-                    wallet.SenderWalletNavigation.PendingAmount -= wallet.Amount;
+                    wallet.SenderWalletNavigation.LastBalanceUpdate = DateTime.UtcNow.AddHours(7);
+                    wallet.SenderWalletNavigation.PendingAmount += wallet.Amount;
                     wallet.SenderWalletNavigation.AvalaibleAmount -= wallet.Amount;
 
                     wallet.ReceiverWalletNavigation.Amount += wallet.Amount;
-                    wallet.ReceiverWalletNavigation.LastBalanceUpdate = DateTime.Now;
+                    wallet.ReceiverWalletNavigation.LastBalanceUpdate = DateTime.UtcNow.AddHours(7);
                     wallet.ReceiverWalletNavigation.AvalaibleAmount += wallet.Amount;
                     wallet.ReceiverWalletNavigation.PendingAmount -= wallet.Amount;
 
@@ -458,6 +589,28 @@ namespace Services.Implementations
                         Subject = "Xác nhận giao dịch",
                         Body = "Giao dịch ví của bạn đã được xác nhận. Mã giao dịch: " + wallet.WalletTransactionId
                     });
+                    var notification1 = new Models.Entities.Notification
+                    {
+                        NotificationId = Guid.NewGuid(),
+                        Title = "Giao dịch ví",
+                        Content = "Giao dịch ví của bạn đã được xác nhận. Mã giao dịch: " + wallet.WalletTransactionId,
+                        UserId = sender.Id,
+                        CreatedAt = DateTime.UtcNow.AddHours(7),
+                        Status = (int)NotificationEnum.UnRead
+                    };
+                    var notification2 = new Models.Entities.Notification
+                    {
+                        NotificationId = Guid.NewGuid(),
+                        Title = "Giao dịch ví",
+                        Content = "Giao dịch ví của bạn đã được xác nhận. Mã giao dịch: " + wallet.WalletTransactionId,
+                        UserId = receiver.Id,
+                        CreatedAt = DateTime.UtcNow.AddHours(7),
+                        Status = (int)NotificationEnum.UnRead
+                    };
+                    _context.Notifications.Add(notification1);
+                    _context.Notifications.Add(notification2);
+                    _firebaseRealtimeDatabaseService.SetAsync("Notifications/" + notification1.NotificationId, notification1);
+                    _firebaseRealtimeDatabaseService.SetAsync("Notifications/" + notification2.NotificationId, notification2);
                 }
                 else if (choice == (Int32)UpdateTransactionType.Unknown) { return new StatusCodeResult(406); }
             }
@@ -470,11 +623,14 @@ namespace Services.Implementations
                     booking.Status = (int)VNPayType.REJECT;
 
                     //update wallet for sender and receiver
-                    wallet.SenderWalletNavigation.LastBalanceUpdate = DateTime.Now;
-                    wallet.SenderWalletNavigation.PendingAmount -= booking.Amount;
+                    wallet.SenderWalletNavigation.LastBalanceUpdate = DateTime.UtcNow.AddHours(7);
+                    wallet.SenderWalletNavigation.PendingAmount += booking.Amount;
+                    wallet.SenderWalletNavigation.AvalaibleAmount += booking.Amount;
+                    wallet.SenderWalletNavigation.Amount += booking.Amount;
 
-                    wallet.ReceiverWalletNavigation.LastBalanceUpdate = DateTime.Now;
+                    wallet.ReceiverWalletNavigation.LastBalanceUpdate = DateTime.UtcNow.AddHours(7);
                     wallet.ReceiverWalletNavigation.PendingAmount -= booking.Amount;
+
 
                     _context.BookingTransactions.Update(booking);
                     _context.WalletTransactions.Update(wallet);
@@ -490,6 +646,28 @@ namespace Services.Implementations
                         Subject = "Xác nhận giao dịch",
                         Body = "Giao dịch booking của bạn đã được hủy bỏ. Mã giao dịch: " + wallet.WalletTransactionId
                     });
+                    var notification1 = new Models.Entities.Notification
+                    {
+                        NotificationId = Guid.NewGuid(),
+                        Title = "Giao dịch booking",
+                        Content = "Giao dịch booking của bạn đã được hủy bỏ. Mã giao dịch: " + wallet.WalletTransactionId,
+                        UserId = sender.Id,
+                        CreatedAt = DateTime.UtcNow.AddHours(7),
+                        Status = (int)NotificationEnum.UnRead
+                    };
+                    var notification2 = new Models.Entities.Notification
+                    {
+                        NotificationId = Guid.NewGuid(),
+                        Title = "Giao dịch booking",
+                        Content = "Giao dịch booking của bạn đã được hủy bỏ. Mã giao dịch: " + wallet.WalletTransactionId,
+                        UserId = receiver.Id,
+                        CreatedAt = DateTime.UtcNow.AddHours(7),
+                        Status = (int)NotificationEnum.UnRead
+                    };
+                    _context.Notifications.Add(notification1);
+                    _context.Notifications.Add(notification2);
+                    await _firebaseRealtimeDatabaseService.SetAsync<Models.Entities.Notification>($"notifications/{notification1.UserId}/{notification1.NotificationId}", notification1);
+                    await _firebaseRealtimeDatabaseService.SetAsync<Models.Entities.Notification>($"notifications/{notification2.UserId}/{notification2.NotificationId}", notification2);
                 }
                 else if (choice == (Int32)UpdateTransactionType.Course)
                 {
@@ -498,11 +676,14 @@ namespace Services.Implementations
                     course.Status = (int)VNPayType.REJECT;
 
                     //update wallet for sender and receiver
-                    wallet.SenderWalletNavigation.LastBalanceUpdate = DateTime.Now;
-                    wallet.SenderWalletNavigation.PendingAmount -= course.Amount;
+                    wallet.SenderWalletNavigation.LastBalanceUpdate = DateTime.UtcNow.AddHours(7);
+                    wallet.SenderWalletNavigation.PendingAmount += course.Amount;
+                    wallet.SenderWalletNavigation.AvalaibleAmount += course.Amount;
+                    wallet.SenderWalletNavigation.Amount += course.Amount;
 
-                    wallet.ReceiverWalletNavigation.LastBalanceUpdate = DateTime.Now;
+                    wallet.ReceiverWalletNavigation.LastBalanceUpdate = DateTime.UtcNow.AddHours(7);
                     wallet.ReceiverWalletNavigation.PendingAmount -= course.Amount;
+                    
 
                     _context.CourseTransactions.Update(course);
                     _context.WalletTransactions.Update(wallet);
@@ -518,17 +699,42 @@ namespace Services.Implementations
                         Subject = "Xác nhận giao dịch",
                         Body = "Giao dịch course của bạn đã được hủy bỏ. Mã giao dịch: " + wallet.WalletTransactionId
                     });
+                    var notification1 = new Models.Entities.Notification
+                    {
+                        NotificationId = Guid.NewGuid(),
+                        Title = "Giao dịch course",
+                        Content = "Giao dịch course của bạn đã được hủy bỏ. Mã giao dịch: " + wallet.WalletTransactionId,
+                        UserId = sender.Id,
+                        CreatedAt = DateTime.UtcNow.AddHours(7),
+                        Status = (int)NotificationEnum.UnRead
+                    };
+                    var notification2 = new Models.Entities.Notification
+                    {
+                        NotificationId = Guid.NewGuid(),
+                        Title = "Giao dịch course",
+                        Content = "Giao dịch course của bạn đã được hủy bỏ. Mã giao dịch: " + wallet.WalletTransactionId,
+                        UserId = receiver.Id,
+                        CreatedAt = DateTime.UtcNow.AddHours(7),
+                        Status = (int)NotificationEnum.UnRead
+                    };
+                    _context.Notifications.Add(notification1);
+                    _context.Notifications.Add(notification2);
+                    await _firebaseRealtimeDatabaseService.SetAsync<Models.Entities.Notification>($"notifications/{notification1.UserId}/{notification1.NotificationId}", notification1);
+                    await _firebaseRealtimeDatabaseService.SetAsync<Models.Entities.Notification>($"notifications/{notification2.UserId}/{notification2.NotificationId}", notification2);
                 }
                 else if (choice == (Int32)UpdateTransactionType.Wallet)
                 {
                     wallet.Status = (int)VNPayType.REJECT;
 
                     //update wallet for sender and receiver
-                    wallet.SenderWalletNavigation.LastBalanceUpdate = DateTime.Now;
-                    wallet.SenderWalletNavigation.PendingAmount -= wallet.Amount;
+                    wallet.SenderWalletNavigation.LastBalanceUpdate = DateTime.UtcNow.AddHours(7);
+                    wallet.SenderWalletNavigation.PendingAmount += wallet.Amount;
+                    wallet.SenderWalletNavigation.AvalaibleAmount += wallet.Amount;
+                    wallet.SenderWalletNavigation.Amount += wallet.Amount;
 
-                    wallet.ReceiverWalletNavigation.LastBalanceUpdate = DateTime.Now;
+                    wallet.ReceiverWalletNavigation.LastBalanceUpdate = DateTime.UtcNow.AddHours(7);
                     wallet.ReceiverWalletNavigation.PendingAmount -= wallet.Amount;
+                    
 
                     _context.WalletTransactions.Update(wallet);
                     await _appExtension.SendMail(new MailContent()
@@ -543,6 +749,28 @@ namespace Services.Implementations
                         Subject = "Xác nhận giao dịch",
                         Body = "Giao dịch ví của bạn đã được hủy bỏ. Mã giao dịch: " + wallet.WalletTransactionId
                     });
+                    var notification1 = new Models.Entities.Notification
+                    {
+                        NotificationId = Guid.NewGuid(),
+                        Title = "Giao dịch ví",
+                        Content = "Giao dịch ví của bạn đã được hủy bỏ. Mã giao dịch: " + wallet.WalletTransactionId,
+                        UserId = sender.Id,
+                        CreatedAt = DateTime.UtcNow.AddHours(7),
+                        Status = (int)NotificationEnum.UnRead
+                    };
+                    var notification2 = new Models.Entities.Notification
+                    {
+                        NotificationId = Guid.NewGuid(),
+                        Title = "Giao dịch ví",
+                        Content = "Giao dịch ví của bạn đã được hủy bỏ. Mã giao dịch: " + wallet.WalletTransactionId,
+                        UserId = receiver.Id,
+                        CreatedAt = DateTime.UtcNow.AddHours(7),
+                        Status = (int)NotificationEnum.UnRead
+                    };
+                    _context.Notifications.Add(notification1);
+                    _context.Notifications.Add(notification2);
+                    await _firebaseRealtimeDatabaseService.SetAsync<Models.Entities.Notification>($"notifications/{notification1.UserId}/{notification1.NotificationId}", notification1);
+                    await _firebaseRealtimeDatabaseService.SetAsync<Models.Entities.Notification>($"notifications/{notification2.UserId}/{notification2.NotificationId}", notification2);
                 }
                 else if (choice == (Int32)UpdateTransactionType.Unknown) { return new StatusCodeResult(406); }
             }

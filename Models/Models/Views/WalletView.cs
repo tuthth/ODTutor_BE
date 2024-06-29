@@ -13,7 +13,7 @@ namespace Models.Models.Views
         public decimal? Amount { get; set; }
         public decimal? AvalaibleAmount { get; set; }
         public decimal? PendingAmount { get; set; }
-        public DateTime LastBalanceUpdate { get; set; } = DateTime.Now;
+        public DateTime LastBalanceUpdate { get; set; } = DateTime.UtcNow.AddHours(7);
         public int Status { get; set; }
     }
 }
