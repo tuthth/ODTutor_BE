@@ -328,6 +328,22 @@ namespace Services.Implementations
             await _context.SaveChangesAsync();
             return new StatusCodeResult(204);
         }
+        public async Task<IActionResult> FinishBooking(Guid id)
+        {
+            var booking = _context.Bookings.FirstOrDefault(x => x.BookingId == id);
+            if (booking == null)
+            {
+                return new StatusCodeResult(404);
+            }
+            if(booking.Status != (Int32)BookingEnum.Learning)
+            {
+                return new StatusCodeResult(409);
+            }
+            booking.Status = (Int32)BookingEnum.Finished;
+            _context.Bookings.Update(booking);
+            await _context.SaveChangesAsync();
+            return new StatusCodeResult(200);
+        }
         public async Task<ActionResult<List<Booking>>> GetAllBookings()
         {
             try

@@ -505,6 +505,10 @@ namespace Services.Implementations
                     _firebaseRealtimeDatabaseService.SetAsync("Notifications/" + notification1.NotificationId, notification1);
                     _firebaseRealtimeDatabaseService.SetAsync("Notifications/" + notification2.NotificationId, notification2);
 
+                    var book = _context.Bookings.FirstOrDefault(b => b.BookingId == booking.BookingId);
+                    book.Status = (int)BookingEnum.Success;
+
+                    _context.Bookings.Update(book);
                 }
                 else if (choice == (Int32)UpdateTransactionType.Course)
                 {
@@ -668,6 +672,11 @@ namespace Services.Implementations
                     _context.Notifications.Add(notification2);
                     await _firebaseRealtimeDatabaseService.SetAsync<Models.Entities.Notification>($"notifications/{notification1.UserId}/{notification1.NotificationId}", notification1);
                     await _firebaseRealtimeDatabaseService.SetAsync<Models.Entities.Notification>($"notifications/{notification2.UserId}/{notification2.NotificationId}", notification2);
+
+                    var book = _context.Bookings.FirstOrDefault(b => b.BookingId == booking.BookingId);
+                    book.Status = (int)BookingEnum.Canceled;
+
+                    _context.Bookings.Update(book);
                 }
                 else if (choice == (Int32)UpdateTransactionType.Course)
                 {

@@ -14,5 +14,7 @@ namespace Models.Models.Views
         public int Status { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow.AddHours(7);
         public string? GoogleMeetUrl { get; set; }
+        public DateTime? StartDate { get; set; }
+        public DateTime? EndDate { get; set; }
     }
 }

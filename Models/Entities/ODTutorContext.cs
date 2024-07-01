@@ -21,6 +21,8 @@ namespace Models.Entities
         public DbSet<Course> Courses {get; set;}
         public DbSet<CourseOutline> CourseOutlines { get; set; }
         public DbSet<CoursePromotion> CoursePromotions { get; set; }
+        public DbSet<CourseSlot> CourseSlots { get; set; }
+        public DbSet<CourseSchedule> CourseSchedules { get; set; }
         public DbSet<CourseTransaction> CourseTransactions { get; set; }
         public DbSet<Promotion> Promotions { get; set; }
         public DbSet<Report> Reports { get; set; }
@@ -130,6 +132,11 @@ namespace Models.Entities
             modelBuilder.Entity<Course>().HasOne(c => c.CourseTransactionNavigation)
                 .WithOne(ct => ct.CourseNavigation)
                 .HasForeignKey<CourseTransaction>(ct => ct.CourseTransactionId).OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<Course>()
+                .HasMany(c => c.CourseSlotsNavigation)
+                .WithOne(cs => cs.CourseNavigation)
+                .HasForeignKey(cs => cs.CourseId).OnDelete(DeleteBehavior.NoAction);
 
 
             //CourseTransaction Entity Configuration
@@ -562,6 +569,33 @@ namespace Models.Entities
                 .WithMany(t => t.TutorSlotAvailablesNavigation)
                 .HasForeignKey(tsa => tsa.TutorID)
                 .OnDelete(DeleteBehavior.NoAction);
+
+            //Configure CourseSlot entity
+            modelBuilder.Entity<CourseSlot>(entity =>
+            {
+                entity.HasKey(cs => cs.CourseSlotId);
+
+                entity.HasOne(cs => cs.CourseNavigation)
+                    .WithMany(c => c.CourseSlotsNavigation)
+                    .HasForeignKey(cs => cs.CourseId)
+                    .OnDelete(DeleteBehavior.NoAction);
+            });
+
+            //Configure CourseSchedule entity
+            modelBuilder.Entity<CourseSchedule>(entity =>
+            {
+                entity.HasKey(cs => new { cs.CourseSlotId, cs.ScheduleId });
+
+                entity.HasOne(cs => cs.CourseSlotNavigation)
+                    .WithMany(cs => cs.CourseSchedulesNavigation)
+                    .HasForeignKey(cs => cs.CourseSlotId)
+                    .OnDelete(DeleteBehavior.NoAction);
+
+                entity.HasOne(cs => cs.ScheduleNavigation)
+                    .WithMany(s => s.CourseSchedulesNavigation)
+                    .HasForeignKey(cs => cs.ScheduleId)
+                    .OnDelete(DeleteBehavior.NoAction);
+            });
         }
 
     }

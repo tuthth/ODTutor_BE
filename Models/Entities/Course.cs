@@ -22,6 +22,7 @@ namespace Models.Entities
         public virtual ICollection<StudentCourse>? StudentCoursesNavigation { get; set; }
         public virtual ICollection<CourseOutline>? CourseOutlinesNavigation { get; set; }
         public virtual ICollection<CoursePromotion>? CoursePromotionsNavigation { get; set; }
+        public virtual ICollection<CourseSlot>? CourseSlotsNavigation { get; set; }
         public virtual CourseTransaction? CourseTransactionNavigation {  get; set; }
     }
 }

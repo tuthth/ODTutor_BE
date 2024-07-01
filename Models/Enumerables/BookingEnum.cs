@@ -11,7 +11,7 @@ namespace Models.Enumerables
         WaitingPayment = 0,
         Learning = 1,
         Finished = 2,
-        Cancled = 3,
+        Canceled = 3,
         Success = 4,
     }
 }
