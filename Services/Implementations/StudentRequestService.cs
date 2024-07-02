@@ -18,9 +18,11 @@ namespace Services.Implementations
     public class StudentRequestService : BaseService, IStudentRequestService
     {
         private readonly IFirebaseRealtimeDatabaseService _service;
-        public StudentRequestService(ODTutorContext context, IMapper mapper, IFirebaseRealtimeDatabaseService service) : base(context, mapper)
+        private readonly INotificationService _notificationService;
+        public StudentRequestService(ODTutorContext context, IMapper mapper, INotificationService notificationService , IFirebaseRealtimeDatabaseService service) : base(context, mapper)
         {
             _service = service;
+            _notificationService = notificationService;
         }
         public async Task<IActionResult> CreateStudentRequest(CreateStudentRequest request)
         {
@@ -34,8 +36,19 @@ namespace Services.Implementations
             studentRequest.CreatedAt = DateTime.UtcNow.AddHours(7);
             studentRequest.StudentRequestId = Guid.NewGuid();
             studentRequest.Status = (Int32)StudentRequestEnum.Pending;
-            _service.SetAsync<StudentRequest>($"Studentrequest/{studentRequest.StudentRequestId}", studentRequest);
-            _context.StudentRequests.Add(studentRequest);
+            var notification = new Models.Entities.Notification
+            {
+                NotificationId = Guid.NewGuid(),
+                Title = "Yêu cầu của bạn đã được gửi đến các gia sư khác",
+                Content = "Vui lòng chờ trong thời gian sớm nhất để nhận được phản hồi từ các gia sư khác trong tin nhắn nhé",
+                UserId = student.UserId,
+                CreatedAt = DateTime.UtcNow.AddHours(7),
+                Status = (Int32)NotificationEnum.UnRead
+            };
+            await _service.SetAsync<Models.Entities.Notification>($"notifications/{student.UserId}/{notification.NotificationId}", notification);
+            await _service.SetAsync<StudentRequest>($"Studentrequest/{studentRequest.StudentRequestId}", studentRequest);
+            await _context.Notifications.AddAsync(notification);
+            await _context.StudentRequests.AddAsync(studentRequest);
             await _context.SaveChangesAsync();
             return new StatusCodeResult(201);
         }

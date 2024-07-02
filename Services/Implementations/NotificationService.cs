@@ -16,6 +16,7 @@ namespace Services.Implementations
     public class NotificationService : BaseService, INotificationService
     {   
         private readonly IFirebaseRealtimeDatabaseService _firebaseRealtimeDatabaseService;
+
         public NotificationService(ODTutorContext context, IMapper mapper, IFirebaseRealtimeDatabaseService firebaseRealtimeDatabaseService) : base (context, mapper)
         {
             _firebaseRealtimeDatabaseService = firebaseRealtimeDatabaseService;
@@ -47,7 +48,6 @@ namespace Services.Implementations
                 throw new CrudException(System.Net.HttpStatusCode.InternalServerError, ex.Message,"");
             }   
         }
-
 
         // Get Notification By UserId
         public async Task<List<NotificationResponse>> GetNotificationByUserId(Guid userId)
@@ -99,6 +99,30 @@ namespace Services.Implementations
                 noti.Status = (Int32)NotificationEnum.Read;
                 await _context.SaveChangesAsync();
                 throw new CrudException(System.Net.HttpStatusCode.OK, "Cập nhật trạng thái thông báo thành công", "");
+            }
+            catch (CrudException ex)
+            {
+                throw ex;
+            }
+            catch (Exception ex)
+            {
+                throw new CrudException(System.Net.HttpStatusCode.InternalServerError, ex.Message, "");
+            }
+        }
+
+        // Update Status Student Request 
+        public async Task<IActionResult> UpdateStatusStudentRequest(Guid studentRequestId)
+        {
+            try
+            {
+                var studentRequest = await _context.StudentRequests.FindAsync(studentRequestId);
+                if (studentRequest == null)
+                {
+                    throw new CrudException(System.Net.HttpStatusCode.NotFound, "Không tìm thấy yêu cầu sinh viên", "");
+                }
+                studentRequest.Status = 1;
+                await _context.SaveChangesAsync();
+                throw new CrudException(System.Net.HttpStatusCode.OK, "Cập nhật trạng thái yêu cầu sinh viên thành công", "");
             }
             catch (CrudException ex)
             {

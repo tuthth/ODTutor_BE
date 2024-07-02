@@ -310,6 +310,7 @@ namespace Services.Implementations
                     Subject = new ClaimsIdentity(new[]
                     {
                 new Claim("UserId", user.Id.ToString()),
+                new Claim("StudentId", student.StudentId.ToString()),
                 new Claim("TutorId", tutor.TutorId.ToString()),
                 new Claim(ClaimTypes.Name, user.Username ?? string.Empty),
                 new Claim(ClaimTypes.Email, user.Email ?? string.Empty),
