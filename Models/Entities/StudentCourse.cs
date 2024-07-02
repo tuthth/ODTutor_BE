@@ -14,6 +14,8 @@ namespace Models.Entities
         public int Status {  get; set; }
         public DateTime CreatedAt {  get; set; } = DateTime.UtcNow.AddHours(7);
         public string? GoogleMeetUrl { get; set; }
+        public DateTime? StartDate { get; set; }
+        public DateTime? EndDate { get; set; }
         public virtual Course? CourseNavigation { get; set; }
         public virtual Student? StudentNavigation { get; set; }
         public virtual ICollection<Schedule>? SchedulesNavigations { get; set; }

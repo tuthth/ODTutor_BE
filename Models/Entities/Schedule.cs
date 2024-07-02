@@ -14,5 +14,6 @@ namespace Models.Entities
         public DateTime EndAt { get; set; }
         public int Status { get; set; }
         public virtual StudentCourse? StudentCourseNavigation { get; set; }
+        public virtual ICollection<CourseSchedule>? CourseSchedulesNavigation { get; set; }
     }
 }

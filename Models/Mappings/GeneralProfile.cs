@@ -83,6 +83,7 @@ namespace Models.Mappings
             CreateMap<Subject, UpdateSubject>();
             CreateMap<Subject, SubjectAddNewRequest>();
             CreateMap<TutorAction, TutorActionView>();
+            CreateMap<CourseSlot, CourseSlotView>();
             CreateMap<PageResults<Wallet>, PageResults<WalletView>>();
             CreateMap<PageResults<User>, PageResults<UserView>>();
             CreateMap<PageResults<Student>, PageResults<StudentView>>();
@@ -111,6 +112,7 @@ namespace Models.Mappings
             CreateMap<PageResults<TutorAction>, PageResults<TutorActionView>>();
             CreateMap<StudentRequest, CreateStudentRequest>();
             CreateMap<CreateStudentRequest, StudentRequest>();
+            CreateMap<PageResults<CourseSlot>, PageResults<CourseSlotView>>();
         }
     }
 }

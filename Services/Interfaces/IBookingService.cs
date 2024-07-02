@@ -21,5 +21,6 @@ namespace Services.Interfaces
         Task<IActionResult> RateBookings(TutorRatingRequest tutorRatingRequest);
         Task<IActionResult> UpdateRating(UpdateTutorRatingRequest request);
         Task<IActionResult> RemoveRating(Guid id);
+        Task<IActionResult> FinishBooking(Guid id);
     }
 }

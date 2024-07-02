@@ -90,7 +90,7 @@ namespace API.Controllers
         }
 
         /// <summary>
-        ///         Booking status: 1 ( Learning ), 2 ( Finsihed ), 3 ( Deleted ), 4 ( Pending ), 5 ( Accepted )
+        ///         Booking status: 1 ( Learning ), 2 ( Finsihed ), 3 ( Deleted ), 4 ( Success ), 0 ( Wait for payment ). Dùng 0 với 4 cho lúc thanh toán.
         /// </summary>
         [HttpPost("create/booking")]
         public async Task<IActionResult> CreateBooking(BookingRequest bookingRequest)
@@ -153,6 +153,24 @@ namespace API.Controllers
                     if (statusCodeResult.StatusCode == 404) return NotFound(new { Message = "Không tìm thấy lịch đặt đã hoàn thành" });
                     if (statusCodeResult.StatusCode == 406) { return StatusCode(StatusCodes.Status406NotAcceptable, new { Message = "Tài khoản student đang bị đình chỉ bởi hệ thống" }); }
                     if (statusCodeResult.StatusCode == 201) return StatusCode(StatusCodes.Status201Created, new { Message = "Đánh giá thành công" });
+                }
+                if (actionResult is Exception exception) StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
+            }
+            throw new Exception("Lỗi không xác định");
+        }
+        [HttpPut("finish/booking/{bookingID}")]
+        public async Task<IActionResult> FinishBooking(Guid bookingID)
+        {
+            var result = await _bookingService.FinishBooking(bookingID);
+            if (result is IActionResult actionResult)
+            {
+                if (actionResult is StatusCodeResult statusCodeResult)
+                {
+                    if (statusCodeResult.StatusCode == 400) { return BadRequest(new { Message = "Dữ liệu không hợp lệ" }); }
+                    if (statusCodeResult.StatusCode == 404) return NotFound(new { Message = "Không tìm thấy lịch đặt" });
+                    if (statusCodeResult.StatusCode == 406) { return StatusCode(StatusCodes.Status406NotAcceptable, new { Message = "Tài khoản student đang bị đình chỉ bởi hệ thống" }); }
+                    if(statusCodeResult.StatusCode == 409) { return StatusCode(StatusCodes.Status409Conflict, new { Message = "Buổi học hiện không diễn ra" }); }
+                    if (statusCodeResult.StatusCode == 200) return StatusCode(StatusCodes.Status200OK, new { Message = "Kết thúc buổi học thành công" });
                 }
                 if (actionResult is Exception exception) StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
             }
