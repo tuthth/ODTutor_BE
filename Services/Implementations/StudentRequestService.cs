@@ -1,9 +1,11 @@
 ﻿using AutoMapper;
+using FirebaseAdmin.Messaging;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Models.Entities;
 using Models.Enumerables;
 using Models.Models.Requests;
+using Models.Models.Views;
 using Services.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -15,25 +17,24 @@ namespace Services.Implementations
 {
     public class StudentRequestService : BaseService, IStudentRequestService
     {
-        public StudentRequestService(ODTutorContext context, IMapper mapper) : base(context, mapper)
+        private readonly IFirebaseRealtimeDatabaseService _service;
+        public StudentRequestService(ODTutorContext context, IMapper mapper, IFirebaseRealtimeDatabaseService service) : base(context, mapper)
         {
+            _service = service;
         }
         public async Task<IActionResult> CreateStudentRequest(CreateStudentRequest request)
         {
-            var student = _context.Students.FirstOrDefault(x => x.StudentId == request.StudentId && x.UserNavigation.IsPremium == true);
+            Student student = _context.Students.FirstOrDefault(x => x.StudentId == request.StudentId);
             var subject = _context.Subjects.FirstOrDefault(x => x.SubjectId == request.SubjectId);
             if (student == null || subject == null)
             {
                 return new StatusCodeResult(404);
             }
-            if(student.UserNavigation.Banned == true)
-            {
-                return new StatusCodeResult(403);
-            }
             var studentRequest = _mapper.Map<StudentRequest>(request);
             studentRequest.CreatedAt = DateTime.UtcNow.AddHours(7);
             studentRequest.StudentRequestId = Guid.NewGuid();
             studentRequest.Status = (Int32)StudentRequestEnum.Pending;
+            _service.SetAsync<StudentRequest>($"Studentrequest/{studentRequest.StudentRequestId}", studentRequest);
             _context.StudentRequests.Add(studentRequest);
             await _context.SaveChangesAsync();
             return new StatusCodeResult(201);
@@ -126,6 +127,49 @@ namespace Services.Implementations
             catch (Exception ex)
             {
                 throw new Exception(ex.ToString());
+            }
+        }
+
+        public async Task<ActionResult<List<StudentRequestView>>> GetStudentRequestsByStatus()
+        {
+            try
+            {
+                // Lấy dữ liệu
+                var studentRequestsData = await _service.GetAsync<Dictionary<string, Dictionary<string, object>>>("Studentrequest");
+
+                // Kiểm tra dữ liệu null
+                if (studentRequestsData == null || !studentRequestsData.Any())
+                {
+                    throw new CrudException(System.Net.HttpStatusCode.NotFound, "No student requests found", "");
+                }
+
+                var studentRequests = new List<StudentRequestView>();
+
+                // Duyệt qua từng mục trong dữ liệu
+                foreach (var item in studentRequestsData)
+                {
+                    var studentRequestObject = item.Value;
+
+                    var studentRequestView = new StudentRequestView
+                    {
+                        StudentRequestId = Guid.Parse(item.Key), // Dùng item.Key cho StudentRequestId
+                        StudentId = Guid.Parse(studentRequestObject["StudentId"].ToString()),
+                        SubjectId = Guid.Parse(studentRequestObject["SubjectId"].ToString()),
+                        CreatedAt = DateTime.Parse(studentRequestObject["CreatedAt"].ToString()),
+                        Message = studentRequestObject["Message"].ToString(),
+                        Status = int.Parse(studentRequestObject["Status"].ToString())
+                    };
+
+                    studentRequests.Add(studentRequestView);
+                }
+
+                return new ActionResult<List<StudentRequestView>>(studentRequests);
+            }
+            catch (Exception ex)
+            {
+                // Xử lý ngoại lệ
+                Console.WriteLine("Error: " + ex.Message);
+                throw new CrudException(System.Net.HttpStatusCode.InternalServerError, ex.Message, "");
             }
         }
     }

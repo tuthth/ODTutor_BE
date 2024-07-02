@@ -58,6 +58,31 @@ namespace Services.Implementations
         {
             DocumentReference docRef = _firestoreDb.Collection(collectionName).Document(documentName);
             await docRef.SetAsync(value);
-        }   
+        }
+
+        // Get From Collection
+        public async Task<List<T>> GetCollectionAsync<T>(string collectionName)
+        {
+            QuerySnapshot snapshot = await _firestoreDb.Collection(collectionName).GetSnapshotAsync();
+            List<T> list = new List<T>();
+            foreach (DocumentSnapshot document in snapshot.Documents)
+            {
+                list.Add(document.ConvertTo<T>());
+            }
+            return list;
+        }
+        //
+        public async Task<T> GetDocumentAsync<T>(string collectionName, string documentId)
+        {
+            DocumentSnapshot snapshot = await _firestoreDb.Collection(collectionName).Document(documentId).GetSnapshotAsync();
+            if (snapshot.Exists)
+            {
+                return snapshot.ConvertTo<T>();
+            }
+            else
+            {
+                return default(T); // Replace with appropriate handling
+            }
+        }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Models.Entities;
 using Models.Models.Requests;
+using Models.Models.Views;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,5 +18,6 @@ namespace Services.Interfaces
         Task<ActionResult<StudentRequest>> GetStudentRequest(Guid id);
         Task<ActionResult<List<StudentRequest>>> GetStudentRequestsByStudentId(Guid id);
         Task<ActionResult<List<StudentRequest>>> GetStudentRequestsBySubjectId(Guid id);
+        Task<ActionResult<List<StudentRequestView>>> GetStudentRequestsByStatus();
     }
 }

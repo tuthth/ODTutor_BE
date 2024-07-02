@@ -1,4 +1,5 @@
-﻿using Models.Models.Requests;
+﻿using Microsoft.AspNetCore.Mvc;
+using Models.Models.Requests;
 using Models.Models.Views;
 using System;
 using System.Collections.Generic;
@@ -14,5 +15,6 @@ namespace Services.Interfaces
         Task<UserFireStoreReponse> GetMessageAsync(string collection, string document);
         Task<bool> BlockUserAsync(string collection, string document, UserFirestoreRequest request);
         Task<bool> UnBlockUserAsync(string collection, string document, UserFirestoreRequest request);
+        Task<ActionResult<UserInFireStore>> CreateOrGetUserAndUserChatsInFirestore(string userID);
     }
 }

@@ -13,7 +13,7 @@ using System.Threading.Tasks;
 namespace Services.Implementations
 {
     public class FirebaseRealtimeDatabaseService : IFirebaseRealtimeDatabaseService
-    {   
+    {
         private readonly IFirebaseClient _firebaseClient;
         private readonly IConfiguration configuration;
 
@@ -29,7 +29,7 @@ namespace Services.Implementations
         public async Task<T> GetAsync<T>(string key)
         {
             FirebaseResponse response = await _firebaseClient.GetAsync(key);
-            if(response.Body != "null")
+            if (response.Body != "null")
             {
                 return response.ResultAs<T>();
             }
@@ -38,7 +38,6 @@ namespace Services.Implementations
                 return default(T);
             }
         }
-
         public async Task<bool> RemoveData(string key)
         {
             var _exist = await _firebaseClient.GetAsync(key);
@@ -53,7 +52,6 @@ namespace Services.Implementations
                 return false;
             }
         }
-         
         public async Task SetAsync<T>(string key, T value)
         {
             await _firebaseClient.SetAsync<T>(key, value);

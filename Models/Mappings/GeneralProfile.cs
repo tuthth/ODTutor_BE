@@ -109,6 +109,8 @@ namespace Models.Mappings
             CreateMap<PageResults<CourseTransaction>, PageResults<CourseTransactionView>>();
             CreateMap<PageResults<WalletTransaction>, PageResults<WalletTransactionView>>();
             CreateMap<PageResults<TutorAction>, PageResults<TutorActionView>>();
+            CreateMap<StudentRequest, CreateStudentRequest>();
+            CreateMap<CreateStudentRequest, StudentRequest>();
         }
     }
 }

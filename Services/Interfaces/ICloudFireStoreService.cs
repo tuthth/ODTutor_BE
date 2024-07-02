@@ -11,5 +11,7 @@ namespace Services.Interfaces
         Task<T> GetAsync<T>(string collectionName, string documentName);
         Task SetAsync<T>(string collectionName, string documentName, T value);
         Task<bool> RemoveData(string collectionName, string documentName);
+        Task<List<T>> GetCollectionAsync<T>(string collectionName);
+        Task<T> GetDocumentAsync<T>(string collectionName, string documentId);
     }
 }

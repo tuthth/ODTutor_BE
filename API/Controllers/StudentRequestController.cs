@@ -122,5 +122,14 @@ namespace API.Controllers
             throw new Exception("Lỗi không xác định");
         }
 
+        // Get student requests
+        [HttpGet("get")]
+        public async Task<ActionResult<List<StudentRequestView>>> GetStudentRequestsByStatus()
+        {
+                var result = await _studentRequestService.GetStudentRequestsByStatus();
+            return Ok(result);
+        }
+
+
     }
 }

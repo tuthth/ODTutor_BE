@@ -45,5 +45,13 @@ namespace API.Controllers
             await _messageService.UnBlockUserAsync(collection, document, request);
             return Ok("Gỡ block Thành công");
         }
+
+        // Create or Get User and User Chats
+        [HttpPost("createOrGetUserAndUserChats")]
+        public async Task<ActionResult<UserInFireStore>> CreateOrGetUserAndUserChats(string userID)
+        {
+            var response = await _messageService.CreateOrGetUserAndUserChatsInFirestore(userID);
+            return response;
+        }
     }
 }

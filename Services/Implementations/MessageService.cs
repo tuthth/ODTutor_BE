@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Mvc;
 using Models.Entities;
 using Models.Models.Requests;
 using Models.Models.Views;
@@ -19,6 +20,56 @@ namespace Services.Implementations
             _cloudFireStoreService = cloudFireStoreService;
         }
 
+        // Create Or Get a User From FireStore
+        public async Task<ActionResult<UserInFireStore>> CreateOrGetUserAndUserChatsInFirestore (string userID)
+        {   
+            try
+            {
+                if (!Guid.TryParse(userID, out Guid userId))
+                {
+                    throw new CrudException(System.Net.HttpStatusCode.BadRequest, "Invalid User ID", "");
+                }
+                // Fetch User From the context
+                User user = _context.Users.FirstOrDefault(x => x.Id == userId);
+                UserInFireStore userFireStore = await _cloudFireStoreService.GetAsync<UserInFireStore>("users", userID);
+                // Check if the user is in the FireStore
+                if (userFireStore == null)
+                {   
+                    DateTime timeForFireStore = DateTime.UtcNow;
+                    // Create a new User in the FireStore
+                    UserInFireStore userFireStoreReponse = new UserInFireStore
+                    {
+                        avatar = user.ImageUrl,
+                        blockedUser = new List<string>(),
+                        LastLogin = timeForFireStore,
+                        name = user.Name,
+                        userId = userID.ToString()
+                    };
+                    await _cloudFireStoreService.SetAsync("users", userID, userFireStoreReponse);
+                    var userchats = new Dictionary<string, Object>();
+                    await _cloudFireStoreService.SetAsync("userchats", userID, userchats);
+                    return userFireStoreReponse;
+                }
+                else
+                {   
+                    DateTime timeForFireStore = DateTime.UtcNow;
+                    long unixTime = ((DateTimeOffset)timeForFireStore).ToUnixTimeSeconds();
+                    userFireStore.LastLogin = timeForFireStore;
+                    userFireStore.name = user.Name;
+                    userFireStore.avatar = user.ImageUrl;
+                    await _cloudFireStoreService.SetAsync("users", userID, userFireStore);
+                    return userFireStore;
+                }
+            }
+            catch (CrudException ex)
+            {
+                throw ex;
+            } catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
         // Create a new message
         public async Task CreateMessageAsync(string collection, string document, MessageRequest request)
         {
@@ -35,7 +86,11 @@ namespace Services.Implementations
                 {
 
                     Avatar = data["avatar"].ToString(),
-                    Email = data["name"].ToString()
+                    Email = data["name"].ToString(),
+                    LastLogin = DateTime.Parse(data["LastLogin"].ToString()),
+                    UserId = Guid.Parse(data["userId"].ToString()),
+                    Name = data["name"].ToString(),
+                    blockedUser = ((List<object>)data["blockedUser"]).Cast<string>().Select(x => Guid.Parse(x)).ToList()
                 };
                 return response;
             }
