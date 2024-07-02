@@ -45,7 +45,7 @@ namespace Services.Implementations
                 CreatedAt = DateTime.UtcNow.AddHours(7),
                 Status = (Int32)NotificationEnum.UnRead
             };
-            await _service.SetAsync<Models.Entities.Notification>($"notifications/{student.UserId}/{notification.NotificationId}", notification);
+            await _service.SetAsync<Models.Entities.Notification>($"notifications/{notification.UserId}/{notification.NotificationId}", notification);
             await _service.SetAsync<StudentRequest>($"Studentrequest/{studentRequest.StudentRequestId}", studentRequest);
             await _context.Notifications.AddAsync(notification);
             await _context.StudentRequests.AddAsync(studentRequest);
