@@ -57,26 +57,15 @@ namespace Services.Implementations
         public async Task<IActionResult> UpdateStudentRequest(UpdateStudentRequest request)
         {
             var studentRequest = _context.StudentRequests.FirstOrDefault(x => x.StudentRequestId == request.StudentRequestId);
-            var student = _context.Students.FirstOrDefault(x => x.StudentId == request.StudentId);
             var subject = _context.Subjects.FirstOrDefault(x => x.SubjectId == request.SubjectId);
-            if (student == null || subject == null)
-            {
-                return new StatusCodeResult(406);
-            }
-            if (student.UserNavigation.Banned == true)
-            {
-                return new StatusCodeResult(403);
-            }
             if (studentRequest == null)
             {
                 return new StatusCodeResult(404);
             }
-            if (studentRequest.Status != (Int32)StudentRequestEnum.Pending)
-            {
-                return new StatusCodeResult(409);
-            }
             studentRequest.Message = request.Message;
-            studentRequest.Status = request.Status;
+            studentRequest.Status = (Int32)StudentRequestEnum.Pending;
+            studentRequest.CreatedAt = DateTime.Now;
+            await _service.SetAsync<StudentRequest>($"Studentrequest/{studentRequest.StudentRequestId}", studentRequest);
             await _context.SaveChangesAsync();
             return new StatusCodeResult(200);
         }

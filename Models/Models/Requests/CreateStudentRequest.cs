@@ -15,9 +15,7 @@ namespace Models.Models.Requests
     public class UpdateStudentRequest
     {
         public Guid StudentRequestId { get; set; }
-        public Guid StudentId { get; set; }
         public Guid SubjectId { get; set; }
         public string? Message { get; set; }
-        public int Status { get; set; }
     }
 }
