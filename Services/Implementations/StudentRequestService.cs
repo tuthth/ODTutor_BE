@@ -80,6 +80,19 @@ namespace Services.Implementations
             await _context.SaveChangesAsync();
             return new StatusCodeResult(200);
         }
+        // Xóa yêu cầu của học sinh
+        public async Task<IActionResult> DeleteStudentRequest(Guid id)
+        {
+            var studentRequest = _context.StudentRequests.FirstOrDefault(x => x.StudentRequestId == id);
+            if (studentRequest == null)
+            {
+                return new StatusCodeResult(404);
+            }
+            studentRequest.Status = (Int32)StudentRequestEnum.Accepted;
+            await _service.SetAsync<StudentRequest>($"Studentrequest/{studentRequest.StudentRequestId}", studentRequest);
+            await _context.SaveChangesAsync();
+            return new StatusCodeResult(200);
+        }
         public async Task<ActionResult<List<StudentRequest>>> GetAllStudentRequests()
         {
             try
@@ -144,7 +157,6 @@ namespace Services.Implementations
                 throw new Exception(ex.ToString());
             }
         }
-
         public async Task<ActionResult<List<StudentRequestView>>> GetStudentRequestsByStatus()
         {
             try

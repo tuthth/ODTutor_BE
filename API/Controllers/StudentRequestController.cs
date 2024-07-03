@@ -35,7 +35,7 @@ namespace API.Controllers
             throw new Exception("Lỗi không xác định");
         }
         /// <summary>
-        /// Student request status: 1 - Pending, 2 - Accepted, 3 - Rejected
+        /// Student request status: 1 - Pending, 2 - Accepted
         /// </summary>
 
         [HttpPut("update")]
@@ -168,6 +168,21 @@ namespace API.Controllers
 
             }
             if ((IActionResult)result.Result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
+            throw new Exception("Lỗi không xác định");
+        }
+
+        // Delete student request
+        [HttpPost("delete/{studentRequestID}")]
+        public async Task<IActionResult> DeleteStudentRequest(Guid studentRequestID)
+        {
+            var response = await _studentRequestService.DeleteStudentRequest(studentRequestID);
+            if (response is StatusCodeResult statusCodeResult)
+            {
+                if (statusCodeResult.StatusCode == 404) { return NotFound(new { Message = "Không tìm thấy yêu cầu" }); }
+                if (statusCodeResult.StatusCode == 409) { return StatusCode(StatusCodes.Status409Conflict, new { Message = "Yêu cầu không thể xóa" }); }
+                if (statusCodeResult.StatusCode == 200) { return Ok(new { Message = "Xóa yêu cầu thành công" });}
+            }
+            if (response is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
             throw new Exception("Lỗi không xác định");
         }
 
