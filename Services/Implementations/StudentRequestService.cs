@@ -62,6 +62,7 @@ namespace Services.Implementations
             {
                 return new StatusCodeResult(404);
             }
+            studentRequest.SubjectId = request.SubjectId;
             studentRequest.Message = request.Message;
             studentRequest.Status = (Int32)StudentRequestEnum.Pending;
             studentRequest.CreatedAt = DateTime.Now;
