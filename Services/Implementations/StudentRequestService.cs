@@ -6,10 +6,12 @@ using Models.Entities;
 using Models.Enumerables;
 using Models.Models.Requests;
 using Models.Models.Views;
+using Models.PageHelper;
 using Services.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -185,5 +187,133 @@ namespace Services.Implementations
                 throw new CrudException(System.Net.HttpStatusCode.InternalServerError, ex.Message, "");
             }
         }
+        public async Task<ActionResult<PageResults<StudentRequest>>> GetStudentRequestsByStudentIdPaging(Guid id, PagingRequest request)
+        {
+            try
+            {
+                var studentRequests = await _context.StudentRequests
+                    .Where(c => c.StudentId == id)
+                    .OrderByDescending(c => c.CreatedAt)
+                    .ToListAsync();
+
+                if (studentRequests == null || !studentRequests.Any())
+                {
+                    return new StatusCodeResult(404);
+                }
+
+                var paginatedStudentRequests = PagingHelper<StudentRequest>.Paging(studentRequests, request.Page, request.PageSize);
+                if (paginatedStudentRequests == null)
+                {
+                    return new StatusCodeResult(400);
+                }
+
+                return paginatedStudentRequests;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.ToString());
+            }
+        }
+        public async Task<ActionResult<PageResults<StudentRequest>>> GetStudentRequestsBySubjectIdPaging(Guid id, PagingRequest request)
+        {
+            try
+            {
+                var studentRequests = await _context.StudentRequests
+                    .Where(c => c.SubjectId == id)
+                    .OrderByDescending(c => c.CreatedAt)
+                    .ToListAsync();
+
+                if (studentRequests == null || !studentRequests.Any())
+                {
+                    return new StatusCodeResult(404);
+                }
+
+                var paginatedStudentRequests = PagingHelper<StudentRequest>.Paging(studentRequests, request.Page, request.PageSize);
+                if (paginatedStudentRequests == null)
+                {
+                    return new StatusCodeResult(400);
+                }
+
+                return paginatedStudentRequests;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.ToString());
+            }
+        }
+        public async Task<ActionResult<PageResults<StudentRequestView>>> GetStudentRequestsByStatusPaging(PagingRequest request)
+        {
+            try
+            {
+                // Retrieve data
+                var studentRequestsData = await _service.GetAsync<Dictionary<string, Dictionary<string, object>>>("Studentrequest");
+
+                if (studentRequestsData == null || !studentRequestsData.Any())
+                {
+                    throw new CrudException(HttpStatusCode.NotFound, "No student requests found", "");
+                }
+
+                var studentRequests = new List<StudentRequestView>();
+
+                foreach (var item in studentRequestsData)
+                {
+                    var studentRequestObject = item.Value;
+
+                    var studentRequestView = new StudentRequestView
+                    {
+                        StudentRequestId = Guid.Parse(item.Key),
+                        StudentId = Guid.Parse(studentRequestObject["StudentId"].ToString()),
+                        SubjectId = Guid.Parse(studentRequestObject["SubjectId"].ToString()),
+                        CreatedAt = DateTime.Parse(studentRequestObject["CreatedAt"].ToString()),
+                        Message = studentRequestObject["Message"].ToString(),
+                        Status = int.Parse(studentRequestObject["Status"].ToString())
+                    };
+
+                    studentRequests.Add(studentRequestView);
+                }
+
+                var paginatedStudentRequests = PagingHelper<StudentRequestView>.Paging(studentRequests, request.Page, request.PageSize);
+                if (paginatedStudentRequests == null)
+                {
+                    return new StatusCodeResult(400);
+                }
+
+                return paginatedStudentRequests;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error: " + ex.Message);
+                throw new CrudException(HttpStatusCode.InternalServerError, ex.Message, "");
+            }
+        }
+        public async Task<ActionResult<PageResults<StudentRequest>>> GetAllStudentRequestsPaging(PagingRequest request)
+        {
+            try
+            {
+                var studentRequests = await _context.StudentRequests
+                    .OrderByDescending(c => c.CreatedAt)
+                    .ToListAsync();
+
+                if (studentRequests == null || !studentRequests.Any())
+                {
+                    return new StatusCodeResult(404);
+                }
+
+                var paginatedStudentRequests = PagingHelper<StudentRequest>.Paging(studentRequests, request.Page, request.PageSize);
+                if (paginatedStudentRequests == null)
+                {
+                    return new StatusCodeResult(400);
+                }
+
+                return paginatedStudentRequests;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.ToString());
+            }
+        }
+
+
+
     }
 }
