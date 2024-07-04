@@ -20,8 +20,6 @@ namespace Services.Interfaces
         Task<ActionResult<Student>> GetStudent(Guid id);
         Task<ActionResult<List<Tutor>>> GetAllTutors();
         Task<ActionResult<Tutor>> GetTutor(Guid id);
-        Task<ActionResult<List<Subject>>> GetAllSubjects();
-        Task<ActionResult<Subject>> GetSubject(Guid id);
         Task<ActionResult<List<TutorCertificate>>> GetAllTutorCertificates();
         Task<ActionResult<TutorCertificate>> GetTutorCertificate(Guid id);
         Task<ActionResult<List<TutorCertificate>>> GetTutorCertificatesByTutorId(Guid id);

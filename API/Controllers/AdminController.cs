@@ -163,40 +163,6 @@ namespace API.Controllers
             if ((IActionResult)result.Result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
             throw new Exception("Lỗi không xác định");
         }
-        [HttpGet("get/subjects")]
-        public async Task<ActionResult<List<SubjectView>>> GetAllSubjects()
-        {
-            var result = await _adminService.GetAllSubjects();
-            if (result is ActionResult<List<Subject>> subjects && result.Value != null)
-            {
-                var subjectViews = _mapper.Map<List<SubjectView>>(subjects.Value);
-                return Ok(subjectViews);
-            }
-            if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
-            {
-                if (statusCodeResult.StatusCode == 404) { return NotFound(new { Message = "Không tìm thấy môn học" }); }
-            }
-            if ((IActionResult)result.Result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
-            throw new Exception("Lỗi không xác định");
-        }
-
-
-        [HttpGet("get/subject/{subjectID}")]
-        public async Task<ActionResult<SubjectView>> GetSubject(Guid subjectID)
-        {
-            var result = await _adminService.GetSubject(subjectID);
-            if (result is ActionResult<Subject> subject && result.Value != null)
-            {
-                var subjectView = _mapper.Map<SubjectView>(subject.Value);
-                return Ok(subjectView);
-            }
-            if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
-            {
-                if (statusCodeResult.StatusCode == 404) { return NotFound(new { Message = "Không tìm thấy môn học" }); }
-            }
-            if ((IActionResult)result.Result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
-            throw new Exception("Lỗi không xác định");
-        }
         [HttpGet("get/tutor-certificates")]
         public async Task<ActionResult<List<TutorCertificateView>>> GetAllTutorCertificates()
         {

@@ -164,38 +164,6 @@ namespace Services.Implementations
                 throw new Exception(ex.ToString());
             }
         }
-        public async Task<ActionResult<List<Subject>>> GetAllSubjects()
-        {
-            try
-            {
-                var subjects = await _context.Subjects.ToListAsync();
-                if (subjects == null)
-                {
-                    return new StatusCodeResult(404);
-                }
-                return subjects;
-            }
-            catch (Exception ex)
-            {
-                throw new Exception(ex.ToString());
-            }
-        }
-        public async Task<ActionResult<Subject>> GetSubject(Guid id)
-        {
-            try
-            {
-                var subject = await _context.Subjects.FirstOrDefaultAsync(c => c.SubjectId == id);
-                if (subject == null)
-                {
-                    return new StatusCodeResult(404);
-                }
-                return subject;
-            }
-            catch (Exception ex)
-            {
-                throw new Exception(ex.ToString());
-            }
-        }
         public async Task<ActionResult<List<TutorCertificate>>> GetAllTutorCertificates()
         {
             try

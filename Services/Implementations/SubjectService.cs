@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Models.Entities;
 using Models.Models.Requests;
@@ -16,49 +17,79 @@ namespace Services.Implementations
         public SubjectService(ODTutorContext context, IMapper mapper) : base(context, mapper)
         { 
         }
-
-        // Get All Subjects
-        public async Task<List<Subject>> GetAllSubjects()
+        public async Task<ActionResult<List<Subject>>> GetAllSubjects()
         {
-            return await _context.Subjects.ToListAsync();
+            try
+            {
+                var subjects = await _context.Subjects.ToListAsync();
+                if (subjects == null)
+                {
+                    return new StatusCodeResult(404);
+                }
+                return subjects;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.ToString());
+            }
         }
-        // Get Subject By ID
-        public async Task<Subject> GetSubjectById(Guid subjectId)
+        public async Task<ActionResult<Subject>> GetSubject(Guid id)
         {
-            return await _context.Subjects.FirstOrDefaultAsync(x => x.SubjectId == subjectId);
+            try
+            {
+                var subject = await _context.Subjects.FirstOrDefaultAsync(c => c.SubjectId == id);
+                if (subject == null)
+                {
+                    return new StatusCodeResult(404);
+                }
+                return subject;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.ToString());
+            }
         }
-        // Add New Subject
-        public async Task<Subject> AddNewSubject(SubjectAddNewRequest subjectRequest)
-        {   
+        public async Task<IActionResult> AddNewSubject(SubjectAddNewRequest subjectRequest)
+        {
+            var checkSubject = await _context.Subjects.FirstOrDefaultAsync(x => x.Title.ToLower().Equals(subjectRequest.Title.ToLower()));
+            if (checkSubject != null)
+            {
+                return new StatusCodeResult(409);
+            }
             var subject = _mapper.Map<Subject>(subjectRequest);
             subject.SubjectId = Guid.NewGuid();
-            await _context.Subjects.AddAsync(subject);
+            _context.Subjects.Add(subject);
             await _context.SaveChangesAsync();
-            return subject;
+            return new StatusCodeResult(200);
         }
-        // Update Subject
-        public async Task<Subject> UpdateSubject(UpdateSubject subjectRequest)
+        public async Task<IActionResult> UpdateSubject(UpdateSubject subjectRequest)
         {
             var subject = await _context.Subjects.FirstOrDefaultAsync(x => x.SubjectId == subjectRequest.SubjectId);
             if (subject == null)
             {
-                return null;
+                return new StatusCodeResult(404);
             }
             _mapper.Map(subjectRequest, subject);
             await _context.SaveChangesAsync();
-            return subject;
+            return new StatusCodeResult(200);
         }
         // Delete Subject
-        public async Task<bool> DeleteSubject(Guid subjectId)
+        public async Task<IActionResult> DeleteSubject(Guid subjectId)
         {
             var subject = await _context.Subjects.FirstOrDefaultAsync(x => x.SubjectId == subjectId);
-            if (subject == null)
+            var tutorSubjects = await _context.TutorSubjects.Where(x => x.SubjectId == subjectId).ToListAsync();
+            var studentRequests = await _context.StudentRequests.Where(x => x.SubjectId == subjectId).ToListAsync();
+            if(studentRequests != null || tutorSubjects != null)
             {
-                return false;
+                return new StatusCodeResult(400);
+            }
+            if(subject == null)
+            {
+                return new StatusCodeResult(404);
             }
             _context.Subjects.Remove(subject);
             await _context.SaveChangesAsync();
-            return true;
+            return new StatusCodeResult(204);
         }
     }
 }

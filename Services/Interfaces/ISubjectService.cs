@@ -1,4 +1,5 @@
-﻿using Models.Entities;
+﻿using Microsoft.AspNetCore.Mvc;
+using Models.Entities;
 using Models.Models.Requests;
 using System;
 using System.Collections.Generic;
@@ -10,10 +11,10 @@ namespace Services.Interfaces
 {
     public interface ISubjectService
     {
-        Task<List<Subject>> GetAllSubjects();
-        Task<Subject> GetSubjectById(Guid subjectId);
-        Task<Subject> AddNewSubject(SubjectAddNewRequest subject);
-        Task<Subject> UpdateSubject(UpdateSubject subjectRequest);
-        Task<bool> DeleteSubject(Guid subjectId);
+        Task<IActionResult> AddNewSubject(SubjectAddNewRequest subject);
+        Task<IActionResult> UpdateSubject(UpdateSubject subjectRequest);
+        Task<IActionResult> DeleteSubject(Guid subjectId);
+        Task<ActionResult<List<Subject>>> GetAllSubjects();
+        Task<ActionResult<Subject>> GetSubject(Guid id);
     }
 }
