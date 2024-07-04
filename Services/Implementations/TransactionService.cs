@@ -80,7 +80,7 @@ namespace Services.Implementations
                 };
 
                 _context.Notifications.Add(notification);
-                _firebaseRealtimeDatabaseService.SetAsync("Notifications/" + notification.NotificationId, notification);
+                await _firebaseRealtimeDatabaseService.SetAsync<Models.Entities.Notification>($"notifications/{notification.UserId}/{notification.NotificationId}", notification);
                 await _context.SaveChangesAsync();
 
                 string vnp_Returnurl = transactionCreate.RedirectUrl;
@@ -163,7 +163,7 @@ namespace Services.Implementations
                     Status = (int)NotificationEnum.UnRead
                 };
                 _context.Notifications.Add(notification);
-                _firebaseRealtimeDatabaseService.SetAsync("Notifications/" + notification.NotificationId, notification);
+                await _firebaseRealtimeDatabaseService.SetAsync<Models.Entities.Notification>($"notifications/{notification.UserId}/{notification.NotificationId}", notification);
                 await _context.SaveChangesAsync();
 
                 string vnp_Returnurl = transactionCreate.RedirectUrl;
@@ -221,7 +221,7 @@ namespace Services.Implementations
                 Status = (int)NotificationEnum.UnRead
             };
             _context.Notifications.Add(notificationError);
-            _firebaseRealtimeDatabaseService.SetAsync("Notifications/" + notificationError.NotificationId, notificationError);
+            await _firebaseRealtimeDatabaseService.SetAsync<Models.Entities.Notification>($"notifications/{notificationError.UserId}/{notificationError.NotificationId}", notificationError);
             await _context.SaveChangesAsync();
             return new StatusCodeResult(500);
         }
@@ -273,7 +273,7 @@ namespace Services.Implementations
                 Status = (int)NotificationEnum.UnRead
             };
             _context.Notifications.Add(notification);
-            _firebaseRealtimeDatabaseService.SetAsync("Notifications/" + notification.NotificationId, notification);
+            await _firebaseRealtimeDatabaseService.SetAsync<Models.Entities.Notification>($"notifications/{notification.UserId}/{notification.NotificationId}", notification);
             await _context.SaveChangesAsync();
             await _appExtension.SendMail(new MailContent()
             {
@@ -340,7 +340,7 @@ namespace Services.Implementations
                     Status = (int)NotificationEnum.UnRead
                 };
                 _context.Notifications.Add(notificationError);
-                _firebaseRealtimeDatabaseService.SetAsync("Notifications/" + notificationError.NotificationId, notificationError);
+                await _firebaseRealtimeDatabaseService.SetAsync<Models.Entities.Notification>($"notifications/{notificationError.UserId}/{notificationError.NotificationId}", notificationError);
                 return new StatusCodeResult(409);
             }
             sendWallet.PendingAmount -= transactionCreate.Amount;
@@ -361,7 +361,7 @@ namespace Services.Implementations
                 Status = (int)NotificationEnum.UnRead
             };
             _context.Notifications.Add(notification);
-            _firebaseRealtimeDatabaseService.SetAsync("Notifications/" + notification.NotificationId, notification);
+            await _firebaseRealtimeDatabaseService.SetAsync<Models.Entities.Notification>($"notifications/{notification.UserId}/{notification.NotificationId}", notification);
             await _context.SaveChangesAsync();
             await _appExtension.SendMail(new MailContent()
             {
@@ -423,6 +423,18 @@ namespace Services.Implementations
 
             _context.Wallets.Update(sendWallet);
             _context.Wallets.Update(receiveWallet);
+
+            var notification = new Models.Entities.Notification
+            {
+                NotificationId = Guid.NewGuid(),
+                Title = "Giao dịch course",
+                Content = "Bạn đã nhận được một giao dịch course với số tiền là " + transactionCreate.Amount + " VND. Mã giao dịch: " + transaction.CourseTransactionId,
+                UserId = findUser.Id,
+                CreatedAt = DateTime.UtcNow.AddHours(7),
+                Status = (int)NotificationEnum.UnRead
+            };
+            _context.Notifications.Add(notification);
+            await _firebaseRealtimeDatabaseService.SetAsync<Models.Entities.Notification>($"notifications/{notification.UserId}/{notification.NotificationId}", notification);
 
             _context.CourseTransactions.Add(transaction);
             _context.WalletTransactions.Add(senderTransaction);
@@ -502,8 +514,9 @@ namespace Services.Implementations
                     };
                     _context.Notifications.Add(notification1);
                     _context.Notifications.Add(notification2);
-                    _firebaseRealtimeDatabaseService.SetAsync("Notifications/" + notification1.NotificationId, notification1);
-                    _firebaseRealtimeDatabaseService.SetAsync("Notifications/" + notification2.NotificationId, notification2);
+                    await _firebaseRealtimeDatabaseService.SetAsync<Models.Entities.Notification>($"notifications/{notification1.UserId}/{notification1.NotificationId}", notification1);
+                    await _firebaseRealtimeDatabaseService.SetAsync<Models.Entities.Notification>($"notifications/{notification2.UserId}/{notification2.NotificationId}", notification2);
+
 
                     var book = _context.Bookings.FirstOrDefault(b => b.BookingId == booking.BookingId);
                     book.Status = (int)BookingEnum.Success;
@@ -613,8 +626,9 @@ namespace Services.Implementations
                     };
                     _context.Notifications.Add(notification1);
                     _context.Notifications.Add(notification2);
-                    _firebaseRealtimeDatabaseService.SetAsync("Notifications/" + notification1.NotificationId, notification1);
-                    _firebaseRealtimeDatabaseService.SetAsync("Notifications/" + notification2.NotificationId, notification2);
+                    await _firebaseRealtimeDatabaseService.SetAsync<Models.Entities.Notification>($"notifications/{notification1.UserId}/{notification1.NotificationId}", notification1);
+                    await _firebaseRealtimeDatabaseService.SetAsync<Models.Entities.Notification>($"notifications/{notification2.UserId}/{notification2.NotificationId}", notification2);
+
                 }
                 else if (choice == (Int32)UpdateTransactionType.Unknown) { return new StatusCodeResult(406); }
             }
