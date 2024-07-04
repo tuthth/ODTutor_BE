@@ -30,9 +30,11 @@ namespace API.Controllers
                 if (actionResult is StatusCodeResult statusCodeResult)
                 {
                     if (statusCodeResult.StatusCode == 403) { return StatusCode(StatusCodes.Status403Forbidden, new { Message = "Không thể theo dõi tài khoản" }); }
+                    if (statusCodeResult.StatusCode == 409) { return StatusCode(StatusCodes.Status409Conflict, new { Message = "Bạn đã theo dõi tài khoản này" }); }
                     if (statusCodeResult.StatusCode == 201) return StatusCode(StatusCodes.Status201Created, new { Message = "Theo dõi tài khoản thành công" });
+                    if(statusCodeResult.StatusCode == 400) { return StatusCode(StatusCodes.Status400BadRequest, new { Message = "Có tài khoản không tồn tại trong hệ thống, hoặc đã bị hệ thống đình chỉ" }); }
                 }
-                if (actionResult is Exception exception) return StatusCode(500, new { Message = exception.ToString() });
+                if (actionResult is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
             }
             throw new Exception("Lỗi không xác định");
         }
@@ -46,6 +48,7 @@ namespace API.Controllers
                 {
                     if (statusCodeResult.StatusCode == 404) { return StatusCode(StatusCodes.Status404NotFound, new { Message = "Bạn chưa follow tài khoản này" }); }
                     if (statusCodeResult.StatusCode == 204) return StatusCode(StatusCodes.Status204NoContent, new { Message = "Bỏ theo dõi tài khoản thành công" });
+                    if (statusCodeResult.StatusCode == 400) { return StatusCode(StatusCodes.Status400BadRequest, new { Message = "Có tài khoản không tồn tại trong hệ thống, hoặc đã bị hệ thống đình chỉ" }); }
                 }
                 if (actionResult is Exception exception) return StatusCode(500, new { Message = exception.ToString() });
             }
@@ -60,6 +63,9 @@ namespace API.Controllers
                 if (actionResult is StatusCodeResult statusCodeResult)
                 {
                     if (statusCodeResult.StatusCode == 201) return StatusCode(StatusCodes.Status201Created, new { Message = "Chặn tài khoản thành công" });
+                    if (statusCodeResult.StatusCode == 409) { return StatusCode(StatusCodes.Status409Conflict, new { Message = "Bạn đã chặn tài khoản này" }); }
+                    if (statusCodeResult.StatusCode == 400) { return StatusCode(StatusCodes.Status400BadRequest, new { Message = "Có tài khoản không tồn tại trong hệ thống, hoặc đã bị hệ thống đình chỉ" }); }
+                    //if (statusCodeResult.StatusCode == 404) { return StatusCode(StatusCodes.Status404NotFound, new { Message = "Không tìm thấy tài khoản cần chặn" }); }
                 }
                 if (actionResult is Exception exception) return StatusCode(500, new { Message = exception.ToString() });
             }
@@ -75,6 +81,7 @@ namespace API.Controllers
                 {
                     if (statusCodeResult.StatusCode == 404) { return StatusCode(StatusCodes.Status404NotFound, new { Message = "Không tìm thấy tài khoản bị bạn chặn" }); }
                     if (statusCodeResult.StatusCode == 204) return StatusCode(StatusCodes.Status204NoContent, new { Message = "Bỏ chặn tài khoản thành công" });
+                    if (statusCodeResult.StatusCode == 400) { return StatusCode(StatusCodes.Status400BadRequest, new { Message = "Có tài khoản không tồn tại trong hệ thống, hoặc đã bị hệ thống đình chỉ" }); }
                 }
                 if (actionResult is Exception exception) return StatusCode(500, new { Message = exception.ToString() });
             }

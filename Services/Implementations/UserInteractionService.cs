@@ -19,10 +19,20 @@ namespace Services.Implementations
         }
         public async Task<IActionResult> FollowUser(UserInteractRequest request)
         {
+            var isBothAccountExisted = await IsBothAccountExisted(request.CreateUserId, request.TargetUserId);
+            if (isBothAccountExisted != null)
+            {
+                return isBothAccountExisted;
+            }
             var isBlocked = _context.UserBlocks.Any(x => x.CreateUserId == request.CreateUserId && x.TargetUserId == request.TargetUserId);
             if (isBlocked)
             {
                 return new StatusCodeResult(403);
+            }
+            var isFollowed = _context.UserFollows.Any(x => x.CreateUserId == request.CreateUserId && x.TargetUserId == request.TargetUserId);
+            if (isFollowed)
+            {
+                return new StatusCodeResult(409);
             }
             var userFollow = _mapper.Map<UserFollow>(request);
             userFollow.CreatedAt = DateTime.UtcNow.AddHours(7);
@@ -32,6 +42,11 @@ namespace Services.Implementations
         }
         public async Task<IActionResult> UnfollowUser(UserInteractRequest request)
         {
+            var isBothAccountExisted = await IsBothAccountExisted(request.CreateUserId, request.TargetUserId);
+            if (isBothAccountExisted != null)
+            {
+                return isBothAccountExisted;
+            }
             var userFollow = _context.UserFollows.FirstOrDefault(x => x.CreateUserId == request.CreateUserId && x.TargetUserId == request.TargetUserId);
             if (userFollow == null)
             {
@@ -43,11 +58,21 @@ namespace Services.Implementations
         }
         public async Task<IActionResult> BlockUser(UserInteractRequest request)
         {
+            var isBothAccountExisted = await IsBothAccountExisted(request.CreateUserId, request.TargetUserId);
+            if (isBothAccountExisted != null)
+            {
+                return isBothAccountExisted;
+            }
             var isFollowed = await _context.UserFollows.FirstOrDefaultAsync(x => x.CreateUserId == request.CreateUserId && x.TargetUserId == request.TargetUserId);
             if (isFollowed!=null)
             {
                 _context.UserFollows.Remove(isFollowed);
                 await _context.SaveChangesAsync();
+            }
+            var isBlocked = _context.UserBlocks.Any(x => x.CreateUserId == request.CreateUserId && x.TargetUserId == request.TargetUserId);
+            if (isBlocked)
+            {
+                return new StatusCodeResult(409);
             }
             var userBlock = _mapper.Map<UserBlock>(request);
             userBlock.CreatedAt = DateTime.UtcNow.AddHours(7);
@@ -57,6 +82,11 @@ namespace Services.Implementations
         }
         public async Task<IActionResult> UnblockUser(UserInteractRequest request)
         {
+            var isBothAccountExisted = await IsBothAccountExisted(request.CreateUserId, request.TargetUserId);
+            if (isBothAccountExisted != null)
+            {
+                return isBothAccountExisted;
+            }
             var userBlock = _context.UserBlocks.FirstOrDefault(x => x.CreateUserId == request.CreateUserId && x.TargetUserId == request.TargetUserId);
             if (userBlock == null)
             {
@@ -65,6 +95,16 @@ namespace Services.Implementations
             _context.UserBlocks.Remove(userBlock);
             await _context.SaveChangesAsync();
             return new StatusCodeResult(204);
+        }
+        private async Task<IActionResult> IsBothAccountExisted(Guid createUser, Guid targetUser)
+        {
+            var isCreateUserExisted = await _context.Users.AnyAsync(x => x.Id == createUser && x.Banned == false);
+            var isTargetUserExisted = await _context.Users.AnyAsync(x => x.Id == targetUser && x.Banned == false);
+            if (!isCreateUserExisted || !isTargetUserExisted)
+            {
+                return new StatusCodeResult(400);
+            }
+            return null;
         }
         public async Task<ActionResult<List<UserBlock>>> GetAllUserBlocks()
         {

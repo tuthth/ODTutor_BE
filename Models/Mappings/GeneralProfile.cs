@@ -25,6 +25,8 @@ namespace Models.Mappings
             CreateMap<SubjectAddNewRequest, Subject>();
             CreateMap<UserBlock, UserInteractRequest>();
             CreateMap<UserFollow, UserInteractRequest>();
+            CreateMap<UserInteractRequest, UserFollow>();
+            CreateMap<UserInteractRequest, UserBlock>();
             CreateMap<StudentRequest, CreateStudentRequest>();
             CreateMap<StudentRequest, UpdateStudentRequest>();
             CreateMap<Booking, BookingRequest>();
