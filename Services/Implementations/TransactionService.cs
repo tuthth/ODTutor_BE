@@ -514,8 +514,8 @@ namespace Services.Implementations
                     };
                     _context.Notifications.Add(notification1);
                     _context.Notifications.Add(notification2);
-                    await _firebaseRealtimeDatabaseService.SetAsync<Models.Entities.Notification>($"notifications/{notification1.UserId}/{notification1.NotificationId}", notification1);
-                    await _firebaseRealtimeDatabaseService.SetAsync<Models.Entities.Notification>($"notifications/{notification2.UserId}/{notification2.NotificationId}", notification2);
+                    _firebaseRealtimeDatabaseService.SetAsync<Models.Entities.Notification>($"notifications/{notification1.UserId}/{notification1.NotificationId}", notification1);
+                    _firebaseRealtimeDatabaseService.SetAsync<Models.Entities.Notification>($"notifications/{notification2.UserId}/{notification2.NotificationId}", notification2);
 
 
                     var book = _context.Bookings.FirstOrDefault(b => b.BookingId == booking.BookingId);
@@ -574,8 +574,8 @@ namespace Services.Implementations
                     };
                     _context.Notifications.Add(notification1);
                     _context.Notifications.Add(notification2);
-                    await _firebaseRealtimeDatabaseService.SetAsync<Models.Entities.Notification>($"notifications/{notification1.UserId}/{notification1.NotificationId}", notification1);
-                    await _firebaseRealtimeDatabaseService.SetAsync<Models.Entities.Notification>($"notifications/{notification2.UserId}/{notification2.NotificationId}", notification2);
+                    _firebaseRealtimeDatabaseService.SetAsync<Models.Entities.Notification>($"notifications/{notification1.UserId}/{notification1.NotificationId}", notification1);
+                    _firebaseRealtimeDatabaseService.SetAsync<Models.Entities.Notification>($"notifications/{notification2.UserId}/{notification2.NotificationId}", notification2);
                 }
                 else if (choice == (Int32)UpdateTransactionType.Wallet)
                 {
@@ -626,8 +626,8 @@ namespace Services.Implementations
                     };
                     _context.Notifications.Add(notification1);
                     _context.Notifications.Add(notification2);
-                    await _firebaseRealtimeDatabaseService.SetAsync<Models.Entities.Notification>($"notifications/{notification1.UserId}/{notification1.NotificationId}", notification1);
-                    await _firebaseRealtimeDatabaseService.SetAsync<Models.Entities.Notification>($"notifications/{notification2.UserId}/{notification2.NotificationId}", notification2);
+                    _firebaseRealtimeDatabaseService.SetAsync<Models.Entities.Notification>($"notifications/{notification1.UserId}/{notification1.NotificationId}", notification1);
+                    _firebaseRealtimeDatabaseService.SetAsync<Models.Entities.Notification>($"notifications/{notification2.UserId}/{notification2.NotificationId}", notification2);
 
                 }
                 else if (choice == (Int32)UpdateTransactionType.Unknown) { return new StatusCodeResult(406); }
@@ -684,8 +684,8 @@ namespace Services.Implementations
                     };
                     _context.Notifications.Add(notification1);
                     _context.Notifications.Add(notification2);
-                    await _firebaseRealtimeDatabaseService.SetAsync<Models.Entities.Notification>($"notifications/{notification1.UserId}/{notification1.NotificationId}", notification1);
-                    await _firebaseRealtimeDatabaseService.SetAsync<Models.Entities.Notification>($"notifications/{notification2.UserId}/{notification2.NotificationId}", notification2);
+                    _firebaseRealtimeDatabaseService.SetAsync<Models.Entities.Notification>($"notifications/{notification1.UserId}/{notification1.NotificationId}", notification1);
+                    _firebaseRealtimeDatabaseService.SetAsync<Models.Entities.Notification>($"notifications/{notification2.UserId}/{notification2.NotificationId}", notification2);
 
                     var book = _context.Bookings.FirstOrDefault(b => b.BookingId == booking.BookingId);
                     book.Status = (int)BookingEnum.Canceled;
@@ -742,8 +742,8 @@ namespace Services.Implementations
                     };
                     _context.Notifications.Add(notification1);
                     _context.Notifications.Add(notification2);
-                    await _firebaseRealtimeDatabaseService.SetAsync<Models.Entities.Notification>($"notifications/{notification1.UserId}/{notification1.NotificationId}", notification1);
-                    await _firebaseRealtimeDatabaseService.SetAsync<Models.Entities.Notification>($"notifications/{notification2.UserId}/{notification2.NotificationId}", notification2);
+                    _firebaseRealtimeDatabaseService.SetAsync<Models.Entities.Notification>($"notifications/{notification1.UserId}/{notification1.NotificationId}", notification1);
+                    _firebaseRealtimeDatabaseService.SetAsync<Models.Entities.Notification>($"notifications/{notification2.UserId}/{notification2.NotificationId}", notification2);
                 }
                 else if (choice == (Int32)UpdateTransactionType.Wallet)
                 {
@@ -792,8 +792,8 @@ namespace Services.Implementations
                     };
                     _context.Notifications.Add(notification1);
                     _context.Notifications.Add(notification2);
-                    await _firebaseRealtimeDatabaseService.SetAsync<Models.Entities.Notification>($"notifications/{notification1.UserId}/{notification1.NotificationId}", notification1);
-                    await _firebaseRealtimeDatabaseService.SetAsync<Models.Entities.Notification>($"notifications/{notification2.UserId}/{notification2.NotificationId}", notification2);
+                    _firebaseRealtimeDatabaseService.SetAsync<Models.Entities.Notification>($"notifications/{notification1.UserId}/{notification1.NotificationId}", notification1);
+                    _firebaseRealtimeDatabaseService.SetAsync<Models.Entities.Notification>($"notifications/{notification2.UserId}/{notification2.NotificationId}", notification2);
                 }
                 else if (choice == (Int32)UpdateTransactionType.Unknown) { return new StatusCodeResult(406); }
             }

@@ -78,7 +78,7 @@ namespace Services.Implementations
             await _context.Notifications.AddAsync(notification);
             _context.StudentRequests.Update(studentRequest);
             await _service.SetAsync<Models.Entities.Notification>($"notifications/{notification.UserId}/{notification.NotificationId}", notification);
-            await _service.SetAsync<StudentRequest>($"Studentrequest/{studentRequest.StudentRequestId}", studentRequest); //error if have await
+            _service.SetAsync<StudentRequest>($"Studentrequest/{studentRequest.StudentRequestId}", studentRequest); //error if have await
             await _context.SaveChangesAsync();
             return new StatusCodeResult(200);
         }
