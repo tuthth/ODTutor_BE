@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Models.Entities;
 using Models.Models.Requests;
+using Models.Models.Views;
+using Models.PageHelper;
 using Services.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -54,7 +56,7 @@ namespace Services.Implementations
             }
             _context.UserFollows.Remove(userFollow);
             await _context.SaveChangesAsync();
-            return new StatusCodeResult(204);
+            return new StatusCodeResult(200);
         }
         public async Task<IActionResult> BlockUser(UserInteractRequest request)
         {
@@ -94,7 +96,7 @@ namespace Services.Implementations
             }
             _context.UserBlocks.Remove(userBlock);
             await _context.SaveChangesAsync();
-            return new StatusCodeResult(204);
+            return new StatusCodeResult(200);
         }
         private async Task<IActionResult> IsBothAccountExisted(Guid createUser, Guid targetUser)
         {
@@ -202,6 +204,167 @@ namespace Services.Implementations
                 throw new Exception(ex.ToString());
             }
         }
+        public async Task<ActionResult<PageResults<UserBlock>>> GetAllUserBlocksPaging(PagingRequest request)
+        {
+            try
+            {
+                var userBlocks = await _context.UserBlocks
+                    .OrderByDescending(c => c.CreatedAt)
+                    .ToListAsync();
+
+                if (userBlocks == null || !userBlocks.Any())
+                {
+                    return new StatusCodeResult(404);
+                }
+
+                var paginatedUserBlocks = PagingHelper<UserBlock>.Paging(userBlocks, request.Page, request.PageSize);
+                if (paginatedUserBlocks == null)
+                {
+                    return new StatusCodeResult(400);
+                }
+
+                return paginatedUserBlocks;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.ToString());
+            }
+        }
+        public async Task<ActionResult<PageResults<UserBlock>>> GetAllBlockByCreateUserIdPaging(Guid id, PagingRequest request)
+        {
+            try
+            {
+                var userBlocks = await _context.UserBlocks
+                    .Where(c => c.CreateUserId == id)
+                    .OrderByDescending(c => c.CreatedAt)
+                    .ToListAsync();
+
+                if (userBlocks == null || !userBlocks.Any())
+                {
+                    return new StatusCodeResult(404);
+                }
+
+                var paginatedUserBlocks = PagingHelper<UserBlock>.Paging(userBlocks, request.Page, request.PageSize);
+                if (paginatedUserBlocks == null)
+                {
+                    return new StatusCodeResult(400);
+                }
+
+                return paginatedUserBlocks;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.ToString());
+            }
+        }
+        public async Task<ActionResult<PageResults<UserBlock>>> GetAllBlockByTargetUserIdPaging(Guid id, PagingRequest request)
+        {
+            try
+            {
+                var userBlocks = await _context.UserBlocks
+                    .Where(c => c.TargetUserId == id)
+                    .OrderByDescending(c => c.CreatedAt)
+                    .ToListAsync();
+
+                if (userBlocks == null || !userBlocks.Any())
+                {
+                    return new StatusCodeResult(404);
+                }
+
+                var paginatedUserBlocks = PagingHelper<UserBlock>.Paging(userBlocks, request.Page, request.PageSize);
+                if (paginatedUserBlocks == null)
+                {
+                    return new StatusCodeResult(400);
+                }
+
+                return paginatedUserBlocks;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.ToString());
+            }
+        }
+        public async Task<ActionResult<PageResults<UserFollow>>> GetAllUserFollowsPaging(PagingRequest request)
+        {
+            try
+            {
+                var userFollows = await _context.UserFollows
+                    .OrderByDescending(c => c.CreatedAt)
+                    .ToListAsync();
+
+                if (userFollows == null || !userFollows.Any())
+                {
+                    return new StatusCodeResult(404);
+                }
+
+                var paginatedUserFollows = PagingHelper<UserFollow>.Paging(userFollows, request.Page, request.PageSize);
+                if (paginatedUserFollows == null)
+                {
+                    return new StatusCodeResult(400);
+                }
+
+                return paginatedUserFollows;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.ToString());
+            }
+        }
+        public async Task<ActionResult<PageResults<UserFollow>>> GetAllFollowsByCreateUserIdPaging(Guid id, PagingRequest request)
+        {
+            try
+            {
+                var userFollows = await _context.UserFollows
+                    .Where(c => c.CreateUserId == id)
+                    .OrderByDescending(c => c.CreatedAt)
+                    .ToListAsync();
+
+                if (userFollows == null || !userFollows.Any())
+                {
+                    return new StatusCodeResult(404);
+                }
+
+                var paginatedUserFollows = PagingHelper<UserFollow>.Paging(userFollows, request.Page, request.PageSize);
+                if (paginatedUserFollows == null)
+                {
+                    return new StatusCodeResult(400);
+                }
+
+                return paginatedUserFollows;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.ToString());
+            }
+        }
+        public async Task<ActionResult<PageResults<UserFollow>>> GetAllFollowsByTargetUserIdPaging(Guid id, PagingRequest request)
+        {
+            try
+            {
+                var userFollows = await _context.UserFollows
+                    .Where(c => c.TargetUserId == id)
+                    .OrderByDescending(c => c.CreatedAt)
+                    .ToListAsync();
+
+                if (userFollows == null || !userFollows.Any())
+                {
+                    return new StatusCodeResult(404);
+                }
+
+                var paginatedUserFollows = PagingHelper<UserFollow>.Paging(userFollows, request.Page, request.PageSize);
+                if (paginatedUserFollows == null)
+                {
+                    return new StatusCodeResult(400);
+                }
+
+                return paginatedUserFollows;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.ToString());
+            }
+        }
+
 
     }
 }

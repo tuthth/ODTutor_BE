@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Models.Entities;
 using Models.Models.Requests;
+using Models.Models.Views;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,5 +22,11 @@ namespace Services.Interfaces
         Task<ActionResult<List<UserFollow>>> GetAllUserFollows();
         Task<ActionResult<List<UserFollow>>> GetAllFollowsByCreateUserId(Guid id);
         Task<ActionResult<List<UserFollow>>> GetAllFollowsByTargetUserId(Guid id);
+        Task<ActionResult<PageResults<UserBlock>>> GetAllUserBlocksPaging(PagingRequest request);
+        Task<ActionResult<PageResults<UserBlock>>> GetAllBlockByCreateUserIdPaging(Guid id, PagingRequest request);
+        Task<ActionResult<PageResults<UserBlock>>> GetAllBlockByTargetUserIdPaging(Guid id, PagingRequest request);
+        Task<ActionResult<PageResults<UserFollow>>> GetAllUserFollowsPaging(PagingRequest request);
+        Task<ActionResult<PageResults<UserFollow>>> GetAllFollowsByCreateUserIdPaging(Guid id, PagingRequest request);
+        Task<ActionResult<PageResults<UserFollow>>> GetAllFollowsByTargetUserIdPaging(Guid id, PagingRequest request);
     }
 }
