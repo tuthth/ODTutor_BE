@@ -53,6 +53,22 @@ namespace API.Controllers
             if (response is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
             throw new Exception("Lỗi không xác định");
         }
+        // Update student request V2 
+        [HttpPost("update/v2")]
+        public async Task<IActionResult> UpdateStudentRequestV2([FromBody] UpdateStudentRequest request)
+        {
+            var response = await _studentRequestService.UpdateStudentRequest(request);
+            if (response is StatusCodeResult statusCodeResult)
+            {
+                if (statusCodeResult.StatusCode == 406) { return StatusCode(StatusCodes.Status406NotAcceptable, new { Message = "Không tìm thấy học sinh hoặc môn học" }); }
+                if (statusCodeResult.StatusCode == 403) { return StatusCode(StatusCodes.Status403Forbidden, new { Message = "Học sinh đang bị đình chỉ khỏi hệ thống" }); }
+                if (statusCodeResult.StatusCode == 404) { return NotFound(new { Message = "Không tìm thấy yêu cầu" }); }
+                if (statusCodeResult.StatusCode == 409) { return StatusCode(StatusCodes.Status409Conflict, new { Message = "Yêu cầu không thể cập nhật" }); }
+                if (statusCodeResult.StatusCode == 200) { return Ok(new { Message = "Cập nhật yêu cầu thành công" }); }
+            }
+            if (response is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
+            throw new Exception("Lỗi không xác định");
+        }
 
         [HttpGet("get/all")]
         public async Task<ActionResult<List<StudentRequestView>>> GetAllStudentRequests()

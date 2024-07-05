@@ -56,5 +56,11 @@ namespace Services.Implementations
         {
             await _firebaseClient.SetAsync<T>(key, value);
         }
+
+        // Update
+        public async Task UpdateAsync<T>(string key, T value)
+        {
+            await _firebaseClient.UpdateAsync(key, value);
+        }
     }
 }

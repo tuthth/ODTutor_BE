@@ -21,7 +21,7 @@ namespace Services.Implementations
     {
         private readonly IFirebaseRealtimeDatabaseService _service;
         private readonly INotificationService _notificationService;
-        public StudentRequestService(ODTutorContext context, IMapper mapper, INotificationService notificationService , IFirebaseRealtimeDatabaseService service) : base(context, mapper)
+        public StudentRequestService(ODTutorContext context, IMapper mapper, INotificationService notificationService, IFirebaseRealtimeDatabaseService service) : base(context, mapper)
         {
             _service = service;
             _notificationService = notificationService;
@@ -54,6 +54,7 @@ namespace Services.Implementations
             await _context.SaveChangesAsync();
             return new StatusCodeResult(201);
         }
+
         public async Task<IActionResult> UpdateStudentRequest(UpdateStudentRequest request)
         {
             var studentRequest = _context.StudentRequests.FirstOrDefault(x => x.StudentRequestId == request.StudentRequestId);
@@ -66,10 +67,19 @@ namespace Services.Implementations
             studentRequest.Message = request.Message;
             studentRequest.Status = (Int32)StudentRequestEnum.Pending;
             studentRequest.CreatedAt = DateTime.Now;
-            await _service.SetAsync<StudentRequest>($"Studentrequest/{studentRequest.StudentRequestId}", studentRequest);
+            var studentRequestDTO = new StudentRequestDTO
+            {
+                StudentRequestId = studentRequest.StudentRequestId,
+                SubjectId = request.SubjectId,
+                Message = request.Message,
+                Status = (Int32)StudentRequestEnum.Pending,
+                CreatedAt = studentRequest.CreatedAt
+            };
+            await _service.UpdateAsync($"Studentrequest/{studentRequest.StudentRequestId}", studentRequestDTO);
             await _context.SaveChangesAsync();
             return new StatusCodeResult(200);
         }
+
         // Xóa yêu cầu của học sinh
         public async Task<IActionResult> DeleteStudentRequest(Guid id)
         {
