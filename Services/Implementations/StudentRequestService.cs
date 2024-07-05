@@ -57,9 +57,10 @@ namespace Services.Implementations
 
         public async Task<IActionResult> UpdateStudentRequest(UpdateStudentRequest request)
         {
-            var studentRequest = _context.StudentRequests.FirstOrDefault(x => x.StudentRequestId == request.StudentRequestId);
+            var studentRequest = _context.StudentRequests.Include(x => x.StudentNavigation).FirstOrDefault(x => x.StudentRequestId == request.StudentRequestId);
             var subject = _context.Subjects.FirstOrDefault(x => x.SubjectId == request.SubjectId);
-            if (studentRequest == null)
+            Student student = _context.Students.FirstOrDefault(x => x.StudentId == studentRequest.StudentId);
+            if (studentRequest == null || subject == null)
             {
                 return new StatusCodeResult(404);
             }
@@ -69,13 +70,25 @@ namespace Services.Implementations
             studentRequest.CreatedAt = DateTime.Now;
             var studentRequestDTO = new StudentRequestDTO
             {
-                StudentRequestId = studentRequest.StudentRequestId,
+                StudentRequestId = request.StudentRequestId,
                 SubjectId = request.SubjectId,
                 Message = request.Message,
                 Status = (Int32)StudentRequestEnum.Pending,
                 CreatedAt = studentRequest.CreatedAt
             };
             await _service.UpdateAsync($"Studentrequest/{studentRequest.StudentRequestId}", studentRequestDTO);
+            var notification = new Models.Entities.Notification
+            {
+                NotificationId = Guid.NewGuid(),
+                Title = "Yêu cầu của bạn đã được cập nhật",
+                Content = "Vui lòng chờ trong thời gian sớm nhất để nhận được phản hồi từ các gia sư khác trong tin nhắn nhé",
+                UserId = student.UserId,
+                CreatedAt = DateTime.UtcNow.AddHours(7),
+                Status = (Int32)NotificationEnum.UnRead
+            };
+            await _context.Notifications.AddAsync(notification);
+            _context.StudentRequests.Update(studentRequest);
+            await _service.SetAsync<Models.Entities.Notification>($"notifications/{notification.UserId}/{notification.NotificationId}", notification);
             await _context.SaveChangesAsync();
             return new StatusCodeResult(200);
         }
@@ -90,6 +103,7 @@ namespace Services.Implementations
             }
             studentRequest.Status = (Int32)StudentRequestEnum.Accepted;
             await _service.SetAsync<StudentRequest>($"Studentrequest/{studentRequest.StudentRequestId}", studentRequest);
+            _context.StudentRequests.Update(studentRequest);
             await _context.SaveChangesAsync();
             return new StatusCodeResult(200);
         }

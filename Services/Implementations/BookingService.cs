@@ -143,7 +143,7 @@ namespace Services.Implementations
                 notification.CreatedAt = DateTime.UtcNow.AddHours(7);
                 _context.Notifications.Add(notification);
                 // Lưu notification vào firestore
-                _firebaseRealtimeDatabaseService.SetAsync("Notifications/" + notification.NotificationId, notification);
+                await _firebaseRealtimeDatabaseService.SetAsync<Models.Entities.Notification>($"notifications/{notification.UserId}/{notification.NotificationId}", notification);
                 // Lưu tất cả thay đổi vào cơ sở dữ liệu
                 await _context.SaveChangesAsync();
                 throw new CrudException(HttpStatusCode.Created, "Payment for booking successfully", "");
