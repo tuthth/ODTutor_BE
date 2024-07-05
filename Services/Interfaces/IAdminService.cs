@@ -15,9 +15,6 @@ namespace Services.Interfaces
         Task<ActionResult<List<User>>> GetAllUsers();
         Task<ActionResult<PageResults<User>>> GetAllUsersPaging(PagingRequest request);
         Task<ActionResult<User>> GetUser(Guid id);
-        Task<ActionResult<List<Student>>> GetAllStudents();
-        Task<ActionResult<PageResults<Student>>> GetAllStudentsPaging(PagingRequest request);
-        Task<ActionResult<Student>> GetStudent(Guid id);
         Task<ActionResult<List<Tutor>>> GetAllTutors();
         Task<ActionResult<Tutor>> GetTutor(Guid id);
         Task<ActionResult<List<TutorCertificate>>> GetAllTutorCertificates();

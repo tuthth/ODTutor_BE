@@ -75,6 +75,7 @@ namespace API.Configurations
             services.AddScoped<ICloudFireStoreService, CloudFireStoreService>();
             services.AddScoped<IMessageService, MessageService>();
             services.AddScoped<IUserInteractService, UserInteractionService>();
+            services.AddScoped<IStudentService, StudentService>();
         }
         public static void AddSwagger(this IServiceCollection services)
         {
