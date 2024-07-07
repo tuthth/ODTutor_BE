@@ -32,10 +32,12 @@ namespace Services.Implementations
 
         private readonly IConfiguration _cf;
         private readonly IWebHostEnvironment _env;
-        public TutorRegisterService(ODTutorContext odContext, IWebHostEnvironment env, IMapper mapper, IConfiguration cf) : base(odContext, mapper)
+        private readonly IFirebaseRealtimeDatabaseService _firebaseService;
+        public TutorRegisterService(ODTutorContext odContext, IWebHostEnvironment env, IMapper mapper, IConfiguration cf, IFirebaseRealtimeDatabaseService firebaseService) : base(odContext, mapper)
         {
             _cf = cf;
             _env = env;
+            _firebaseService = firebaseService;
         }
 
         /*Register Tutor Step By Step*/
@@ -112,6 +114,7 @@ namespace Services.Implementations
                     certificate.CertificateDescription = urlLink.CertificateDescription;
                     certificate.StartYear = urlLink.StartYear;
                     certificate.EndYear = urlLink.EndYear;
+                    certificate.IsVerified = false;
                     _context.TutorCertificates.Add(certificate);
                     await _context.SaveChangesAsync();
                 }
@@ -143,6 +146,7 @@ namespace Services.Implementations
                     TutorExperience tutorExperience = _mapper.Map<TutorExperience>(tutorExperienceRegist);
                     tutorExperience.TutorExperienceId = Guid.NewGuid();
                     tutorExperience.TutorId = tutorID;
+                    tutorExperience.IsVerified = false;
                     _context.TutorExperiences.Add(tutorExperience);
                 }
                 await _context.SaveChangesAsync();
@@ -213,6 +217,7 @@ namespace Services.Implementations
                 notification.CreatedAt = DateTime.UtcNow.AddHours(7);
                 notification.Status = 1; // "1" is sent
                 await _context.Notifications.AddAsync(notification);
+                await _firebaseService.SetAsync<Models.Entities.Notification>($"notifications/{notification.UserId}/{notification.NotificationId}", notification);
                 await _context.SaveChangesAsync();
                 return new StatusCodeResult(201);
             }
@@ -476,6 +481,18 @@ namespace Services.Implementations
                 tutorAction.ModeratorId = request.ApprovalID;
                 tutorAction.ReponseDate = DateTime.UtcNow.AddHours(7);
                 tutorAction.Status = (Int32)TutorActionEnum.Accept;
+                var tutorCertificate = _context.TutorCertificates.Where(x => x.TutorId == tutorAction.TutorId).ToList();
+                foreach (var cert in tutorCertificate)
+                {
+                    cert.IsVerified = true;
+                }
+                _context.TutorCertificates.UpdateRange(tutorCertificate);
+                var tutorExperience = _context.TutorExperiences.Where(x => x.TutorId == tutorAction.TutorId).ToList();
+                foreach (var exp in tutorExperience)
+                {
+                    exp.IsVerified = true;
+                }
+                _context.TutorExperiences.UpdateRange(tutorExperience);
                 await _context.SaveChangesAsync();
 
                 // Change the Status Of Tutor
@@ -492,6 +509,7 @@ namespace Services.Implementations
                 notification.CreatedAt = DateTime.UtcNow.AddHours(7);
                 notification.Status = (Int32)NotificationEnum.UnRead;
                 await _context.Notifications.AddAsync(notification);
+                await _firebaseService.SetAsync<Models.Entities.Notification>($"notifications/{notification.UserId}/{notification.NotificationId}", notification);
                 await _context.SaveChangesAsync();
                 return new StatusCodeResult(200);
             }
@@ -519,6 +537,10 @@ namespace Services.Implementations
                 // Change the Status Of Tutor
                 Tutor tutor = _context.Tutors.FirstOrDefault(t => t.TutorId == tutorAction.TutorId);
                 tutor.Status = (Int32)TutorEnum.Denny;
+                var tutorCertificate = _context.TutorCertificates.Where(x => x.TutorId == tutorAction.TutorId).ToList();
+                _context.TutorCertificates.RemoveRange(tutorCertificate);
+                var tutorExperience = _context.TutorExperiences.Where(x => x.TutorId == tutorAction.TutorId).ToList();
+                _context.TutorExperiences.RemoveRange(tutorExperience);
                 await _context.SaveChangesAsync();
 
                 // Create a notification for Tutor
@@ -526,10 +548,11 @@ namespace Services.Implementations
                 notification.NotificationId = Guid.NewGuid();
                 notification.UserId = tutor.UserId;
                 notification.Title = "Yêu cầu xét duyệt trở thành gia sư đã bị từ chối";
-                notification.Content = "Yêu cầu của bạn đã bị từ chối. Vui lòng liên hệ với hệ thống để biết thêm thông tin";
+                notification.Content = "Yêu cầu của bạn đã bị từ chối. Vui lòng liên hệ với hệ thống để biết thêm thông tin.";
                 notification.CreatedAt = DateTime.UtcNow.AddHours(7);
                 notification.Status = (Int32)NotificationEnum.Deleted;
                 await _context.Notifications.AddAsync(notification);
+                await _firebaseService.SetAsync<Models.Entities.Notification>($"notifications/{notification.UserId}/{notification.NotificationId}", notification);
                 await _context.SaveChangesAsync();
                 return new StatusCodeResult(200);
             }

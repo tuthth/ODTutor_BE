@@ -17,6 +17,7 @@ namespace Models.Entities
         public string CertificateFrom { get; set; }
         public string StartYear { get; set; }
         public string EndYear { get; set; }
+        public bool IsVerified { get; set; }
         public virtual Tutor? TutorNavigation {  get; set; }
     }
 }

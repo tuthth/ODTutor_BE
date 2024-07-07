@@ -16,6 +16,7 @@ namespace Models.Entities
         public DateTime StartDate { get; set; }
         public DateTime EndYear { get;set; }
         public string? imageUrl { get; set; }
+        public bool IsVerified { get; set; }
         // Navigation properties
         public virtual Tutor TutorNavigation { get; set; }
     }
