@@ -515,9 +515,7 @@ namespace Services.Implementations
                     _context.Notifications.Add(notification1);
                     _context.Notifications.Add(notification2);
                     await _firebaseRealtimeDatabaseService.UpdateAsync<Models.Entities.Notification>($"notifications/{notification1.UserId}/{notification1.NotificationId}", notification1);
-                    await _firebaseRealtimeDatabaseService.UpdateAsync<Models.Entities.Notification>($"notifications/{notification2.UserId}/{notification2.NotificationId}", notification2));
-
-
+                    await _firebaseRealtimeDatabaseService.UpdateAsync<Models.Entities.Notification>($"notifications/{notification2.UserId}/{notification1.NotificationId}", notification2);
                     var book = _context.Bookings.FirstOrDefault(b => b.BookingId == booking.BookingId);
                     book.Status = (int)BookingEnum.Success;
 
