@@ -56,7 +56,7 @@ namespace API.Controllers
         /// <summary>
         ///         Transaction choice: 3 ( Premium ), not equal 3 == error 406
         /// </summary>
-        [HttpPost("premium")]
+        [HttpPatch("premium")]
         public async Task<IActionResult> UpgradeAccount([FromBody] WalletTransactionCreate transactionCreate)
         {
             var transaction = await _transactionService.UpgradeAccount(transactionCreate);
