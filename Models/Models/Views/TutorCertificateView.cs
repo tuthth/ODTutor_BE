@@ -12,6 +12,7 @@ namespace Models.Models.Views
         public Guid TutorId { get; set; }
         public string ImageUrl { get; set; }
         public string? CertificateType { get; set; }
+        public bool IsVerified { get; set; }
         public DateTime? CreateAt { get; set; }
     }
 }

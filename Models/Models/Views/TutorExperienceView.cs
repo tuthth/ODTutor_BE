@@ -15,5 +15,6 @@ namespace Models.Models.Views
         public string Location { get; set; }
         public DateTime StartDate { get; set; }
         public DateTime EndYear { get; set; }
+        public bool IsVerified { get; set; }
     }
 }
