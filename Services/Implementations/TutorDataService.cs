@@ -146,6 +146,9 @@ namespace Services.Implementations
           Description = t.Description,
           Status = t.Status,
           VideoUrl = t.VideoUrl,
+          ActiveTitle = t.AttractiveTitle,
+          EducationExperience = t.EducationExperience,
+          Motivation = t.Motivation,
           Courses = t.CoursesNavigation.Select(c => new Course
           {
               CourseId = c.CourseId,
