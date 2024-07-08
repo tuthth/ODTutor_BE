@@ -314,5 +314,34 @@ namespace Services.Implementations
             }
         }
 
+        // Update Tutor Information
+        public async Task<IActionResult> UpdateTutorInformation(TutorInformationUpdate tutorInformationUpdate)
+        {
+            try
+            {
+                var tutor = await _context.Tutors.FirstOrDefaultAsync(t => t.TutorId == tutorInformationUpdate.TutorId);
+                if (tutor == null)
+                {
+                    throw new CrudException(HttpStatusCode.NotFound, "Tutor Not Found", "Tutor Not Found");
+                }
+                tutor.PricePerHour = tutorInformationUpdate.PricePerHour;
+                tutor.Description = tutorInformationUpdate.Description;
+                tutor.EducationExperience = tutorInformationUpdate.EducationExperience;
+                tutor.Motivation = tutorInformationUpdate.Motivation;
+                tutor.AttractiveTitle = tutorInformationUpdate.AttractiveTitle;
+                tutor.UpdateAt = DateTime.Now;
+                await _context.SaveChangesAsync();
+                throw new CrudException(HttpStatusCode.OK, "Update Tutor Information Success", "Update Tutor Information Success");
+            }
+            catch (CrudException ex)
+            {
+                throw ex;
+            }
+            catch (Exception ex)
+            {
+                throw new CrudException(HttpStatusCode.InternalServerError, "Update Tutor Information Error", ex.Message);
+            }
+        }
+
     }
 }

@@ -115,6 +115,7 @@ namespace Models.Mappings
             CreateMap<StudentRequest, CreateStudentRequest>();
             CreateMap<CreateStudentRequest, StudentRequest>();
             CreateMap<PageResults<CourseSlot>, PageResults<CourseSlotView>>();
+            CreateMap<TutorInformationUpdate, Tutor>();
         }
     }
 }

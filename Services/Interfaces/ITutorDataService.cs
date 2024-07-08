@@ -17,5 +17,6 @@ namespace Services.Interfaces
         Task<ActionResult<TutorRatingResponse>> GetTutorRating(Guid tutorId);
         Task<PageResults<TutorFeedBackResponse>> GetTutorFeedBackResponseByTutorID(Guid tutorID, PagingRequest pagingRequest);
         Task<ActionResult<List<TutorScheduleResponse>>> GetAllTutorSlotRegistered(Guid tutorID);
+        Task<IActionResult> UpdateTutorInformation(TutorInformationUpdate tutorInformationUpdate);
     }
 }
