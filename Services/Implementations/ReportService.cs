@@ -56,8 +56,8 @@ namespace Services.Implementations
             };
             _context.Notifications.Add(notification1);
             _context.Notifications.Add(notification2);
-            await _firebaseRealtimeDatabaseService.SetAsync<Models.Entities.Notification>($"notifications/{notification1.UserId}/{notification1.NotificationId}", notification1);
-            await _firebaseRealtimeDatabaseService.SetAsync<Models.Entities.Notification>($"notifications/{notification2.UserId}/{notification2.NotificationId}", notification2);
+            _firebaseRealtimeDatabaseService.SetAsync<Models.Entities.Notification>($"notifications/{notification1.UserId}/{notification1.NotificationId}", notification1);
+            _firebaseRealtimeDatabaseService.SetAsync<Models.Entities.Notification>($"notifications/{notification2.UserId}/{notification2.NotificationId}", notification2);
             await _context.SaveChangesAsync();
             await _appExtension.SendMail(new MailContent()
             {
@@ -118,8 +118,8 @@ namespace Services.Implementations
                 };
                 _context.Notifications.Add(notification1);
                 _context.Notifications.Add(notification2);
-                await _firebaseRealtimeDatabaseService.SetAsync<Models.Entities.Notification>($"notifications/{notification1.UserId}/{notification1.NotificationId}", notification1);
-                await _firebaseRealtimeDatabaseService.SetAsync<Models.Entities.Notification>($"notifications/{notification2.UserId}/{notification2.NotificationId}", notification2);
+                _firebaseRealtimeDatabaseService.SetAsync<Models.Entities.Notification>($"notifications/{notification1.UserId}/{notification1.NotificationId}", notification1);
+                _firebaseRealtimeDatabaseService.SetAsync<Models.Entities.Notification>($"notifications/{notification2.UserId}/{notification2.NotificationId}", notification2);
             }
             if (updateReportRequest.Status == (Int32)ReportEnum.Finished)
             {
@@ -155,8 +155,8 @@ namespace Services.Implementations
                 };
                 _context.Notifications.Add(notification1);
                 _context.Notifications.Add(notification2);
-                await _firebaseRealtimeDatabaseService.SetAsync<Models.Entities.Notification>($"notifications/{notification1.UserId}/{notification1.NotificationId}", notification1);
-                await _firebaseRealtimeDatabaseService.SetAsync<Models.Entities.Notification>($"notifications/{notification2.UserId}/{notification2.NotificationId}", notification2);
+                _firebaseRealtimeDatabaseService.SetAsync<Models.Entities.Notification>($"notifications/{notification1.UserId}/{notification1.NotificationId}", notification1);
+                _firebaseRealtimeDatabaseService.SetAsync<Models.Entities.Notification>($"notifications/{notification2.UserId}/{notification2.NotificationId}", notification2);
             }
             await _context.SaveChangesAsync();
             return new StatusCodeResult(200);
@@ -230,8 +230,8 @@ namespace Services.Implementations
             };
             _context.Notifications.Add(notification1);
             _context.Notifications.Add(notification2);
-            await _firebaseRealtimeDatabaseService.SetAsync<Models.Entities.Notification>($"notifications/{notification1.UserId}/{notification1.NotificationId}", notification1);
-            await _firebaseRealtimeDatabaseService.SetAsync<Models.Entities.Notification>($"notifications/{notification2.UserId}/{notification2.NotificationId}", notification2);
+            _firebaseRealtimeDatabaseService.SetAsync<Models.Entities.Notification>($"notifications/{notification1.UserId}/{notification1.NotificationId}", notification1);
+            _firebaseRealtimeDatabaseService.SetAsync<Models.Entities.Notification>($"notifications/{notification2.UserId}/{notification2.NotificationId}", notification2);
             _context.Users.Update(target);
             await _context.SaveChangesAsync();
             return new StatusCodeResult(200);

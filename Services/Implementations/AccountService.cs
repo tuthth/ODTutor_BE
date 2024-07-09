@@ -98,7 +98,7 @@ namespace Services.Implementations
                     Status = (Int32)NotificationEnum.UnRead
                 };
                 _context.Notifications.Add(notification);
-                await _firebaseRealtimeDatabaseService.SetAsync<Models.Entities.Notification>($"notifications/{notification.UserId}/{notification.NotificationId}", notification);
+                _firebaseRealtimeDatabaseService.SetAsync<Models.Entities.Notification>($"notifications/{notification.UserId}/{notification.NotificationId}", notification);
                 await _context.SaveChangesAsync();
                 var accountResponse = _mapper.Map<AccountResponse>(account);
                 // Return information of account

@@ -65,7 +65,7 @@ namespace Services.Implementations
                 _context.Wallets.Update(sendWallet);
                 var receiveWallet = _context.Wallets.FirstOrDefault(w => w.WalletId == transactionCreate.ReceiverId);
                 receiveWallet.PendingAmount += transactionCreate.Amount;
-               
+
                 _context.Wallets.Update(receiveWallet);
                 _context.WalletTransactions.Add(transaction);
 
@@ -80,7 +80,9 @@ namespace Services.Implementations
                 };
 
                 _context.Notifications.Add(notification);
-                await _firebaseRealtimeDatabaseService.SetAsync<Models.Entities.Notification>($"notifications/{notification.UserId}/{notification.NotificationId}", notification);
+
+
+                _firebaseRealtimeDatabaseService.SetAsync<Models.Entities.Notification>($"notifications/{notification.UserId}/{notification.NotificationId}", notification);
                 await _context.SaveChangesAsync();
 
                 string vnp_Returnurl = transactionCreate.RedirectUrl;
@@ -163,7 +165,7 @@ namespace Services.Implementations
                     Status = (int)NotificationEnum.UnRead
                 };
                 _context.Notifications.Add(notification);
-                await _firebaseRealtimeDatabaseService.SetAsync<Models.Entities.Notification>($"notifications/{notification.UserId}/{notification.NotificationId}", notification);
+                _firebaseRealtimeDatabaseService.SetAsync<Models.Entities.Notification>($"notifications/{notification.UserId}/{notification.NotificationId}", notification);
                 await _context.SaveChangesAsync();
 
                 string vnp_Returnurl = transactionCreate.RedirectUrl;
@@ -221,19 +223,19 @@ namespace Services.Implementations
                 Status = (int)NotificationEnum.UnRead
             };
             _context.Notifications.Add(notificationError);
-            await _firebaseRealtimeDatabaseService.SetAsync<Models.Entities.Notification>($"notifications/{notificationError.UserId}/{notificationError.NotificationId}", notificationError);
+            _firebaseRealtimeDatabaseService.SetAsync<Models.Entities.Notification>($"notifications/{notificationError.UserId}/{notificationError.NotificationId}", notificationError);
             await _context.SaveChangesAsync();
             return new StatusCodeResult(500);
         }
 
         public async Task<IActionResult> UpgradeAccount(WalletTransactionCreate transactionCreate)
         {
-            if(transactionCreate.Choice != (Int32)VNPayTransactionType.Upgrade)
+            if (transactionCreate.Choice != (Int32)VNPayTransactionType.Upgrade)
             {
                 return new StatusCodeResult(406);
             }
             var findUser = _context.Users.FirstOrDefault(u => u.Id == transactionCreate.SenderId);
-            if(findUser == null)
+            if (findUser == null)
             {
                 return new StatusCodeResult(404);
             }
@@ -273,7 +275,7 @@ namespace Services.Implementations
                 Status = (int)NotificationEnum.UnRead
             };
             _context.Notifications.Add(notification);
-            await _firebaseRealtimeDatabaseService.UpdateAsync<Models.Entities.Notification>($"notifications/{notification.UserId}/{notification.NotificationId}", notification);
+            _firebaseRealtimeDatabaseService.UpdateAsync<Models.Entities.Notification>($"notifications/{notification.UserId}/{notification.NotificationId}", notification);
             await _context.SaveChangesAsync();
             await _appExtension.SendMail(new MailContent()
             {
@@ -340,7 +342,7 @@ namespace Services.Implementations
                     Status = (int)NotificationEnum.UnRead
                 };
                 _context.Notifications.Add(notificationError);
-                await _firebaseRealtimeDatabaseService.SetAsync<Models.Entities.Notification>($"notifications/{notificationError.UserId}/{notificationError.NotificationId}", notificationError);
+                _firebaseRealtimeDatabaseService.SetAsync<Models.Entities.Notification>($"notifications/{notificationError.UserId}/{notificationError.NotificationId}", notificationError);
                 return new StatusCodeResult(409);
             }
             sendWallet.PendingAmount -= transactionCreate.Amount;
@@ -361,7 +363,7 @@ namespace Services.Implementations
                 Status = (int)NotificationEnum.UnRead
             };
             _context.Notifications.Add(notification);
-            await _firebaseRealtimeDatabaseService.SetAsync<Models.Entities.Notification>($"notifications/{notification.UserId}/{notification.NotificationId}", notification);
+            _firebaseRealtimeDatabaseService.SetAsync<Models.Entities.Notification>($"notifications/{notification.UserId}/{notification.NotificationId}", notification);
             await _context.SaveChangesAsync();
             await _appExtension.SendMail(new MailContent()
             {
@@ -434,7 +436,7 @@ namespace Services.Implementations
                 Status = (int)NotificationEnum.UnRead
             };
             _context.Notifications.Add(notification);
-            await _firebaseRealtimeDatabaseService.SetAsync<Models.Entities.Notification>($"notifications/{notification.UserId}/{notification.NotificationId}", notification);
+            _firebaseRealtimeDatabaseService.SetAsync<Models.Entities.Notification>($"notifications/{notification.UserId}/{notification.NotificationId}", notification);
 
             _context.CourseTransactions.Add(transaction);
             _context.WalletTransactions.Add(senderTransaction);
@@ -514,8 +516,8 @@ namespace Services.Implementations
                     };
                     _context.Notifications.Add(notification1);
                     _context.Notifications.Add(notification2);
-                    await _firebaseRealtimeDatabaseService.UpdateAsync<Models.Entities.Notification>($"notifications/{notification1.UserId}/{notification1.NotificationId}", notification1);
-                    await _firebaseRealtimeDatabaseService.UpdateAsync<Models.Entities.Notification>($"notifications/{notification2.UserId}/{notification1.NotificationId}", notification2);
+                    _firebaseRealtimeDatabaseService.UpdateAsync<Models.Entities.Notification>($"notifications/{notification1.UserId}/{notification1.NotificationId}", notification1);
+                    _firebaseRealtimeDatabaseService.UpdateAsync<Models.Entities.Notification>($"notifications/{notification2.UserId}/{notification1.NotificationId}", notification2);
                     var book = _context.Bookings.FirstOrDefault(b => b.BookingId == booking.BookingId);
                     book.Status = (int)BookingEnum.Success;
 
@@ -572,8 +574,8 @@ namespace Services.Implementations
                     };
                     _context.Notifications.Add(notification1);
                     _context.Notifications.Add(notification2);
-                   await _firebaseRealtimeDatabaseService.UpdateAsync<Models.Entities.Notification>($"notifications/{notification1.UserId}/{notification1.NotificationId}", notification1);
-                    await _firebaseRealtimeDatabaseService.UpdateAsync<Models.Entities.Notification>($"notifications/{notification2.UserId}/{notification2.NotificationId}", notification2);
+                    _firebaseRealtimeDatabaseService.UpdateAsync<Models.Entities.Notification>($"notifications/{notification1.UserId}/{notification1.NotificationId}", notification1);
+                    _firebaseRealtimeDatabaseService.UpdateAsync<Models.Entities.Notification>($"notifications/{notification2.UserId}/{notification2.NotificationId}", notification2);
                 }
                 else if (choice == (Int32)UpdateTransactionType.Wallet)
                 {
@@ -624,8 +626,8 @@ namespace Services.Implementations
                     };
                     _context.Notifications.Add(notification1);
                     _context.Notifications.Add(notification2);
-                    await _firebaseRealtimeDatabaseService.UpdateAsync<Models.Entities.Notification>($"notifications/{notification1.UserId}/{notification1.NotificationId}", notification1);
-                    await _firebaseRealtimeDatabaseService.UpdateAsync<Models.Entities.Notification>($"notifications/{notification2.UserId}/{notification2.NotificationId}", notification2);
+                    _firebaseRealtimeDatabaseService.UpdateAsync<Models.Entities.Notification>($"notifications/{notification1.UserId}/{notification1.NotificationId}", notification1);
+                    _firebaseRealtimeDatabaseService.UpdateAsync<Models.Entities.Notification>($"notifications/{notification2.UserId}/{notification2.NotificationId}", notification2);
 
                 }
                 else if (choice == (Int32)UpdateTransactionType.Unknown) { return new StatusCodeResult(406); }
@@ -682,8 +684,8 @@ namespace Services.Implementations
                     };
                     _context.Notifications.Add(notification1);
                     _context.Notifications.Add(notification2);
-                    await _firebaseRealtimeDatabaseService.UpdateAsync<Models.Entities.Notification>($"notifications/{notification1.UserId}/{notification1.NotificationId}", notification1);
-                    await _firebaseRealtimeDatabaseService.UpdateAsync<Models.Entities.Notification>($"notifications/{notification2.UserId}/{notification2.NotificationId}", notification2);
+                    _firebaseRealtimeDatabaseService.UpdateAsync<Models.Entities.Notification>($"notifications/{notification1.UserId}/{notification1.NotificationId}", notification1);
+                    _firebaseRealtimeDatabaseService.UpdateAsync<Models.Entities.Notification>($"notifications/{notification2.UserId}/{notification2.NotificationId}", notification2);
                     var book = _context.Bookings.FirstOrDefault(b => b.BookingId == booking.BookingId);
                     book.Status = (int)BookingEnum.Canceled;
 
@@ -703,7 +705,7 @@ namespace Services.Implementations
 
                     wallet.ReceiverWalletNavigation.LastBalanceUpdate = DateTime.UtcNow.AddHours(7);
                     wallet.ReceiverWalletNavigation.PendingAmount -= course.Amount;
-                    
+
 
                     _context.CourseTransactions.Update(course);
                     _context.WalletTransactions.Update(wallet);
@@ -739,8 +741,8 @@ namespace Services.Implementations
                     };
                     _context.Notifications.Add(notification1);
                     _context.Notifications.Add(notification2);
-                    await _firebaseRealtimeDatabaseService.UpdateAsync<Models.Entities.Notification>($"notifications/{notification1.UserId}/{notification1.NotificationId}", notification1);
-                    await _firebaseRealtimeDatabaseService.UpdateAsync<Models.Entities.Notification>($"notifications/{notification2.UserId}/{notification2.NotificationId}", notification2);
+                    _firebaseRealtimeDatabaseService.UpdateAsync<Models.Entities.Notification>($"notifications/{notification1.UserId}/{notification1.NotificationId}", notification1);
+                    _firebaseRealtimeDatabaseService.UpdateAsync<Models.Entities.Notification>($"notifications/{notification2.UserId}/{notification2.NotificationId}", notification2);
                 }
                 else if (choice == (Int32)UpdateTransactionType.Wallet)
                 {
@@ -754,7 +756,7 @@ namespace Services.Implementations
 
                     wallet.ReceiverWalletNavigation.LastBalanceUpdate = DateTime.UtcNow.AddHours(7);
                     wallet.ReceiverWalletNavigation.PendingAmount -= wallet.Amount;
-                    
+
 
                     _context.WalletTransactions.Update(wallet);
                     await _appExtension.SendMail(new MailContent()
@@ -789,8 +791,8 @@ namespace Services.Implementations
                     };
                     _context.Notifications.Add(notification1);
                     _context.Notifications.Add(notification2);
-                    await _firebaseRealtimeDatabaseService.UpdateAsync<Models.Entities.Notification>($"notifications/{notification1.UserId}/{notification1.NotificationId}", notification1);
-                    await _firebaseRealtimeDatabaseService.UpdateAsync<Models.Entities.Notification>($"notifications/{notification2.UserId}/{notification2.NotificationId}", notification2);
+                    _firebaseRealtimeDatabaseService.UpdateAsync<Models.Entities.Notification>($"notifications/{notification1.UserId}/{notification1.NotificationId}", notification1);
+                    _firebaseRealtimeDatabaseService.UpdateAsync<Models.Entities.Notification>($"notifications/{notification2.UserId}/{notification2.NotificationId}", notification2);
                 }
                 else if (choice == (Int32)UpdateTransactionType.Unknown) { return new StatusCodeResult(406); }
             }
@@ -880,7 +882,7 @@ namespace Services.Implementations
             }
             catch (Exception ex)
             {
-               throw new Exception(ex.ToString());
+                throw new Exception(ex.ToString());
             }
         }
 
@@ -924,7 +926,7 @@ namespace Services.Implementations
             }
             catch (Exception ex)
             {
-               throw new Exception(ex.ToString());
+                throw new Exception(ex.ToString());
             }
         }
 

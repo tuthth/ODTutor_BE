@@ -60,7 +60,7 @@ namespace Services.Implementations
                         Status = (Int32)NotificationEnum.UnRead
                     };
                     _context.Notifications.Add(notification);
-                    await _firebaseRealtimeDatabaseService.SetAsync<Models.Entities.Notification>($"notifications/{notification.UserId}/{notification.NotificationId}", notification);
+                    _firebaseRealtimeDatabaseService.SetAsync<Models.Entities.Notification>($"notifications/{notification.UserId}/{notification.NotificationId}", notification);
                     _context.UserAuthentications.Add(userAuthentication);
                     await _context.SaveChangesAsync();
                     try
