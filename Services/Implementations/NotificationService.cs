@@ -36,7 +36,7 @@ namespace Services.Implementations
                     CreatedAt = DateTime.UtcNow.AddHours(7),
                     Status = (Int32)NotificationEnum.UnRead
                 };
-                await _firebaseRealtimeDatabaseService.SetAsync<Notification>($"notifications/{request.UserId}/{notification.NotificationId}", notification);
+                _firebaseRealtimeDatabaseService.SetAsync<Notification>($"notifications/{request.UserId}/{notification.NotificationId}", notification);
                 await _context.Notifications.AddAsync(notification);
                 await _context.SaveChangesAsync();
                 throw new CrudException(System.Net.HttpStatusCode.Created, "Tạo thông báo thành công", "");
@@ -94,7 +94,7 @@ namespace Services.Implementations
                     throw new CrudException(System.Net.HttpStatusCode.NotFound, "Không tìm thấy thông báo", "");
                 }
                 notification.Status = (Int32) NotificationEnum.Read;
-                await _firebaseRealtimeDatabaseService.SetAsync<Notification>($"notifications/{userId}/{notificationId}", notification);
+                _firebaseRealtimeDatabaseService.SetAsync<Notification>($"notifications/{userId}/{notificationId}", notification);
                 Notification noti = await _context.Notifications.FindAsync(notificationId);
                 noti.Status = (Int32)NotificationEnum.Read;
                 await _context.SaveChangesAsync();

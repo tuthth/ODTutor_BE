@@ -68,6 +68,6 @@ namespace Services
             {
                 await HandleExceptionAsync(context, ex);
             }
-        }
+            }
     }
 }

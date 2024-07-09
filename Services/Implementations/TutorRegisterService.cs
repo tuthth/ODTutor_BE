@@ -217,7 +217,7 @@ namespace Services.Implementations
                 notification.CreatedAt = DateTime.UtcNow.AddHours(7);
                 notification.Status = 1; // "1" is sent
                 await _context.Notifications.AddAsync(notification);
-                await _firebaseService.SetAsync<Models.Entities.Notification>($"notifications/{notification.UserId}/{notification.NotificationId}", notification);
+                _firebaseService.SetAsync<Models.Entities.Notification>($"notifications/{notification.UserId}/{notification.NotificationId}", notification);
                 await _context.SaveChangesAsync();
                 return new StatusCodeResult(201);
             }
@@ -509,7 +509,7 @@ namespace Services.Implementations
                 notification.CreatedAt = DateTime.UtcNow.AddHours(7);
                 notification.Status = (Int32)NotificationEnum.UnRead;
                 await _context.Notifications.AddAsync(notification);
-                await _firebaseService.SetAsync<Models.Entities.Notification>($"notifications/{notification.UserId}/{notification.NotificationId}", notification);
+                _firebaseService.SetAsync<Models.Entities.Notification>($"notifications/{notification.UserId}/{notification.NotificationId}", notification);
                 await _context.SaveChangesAsync();
                 return new StatusCodeResult(200);
             }
@@ -552,7 +552,7 @@ namespace Services.Implementations
                 notification.CreatedAt = DateTime.UtcNow.AddHours(7);
                 notification.Status = (Int32)NotificationEnum.Deleted;
                 await _context.Notifications.AddAsync(notification);
-                await _firebaseService.SetAsync<Models.Entities.Notification>($"notifications/{notification.UserId}/{notification.NotificationId}", notification);
+                _firebaseService.SetAsync<Models.Entities.Notification>($"notifications/{notification.UserId}/{notification.NotificationId}", notification);
                 await _context.SaveChangesAsync();
                 return new StatusCodeResult(200);
             }

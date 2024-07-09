@@ -37,8 +37,8 @@ namespace Services.Implementations
             try
             {
                 BookingStep1Response response = new BookingStep1Response();
-                var student = _context.Users.FirstOrDefault(x => x.Id == bookingRequest.StudentId);
-                var tutor = _context.Users.FirstOrDefault(x => x.Id == bookingRequest.TutorId);
+                var student = _context.Users.Include(x => x.StudentNavigation).FirstOrDefault(x => x.StudentNavigation.StudentId == bookingRequest.StudentId);
+                var tutor = _context.Users.Include(x => x.TutorNavigation).FirstOrDefault(x => x.TutorNavigation.TutorId == bookingRequest.TutorId);
                 if (student.Banned == true || tutor.Banned == true)
                 {
                     throw new CrudException(HttpStatusCode.Forbidden, "User is banned", "");
@@ -143,7 +143,7 @@ namespace Services.Implementations
                 notification.CreatedAt = DateTime.UtcNow.AddHours(7);
                 _context.Notifications.Add(notification);
                 // Lưu notification vào firestore
-                await _firebaseRealtimeDatabaseService.SetAsync<Models.Entities.Notification>($"notifications/{notification.UserId}/{notification.NotificationId}", notification);
+                _firebaseRealtimeDatabaseService.SetAsync<Models.Entities.Notification>($"notifications/{notification.UserId}/{notification.NotificationId}", notification);
                 // Lưu tất cả thay đổi vào cơ sở dữ liệu
                 await _context.SaveChangesAsync();
                 throw new CrudException(HttpStatusCode.Created, "Payment for booking successfully", "");
