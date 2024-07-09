@@ -37,8 +37,8 @@ namespace Services.Implementations
             try
             {
                 BookingStep1Response response = new BookingStep1Response();
-                var student = _context.Users.FirstOrDefault(x => x.Id == bookingRequest.StudentId);
-                var tutor = _context.Users.FirstOrDefault(x => x.Id == bookingRequest.TutorId);
+                var student = _context.Users.Include(x => x.StudentNavigation).FirstOrDefault(x => x.StudentNavigation.StudentId == bookingRequest.StudentId);
+                var tutor = _context.Users.Include(x => x.TutorNavigation).FirstOrDefault(x => x.TutorNavigation.TutorId == bookingRequest.TutorId);
                 if (student.Banned == true || tutor.Banned == true)
                 {
                     throw new CrudException(HttpStatusCode.Forbidden, "User is banned", "");
