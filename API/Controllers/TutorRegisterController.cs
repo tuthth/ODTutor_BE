@@ -186,7 +186,7 @@ namespace API.Controllers
         }
 
         // Deny Tutor Register
-        [HttpPost("deny/{tutorActionId}/{denyID}")]
+        [HttpPost("deny")]
         public async Task<IActionResult> denyTutorRegister([FromBody]TutorApprovalRequest request)
         {
             var result = await _tutorRegisterService.DenyTheTutorRegister(request);
