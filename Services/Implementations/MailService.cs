@@ -7,6 +7,7 @@ using MimeKit;
 using Models.Entities;
 using Models.Enumerables;
 using Models.Models.Emails;
+using Models.Models.Requests;
 using Services.Interfaces;
 using Settings.Mail;
 using System;
@@ -50,7 +51,7 @@ namespace Services.Implementations
                         EmailToken = tokenEmail,
                         EmailTokenExpiry = DateTime.UtcNow.AddHours(7).AddMinutes(15)
                     };
-                    var notification = new Models.Entities.Notification
+                    var notification = new NotificationDTO
                     {
                         NotificationId = Guid.NewGuid(),
                         Title = "Mã xác thực OTP",
@@ -59,8 +60,9 @@ namespace Services.Implementations
                         CreatedAt = DateTime.UtcNow.AddHours(7),
                         Status = (Int32)NotificationEnum.UnRead
                     };
-                    _context.Notifications.Add(notification);
-                    await _firebaseRealtimeDatabaseService.SetAsync<Models.Entities.Notification>($"notifications/{notification.UserId}/{notification.NotificationId}", notification);
+                    Notification noti = _mapper.Map<NotificationDTO, Notification>(notification);
+                    _context.Notifications.Add(noti);
+                    await _firebaseRealtimeDatabaseService.SetAsync<NotificationDTO>($"notifications/{notification.UserId}/{notification.NotificationId}", notification);
                     _context.UserAuthentications.Add(userAuthentication);
                     await _context.SaveChangesAsync();
                     try

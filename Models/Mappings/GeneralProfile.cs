@@ -116,6 +116,8 @@ namespace Models.Mappings
             CreateMap<CreateStudentRequest, StudentRequest>();
             CreateMap<PageResults<CourseSlot>, PageResults<CourseSlotView>>();
             CreateMap<TutorInformationUpdate, Tutor>();
+            CreateMap<NotificationDTO, Notification>();
+            CreateMap<Notification, NotificationDTO>();
         }
     }
 }
