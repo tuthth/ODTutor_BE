@@ -94,7 +94,10 @@ namespace API.Controllers
             if (result is ActionResult<List<UserBlock>> userBlocks && result.Value != null)
             {
                 var userBlockViews = _mapper.Map<List<UserBlockView>>(userBlocks.Value);
-                return Ok(userBlockViews);
+                var userBlockIn30Days = userBlockViews.Where(x => x.CreatedAt >= DateTime.UtcNow.AddHours(7).AddDays(-30)).ToList();
+                var userBlockInPrevious30Days = userBlockViews.Where(x => x.CreatedAt < DateTime.UtcNow.AddHours(7).AddDays(-30) && x.CreatedAt >= DateTime.UtcNow.AddHours(7).AddDays(-60)).ToList();
+                var percentageChange = userBlockInPrevious30Days.Count == 0 ? 0 : (userBlockIn30Days.Count - userBlockInPrevious30Days.Count) / userBlockInPrevious30Days.Count * 100;
+                return Ok(new {UserBlocks = userBlockViews, Counts = userBlockViews.Count, Last30Days = userBlockIn30Days.Count, PercentageChange = percentageChange});
             }
             if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
             {
@@ -127,7 +130,10 @@ namespace API.Controllers
             if (result is ActionResult<List<UserBlock>> userBlock && result.Value != null)
             {
                 var userBlockViews = _mapper.Map<List<UserBlockView>>(userBlock.Value);
-                return Ok(userBlockViews);
+                var userBlockIn30Days = userBlockViews.Where(x => x.CreatedAt >= DateTime.UtcNow.AddHours(7).AddDays(-30)).ToList();
+                var userBlockInPrevious30Days = userBlockViews.Where(x => x.CreatedAt < DateTime.UtcNow.AddHours(7).AddDays(-30) && x.CreatedAt >= DateTime.UtcNow.AddHours(7).AddDays(-60)).ToList();
+                var percentageChange = userBlockInPrevious30Days.Count == 0 ? 0 : (userBlockIn30Days.Count - userBlockInPrevious30Days.Count) / userBlockInPrevious30Days.Count * 100;
+                return Ok(new { UserBlocks = userBlockViews, Counts = userBlockViews.Count, Last30Days = userBlockIn30Days.Count, PercentageChange = percentageChange });
             }
             if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
             {
@@ -162,7 +168,10 @@ namespace API.Controllers
             if (result is ActionResult<List<UserBlock>> userBlocks && result.Value != null)
             {
                 var userBlockViews = _mapper.Map<List<UserBlockView>>(userBlocks.Value);
-                return Ok(userBlockViews);
+                var userBlockIn30Days = userBlockViews.Where(x => x.CreatedAt >= DateTime.UtcNow.AddHours(7).AddDays(-30)).ToList();
+                var userBlockInPrevious30Days = userBlockViews.Where(x => x.CreatedAt < DateTime.UtcNow.AddHours(7).AddDays(-30) && x.CreatedAt >= DateTime.UtcNow.AddHours(7).AddDays(-60)).ToList();
+                var percentageChange = userBlockInPrevious30Days.Count == 0 ? 0 : (userBlockIn30Days.Count - userBlockInPrevious30Days.Count) / userBlockInPrevious30Days.Count * 100;
+                return Ok(new { UserBlocks = userBlockViews, Counts = userBlockViews.Count, Last30Days = userBlockIn30Days.Count, PercentageChange = percentageChange });
             }
             if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
             {
@@ -195,7 +204,10 @@ namespace API.Controllers
             if (result is ActionResult<List<UserFollow>> userFollows && result.Value != null)
             {
                 var userFollowViews = _mapper.Map<List<UserFollowView>>(userFollows.Value);
-                return Ok(userFollowViews);
+                var userFollowIn30Days = userFollowViews.Where(x => x.CreatedAt >= DateTime.UtcNow.AddHours(7).AddDays(-30)).ToList();
+                var userFollowInPrevious30Days = userFollowViews.Where(x => x.CreatedAt < DateTime.UtcNow.AddHours(7).AddDays(-30) && x.CreatedAt >= DateTime.UtcNow.AddHours(7).AddDays(-60)).ToList();
+                var percentageChange = userFollowInPrevious30Days.Count == 0 ? 0 : (userFollowIn30Days.Count - userFollowInPrevious30Days.Count) / userFollowInPrevious30Days.Count * 100;
+                return Ok(new { UserFollows = userFollowViews, Counts = userFollowViews.Count, Last30Days = userFollowIn30Days.Count, PercentageChange = percentageChange });
             }
             if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
             {
@@ -228,7 +240,10 @@ namespace API.Controllers
             if (result is ActionResult<List<UserFollow>> userFollow && result.Value != null)
             {
                 var userFollowViews = _mapper.Map<List<UserFollowView>>(userFollow.Value);
-                return Ok(userFollowViews);
+                var userFollowIn30Days = userFollowViews.Where(x => x.CreatedAt >= DateTime.UtcNow.AddHours(7).AddDays(-30)).ToList();
+                var userFollowInPrevious30Days = userFollowViews.Where(x => x.CreatedAt < DateTime.UtcNow.AddHours(7).AddDays(-30) && x.CreatedAt >= DateTime.UtcNow.AddHours(7).AddDays(-60)).ToList();
+                var percentageChange = userFollowInPrevious30Days.Count == 0 ? 0 : (userFollowIn30Days.Count - userFollowInPrevious30Days.Count) / userFollowInPrevious30Days.Count * 100;
+                return Ok(new { UserFollows = userFollowViews, Counts = userFollowViews.Count, Last30Days = userFollowIn30Days.Count, PercentageChange = percentageChange });
             }
             if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
             {
@@ -261,7 +276,10 @@ namespace API.Controllers
             if (result is ActionResult<List<UserFollow>> userFollows && result.Value != null)
             {
                 var userFollowViews = _mapper.Map<List<UserFollowView>>(userFollows.Value);
-                return Ok(userFollowViews);
+                var userFollowIn30Days = userFollowViews.Where(x => x.CreatedAt >= DateTime.UtcNow.AddHours(7).AddDays(-30)).ToList();
+                var userFollowInPrevious30Days = userFollowViews.Where(x => x.CreatedAt < DateTime.UtcNow.AddHours(7).AddDays(-30) && x.CreatedAt >= DateTime.UtcNow.AddHours(7).AddDays(-60)).ToList();
+                var percentageChange = userFollowInPrevious30Days.Count == 0 ? 0 : (userFollowIn30Days.Count - userFollowInPrevious30Days.Count) / userFollowInPrevious30Days.Count * 100;
+                return Ok(new { UserFollows = userFollowViews, Counts = userFollowViews.Count, Last30Days = userFollowIn30Days.Count, PercentageChange = percentageChange });
             }
             if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
             {

@@ -191,7 +191,10 @@ namespace API.Controllers
             if (result is ActionResult<List<CourseTransaction>> courseTransactions && result.Value != null)
             {
                 var courseTransactionViews = _mapper.Map<List<CourseTransactionView>>(courseTransactions.Value);
-                return Ok(courseTransactionViews);
+                var courseTransactionIn30Days = courseTransactionViews.Where(courseTransaction => courseTransaction.CreatedAt >= DateTime.UtcNow.AddHours(7).AddDays(-30)).ToList();
+                var courseTransactionInPrevious30Days = courseTransactionViews.Where(courseTransaction => courseTransaction.CreatedAt < DateTime.UtcNow.AddHours(7).AddDays(-30) && courseTransaction.CreatedAt >= DateTime.UtcNow.AddHours(7).AddDays(-60)).ToList();
+                var percentageChange = courseTransactionInPrevious30Days.Count == 0 ? 0 : (courseTransactionIn30Days.Count - courseTransactionInPrevious30Days.Count) / courseTransactionInPrevious30Days.Count * 100;
+                return Ok(new { CourseTransactions = courseTransactionViews, Count = courseTransactionViews.Count, CourseTransactionInPrevious30Days = courseTransactionInPrevious30Days, PercentageChange = percentageChange });
             }
             if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
             {
@@ -245,7 +248,11 @@ namespace API.Controllers
             if (result is ActionResult<List<CourseTransaction>> courseTransactions && result.Value != null)
             {
                 var courseTransactionViews = _mapper.Map<List<CourseTransactionView>>(courseTransactions.Value);
-                return Ok(courseTransactionViews);
+                var courseTransactionIn30Days = courseTransactionViews.Where(courseTransaction => courseTransaction.CreatedAt >= DateTime.UtcNow.AddHours(7).AddDays(-30)).ToList();
+                var courseTransactionInPrevious30Days = courseTransactionViews.Where(courseTransaction => courseTransaction.CreatedAt < DateTime.UtcNow.AddHours(7).AddDays(-30) && courseTransaction.CreatedAt >= DateTime.UtcNow.AddHours(7).AddDays(-60)).ToList();
+                var percentageChange = courseTransactionInPrevious30Days.Count == 0 ? 0 : (courseTransactionIn30Days.Count - courseTransactionInPrevious30Days.Count) / courseTransactionInPrevious30Days.Count * 100;
+                return Ok(new { CourseTransactions = courseTransactionViews, Count = courseTransactionViews.Count, CourseTransactionInPrevious30Days = courseTransactionInPrevious30Days, PercentageChange = percentageChange });
+
             }
             if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
             {
@@ -282,7 +289,11 @@ namespace API.Controllers
             if (result is ActionResult<List<CourseTransaction>> courseTransactions && result.Value != null)
             {
                 var courseTransactionViews = _mapper.Map<List<CourseTransactionView>>(courseTransactions.Value);
-                return Ok(courseTransactionViews);
+                var courseTransactionIn30Days = courseTransactionViews.Where(courseTransaction => courseTransaction.CreatedAt >= DateTime.UtcNow.AddHours(7).AddDays(-30)).ToList();
+                var courseTransactionInPrevious30Days = courseTransactionViews.Where(courseTransaction => courseTransaction.CreatedAt < DateTime.UtcNow.AddHours(7).AddDays(-30) && courseTransaction.CreatedAt >= DateTime.UtcNow.AddHours(7).AddDays(-60)).ToList();
+                var percentageChange = courseTransactionInPrevious30Days.Count == 0 ? 0 : (courseTransactionIn30Days.Count - courseTransactionInPrevious30Days.Count) / courseTransactionInPrevious30Days.Count * 100;
+                return Ok(new { CourseTransactions = courseTransactionViews, Count = courseTransactionViews.Count, CourseTransactionInPrevious30Days = courseTransactionInPrevious30Days, PercentageChange = percentageChange });
+
             }
             if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
             {
@@ -320,7 +331,10 @@ namespace API.Controllers
             if (result is ActionResult<List<CourseTransaction>> courseTransactions && result.Value != null)
             {
                 var courseTransactionViews = _mapper.Map<List<CourseTransactionView>>(courseTransactions.Value);
-                return Ok(courseTransactionViews);
+                var courseTransactionIn30Days = courseTransactionViews.Where(courseTransaction => courseTransaction.CreatedAt >= DateTime.UtcNow.AddHours(7).AddDays(-30)).ToList();
+                var courseTransactionInPrevious30Days = courseTransactionViews.Where(courseTransaction => courseTransaction.CreatedAt < DateTime.UtcNow.AddHours(7).AddDays(-30) && courseTransaction.CreatedAt >= DateTime.UtcNow.AddHours(7).AddDays(-60)).ToList();
+                var percentageChange = courseTransactionInPrevious30Days.Count == 0 ? 0 : (courseTransactionIn30Days.Count - courseTransactionInPrevious30Days.Count) / courseTransactionInPrevious30Days.Count * 100;
+                return Ok(new { CourseTransactions = courseTransactionViews, Count = courseTransactionViews.Count, CourseTransactionInPrevious30Days = courseTransactionInPrevious30Days, PercentageChange = percentageChange });
             }
             if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
             {
@@ -358,7 +372,10 @@ namespace API.Controllers
             if (result is ActionResult<List<BookingTransaction>> bookingTransactions && result.Value != null)
             {
                 var bookingTransactionViews = _mapper.Map<List<BookingTransactionView>>(bookingTransactions.Value);
-                return Ok(bookingTransactionViews);
+                var bookingTransactionIn30Days = bookingTransactionViews.Where(bookingTransaction => bookingTransaction.CreatedAt >= DateTime.UtcNow.AddHours(7).AddDays(-30)).ToList();
+                var bookingTransactionInPrevious30Days = bookingTransactionViews.Where(bookingTransaction => bookingTransaction.CreatedAt < DateTime.UtcNow.AddHours(7).AddDays(-30) && bookingTransaction.CreatedAt >= DateTime.UtcNow.AddHours(7).AddDays(-60)).ToList();
+                var percentageChange = bookingTransactionInPrevious30Days.Count == 0 ? 0 : (bookingTransactionIn30Days.Count - bookingTransactionInPrevious30Days.Count) / bookingTransactionInPrevious30Days.Count * 100;
+                return Ok(new { BookingTransactions = bookingTransactionViews, Count = bookingTransactionViews.Count, BookingTransactionInPrevious30Days = bookingTransactionInPrevious30Days, PercentageChange = percentageChange });
             }
             if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
             {
@@ -416,8 +433,11 @@ namespace API.Controllers
             var result = await _transactionService.GetBookingTransactionsByBookingId(bookingTransactionID);
             if (result is ActionResult<List<BookingTransaction>> bookingTransaction && result.Value != null)
             {
-                var bookingTransactionView = _mapper.Map<List<BookingTransactionView>>(bookingTransaction.Value);
-                return Ok(bookingTransactionView);
+                var bookingTransactionViews = _mapper.Map<List<BookingTransactionView>>(bookingTransaction.Value);
+                var bookingTransactionIn30Days = bookingTransactionViews.Where(bookingTransaction => bookingTransaction.CreatedAt >= DateTime.UtcNow.AddHours(7).AddDays(-30)).ToList();
+                var bookingTransactionInPrevious30Days = bookingTransactionViews.Where(bookingTransaction => bookingTransaction.CreatedAt < DateTime.UtcNow.AddHours(7).AddDays(-30) && bookingTransaction.CreatedAt >= DateTime.UtcNow.AddHours(7).AddDays(-60)).ToList();
+                var percentageChange = bookingTransactionInPrevious30Days.Count == 0 ? 0 : (bookingTransactionIn30Days.Count - bookingTransactionInPrevious30Days.Count) / bookingTransactionInPrevious30Days.Count * 100;
+                return Ok(new { BookingTransactions = bookingTransactionViews, Count = bookingTransactionViews.Count, BookingTransactionInPrevious30Days = bookingTransactionInPrevious30Days, PercentageChange = percentageChange });
             }
             if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
             {
@@ -455,7 +475,10 @@ namespace API.Controllers
             if (result is ActionResult<List<BookingTransaction>> bookingTransactions && result.Value != null)
             {
                 var bookingTransactionViews = _mapper.Map<List<BookingTransactionView>>(bookingTransactions.Value);
-                return Ok(bookingTransactionViews);
+                var bookingTransactionIn30Days = bookingTransactionViews.Where(bookingTransaction => bookingTransaction.CreatedAt >= DateTime.UtcNow.AddHours(7).AddDays(-30)).ToList();
+                var bookingTransactionInPrevious30Days = bookingTransactionViews.Where(bookingTransaction => bookingTransaction.CreatedAt < DateTime.UtcNow.AddHours(7).AddDays(-30) && bookingTransaction.CreatedAt >= DateTime.UtcNow.AddHours(7).AddDays(-60)).ToList();
+                var percentageChange = bookingTransactionInPrevious30Days.Count == 0 ? 0 : (bookingTransactionIn30Days.Count - bookingTransactionInPrevious30Days.Count) / bookingTransactionInPrevious30Days.Count * 100;
+                return Ok(new { BookingTransactions = bookingTransactionViews, Count = bookingTransactionViews.Count, BookingTransactionInPrevious30Days = bookingTransactionInPrevious30Days, PercentageChange = percentageChange });
             }
             if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
             {
@@ -493,7 +516,10 @@ namespace API.Controllers
             if (result is ActionResult<List<BookingTransaction>> bookingTransactions && result.Value != null)
             {
                 var bookingTransactionViews = _mapper.Map<List<BookingTransactionView>>(bookingTransactions.Value);
-                return Ok(bookingTransactionViews);
+                var bookingTransactionIn30Days = bookingTransactionViews.Where(bookingTransaction => bookingTransaction.CreatedAt >= DateTime.UtcNow.AddHours(7).AddDays(-30)).ToList();
+                var bookingTransactionInPrevious30Days = bookingTransactionViews.Where(bookingTransaction => bookingTransaction.CreatedAt < DateTime.UtcNow.AddHours(7).AddDays(-30) && bookingTransaction.CreatedAt >= DateTime.UtcNow.AddHours(7).AddDays(-60)).ToList();
+                var percentageChange = bookingTransactionInPrevious30Days.Count == 0 ? 0 : (bookingTransactionIn30Days.Count - bookingTransactionInPrevious30Days.Count) / bookingTransactionInPrevious30Days.Count * 100;
+                return Ok(new { BookingTransactions = bookingTransactionViews, Count = bookingTransactionViews.Count, BookingTransactionInPrevious30Days = bookingTransactionInPrevious30Days, PercentageChange = percentageChange });
             }
             if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
             {
@@ -530,7 +556,10 @@ namespace API.Controllers
             if (result is ActionResult<List<WalletTransaction>> walletTransactions && result.Value != null)
             {
                 var walletTransactionViews = _mapper.Map<List<WalletTransactionView>>(walletTransactions.Value);
-                return Ok(walletTransactionViews);
+                var walletTransactionIn30Days = walletTransactionViews.Where(walletTransaction => walletTransaction.CreatedAt >= DateTime.UtcNow.AddHours(7).AddDays(-30)).ToList();
+                var walletTransactionInPrevious30Days = walletTransactionViews.Where(walletTransaction => walletTransaction.CreatedAt < DateTime.UtcNow.AddHours(7).AddDays(-30) && walletTransaction.CreatedAt >= DateTime.UtcNow.AddHours(7).AddDays(-60)).ToList();
+                var percentageChange = walletTransactionInPrevious30Days.Count == 0 ? 0 : (walletTransactionIn30Days.Count - walletTransactionInPrevious30Days.Count) / walletTransactionInPrevious30Days.Count * 100;
+                return Ok(new { WalletTransactions = walletTransactionViews, Count = walletTransactionViews.Count, WalletTransactionInPrevious30Days = walletTransactionInPrevious30Days, PercentageChange = percentageChange });
             }
             if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
             {
@@ -566,8 +595,11 @@ namespace API.Controllers
             var result = await _transactionService.GetWalletTransactionsByWalletTransactionId(walletTransactionID);
             if (result is ActionResult<List<WalletTransaction>> walletTransaction && result.Value != null)
             {
-                var walletTransactionView = _mapper.Map<List<WalletTransactionView>>(walletTransaction.Value);
-                return Ok(walletTransactionView);
+                var walletTransactionViews = _mapper.Map<List<WalletTransactionView>>(walletTransaction.Value);
+                var walletTransactionIn30Days = walletTransactionViews.Where(walletTransaction => walletTransaction.CreatedAt >= DateTime.UtcNow.AddHours(7).AddDays(-30)).ToList();
+                var walletTransactionInPrevious30Days = walletTransactionViews.Where(walletTransaction => walletTransaction.CreatedAt < DateTime.UtcNow.AddHours(7).AddDays(-30) && walletTransaction.CreatedAt >= DateTime.UtcNow.AddHours(7).AddDays(-60)).ToList();
+                var percentageChange = walletTransactionInPrevious30Days.Count == 0 ? 0 : (walletTransactionIn30Days.Count - walletTransactionInPrevious30Days.Count) / walletTransactionInPrevious30Days.Count * 100;
+                return Ok(new { WalletTransactions = walletTransactionViews, Count = walletTransactionViews.Count, WalletTransactionInPrevious30Days = walletTransactionInPrevious30Days, PercentageChange = percentageChange });
             }
             if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
             {
@@ -604,7 +636,10 @@ namespace API.Controllers
             if (result is ActionResult<List<WalletTransaction>> walletTransactions && result.Value != null)
             {
                 var walletTransactionViews = _mapper.Map<List<WalletTransactionView>>(walletTransactions.Value);
-                return Ok(walletTransactionViews);
+                var walletTransactionIn30Days = walletTransactionViews.Where(walletTransaction => walletTransaction.CreatedAt >= DateTime.UtcNow.AddHours(7).AddDays(-30)).ToList();
+                var walletTransactionInPrevious30Days = walletTransactionViews.Where(walletTransaction => walletTransaction.CreatedAt < DateTime.UtcNow.AddHours(7).AddDays(-30) && walletTransaction.CreatedAt >= DateTime.UtcNow.AddHours(7).AddDays(-60)).ToList();
+                var percentageChange = walletTransactionInPrevious30Days.Count == 0 ? 0 : (walletTransactionIn30Days.Count - walletTransactionInPrevious30Days.Count) / walletTransactionInPrevious30Days.Count * 100;
+                return Ok(new { WalletTransactions = walletTransactionViews, Count = walletTransactionViews.Count, WalletTransactionInPrevious30Days = walletTransactionInPrevious30Days, PercentageChange = percentageChange });
             }
             if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
             {
@@ -641,7 +676,10 @@ namespace API.Controllers
             if (result is ActionResult<List<WalletTransaction>> walletTransactions && result.Value != null)
             {
                 var walletTransactionViews = _mapper.Map<List<WalletTransactionView>>(walletTransactions.Value);
-                return Ok(walletTransactionViews);
+                var walletTransactionIn30Days = walletTransactionViews.Where(walletTransaction => walletTransaction.CreatedAt >= DateTime.UtcNow.AddHours(7).AddDays(-30)).ToList();
+                var walletTransactionInPrevious30Days = walletTransactionViews.Where(walletTransaction => walletTransaction.CreatedAt < DateTime.UtcNow.AddHours(7).AddDays(-30) && walletTransaction.CreatedAt >= DateTime.UtcNow.AddHours(7).AddDays(-60)).ToList();
+                var percentageChange = walletTransactionInPrevious30Days.Count == 0 ? 0 : (walletTransactionIn30Days.Count - walletTransactionInPrevious30Days.Count) / walletTransactionInPrevious30Days.Count * 100;
+                return Ok(new { WalletTransactions = walletTransactionViews, Count = walletTransactionViews.Count, WalletTransactionInPrevious30Days = walletTransactionInPrevious30Days, PercentageChange = percentageChange });
             }
             if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
             {
@@ -678,7 +716,10 @@ namespace API.Controllers
             if (result is ActionResult<List<WalletTransaction>> walletTransactions && result.Value != null)
             {
                 var walletTransactionViews = _mapper.Map<List<WalletTransactionView>>(walletTransactions.Value);
-                return Ok(walletTransactionViews);
+                var walletTransactionIn30Days = walletTransactionViews.Where(walletTransaction => walletTransaction.CreatedAt >= DateTime.UtcNow.AddHours(7).AddDays(-30)).ToList();
+                var walletTransactionInPrevious30Days = walletTransactionViews.Where(walletTransaction => walletTransaction.CreatedAt < DateTime.UtcNow.AddHours(7).AddDays(-30) && walletTransaction.CreatedAt >= DateTime.UtcNow.AddHours(7).AddDays(-60)).ToList();
+                var percentageChange = walletTransactionInPrevious30Days.Count == 0 ? 0 : (walletTransactionIn30Days.Count - walletTransactionInPrevious30Days.Count) / walletTransactionInPrevious30Days.Count * 100;
+                return Ok(new { WalletTransactions = walletTransactionViews, Count = walletTransactionViews.Count, WalletTransactionInPrevious30Days = walletTransactionInPrevious30Days, PercentageChange = percentageChange });
             }
             if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
             {
@@ -693,13 +734,11 @@ namespace API.Controllers
             var result = await _transactionService.GetWalletTransactionByAccountId(accountID);
             if (result is ActionResult<List<WalletTransaction>> walletTransactions && result.Value != null)
             {
-                var walletTransactionViews = new List<WalletTransactionView>();
-                foreach (var walletTransaction in walletTransactions.Value)
-                {
-                    var walletTransactionView = _mapper.Map<WalletTransaction, WalletTransactionView>(walletTransaction);
-                    walletTransactionViews.Add(walletTransactionView);
-                }
-                return Ok(walletTransactionViews);
+                var walletTransactionViews = _mapper.Map<List<WalletTransactionView>>(walletTransactions.Value);
+                var walletTransactionIn30Days = walletTransactionViews.Where(walletTransaction => walletTransaction.CreatedAt >= DateTime.UtcNow.AddHours(7).AddDays(-30)).ToList();
+                var walletTransactionInPrevious30Days = walletTransactionViews.Where(walletTransaction => walletTransaction.CreatedAt < DateTime.UtcNow.AddHours(7).AddDays(-30) && walletTransaction.CreatedAt >= DateTime.UtcNow.AddHours(7).AddDays(-60)).ToList();
+                var percentageChange = walletTransactionInPrevious30Days.Count == 0 ? 0 : (walletTransactionIn30Days.Count - walletTransactionInPrevious30Days.Count) / walletTransactionInPrevious30Days.Count * 100;
+                return Ok(new { WalletTransactions = walletTransactionViews, Count = walletTransactionViews.Count, WalletTransactionInPrevious30Days = walletTransactionInPrevious30Days, PercentageChange = percentageChange });
             }
             if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
             {

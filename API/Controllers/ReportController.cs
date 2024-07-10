@@ -83,7 +83,10 @@ namespace API.Controllers
             if (result is ActionResult<List<Report>> reports && result.Value != null)
             {
                 var reportViews = _mapper.Map<List<ReportView>>(reports.Value);
-                return Ok(reportViews);
+                var reportIn30Days = reportViews.Where(report => report.CreatedAt >= DateTime.UtcNow.AddHours(7).AddDays(-30)).ToList();
+                var reportInPrevious30Days = reportViews.Where(report => report.CreatedAt < DateTime.UtcNow.AddHours(7).AddDays(-30) && report.CreatedAt >= DateTime.UtcNow.AddHours(7).AddDays(-60)).ToList();
+                var percentageChange = reportInPrevious30Days.Count == 0 ? 0 : (reportIn30Days.Count - reportInPrevious30Days.Count) / reportInPrevious30Days.Count * 100;
+                return Ok(new { ReportIn30Days = reportIn30Days, ReportInPrevious30Days = reportInPrevious30Days, PercentageChange = percentageChange });
             }
             if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
             {
@@ -116,7 +119,10 @@ namespace API.Controllers
             if (result is ActionResult<List<Report>> reports && result.Value != null)
             {
                 var reportViews = _mapper.Map<List<ReportView>>(reports.Value);
-                return Ok(reportViews);
+                var reportIn30Days = reportViews.Where(report => report.CreatedAt >= DateTime.UtcNow.AddHours(7).AddDays(-30)).ToList();
+                var reportInPrevious30Days = reportViews.Where(report => report.CreatedAt < DateTime.UtcNow.AddHours(7).AddDays(-30) && report.CreatedAt >= DateTime.UtcNow.AddHours(7).AddDays(-60)).ToList();
+                var percentageChange = reportInPrevious30Days.Count == 0 ? 0 : (reportIn30Days.Count - reportInPrevious30Days.Count) / reportInPrevious30Days.Count * 100;
+                return Ok(new { ReportIn30Days = reportIn30Days, ReportInPrevious30Days = reportInPrevious30Days, PercentageChange = percentageChange });
             }
             if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
             {
@@ -132,7 +138,10 @@ namespace API.Controllers
             if (result is ActionResult<List<Report>> reports && result.Value != null)
             {
                 var reportViews = _mapper.Map<List<ReportView>>(reports.Value);
-                return Ok(reportViews);
+                var reportIn30Days = reportViews.Where(report => report.CreatedAt >= DateTime.UtcNow.AddHours(7).AddDays(-30)).ToList();
+                var reportInPrevious30Days = reportViews.Where(report => report.CreatedAt < DateTime.UtcNow.AddHours(7).AddDays(-30) && report.CreatedAt >= DateTime.UtcNow.AddHours(7).AddDays(-60)).ToList();
+                var percentageChange = reportInPrevious30Days.Count == 0 ? 0 : (reportIn30Days.Count - reportInPrevious30Days.Count) / reportInPrevious30Days.Count * 100;
+                return Ok(new { ReportIn30Days = reportIn30Days, ReportInPrevious30Days = reportInPrevious30Days, PercentageChange = percentageChange });
             }
             if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
             {

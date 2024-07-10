@@ -47,10 +47,10 @@ namespace API.Controllers
             var result = await _courseService.UpdateCourse(courseRequest);
             if (result is StatusCodeResult statusCodeResult)
             {
-                if (statusCodeResult.StatusCode == 200) return Ok(new {Message = "Cập nhật khóa học thành công" });
+                if (statusCodeResult.StatusCode == 200) return Ok(new { Message = "Cập nhật khóa học thành công" });
                 if (statusCodeResult.StatusCode == 400) return BadRequest(new { Message = "Dữ liệu không hợp lệ" });
                 if (statusCodeResult.StatusCode == 404) return Ok(new { Message = "Không tìm thấy khóa học" });
-                if (statusCodeResult.StatusCode == 409) return Conflict(new {Message = "Khoá học đã được gỡ khỏi tìm kiếm trước đó" });
+                if (statusCodeResult.StatusCode == 409) return Conflict(new { Message = "Khoá học đã được gỡ khỏi tìm kiếm trước đó" });
 
             }
             if (result is Exception exception)
@@ -65,11 +65,11 @@ namespace API.Controllers
             var result = await _courseService.DeleteCourse(ID);
             if (result is StatusCodeResult statusCodeResult)
             {
-                if (statusCodeResult.StatusCode == 204) return StatusCode(StatusCodes.Status204NoContent, new {Message = "Xóa khóa học và các thông tin liên quan thành công" } );
-                if (statusCodeResult.StatusCode == 200) return Ok(new {Message = "Khóa học được xóa khỏi tìm kiếm. Các mã giảm giá liên quan được xóa. Lịch học liên quan đến khóa học đã được hủy" });
+                if (statusCodeResult.StatusCode == 204) return StatusCode(StatusCodes.Status204NoContent, new { Message = "Xóa khóa học và các thông tin liên quan thành công" });
+                if (statusCodeResult.StatusCode == 200) return Ok(new { Message = "Khóa học được xóa khỏi tìm kiếm. Các mã giảm giá liên quan được xóa. Lịch học liên quan đến khóa học đã được hủy" });
                 if (statusCodeResult.StatusCode == 400) return BadRequest(new { Message = "Dữ liệu không hợp lệ" });
                 if (statusCodeResult.StatusCode == 404) return Ok(new { Message = "Không tìm thấy khóa học" });
-                if (statusCodeResult.StatusCode == 409) return Conflict(new {Message = "Khóa học có giao dịch và đã được gỡ khỏi tìm kiếm trước đó" });
+                if (statusCodeResult.StatusCode == 409) return Conflict(new { Message = "Khóa học có giao dịch và đã được gỡ khỏi tìm kiếm trước đó" });
 
             }
             if (result is Exception exception)
@@ -84,9 +84,9 @@ namespace API.Controllers
             var result = await _courseService.CreateCourseOutline(courseOutlineRequest);
             if (result is StatusCodeResult statusCodeResult)
             {
-                if (statusCodeResult.StatusCode == 201) return StatusCode(StatusCodes.Status201Created, new {Message = "Tạo đề cương khóa học thành công"} );
+                if (statusCodeResult.StatusCode == 201) return StatusCode(StatusCodes.Status201Created, new { Message = "Tạo đề cương khóa học thành công" });
                 if (statusCodeResult.StatusCode == 400) return BadRequest(new { Message = "Dữ liệu không hợp lệ" });
-                if (statusCodeResult.StatusCode == 404) return Ok(new {Message = "Không tìm thấy khóa học đang hoạt động" });
+                if (statusCodeResult.StatusCode == 404) return Ok(new { Message = "Không tìm thấy khóa học đang hoạt động" });
 
             }
             if (result is Exception exception)
@@ -101,8 +101,8 @@ namespace API.Controllers
             var result = await _courseService.UpdateCourseOutline(courseOutlineRequest);
             if (result is StatusCodeResult statusCodeResult)
             {
-                if (statusCodeResult.StatusCode == 200) return Ok(new {Message = "Cập nhật đề cương khóa học thành công" });
-                if (statusCodeResult.StatusCode == 409) return Conflict(new {Message = "Đề cương khóa học đã được gỡ khỏi tìm kiếm trước đó, không thể cập nhật" });
+                if (statusCodeResult.StatusCode == 200) return Ok(new { Message = "Cập nhật đề cương khóa học thành công" });
+                if (statusCodeResult.StatusCode == 409) return Conflict(new { Message = "Đề cương khóa học đã được gỡ khỏi tìm kiếm trước đó, không thể cập nhật" });
                 if (statusCodeResult.StatusCode == 400) return BadRequest(new { Message = "Dữ liệu không hợp lệ" });
                 if (statusCodeResult.StatusCode == 404) return Ok(new { Message = "Không tìm thấy khóa học" });
 
@@ -119,11 +119,11 @@ namespace API.Controllers
             var result = await _courseService.DeleteCourseOutline(ID);
             if (result is StatusCodeResult statusCodeResult)
             {
-                if (statusCodeResult.StatusCode == 204) return StatusCode(StatusCodes.Status204NoContent, new {Message = "Xóa đề cương khóa học thành công" } );
-                if (statusCodeResult.StatusCode == 200) return Ok(new {Message = "Đề cương khóa học được xóa khỏi tìm kiếm, những tài khoản đã lưu tài liệu vẫn có thể download" });
-                if (statusCodeResult.StatusCode == 409) return Conflict(new {Message = "Khóa học liên quan đã được gỡ khỏi tìm kiếm trước đó" });
+                if (statusCodeResult.StatusCode == 204) return StatusCode(StatusCodes.Status204NoContent, new { Message = "Xóa đề cương khóa học thành công" });
+                if (statusCodeResult.StatusCode == 200) return Ok(new { Message = "Đề cương khóa học được xóa khỏi tìm kiếm, những tài khoản đã lưu tài liệu vẫn có thể download" });
+                if (statusCodeResult.StatusCode == 409) return Conflict(new { Message = "Khóa học liên quan đã được gỡ khỏi tìm kiếm trước đó" });
                 if (statusCodeResult.StatusCode == 400) return BadRequest(new { Message = "Dữ liệu không hợp lệ" });
-                if (statusCodeResult.StatusCode == 404) return Ok(new {Message = "Không tìm thấy đề cương khóa học" });
+                if (statusCodeResult.StatusCode == 404) return Ok(new { Message = "Không tìm thấy đề cương khóa học" });
 
             }
             if (result is Exception exception)
@@ -138,7 +138,7 @@ namespace API.Controllers
             var result = await _courseService.CreateCoursePromotion(coursePromotionRequest);
             if (result is StatusCodeResult statusCodeResult)
             {
-                if (statusCodeResult.StatusCode == 201) return StatusCode(StatusCodes.Status201Created,new {Message = "Tạo khuyến mãi khóa học thành công" } );
+                if (statusCodeResult.StatusCode == 201) return StatusCode(StatusCodes.Status201Created, new { Message = "Tạo khuyến mãi khóa học thành công" });
                 if (statusCodeResult.StatusCode == 400) return BadRequest(new { Message = "Dữ liệu không hợp lệ" });
                 if (statusCodeResult.StatusCode == 404) return Ok(new { Message = "Không tìm thấy khóa học" });
 
@@ -155,7 +155,7 @@ namespace API.Controllers
             var result = await _courseService.DeleteCoursePromotion(coursePromotionRequest);
             if (result is StatusCodeResult statusCodeResult)
             {
-                if (statusCodeResult.StatusCode == 204) return StatusCode(StatusCodes.Status204NoContent, new {Message = "Xóa khuyến mãi khóa học thành công" } );
+                if (statusCodeResult.StatusCode == 204) return StatusCode(StatusCodes.Status204NoContent, new { Message = "Xóa khuyến mãi khóa học thành công" });
                 if (statusCodeResult.StatusCode == 400) return BadRequest(new { Message = "Dữ liệu không hợp lệ" });
                 if (statusCodeResult.StatusCode == 404) return Ok(new { Message = "Không tìm thấy khóa học" });
 
@@ -172,7 +172,7 @@ namespace API.Controllers
             var result = await _courseService.UpdateCoursePromotion(coursePromotionRequest);
             if (result is StatusCodeResult statusCodeResult)
             {
-                if (statusCodeResult.StatusCode == 200) return Ok(new {Message = "Cập nhật khuyến mãi khóa học thành công" });
+                if (statusCodeResult.StatusCode == 200) return Ok(new { Message = "Cập nhật khuyến mãi khóa học thành công" });
                 if (statusCodeResult.StatusCode == 400) return BadRequest(new { Message = "Dữ liệu không hợp lệ" });
                 if (statusCodeResult.StatusCode == 404) return Ok(new { Message = "Không tìm thấy khóa học" });
 
@@ -189,7 +189,7 @@ namespace API.Controllers
             var result = await _courseService.CreatePromotion(createPromotion);
             if (result is StatusCodeResult statusCodeResult)
             {
-                if (statusCodeResult.StatusCode == 201) return StatusCode(StatusCodes.Status201Created, new {Message =  "Tạo khuyến mãi thành công" });
+                if (statusCodeResult.StatusCode == 201) return StatusCode(StatusCodes.Status201Created, new { Message = "Tạo khuyến mãi thành công" });
                 if (statusCodeResult.StatusCode == 400) return BadRequest(new { Message = "Dữ liệu không hợp lệ" });
                 if (statusCodeResult.StatusCode == 404) return Ok(new { Message = "Không tìm thấy khóa học" });
 
@@ -206,7 +206,7 @@ namespace API.Controllers
             var result = await _courseService.UpdatePromotion(updatePromotion);
             if (result is StatusCodeResult statusCodeResult)
             {
-                if (statusCodeResult.StatusCode == 200) return Ok(new {Message = "Cập nhật khuyến mãi thành công" });
+                if (statusCodeResult.StatusCode == 200) return Ok(new { Message = "Cập nhật khuyến mãi thành công" });
                 if (statusCodeResult.StatusCode == 400) return BadRequest(new { Message = "Dữ liệu không hợp lệ" });
                 if (statusCodeResult.StatusCode == 404) return Ok(new { Message = "Không tìm thấy khóa học" });
 
@@ -240,8 +240,11 @@ namespace API.Controllers
             var result = await _courseService.GetAllCourses();
             if (result is ActionResult<List<Course>> courses && result.Value != null)
             {
-               var courseViews = _mapper.Map<List<CourseView>>(courses.Value);
-                return Ok(courseViews);
+                var courseViews = _mapper.Map<List<CourseView>>(courses.Value);
+                var courseIn30Days = courseViews.Where(x => x.CreatedAt >= DateTime.UtcNow.AddHours(7).AddDays(-30)).ToList();
+                var courseInPrevious30Days = courseViews.Where(x => x.CreatedAt < DateTime.UtcNow.AddHours(7).AddDays(-30) && x.CreatedAt >= DateTime.UtcNow.AddHours(7).AddDays(-60)).ToList();
+                var percentageChange = courseInPrevious30Days.Count == 0 ? 100 : (courseIn30Days.Count - courseInPrevious30Days.Count) / courseInPrevious30Days.Count * 100;
+                return Ok(new { Courses = courseViews, Count = courseViews.Count, Last30Days = courseIn30Days.Count, PercentageChange = percentageChange });
             }
             if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
             {
@@ -275,7 +278,7 @@ namespace API.Controllers
             if (result is ActionResult<List<CourseOutline>> courseOutlines && result.Value != null)
             {
                 var courseOutlineViews = _mapper.Map<List<CourseOutlineView>>(courseOutlines.Value);
-                return Ok(courseOutlineViews);
+                return Ok(new {CourseOutlines = courseOutlineViews, Count = courseOutlineViews.Count});
             }
             if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
             {
@@ -309,7 +312,10 @@ namespace API.Controllers
             if (result is ActionResult<List<CoursePromotion>> coursePromotions && result.Value != null)
             {
                 var coursePromotionViews = _mapper.Map<List<CoursePromotionView>>(coursePromotions.Value);
-                return Ok(coursePromotionViews);
+                var coursePromotionIn30Days = coursePromotionViews.Where(x => x.CreatedAt >= DateTime.UtcNow.AddHours(7).AddDays(-30)).ToList();
+                var coursePromotionInPrevious30Days = coursePromotionViews.Where(x => x.CreatedAt < DateTime.UtcNow.AddHours(7).AddDays(-30) && x.CreatedAt >= DateTime.UtcNow.AddHours(7).AddDays(-60)).ToList();
+                var percentageChange = coursePromotionInPrevious30Days.Count == 0 ? 100 : (coursePromotionIn30Days.Count - coursePromotionInPrevious30Days.Count) / coursePromotionInPrevious30Days.Count * 100;
+                return Ok(new {CoursePromotions = coursePromotionViews, Count = coursePromotionViews.Count, Last30Days = coursePromotionIn30Days.Count, PercentageChange = percentageChange});
             }
             if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
             {
@@ -342,7 +348,10 @@ namespace API.Controllers
             if (result is ActionResult<List<Promotion>> promotions && result.Value != null)
             {
                 var promotionViews = _mapper.Map<List<PromotionView>>(promotions.Value);
-                return Ok(promotionViews);
+                var promotionIn30Days = promotionViews.Where(x => x.CreatedAt >= DateTime.UtcNow.AddHours(7).AddDays(-30)).ToList();
+                var promotionInPrevious30Days = promotionViews.Where(x => x.CreatedAt < DateTime.UtcNow.AddHours(7).AddDays(-30) && x.CreatedAt >= DateTime.UtcNow.AddHours(7).AddDays(-60)).ToList();
+                var percentageChange = promotionInPrevious30Days.Count == 0 ? 100 : (promotionIn30Days.Count - promotionInPrevious30Days.Count) / promotionInPrevious30Days.Count * 100;
+                return Ok(new { Promotions = promotionViews, Count = promotionViews.Count, Last30Days = promotionIn30Days.Count, PercentageChange = percentageChange });
             }
             if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
             {

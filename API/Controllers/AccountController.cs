@@ -68,7 +68,14 @@ namespace API.Controllers
         public async Task<ActionResult<List<UserAccountResponse>>> GetAll()
         {
             var rs = await _accountService.GetAllUser();
-            if (rs is List<UserAccountResponse> userAccountResponses && rs.Count > 0) return Ok(userAccountResponses);
+            if (rs is List<UserAccountResponse> userAccountResponses && rs.Count > 0)
+            {
+                var users = userAccountResponses;
+                var userIn30Days = users.Where(x => x.CreatedAt >= DateTime.UtcNow.AddHours(7).AddDays(-30)).ToList();
+                var userInPrevious30Days = users.Where(x => x.CreatedAt < DateTime.UtcNow.AddHours(7).AddDays(-30) && x.CreatedAt >= DateTime.UtcNow.AddHours(7).AddDays(-60)).ToList();
+                var percentageChange = userInPrevious30Days.Count == 0 ? 100 : (userIn30Days.Count - userInPrevious30Days.Count) / userInPrevious30Days.Count * 100;
+                return Ok(new { Users = userAccountResponses, Total = users.Count, UserIn30Days = userIn30Days.Count, PercentageChange = percentageChange });
+            }
             if ((IActionResult)rs is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
             throw new Exception("Lỗi không xác định");
         }

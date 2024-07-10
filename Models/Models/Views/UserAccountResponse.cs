@@ -14,6 +14,7 @@ namespace Models.Models.Views
         public string? Username { get; set; }
         public string FullName { get; set; }
         public string? PhoneNumber { get; set; }
+        public DateTime CreatedAt { get; set;}
         public DateTime? DateOfBirth { get; set; }
         public Boolean EmailConfirmed { get; set; }
         public int Status { get; set; }

@@ -29,11 +29,11 @@ namespace Services
             if(exception is CrudException crudException)
             {
                 statusCode = crudException.StatusCode;
-                errors.Add("ServerError", new string[] {crudException.Message});
+                errors.Add("ServerError", new string[] {crudException.ToString()});
             }
             else
             {
-                errors.Add("ServerError", new string[] {exception.Message});
+                errors.Add("ServerError", new string[] {exception.ToString()});
             }
 
             var exceptionResponse  = new CrudExceptionResponse
