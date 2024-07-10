@@ -47,9 +47,13 @@ namespace Services.Implementations
                 {
                     throw new CrudException(HttpStatusCode.Forbidden, "User is not active", "");
                 }
-                if (student.EmailConfirmed == false || tutor.EmailConfirmed == false)
+                if (student.EmailConfirmed == false)
                 {
-                    throw new CrudException(HttpStatusCode.Forbidden, "User is not confirmed email", "");
+                    throw new CrudException(HttpStatusCode.Forbidden, "Student is not confirmed email", "");
+                }
+                if (tutor.EmailConfirmed == false)
+                {
+                    throw new CrudException(HttpStatusCode.Forbidden, "Tutor is not confirmed email", "");
                 }
                 var booking = _mapper.Map<Booking>(bookingRequest);
                 booking.BookingId = Guid.NewGuid();

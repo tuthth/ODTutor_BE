@@ -30,6 +30,7 @@ namespace Models.Mappings
             CreateMap<StudentRequest, CreateStudentRequest>();
             CreateMap<StudentRequest, UpdateStudentRequest>();
             CreateMap<Booking, BookingRequest>();
+            CreateMap<BookingRequest, Booking>();
             CreateMap<Booking, UpdateBookingRequest>();
             CreateMap<User, AccountRegisterRequest>();
             CreateMap<Course, CourseRequest>();
