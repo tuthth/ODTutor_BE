@@ -50,7 +50,7 @@ namespace Services.Implementations
                 var user = findUserByUserID(tutorRequest.UserId);
                 if (user == null)
                 {
-                    throw new CrudException(HttpStatusCode.NotFound, "User not found", "");
+                    throw new CrudException(HttpStatusCode.OK, "User not found", "");
                 }
                 //Map and save tutor information
                 Tutor tutor = _mapper.Map<Tutor>(tutorRequest);
@@ -137,7 +137,7 @@ namespace Services.Implementations
             var tutor = await _context.Tutors.Where(x => x.TutorId == tutorID).FirstOrDefaultAsync();
             if (tutor == null)
             {
-                throw new CrudException(HttpStatusCode.NotFound, "Not Found Tutor", "");
+                throw new CrudException(HttpStatusCode.OK, "Not Found Tutor", "");
             }
             try
             {
@@ -169,7 +169,7 @@ namespace Services.Implementations
             var tutor = await _context.Tutors.Where(x => x.TutorId == tutorId).FirstOrDefaultAsync();
             if (tutor == null)
             {
-                throw new CrudException(HttpStatusCode.NotFound, "Not Found Tutor", "");
+                throw new CrudException(HttpStatusCode.OK, "Not Found Tutor", "");
             }
             try
             {
@@ -571,12 +571,12 @@ namespace Services.Implementations
                 User user = await _context.Users.Where(x => x.TutorNavigation.TutorId == tutorID).FirstOrDefaultAsync();
                 if(user == null)
                 {
-                    throw new CrudException(HttpStatusCode.NotFound, "User not found", "");
+                    throw new CrudException(HttpStatusCode.OK, "User not found", "");
                 }
                 Tutor tutor = await _context.Tutors.Where(x => x.TutorId == tutorID).FirstOrDefaultAsync();
                 if (tutor == null)
                 {
-                    throw new CrudException(HttpStatusCode.NotFound, "Tutor not found", "");
+                    throw new CrudException(HttpStatusCode.OK, "Tutor not found", "");
                 }
                 response.Email = user.Email;
                 response.identifyNumber = tutor.IdentityNumber;
@@ -602,7 +602,7 @@ namespace Services.Implementations
                 Tutor tutor = await _context.Tutors.Where(x => x.TutorId == tutorID).FirstOrDefaultAsync();
                 if (user == null || tutor == null)
                 {
-                    throw new CrudException(HttpStatusCode.NotFound, "Tutor not found", "");
+                    throw new CrudException(HttpStatusCode.OK, "Tutor not found", "");
                 }
                 List<TutorCertificate> tutorCertificateList = await _context.TutorCertificates.Where(x => x.TutorId == tutorID).ToListAsync();
                 foreach (var cert in tutorCertificateList)
@@ -619,7 +619,7 @@ namespace Services.Implementations
                 }
                 if(response.Count == 0)
                 {
-                    throw new CrudException(HttpStatusCode.NotFound, "Không ghi nhận chứng chỉ từ gia sư", "");
+                    throw new CrudException(HttpStatusCode.OK, "Không ghi nhận chứng chỉ từ gia sư", "");
                 }
                 return response;
             } catch (CrudException ex)
@@ -641,7 +641,7 @@ namespace Services.Implementations
                 Tutor tutor = await _context.Tutors.Where(x => x.TutorId == tutorID).FirstOrDefaultAsync();
                 if (user == null || tutor == null)
                 {
-                    throw new CrudException(HttpStatusCode.NotFound, "Tutor not found", "");
+                    throw new CrudException(HttpStatusCode.OK, "Tutor not found", "");
                 }
                 List<TutorExperience> tutorExperiencesList = await _context.TutorExperiences.Where(x => x.TutorId == tutorID).ToListAsync();
                 foreach (var experience in tutorExperiencesList)
@@ -658,7 +658,7 @@ namespace Services.Implementations
                 }
                 if (response.Count == 0)
                 {
-                    throw new CrudException(HttpStatusCode.NotFound, "Không ghi nhận kinh nghiệm từ gia sư", "");
+                    throw new CrudException(HttpStatusCode.OK, "Không ghi nhận kinh nghiệm từ gia sư", "");
                 }
                 return response;
             }
@@ -680,7 +680,7 @@ namespace Services.Implementations
                 Tutor tutor = await _context.Tutors.Where(x => x.TutorId == tutorID).FirstOrDefaultAsync();
                 if (tutor == null)
                 {
-                    throw new CrudException(HttpStatusCode.NotFound, "Tutor not found", "");
+                    throw new CrudException(HttpStatusCode.OK, "Tutor not found", "");
                 }
                 response.Description = tutor.Description;
                 response.EducationExperience = tutor.EducationExperience;
@@ -706,12 +706,12 @@ namespace Services.Implementations
                 Tutor tutor = await _context.Tutors.Where(x => x.TutorId == tutorID).FirstOrDefaultAsync();
                 if (tutor == null)
                 {
-                    throw new CrudException(HttpStatusCode.NotFound, "Tutor not found", "");
+                    throw new CrudException(HttpStatusCode.OK, "Tutor not found", "");
                 }
                 List<TutorDateAvailable> tutorDateAvailableList = await _context.TutorDateAvailables.Where(x => x.TutorID == tutorID).ToListAsync();
                 if (tutorDateAvailableList.Count == 0)
                 {
-                    throw new CrudException(HttpStatusCode.NotFound, "Chưa ghi nhận thời gian đăng ký của Tutor", "");
+                    throw new CrudException(HttpStatusCode.OK, "Chưa ghi nhận thời gian đăng ký của Tutor", "");
                 }
                 foreach (var date in tutorDateAvailableList)
                 {
@@ -741,12 +741,12 @@ namespace Services.Implementations
                 Tutor tutor = await _context.Tutors.Where(x => x.TutorId == tutorID).FirstOrDefaultAsync();
                 if(tutor == null)
                 {
-                    throw new CrudException(HttpStatusCode.NotFound, "Tutor not found", "");
+                    throw new CrudException(HttpStatusCode.OK, "Tutor not found", "");
                 }
                 response.price = tutor.PricePerHour;
                 if (tutor.PricePerHour == null)
                 {
-                    throw new CrudException(HttpStatusCode.NotFound, "Chưa ghi nhận giá tiền đăng ký", "");
+                    throw new CrudException(HttpStatusCode.OK, "Chưa ghi nhận giá tiền đăng ký", "");
                 }
                 return response;
             } catch (CrudException ex)

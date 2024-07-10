@@ -222,7 +222,7 @@ namespace Services.Implementations
                 // Calculate Total End Rating
                 if (totalRating == 0)
                 {
-                    throw new CrudException(HttpStatusCode.NotFound, "Hiện tại không ghi nhận feedback từ khách hàng!1", "");
+                    throw new CrudException(HttpStatusCode.OK, "Hiện tại không ghi nhận feedback từ khách hàng!1", "");
                 }
                 var totalEndRating = (double) totalRating / totalRatingNumber;      
                 response.TutorId = tutorId;
@@ -269,7 +269,7 @@ namespace Services.Implementations
                     }).ToListAsync();
                 if (tutorFeedBack.Count == 0)
                 {
-                    throw new CrudException(HttpStatusCode.NotFound, "Hiện tại không ghi nhận feedback từ khách hàng!", "");
+                    throw new CrudException(HttpStatusCode.OK, "Hiện tại không ghi nhận feedback từ khách hàng!", "");
                 }
                 var result = PagingHelper<TutorFeedBackResponse>.Paging(tutorFeedBack, pagingRequest.Page, pagingRequest.PageSize);
                 return result;
@@ -322,7 +322,7 @@ namespace Services.Implementations
                 var tutor = await _context.Tutors.FirstOrDefaultAsync(t => t.TutorId == tutorInformationUpdate.TutorId);
                 if (tutor == null)
                 {
-                    throw new CrudException(HttpStatusCode.NotFound, "Tutor Not Found", "Tutor Not Found");
+                    throw new CrudException(HttpStatusCode.OK, "Tutor Not Found", "Tutor Not Found");
                 }
                 tutor.PricePerHour = tutorInformationUpdate.PricePerHour;
                 tutor.Description = tutorInformationUpdate.Description;

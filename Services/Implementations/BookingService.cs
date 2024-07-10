@@ -87,7 +87,7 @@ namespace Services.Implementations
                 Booking booking = _context.Bookings.FirstOrDefault(x => x.BookingId == bookingID);
                 if (booking == null)
                 {
-                    throw new CrudException(HttpStatusCode.NotFound, "Booking not found", "");
+                    throw new CrudException(HttpStatusCode.OK, "Booking not found", "");
                 }
                 if (booking.Status != (Int32)BookingEnum.WaitingPayment)
                 {
@@ -97,18 +97,18 @@ namespace Services.Implementations
                 Student student = _context.Students.FirstOrDefault(x => x.StudentId == booking.StudentId);
                 if (student == null)
                 {
-                    throw new CrudException(HttpStatusCode.NotFound, "Student not found", "");
+                    throw new CrudException(HttpStatusCode.OK, "Student not found", "");
                 }
                 Tutor tutor = _context.Tutors.FirstOrDefault(x => x.TutorId == booking.TutorId);
                 Wallet studentWallet = _context.Wallets.FirstOrDefault(x => x.UserId == student.UserId);
                 Wallet tutorWallet = _context.Wallets.FirstOrDefault(x => x.UserId == tutor.UserId);
                 if (studentWallet == null)
                 {
-                    throw new CrudException(HttpStatusCode.NotFound, "Student wallet not found", "");
+                    throw new CrudException(HttpStatusCode.OK, "Student wallet not found", "");
                 }
                 if (tutorWallet == null)
                 {
-                    throw new CrudException(HttpStatusCode.NotFound, "Tutor wallet not found", "");
+                    throw new CrudException(HttpStatusCode.OK, "Tutor wallet not found", "");
                 }
                 if (studentWallet.AvalaibleAmount < booking.TotalPrice)
                 {
@@ -118,13 +118,13 @@ namespace Services.Implementations
                 TutorDateAvailable tutorDateAvailable = _context.TutorDateAvailables.FirstOrDefault(x => x.TutorID == tutor.TutorId && x.Date.Date == booking.StudyTime);
                 if(tutorDateAvailable == null)
                 {
-                    throw new CrudException(HttpStatusCode.NotFound, "Tutor date available not found", "");
+                    throw new CrudException(HttpStatusCode.OK, "Tutor date available not found", "");
                 }
                 // Find the tutor slot available match the booking time
                 TutorSlotAvailable tutorSlotAvailable = _context.TutorSlotAvailables.FirstOrDefault(x => x.TutorDateAvailableID == tutorDateAvailable.TutorDateAvailableID && x.StartTime == bookingTime);
                 if (tutorSlotAvailable == null)
                 {
-                    throw new CrudException(HttpStatusCode.NotFound, "Tutor slot available not found", "");
+                    throw new CrudException(HttpStatusCode.OK, "Tutor slot available not found", "");
                 }
                 if (tutorSlotAvailable.IsBooked == true)
                 {

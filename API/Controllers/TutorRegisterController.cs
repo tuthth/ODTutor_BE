@@ -39,7 +39,7 @@ namespace API.Controllers
             if((IActionResult)response.Result is StatusCodeResult statusCodeResult)
             {
                 if (statusCodeResult.StatusCode == 400) return BadRequest(new { Message = "Vui lòng kiểm tra lại hình ảnh cá nhân nhập vào" });
-                if (statusCodeResult.StatusCode == 404) return NotFound(new { Message = "Không tìm thấy thông tin người dùng" });
+                if (statusCodeResult.StatusCode == 404) return Ok(new { Message = "Không tìm thấy thông tin người dùng" });
             }
             if((IActionResult)response.Result is Exception exception)
             {
@@ -59,7 +59,7 @@ namespace API.Controllers
             {
                 if (statusCodeResult.StatusCode == 201) return StatusCode(StatusCodes.Status201Created, new { Message = "Đăng ký bằng cấp thành công" });
                 if (statusCodeResult.StatusCode == 400) return BadRequest(new { Message = "Vui lòng kiểm tra lại dữ liệu bằng cấp ở nhập liệu đầu vào" });
-                if (statusCodeResult.StatusCode == 404) return NotFound(new { Message = "Không tìm thấy thông tin gia sư" });
+                if (statusCodeResult.StatusCode == 404) return Ok(new { Message = "Không tìm thấy thông tin gia sư" });
             }
             if (result is Exception exception)
             {
@@ -115,7 +115,7 @@ namespace API.Controllers
             {
                 if (statusCodeResult.StatusCode == 201) return StatusCode(StatusCodes.Status201Created, new { Message = "Yêu cầu xét duyệt trở thành gia sư đã được gửi, vui lòng đợi phản hồi từ hệ thống" });
                 if (statusCodeResult.StatusCode == 400) return BadRequest(new { Message = "Vui lòng kiểm tra lại dữ liệu môn học và bằng cấp ở nhập liệu đầu vào" });
-                if (statusCodeResult.StatusCode == 404) return NotFound(new { Message = "Không tìm thấy thông tin gia sư" });
+                if (statusCodeResult.StatusCode == 404) return Ok(new { Message = "Không tìm thấy thông tin gia sư" });
             }
             if (response is Exception exception)
             {
@@ -135,7 +135,7 @@ namespace API.Controllers
             {
                 if (statusCodeResult.StatusCode == 201) return StatusCode(StatusCodes.Status201Created, new { Message = "Tạo lịch học thành công" });
                 if (statusCodeResult.StatusCode == 400) return BadRequest(new { Message = "Vui lòng kiểm tra lại dữ liệu ngày ở nhập liệu đầu vào" });
-                if (statusCodeResult.StatusCode == 404) return NotFound(new { Message = "Không tìm thấy thông tin gia sư" });
+                if (statusCodeResult.StatusCode == 404) return Ok(new { Message = "Không tìm thấy thông tin gia sư" });
                 if (statusCodeResult.StatusCode == 409) return StatusCode(StatusCodes.Status409Conflict ,new { Message = "Giờ kết thúc không thể xảy ra trước giờ bắt đầu, vui lòng kiểm tra lại" });
             }
             if(response is Exception exception)
@@ -176,7 +176,7 @@ namespace API.Controllers
             {
                 if (statusCodeResult.StatusCode == 200) return Ok(new { Message = "Duyệt thành công" });
                 if (statusCodeResult.StatusCode == 400) return BadRequest(new { Message = "Vui lòng kiểm tra lại dữ liệu đầu vào" });
-                if (statusCodeResult.StatusCode == 404) return NotFound(new { Message = "Không tìm thấy thông tin gia sư" });
+                if (statusCodeResult.StatusCode == 404) return Ok(new { Message = "Không tìm thấy thông tin gia sư" });
             }
             if (result is Exception exception)
             {
@@ -194,7 +194,7 @@ namespace API.Controllers
             {
                 if (statusCodeResult.StatusCode == 200) return Ok(new { Message = "Từ chối thành công" });
                 if (statusCodeResult.StatusCode == 400) return BadRequest(new { Message = "Vui lòng kiểm tra lại dữ liệu đầu vào" });
-                if (statusCodeResult.StatusCode == 404) return NotFound(new { Message = "Không tìm thấy thông tin gia sư" });
+                if (statusCodeResult.StatusCode == 404) return Ok(new { Message = "Không tìm thấy thông tin gia sư" });
             }
             if (result is Exception exception)
             {

@@ -23,7 +23,7 @@ namespace API.Controllers
             var result = await _tutorManageService.DeleteTutorSlots(tutorSlotAvailableIDs);
             if(result is StatusCodeResult statusCodeResult)
             {
-                if(statusCodeResult.StatusCode == 404) return NotFound(new {Message = "Không tìm thấy slot cần xóa, vui lòng kiểm tra"});
+                if(statusCodeResult.StatusCode == 404) return Ok(new {Message = "Không tìm thấy slot cần xóa, vui lòng kiểm tra"});
                 if (statusCodeResult.StatusCode == 204) return StatusCode(StatusCodes.Status204NoContent, new { Message = "Xóa các slot thành công" });
             }
             if(result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
@@ -41,7 +41,7 @@ namespace API.Controllers
             var result = await _tutorManageService.DeleteSlotInTimeRangeInDate(request);
             if (result is StatusCodeResult statusCodeResult)
             {
-                if (statusCodeResult.StatusCode == 404) return NotFound(new { Message = "Không tìm thấy slot cần xóa, vui lòng kiểm tra" });
+                if (statusCodeResult.StatusCode == 404) return Ok(new { Message = "Không tìm thấy slot cần xóa, vui lòng kiểm tra" });
                 if (statusCodeResult.StatusCode == 204) return StatusCode(StatusCodes.Status204NoContent, new { Message = "Xóa các slot thành công" });
             }
             if (result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
@@ -56,7 +56,7 @@ namespace API.Controllers
             var result = await _tutorManageService.DeleteSlotInTimeRange(request);
             if (result is StatusCodeResult statusCodeResult)
             {
-                if (statusCodeResult.StatusCode == 404) return NotFound(new { Message = "Không tìm thấy slot cần xóa, vui lòng kiểm tra" });
+                if (statusCodeResult.StatusCode == 404) return Ok(new { Message = "Không tìm thấy slot cần xóa, vui lòng kiểm tra" });
                 if (statusCodeResult.StatusCode == 204) return StatusCode(StatusCodes.Status204NoContent, new { Message = "Xóa các slot thành công" });
             }
             if (result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
@@ -68,7 +68,7 @@ namespace API.Controllers
             var result = await _tutorManageService.DeleteTutorExperience(id);
             if (result is StatusCodeResult statusCodeResult)
             {
-                if (statusCodeResult.StatusCode == 404) return NotFound(new { Message = "Không tìm thấy nội dung cần xóa, vui lòng kiểm tra" });
+                if (statusCodeResult.StatusCode == 404) return Ok(new { Message = "Không tìm thấy nội dung cần xóa, vui lòng kiểm tra" });
                 if (statusCodeResult.StatusCode == 204) return StatusCode(StatusCodes.Status204NoContent, new { Message = "Xóa kinh nghiệm giảng dạy thành công" });
             }
             if (result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
@@ -80,7 +80,7 @@ namespace API.Controllers
             var result = await _tutorManageService.DeleteTutorSubject(id);
             if (result is StatusCodeResult statusCodeResult)
             {
-                if (statusCodeResult.StatusCode == 404) return NotFound(new { Message = "Không tìm thấy môn học cần xóa, vui lòng kiểm tra" });
+                if (statusCodeResult.StatusCode == 404) return Ok(new { Message = "Không tìm thấy môn học cần xóa, vui lòng kiểm tra" });
                 if (statusCodeResult.StatusCode == 204) return StatusCode(StatusCodes.Status204NoContent, new { Message = "Xóa môn học thành công" });
             }
             if (result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
@@ -92,7 +92,7 @@ namespace API.Controllers
             var result = await _tutorManageService.DeleteTutorCertificate(id);
             if (result is StatusCodeResult statusCodeResult)
             {
-                if (statusCodeResult.StatusCode == 404) return NotFound(new { Message = "Không tìm thấy bằng cấp cần xóa, vui lòng kiểm tra" });
+                if (statusCodeResult.StatusCode == 404) return Ok(new { Message = "Không tìm thấy bằng cấp cần xóa, vui lòng kiểm tra" });
                 if (statusCodeResult.StatusCode == 204) return StatusCode(StatusCodes.Status204NoContent, new { Message = "Xóa bằng cấp thành công" });
             }
             if (result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
@@ -104,7 +104,7 @@ namespace API.Controllers
             var result = await _tutorManageService.DeleteRatingImage(id);
             if (result is StatusCodeResult statusCodeResult)
             {
-                if (statusCodeResult.StatusCode == 404) return NotFound(new { Message = "Không tìm thấy ảnh cần xóa, vui lòng kiểm tra" });
+                if (statusCodeResult.StatusCode == 404) return Ok(new { Message = "Không tìm thấy ảnh cần xóa, vui lòng kiểm tra" });
                 if (statusCodeResult.StatusCode == 204) return StatusCode(StatusCodes.Status204NoContent, new { Message = "Xóa ảnh thành công" });
             }
             if (result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
@@ -116,7 +116,7 @@ namespace API.Controllers
             var result = await _tutorManageService.UpdateTutorExperience(request);
             if (result is StatusCodeResult statusCodeResult)
             {
-                if (statusCodeResult.StatusCode == 404) return NotFound(new { Message = "Không tìm thấy nội dung cần cập nhật, vui lòng kiểm tra" });
+                if (statusCodeResult.StatusCode == 404) return Ok(new { Message = "Không tìm thấy nội dung cần cập nhật, vui lòng kiểm tra" });
                 if (statusCodeResult.StatusCode == 204) return StatusCode(StatusCodes.Status204NoContent, new { Message = "Cập nhật kinh nghiệm giảng dạy thành công" });
             }
             if (result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
@@ -128,7 +128,7 @@ namespace API.Controllers
             var result = await _tutorManageService.UpdateTutorSubject(request);
             if (result is StatusCodeResult statusCodeResult)
             {
-                if (statusCodeResult.StatusCode == 404) return NotFound(new { Message = "Không tìm thấy môn học cần cập nhật, vui lòng kiểm tra" });
+                if (statusCodeResult.StatusCode == 404) return Ok(new { Message = "Không tìm thấy môn học cần cập nhật, vui lòng kiểm tra" });
                 if (statusCodeResult.StatusCode == 204) return StatusCode(StatusCodes.Status204NoContent, new { Message = "Cập nhật môn học thành công" });
             }
             if (result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
@@ -140,7 +140,7 @@ namespace API.Controllers
             var result = await _tutorManageService.UpdateTutorCertificate(request);
             if (result is StatusCodeResult statusCodeResult)
             {
-                if (statusCodeResult.StatusCode == 404) return NotFound(new { Message = "Không tìm thấy bằng cấp cần cập nhật, vui lòng kiểm tra" });
+                if (statusCodeResult.StatusCode == 404) return Ok(new { Message = "Không tìm thấy bằng cấp cần cập nhật, vui lòng kiểm tra" });
                 if (statusCodeResult.StatusCode == 204) return StatusCode(StatusCodes.Status204NoContent, new { Message = "Cập nhật bằng cấp thành công" });
             }
             if (result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });

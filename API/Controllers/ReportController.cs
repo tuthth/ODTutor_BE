@@ -32,7 +32,7 @@ namespace API.Controllers
             {
                 if (actionResult is StatusCodeResult statusCodeResult)
                 {
-                    if (statusCodeResult.StatusCode == 404) return NotFound(new {Message = "Không tìm thấy báo cáo" });
+                    if (statusCodeResult.StatusCode == 404) return Ok(new {Message = "Không tìm thấy báo cáo" });
                     if (statusCodeResult.StatusCode == 201) return StatusCode(StatusCodes.Status201Created, new {Message = "Tạo báo cáo thành công"});
                 }
             }
@@ -47,7 +47,7 @@ namespace API.Controllers
             {
                 if (actionResult is StatusCodeResult statusCodeResult)
                 {
-                    if (statusCodeResult.StatusCode == 404) return NotFound(new {Message = "Không tìm thấy báo cáo" });
+                    if (statusCodeResult.StatusCode == 404) return Ok(new {Message = "Không tìm thấy báo cáo" });
                     if (statusCodeResult.StatusCode == 406) return StatusCode(StatusCodes.Status406NotAcceptable, new {Message = "Trạng thái báo cáo không hợp lệ" } );
                     if (statusCodeResult.StatusCode == 409) return StatusCode(StatusCodes.Status409Conflict, new {Message = "Báo cáo đã được xử lý" });
                     if (statusCodeResult.StatusCode == 200) return StatusCode(StatusCodes.Status200OK, new {Message = "Cập nhật báo cáo thành công" } );
@@ -68,7 +68,7 @@ namespace API.Controllers
             {
                 if (actionResult is StatusCodeResult statusCodeResult)
                 {
-                    if (statusCodeResult.StatusCode == 404) return NotFound(new {Message = "Không tìm thấy báo cáo" });
+                    if (statusCodeResult.StatusCode == 404) return Ok(new {Message = "Không tìm thấy báo cáo" });
                     if (statusCodeResult.StatusCode == 409) return StatusCode(StatusCodes.Status409Conflict, "Chỉ chấp thuận các report đã được xử lý");
                     if (statusCodeResult.StatusCode == 200) return StatusCode(StatusCodes.Status200OK, "Xử lý báo cáo thành công");
                 }

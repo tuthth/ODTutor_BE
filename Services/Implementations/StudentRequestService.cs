@@ -181,7 +181,7 @@ namespace Services.Implementations
                 // Kiểm tra dữ liệu null
                 if (studentRequestsData == null || !studentRequestsData.Any())
                 {
-                    throw new CrudException(System.Net.HttpStatusCode.NotFound, "No student requests found", "");
+                    throw new CrudException(System.Net.HttpStatusCode.OK, "No student requests found", "");
                 }
 
                 var studentRequests = new List<StudentRequestView>();
@@ -276,7 +276,7 @@ namespace Services.Implementations
 
                 if (studentRequestsData == null || !studentRequestsData.Any())
                 {
-                    throw new CrudException(HttpStatusCode.NotFound, "No student requests found", "");
+                    throw new CrudException(HttpStatusCode.OK, "No student requests found", "");
                 }
 
                 var studentRequests = new List<StudentRequestView>();

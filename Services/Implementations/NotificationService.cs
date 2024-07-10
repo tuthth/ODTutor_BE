@@ -91,7 +91,7 @@ namespace Services.Implementations
                 var notification = await _firebaseRealtimeDatabaseService.GetAsync<Notification>($"notifications/{userId}/{notificationId}");
                 if (notification == null)
                 {
-                    throw new CrudException(System.Net.HttpStatusCode.NotFound, "Không tìm thấy thông báo", "");
+                    throw new CrudException(System.Net.HttpStatusCode.OK, "Không tìm thấy thông báo", "");
                 }
                 notification.Status = (Int32) NotificationEnum.Read;
                 _firebaseRealtimeDatabaseService.SetAsync<Notification>($"notifications/{userId}/{notificationId}", notification);
@@ -118,7 +118,7 @@ namespace Services.Implementations
                 var studentRequest = await _context.StudentRequests.FindAsync(studentRequestId);
                 if (studentRequest == null)
                 {
-                    throw new CrudException(System.Net.HttpStatusCode.NotFound, "Không tìm thấy yêu cầu sinh viên", "");
+                    throw new CrudException(System.Net.HttpStatusCode.OK, "Không tìm thấy yêu cầu sinh viên", "");
                 }
                 studentRequest.Status = 1;
                 await _context.SaveChangesAsync();

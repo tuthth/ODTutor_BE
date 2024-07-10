@@ -59,7 +59,7 @@ namespace Services.Implementations
                 var user = _context.Users.FirstOrDefault(u => (u.Email == loginRequest.Email));
                 if (user == null)
                 {
-                    throw new CrudException(HttpStatusCode.NotFound, "User not found", "");
+                    throw new CrudException(HttpStatusCode.OK, "User not found", "");
                 }
                 if (user.Active == false)
                 {
@@ -109,7 +109,7 @@ namespace Services.Implementations
                     var user = _context.Users.FirstOrDefault(u => u.Email == loginRequest.Email);
                     if (user == null)
                     {
-                        throw new CrudException(HttpStatusCode.NotFound, "User not found", "");
+                        throw new CrudException(HttpStatusCode.OK, "User not found", "");
                     }
                  var response = GenerateJwtTokenAdmin(user);
                  return response;
@@ -242,7 +242,7 @@ namespace Services.Implementations
         {
             if (user == null)
             {
-                throw new CrudException(HttpStatusCode.NotFound, "User not found", "");
+                throw new CrudException(HttpStatusCode.OK, "User not found", "");
             }
             var key = Encoding.ASCII.GetBytes(_configuration["AppSettings:SecretKey"]); // Lấy khóa bí mật từ cấu hình
             var tokenHandler = new JwtSecurityTokenHandler();
@@ -343,7 +343,7 @@ namespace Services.Implementations
         {
             if (user == null)
             {
-                throw new CrudException(HttpStatusCode.NotFound, "User not found", "");
+                throw new CrudException(HttpStatusCode.OK, "User not found", "");
             }
             var key = Encoding.ASCII.GetBytes(_configuration["AppSettings:SecretKey"]);
             var tokenHandler = new JwtSecurityTokenHandler();

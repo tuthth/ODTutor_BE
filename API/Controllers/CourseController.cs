@@ -33,7 +33,7 @@ namespace API.Controllers
             {
                 if (statusCodeResult.StatusCode == 201) return StatusCode(StatusCodes.Status201Created, new { Message = "Tạo khóa học thành công" });
                 if (statusCodeResult.StatusCode == 400) return BadRequest(new { Message = "Dữ liệu không hợp lệ" });
-                if (statusCodeResult.StatusCode == 404) return NotFound(new { Message = "Không tìm thấy khóa học" });
+                if (statusCodeResult.StatusCode == 404) return Ok(new { Message = "Không tìm thấy khóa học" });
             }
             if (result is Exception exception)
             {
@@ -49,7 +49,7 @@ namespace API.Controllers
             {
                 if (statusCodeResult.StatusCode == 200) return Ok(new {Message = "Cập nhật khóa học thành công" });
                 if (statusCodeResult.StatusCode == 400) return BadRequest(new { Message = "Dữ liệu không hợp lệ" });
-                if (statusCodeResult.StatusCode == 404) return NotFound(new { Message = "Không tìm thấy khóa học" });
+                if (statusCodeResult.StatusCode == 404) return Ok(new { Message = "Không tìm thấy khóa học" });
                 if (statusCodeResult.StatusCode == 409) return Conflict(new {Message = "Khoá học đã được gỡ khỏi tìm kiếm trước đó" });
 
             }
@@ -68,7 +68,7 @@ namespace API.Controllers
                 if (statusCodeResult.StatusCode == 204) return StatusCode(StatusCodes.Status204NoContent, new {Message = "Xóa khóa học và các thông tin liên quan thành công" } );
                 if (statusCodeResult.StatusCode == 200) return Ok(new {Message = "Khóa học được xóa khỏi tìm kiếm. Các mã giảm giá liên quan được xóa. Lịch học liên quan đến khóa học đã được hủy" });
                 if (statusCodeResult.StatusCode == 400) return BadRequest(new { Message = "Dữ liệu không hợp lệ" });
-                if (statusCodeResult.StatusCode == 404) return NotFound(new { Message = "Không tìm thấy khóa học" });
+                if (statusCodeResult.StatusCode == 404) return Ok(new { Message = "Không tìm thấy khóa học" });
                 if (statusCodeResult.StatusCode == 409) return Conflict(new {Message = "Khóa học có giao dịch và đã được gỡ khỏi tìm kiếm trước đó" });
 
             }
@@ -86,7 +86,7 @@ namespace API.Controllers
             {
                 if (statusCodeResult.StatusCode == 201) return StatusCode(StatusCodes.Status201Created, new {Message = "Tạo đề cương khóa học thành công"} );
                 if (statusCodeResult.StatusCode == 400) return BadRequest(new { Message = "Dữ liệu không hợp lệ" });
-                if (statusCodeResult.StatusCode == 404) return NotFound(new {Message = "Không tìm thấy khóa học đang hoạt động" });
+                if (statusCodeResult.StatusCode == 404) return Ok(new {Message = "Không tìm thấy khóa học đang hoạt động" });
 
             }
             if (result is Exception exception)
@@ -104,7 +104,7 @@ namespace API.Controllers
                 if (statusCodeResult.StatusCode == 200) return Ok(new {Message = "Cập nhật đề cương khóa học thành công" });
                 if (statusCodeResult.StatusCode == 409) return Conflict(new {Message = "Đề cương khóa học đã được gỡ khỏi tìm kiếm trước đó, không thể cập nhật" });
                 if (statusCodeResult.StatusCode == 400) return BadRequest(new { Message = "Dữ liệu không hợp lệ" });
-                if (statusCodeResult.StatusCode == 404) return NotFound(new { Message = "Không tìm thấy khóa học" });
+                if (statusCodeResult.StatusCode == 404) return Ok(new { Message = "Không tìm thấy khóa học" });
 
             }
             if (result is Exception exception)
@@ -123,7 +123,7 @@ namespace API.Controllers
                 if (statusCodeResult.StatusCode == 200) return Ok(new {Message = "Đề cương khóa học được xóa khỏi tìm kiếm, những tài khoản đã lưu tài liệu vẫn có thể download" });
                 if (statusCodeResult.StatusCode == 409) return Conflict(new {Message = "Khóa học liên quan đã được gỡ khỏi tìm kiếm trước đó" });
                 if (statusCodeResult.StatusCode == 400) return BadRequest(new { Message = "Dữ liệu không hợp lệ" });
-                if (statusCodeResult.StatusCode == 404) return NotFound(new {Message = "Không tìm thấy đề cương khóa học" });
+                if (statusCodeResult.StatusCode == 404) return Ok(new {Message = "Không tìm thấy đề cương khóa học" });
 
             }
             if (result is Exception exception)
@@ -140,7 +140,7 @@ namespace API.Controllers
             {
                 if (statusCodeResult.StatusCode == 201) return StatusCode(StatusCodes.Status201Created,new {Message = "Tạo khuyến mãi khóa học thành công" } );
                 if (statusCodeResult.StatusCode == 400) return BadRequest(new { Message = "Dữ liệu không hợp lệ" });
-                if (statusCodeResult.StatusCode == 404) return NotFound(new { Message = "Không tìm thấy khóa học" });
+                if (statusCodeResult.StatusCode == 404) return Ok(new { Message = "Không tìm thấy khóa học" });
 
             }
             if (result is Exception exception)
@@ -157,7 +157,7 @@ namespace API.Controllers
             {
                 if (statusCodeResult.StatusCode == 204) return StatusCode(StatusCodes.Status204NoContent, new {Message = "Xóa khuyến mãi khóa học thành công" } );
                 if (statusCodeResult.StatusCode == 400) return BadRequest(new { Message = "Dữ liệu không hợp lệ" });
-                if (statusCodeResult.StatusCode == 404) return NotFound(new { Message = "Không tìm thấy khóa học" });
+                if (statusCodeResult.StatusCode == 404) return Ok(new { Message = "Không tìm thấy khóa học" });
 
             }
             if (result is Exception exception)
@@ -174,7 +174,7 @@ namespace API.Controllers
             {
                 if (statusCodeResult.StatusCode == 200) return Ok(new {Message = "Cập nhật khuyến mãi khóa học thành công" });
                 if (statusCodeResult.StatusCode == 400) return BadRequest(new { Message = "Dữ liệu không hợp lệ" });
-                if (statusCodeResult.StatusCode == 404) return NotFound(new { Message = "Không tìm thấy khóa học" });
+                if (statusCodeResult.StatusCode == 404) return Ok(new { Message = "Không tìm thấy khóa học" });
 
             }
             if (result is Exception exception)
@@ -191,7 +191,7 @@ namespace API.Controllers
             {
                 if (statusCodeResult.StatusCode == 201) return StatusCode(StatusCodes.Status201Created, new {Message =  "Tạo khuyến mãi thành công" });
                 if (statusCodeResult.StatusCode == 400) return BadRequest(new { Message = "Dữ liệu không hợp lệ" });
-                if (statusCodeResult.StatusCode == 404) return NotFound(new { Message = "Không tìm thấy khóa học" });
+                if (statusCodeResult.StatusCode == 404) return Ok(new { Message = "Không tìm thấy khóa học" });
 
             }
             if (result is Exception exception)
@@ -208,7 +208,7 @@ namespace API.Controllers
             {
                 if (statusCodeResult.StatusCode == 200) return Ok(new {Message = "Cập nhật khuyến mãi thành công" });
                 if (statusCodeResult.StatusCode == 400) return BadRequest(new { Message = "Dữ liệu không hợp lệ" });
-                if (statusCodeResult.StatusCode == 404) return NotFound(new { Message = "Không tìm thấy khóa học" });
+                if (statusCodeResult.StatusCode == 404) return Ok(new { Message = "Không tìm thấy khóa học" });
 
             }
             if (result is Exception exception)
@@ -225,7 +225,7 @@ namespace API.Controllers
             {
                 if (statusCodeResult.StatusCode == 204) return StatusCode(StatusCodes.Status204NoContent, new { Message = "Xóa khuyến mãi thành công }" });
                 if (statusCodeResult.StatusCode == 400) return BadRequest(new { Message = "Dữ liệu không hợp lệ" });
-                if (statusCodeResult.StatusCode == 404) return NotFound(new { Message = "Không tìm thấy khóa học" });
+                if (statusCodeResult.StatusCode == 404) return Ok(new { Message = "Không tìm thấy khóa học" });
 
             }
             if (result is Exception exception)
