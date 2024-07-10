@@ -96,13 +96,14 @@ namespace API.Controllers
         public async Task<IActionResult> CreateBooking(BookingRequest bookingRequest)
         {
             var result = await _bookingService.CreateBooking(bookingRequest);
+            if(result is BookingStep1Response response) return StatusCode(StatusCodes.Status201Created, new { Message = "Đặt lịch học thành công, vui lòng đến mục Thanh toán", BookingId = response.BookingId });
             if (result is IActionResult actionResult)
             {
                 if (actionResult is StatusCodeResult statusCodeResult)
                 {
                     if (statusCodeResult.StatusCode == 400) { return BadRequest(new { Message = "Dữ liệu không hợp lệ" }); }
                     if (statusCodeResult.StatusCode == 406) { return StatusCode(StatusCodes.Status406NotAcceptable, new { Message = "Có tài khoản đang bị đình chỉ bởi hệ thống" }); }
-                    if (statusCodeResult.StatusCode == 201) return StatusCode(StatusCodes.Status201Created, new { Message = "Đặt lịch học thành công, vui lòng đến mục Thanh toán" });
+                    //if (statusCodeResult.StatusCode == 201) return StatusCode(StatusCodes.Status201Created, new { Message = "Đặt lịch học thành công, vui lòng đến mục Thanh toán" });
                 }
                 if (actionResult is Exception exception) StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
             }
@@ -153,6 +154,24 @@ namespace API.Controllers
                     if (statusCodeResult.StatusCode == 404) return NotFound(new { Message = "Không tìm thấy lịch đặt đã hoàn thành" });
                     if (statusCodeResult.StatusCode == 406) { return StatusCode(StatusCodes.Status406NotAcceptable, new { Message = "Tài khoản student đang bị đình chỉ bởi hệ thống" }); }
                     if (statusCodeResult.StatusCode == 201) return StatusCode(StatusCodes.Status201Created, new { Message = "Đánh giá thành công" });
+                }
+                if (actionResult is Exception exception) StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
+            }
+            throw new Exception("Lỗi không xác định");
+        }
+        [HttpPut("start/booking/{bookingID}")]
+        public async Task<IActionResult> StartLearning(Guid bookingID)
+        {
+            var result = await _bookingService.StartLearning(bookingID);
+            if (result is IActionResult actionResult)
+            {
+                if (actionResult is StatusCodeResult statusCodeResult)
+                {
+                    if (statusCodeResult.StatusCode == 400) { return BadRequest(new { Message = "Dữ liệu không hợp lệ" }); }
+                    if (statusCodeResult.StatusCode == 404) return NotFound(new { Message = "Không tìm thấy lịch đặt" });
+                    if (statusCodeResult.StatusCode == 406) { return StatusCode(StatusCodes.Status406NotAcceptable, new { Message = "Tài khoản student đang bị đình chỉ bởi hệ thống" }); }
+                    if (statusCodeResult.StatusCode == 409) { return StatusCode(StatusCodes.Status409Conflict, new { Message = "Buổi học hiện không diễn ra" }); }
+                    if (statusCodeResult.StatusCode == 200) return StatusCode(StatusCodes.Status200OK, new { Message = "Bắt đầu buổi học thành công" });
                 }
                 if (actionResult is Exception exception) StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
             }

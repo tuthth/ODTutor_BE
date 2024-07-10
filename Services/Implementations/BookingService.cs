@@ -59,6 +59,11 @@ namespace Services.Implementations
                 booking.BookingId = Guid.NewGuid();
                 booking.CreatedAt = DateTime.UtcNow.AddHours(7);
                 booking.Status = (Int32)BookingEnum.WaitingPayment;
+                booking.Duration = TimeSpan.FromHours(1);
+                booking.TotalPrice = tutor.TutorNavigation.PricePerHour * 1;
+                booking.GoogleMeetUrl = "";
+                booking.Message = "";
+                booking.Description = "Lịch học của học sinh " + student.Name + " với gia sư " + tutor.Name;
                 response.BookingId = booking.BookingId;
                 _context.Bookings.Add(booking);
                 await _context.SaveChangesAsync();
@@ -331,6 +336,22 @@ namespace Services.Implementations
             _context.TutorRatingImages.RemoveRange(tutorRatingImages);
             await _context.SaveChangesAsync();
             return new StatusCodeResult(204);
+        }
+        public async Task<IActionResult> StartLearning(Guid id)
+        {
+            var booking = _context.Bookings.FirstOrDefault(x => x.BookingId == id);
+            if (booking == null)
+            {
+                return new StatusCodeResult(404);
+            }
+            if (booking.Status != (Int32)BookingEnum.Success)
+            {
+                return new StatusCodeResult(409);
+            }
+            booking.Status = (Int32)BookingEnum.Learning;
+            _context.Bookings.Update(booking);
+            await _context.SaveChangesAsync();
+            return new StatusCodeResult(200);
         }
         public async Task<IActionResult> FinishBooking(Guid id)
         {
