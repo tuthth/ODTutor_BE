@@ -88,7 +88,7 @@ namespace Services.Implementations
                     LastBalanceUpdate = DateTime.UtcNow.AddHours(7)
                 };
                 _context.Wallets.Add(wallet);
-                var notification = new Models.Entities.Notification
+                var notification = new NotificationDTO
                 {
                     NotificationId = Guid.NewGuid(),
                     Title = "Chào mừng bạn đến với ODTutor",
@@ -97,8 +97,9 @@ namespace Services.Implementations
                     CreatedAt = DateTime.UtcNow.AddHours(7),
                     Status = (Int32)NotificationEnum.UnRead
                 };
-                _context.Notifications.Add(notification);
-                await _firebaseRealtimeDatabaseService.SetAsync<Models.Entities.Notification>($"notifications/{notification.UserId}/{notification.NotificationId}", notification);
+                Notification notification1 = _mapper.Map<Notification>(notification);
+                _context.Notifications.Add(notification1);
+                await _firebaseRealtimeDatabaseService.SetAsync<NotificationDTO>($"notifications/{notification.UserId}/{notification.NotificationId}", notification);
                 await _context.SaveChangesAsync();
                 var accountResponse = _mapper.Map<AccountResponse>(account);
                 // Return information of account

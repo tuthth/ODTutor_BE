@@ -38,7 +38,7 @@ namespace Services.Implementations
             studentRequest.CreatedAt = DateTime.UtcNow.AddHours(7);
             studentRequest.StudentRequestId = Guid.NewGuid();
             studentRequest.Status = (Int32)StudentRequestEnum.Pending;
-            var notification = new Models.Entities.Notification
+            var notification = new NotificationDTO
             {
                 NotificationId = Guid.NewGuid(),
                 Title = "Yêu cầu của bạn đã được gửi đến các gia sư khác",
@@ -47,9 +47,10 @@ namespace Services.Implementations
                 CreatedAt = DateTime.UtcNow.AddHours(7),
                 Status = (Int32)NotificationEnum.UnRead
             };
-            await _service.SetAsync<Models.Entities.Notification>($"notifications/{notification.UserId}/{notification.NotificationId}", notification);
+            Models.Entities.Notification notification1x = _mapper.Map<Models.Entities.Notification>(notification);
+            await _service.SetAsync<NotificationDTO>($"notifications/{notification.UserId}/{notification.NotificationId}", notification);
             await _service.SetAsync<StudentRequest>($"Studentrequest/{studentRequest.StudentRequestId}", studentRequest);
-            await _context.Notifications.AddAsync(notification);
+            await _context.Notifications.AddAsync(notification1x);
             await _context.StudentRequests.AddAsync(studentRequest);
             await _context.SaveChangesAsync();
             return new StatusCodeResult(201);
@@ -77,7 +78,7 @@ namespace Services.Implementations
                 CreatedAt = studentRequest.CreatedAt
             };
             await _service.UpdateAsync($"Studentrequest/{studentRequest.StudentRequestId}", studentRequestDTO);
-            var notification = new Models.Entities.Notification
+            var notification = new NotificationDTO
             {
                 NotificationId = Guid.NewGuid(),
                 Title = "Yêu cầu của bạn đã được cập nhật",
@@ -86,9 +87,10 @@ namespace Services.Implementations
                 CreatedAt = DateTime.UtcNow.AddHours(7),
                 Status = (Int32)NotificationEnum.UnRead
             };
-            await _context.Notifications.AddAsync(notification);
+            Models.Entities.Notification notification1x = _mapper.Map<Models.Entities.Notification>(notification);
+            await _context.Notifications.AddAsync(notification1x);
             _context.StudentRequests.Update(studentRequest);
-            await _service.SetAsync<Models.Entities.Notification>($"notifications/{notification.UserId}/{notification.NotificationId}", notification);
+            await _service.SetAsync<NotificationDTO>($"notifications/{notification.UserId}/{notification.NotificationId}", notification);
             await _context.SaveChangesAsync();
             return new StatusCodeResult(200);
         }

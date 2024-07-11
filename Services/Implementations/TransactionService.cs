@@ -69,7 +69,7 @@ namespace Services.Implementations
                 _context.Wallets.Update(receiveWallet);
                 _context.WalletTransactions.Add(transaction);
 
-                var notification = new Models.Entities.Notification
+                var notification1x = new NotificationDTO
                 {
                     NotificationId = Guid.NewGuid(),
                     Title = "Nạp tiền vào tài khoản",
@@ -78,11 +78,9 @@ namespace Services.Implementations
                     CreatedAt = DateTime.UtcNow.AddHours(7),
                     Status = (int)NotificationEnum.UnRead
                 };
-
-                _context.Notifications.Add(notification);
-
-
-                _firebaseRealtimeDatabaseService.SetAsync<Models.Entities.Notification>($"notifications/{notification.UserId}/{notification.NotificationId}", notification);
+                Models.Entities.Notification notification1 = _mapper.Map<Models.Entities.Notification>(notification1x);
+                _context.Notifications.Add(notification1);
+                _firebaseRealtimeDatabaseService.SetAsync<NotificationDTO>($"notifications/{notification1x.UserId}/{notification1x.NotificationId}", notification1x);
                 await _context.SaveChangesAsync();
 
                 string vnp_Returnurl = transactionCreate.RedirectUrl;
@@ -155,7 +153,7 @@ namespace Services.Implementations
                 _context.Wallets.Update(receiveWallet);
                 _context.WalletTransactions.Add(transaction);
 
-                var notification = new Models.Entities.Notification
+                var notification1x = new NotificationDTO
                 {
                     NotificationId = Guid.NewGuid(),
                     Title = "Rút tiền từ tài khoản",
@@ -164,8 +162,9 @@ namespace Services.Implementations
                     CreatedAt = DateTime.UtcNow.AddHours(7),
                     Status = (int)NotificationEnum.UnRead
                 };
-                _context.Notifications.Add(notification);
-                _firebaseRealtimeDatabaseService.SetAsync<Models.Entities.Notification>($"notifications/{notification.UserId}/{notification.NotificationId}", notification);
+                Models.Entities.Notification noti = _mapper.Map<Models.Entities.Notification>(notification1x);
+                _context.Notifications.Add(noti);
+                _firebaseRealtimeDatabaseService.SetAsync<NotificationDTO>($"notifications/{notification1x.UserId}/{notification1x.NotificationId}", notification1x);
                 await _context.SaveChangesAsync();
 
                 string vnp_Returnurl = transactionCreate.RedirectUrl;
@@ -213,7 +212,7 @@ namespace Services.Implementations
                 Subject = "Xác nhận giao dịch",
                 Body = "Giao dịch không hợp lệ, vui lòng kiểm tra lại thông tin."
             });
-            var notificationError = new Models.Entities.Notification
+            var notificationError = new NotificationDTO
             {
                 NotificationId = Guid.NewGuid(),
                 Title = "Giao dịch",
@@ -222,8 +221,9 @@ namespace Services.Implementations
                 CreatedAt = DateTime.UtcNow.AddHours(7),
                 Status = (int)NotificationEnum.UnRead
             };
-            _context.Notifications.Add(notificationError);
-            _firebaseRealtimeDatabaseService.SetAsync<Models.Entities.Notification>($"notifications/{notificationError.UserId}/{notificationError.NotificationId}", notificationError);
+            Models.Entities.Notification notification = _mapper.Map<Models.Entities.Notification>(notificationError);
+            _context.Notifications.Add(notification);
+            _firebaseRealtimeDatabaseService.SetAsync<NotificationDTO>($"notifications/{notificationError.UserId}/{notificationError.NotificationId}", notificationError);
             await _context.SaveChangesAsync();
             return new StatusCodeResult(500);
         }
@@ -332,7 +332,7 @@ namespace Services.Implementations
                     Subject = "Xác nhận giao dịch",
                     Body = "Giao dịch booking không hợp lệ, vui lòng kiểm tra lại thông tin."
                 });
-                var notificationError = new Models.Entities.Notification
+                var notificationError = new NotificationDTO
                 {
                     NotificationId = Guid.NewGuid(),
                     Title = "Giao dịch booking",
@@ -341,8 +341,9 @@ namespace Services.Implementations
                     CreatedAt = DateTime.UtcNow.AddHours(7),
                     Status = (int)NotificationEnum.UnRead
                 };
-                _context.Notifications.Add(notificationError);
-                _firebaseRealtimeDatabaseService.SetAsync<Models.Entities.Notification>($"notifications/{notificationError.UserId}/{notificationError.NotificationId}", notificationError);
+                Models.Entities.Notification notification1 = _mapper.Map<Models.Entities.Notification>(notificationError);
+                _context.Notifications.Add(notification1);
+                _firebaseRealtimeDatabaseService.SetAsync<NotificationDTO>($"notifications/{notificationError.UserId}/{notificationError.NotificationId}", notificationError);
                 return new StatusCodeResult(409);
             }
             sendWallet.PendingAmount -= transactionCreate.Amount;
@@ -353,7 +354,7 @@ namespace Services.Implementations
             _context.BookingTransactions.Add(transaction);
             _context.WalletTransactions.Add(senderTransaction);
 
-            var notification = new Models.Entities.Notification
+            var notification = new NotificationDTO
             {
                 NotificationId = Guid.NewGuid(),
                 Title = "Giao dịch booking",
@@ -362,8 +363,9 @@ namespace Services.Implementations
                 CreatedAt = DateTime.UtcNow.AddHours(7),
                 Status = (int)NotificationEnum.UnRead
             };
-            _context.Notifications.Add(notification);
-            _firebaseRealtimeDatabaseService.SetAsync<Models.Entities.Notification>($"notifications/{notification.UserId}/{notification.NotificationId}", notification);
+            Models.Entities.Notification notification2 = _mapper.Map<Models.Entities.Notification>(notification);
+            _context.Notifications.Add(notification2);
+            _firebaseRealtimeDatabaseService.SetAsync<NotificationDTO>($"notifications/{notification.UserId}/{notification.NotificationId}", notification);
             await _context.SaveChangesAsync();
             await _appExtension.SendMail(new MailContent()
             {
@@ -426,7 +428,7 @@ namespace Services.Implementations
             _context.Wallets.Update(sendWallet);
             _context.Wallets.Update(receiveWallet);
 
-            var notification = new Models.Entities.Notification
+            var notification = new NotificationDTO
             {
                 NotificationId = Guid.NewGuid(),
                 Title = "Giao dịch course",
@@ -435,8 +437,9 @@ namespace Services.Implementations
                 CreatedAt = DateTime.UtcNow.AddHours(7),
                 Status = (int)NotificationEnum.UnRead
             };
-            _context.Notifications.Add(notification);
-            _firebaseRealtimeDatabaseService.SetAsync<Models.Entities.Notification>($"notifications/{notification.UserId}/{notification.NotificationId}", notification);
+            Models.Entities.Notification notification1 = _mapper.Map<Models.Entities.Notification>(notification);
+            _context.Notifications.Add(notification1);
+            _firebaseRealtimeDatabaseService.SetAsync<NotificationDTO>($"notifications/{notification.UserId}/{notification.NotificationId}", notification);
 
             _context.CourseTransactions.Add(transaction);
             _context.WalletTransactions.Add(senderTransaction);

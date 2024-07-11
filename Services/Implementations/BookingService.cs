@@ -144,15 +144,16 @@ namespace Services.Implementations
                 };
                 await _transactionService.CreateDepositVnPayBooking(bookingTransactionCreate);
                 // Xử lý notification 
-                Notification notification = new Notification();
+                NotificationDTO notification = new NotificationDTO();
                 notification.NotificationId = Guid.NewGuid();
                 notification.UserId = student.UserId;
                 notification.Title = "Đặt lịch thành công";
                 notification.Content = "Bạn đã đặt lịch học thành công";
                 notification.CreatedAt = DateTime.UtcNow.AddHours(7);
-                _context.Notifications.Add(notification);
+                Notification noti = _mapper.Map<Notification>(notification);
+                _context.Notifications.Add(noti);
                 // Lưu notification vào firestore
-                _firebaseRealtimeDatabaseService.SetAsync<Models.Entities.Notification>($"notifications/{notification.UserId}/{notification.NotificationId}", notification);
+                _firebaseRealtimeDatabaseService.SetAsync<NotificationDTO>($"notifications/{notification.UserId}/{notification.NotificationId}", notification);
                 // Lưu tất cả thay đổi vào cơ sở dữ liệu
                 await _context.SaveChangesAsync();
                 throw new CrudException(HttpStatusCode.Created, "Payment for booking successfully", "");

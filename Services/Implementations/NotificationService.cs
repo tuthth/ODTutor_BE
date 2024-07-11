@@ -27,7 +27,7 @@ namespace Services.Implementations
         {
             try
             {
-                var notification = new Notification
+                var notification = new NotificationDTO
                 {
                     NotificationId = Guid.NewGuid(),
                     Title = request.Title,
@@ -36,8 +36,9 @@ namespace Services.Implementations
                     CreatedAt = DateTime.UtcNow.AddHours(7),
                     Status = (Int32)NotificationEnum.UnRead
                 };
-                _firebaseRealtimeDatabaseService.SetAsync<Notification>($"notifications/{request.UserId}/{notification.NotificationId}", notification);
-                await _context.Notifications.AddAsync(notification);
+                Notification notification1x = _mapper.Map<Notification>(notification);
+                _firebaseRealtimeDatabaseService.SetAsync<NotificationDTO>($"notifications/{request.UserId}/{notification.NotificationId}", notification);
+                await _context.Notifications.AddAsync(notification1x);
                 await _context.SaveChangesAsync();
                 throw new CrudException(System.Net.HttpStatusCode.Created, "Tạo thông báo thành công", "");
             } catch(CrudException ex)

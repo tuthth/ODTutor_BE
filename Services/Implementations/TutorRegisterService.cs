@@ -209,15 +209,16 @@ namespace Services.Implementations
                 await _context.TutorActions.AddAsync(tutorRegister);
                 await _context.SaveChangesAsync();
                 // Create a notification for user who want to become a tutor
-                Notification notification = new Notification();
+                NotificationDTO notification = new NotificationDTO();
                 notification.NotificationId = new Guid();
                 notification.UserId = tutor.UserId;
                 notification.Title = "Yêu cầu xét duyệt thành gia sư đã được gửi";
                 notification.Content = "Yêu cầu của bạn đã được gửi. Vui lòng đợi phản hồi qua email hoặc thông báo của hệ thống";
                 notification.CreatedAt = DateTime.UtcNow.AddHours(7);
                 notification.Status = 1; // "1" is sent
-                await _context.Notifications.AddAsync(notification);
-                _firebaseService.SetAsync<Models.Entities.Notification>($"notifications/{notification.UserId}/{notification.NotificationId}", notification);
+                Notification notification1x = _mapper.Map<Notification>(notification);
+                await _context.Notifications.AddAsync(notification1x);
+                _firebaseService.SetAsync<NotificationDTO>($"notifications/{notification.UserId}/{notification.NotificationId}", notification);
                 await _context.SaveChangesAsync();
                 return new StatusCodeResult(201);
             }
@@ -501,15 +502,16 @@ namespace Services.Implementations
                 await _context.SaveChangesAsync();
 
                 // Create a notification for Tutor
-                Notification notification = new Notification();
+                NotificationDTO notification = new NotificationDTO();
                 notification.NotificationId = Guid.NewGuid();
                 notification.UserId = tutor.UserId;
                 notification.Title = "Yêu cầu xét duyệt trở thành gia sư đã được chấp nhận";
                 notification.Content = "Yêu cầu của bạn đã được chấp nhận. Bạn đã trở thành gia sư trên hệ thống";
                 notification.CreatedAt = DateTime.UtcNow.AddHours(7);
                 notification.Status = (Int32)NotificationEnum.UnRead;
-                await _context.Notifications.AddAsync(notification);
-                _firebaseService.SetAsync<Models.Entities.Notification>($"notifications/{notification.UserId}/{notification.NotificationId}", notification);
+                Notification notification1x = _mapper.Map<Notification>(notification);
+                await _context.Notifications.AddAsync(notification1x);
+                _firebaseService.SetAsync<NotificationDTO>($"notifications/{notification.UserId}/{notification.NotificationId}", notification);
                 await _context.SaveChangesAsync();
                 return new StatusCodeResult(200);
             }
@@ -544,15 +546,16 @@ namespace Services.Implementations
                 await _context.SaveChangesAsync();
 
                 // Create a notification for Tutor
-                Notification notification = new Notification();
+                NotificationDTO notification = new NotificationDTO();
                 notification.NotificationId = Guid.NewGuid();
                 notification.UserId = tutor.UserId;
                 notification.Title = "Yêu cầu xét duyệt trở thành gia sư đã bị từ chối";
                 notification.Content = "Yêu cầu của bạn đã bị từ chối. Vui lòng liên hệ với hệ thống để biết thêm thông tin.";
                 notification.CreatedAt = DateTime.UtcNow.AddHours(7);
                 notification.Status = (Int32)NotificationEnum.Deleted;
-                await _context.Notifications.AddAsync(notification);
-                _firebaseService.SetAsync<Models.Entities.Notification>($"notifications/{notification.UserId}/{notification.NotificationId}", notification);
+                Notification notification1x = _mapper.Map<Notification>(notification);
+                await _context.Notifications.AddAsync(notification1x);
+                _firebaseService.SetAsync<NotificationDTO>($"notifications/{notification.UserId}/{notification.NotificationId}", notification);
                 await _context.SaveChangesAsync();
                 return new StatusCodeResult(200);
             }

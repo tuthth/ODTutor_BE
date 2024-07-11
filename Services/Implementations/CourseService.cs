@@ -37,7 +37,7 @@ namespace Services.Implementations
             var course = _mapper.Map<Course>(courseRequest);
             course.CourseId = Guid.NewGuid();
             _context.Courses.Add(course);
-            var notification = new Models.Entities.Notification
+            var notification = new NotificationDTO
             {
                 NotificationId = Guid.NewGuid(),
                 Title = "Tạo khóa học thành công",
@@ -46,8 +46,9 @@ namespace Services.Implementations
                 CreatedAt = DateTime.UtcNow.AddHours(7),
                 Status = (Int32)NotificationEnum.UnRead
             };
-            _context.Notifications.Add(notification);
-            _firebaseRealtimeDatabaseService.SetAsync<Models.Entities.Notification>($"notifications/{notification.UserId}/{notification.NotificationId}", notification);
+            Models.Entities.Notification notification1 = _mapper.Map<Models.Entities.Notification>(notification);
+            _context.Notifications.Add(notification1);
+            _firebaseRealtimeDatabaseService.SetAsync<NotificationDTO>($"notifications/{notification.UserId}/{notification.NotificationId}", notification);
             await _context.SaveChangesAsync();
             await _appExtension.SendMail(new MailContent()
             {
@@ -91,7 +92,7 @@ namespace Services.Implementations
                 course.Status = courseRequest.Status;
             }
             _context.Courses.Update(course);
-            var notification = new Models.Entities.Notification
+            var notification = new NotificationDTO
             {
                 NotificationId = Guid.NewGuid(),
                 Title = "Cập nhật khóa học thành công",
@@ -100,8 +101,9 @@ namespace Services.Implementations
                 CreatedAt = DateTime.UtcNow.AddHours(7),
                 Status = (Int32)NotificationEnum.UnRead
             };
-            _context.Notifications.Add(notification);
-            _firebaseRealtimeDatabaseService.SetAsync<Models.Entities.Notification>($"notifications/{notification.UserId}/{notification.NotificationId}", notification);
+            Models.Entities.Notification noti = _mapper.Map<Models.Entities.Notification>(notification);
+            _context.Notifications.Add(noti);
+            _firebaseRealtimeDatabaseService.SetAsync<NotificationDTO>($"notifications/{notification.UserId}/{notification.NotificationId}", notification);
             await _context.SaveChangesAsync();
             await _appExtension.SendMail(new MailContent()
             {
@@ -150,7 +152,7 @@ namespace Services.Implementations
                             studentCourse.Status = (Int32)CourseEnum.Deleted;
                             _context.StudentCourses.Update(studentCourse);
                         }
-                        var notification = new Models.Entities.Notification
+                        var notification = new NotificationDTO
                         {
                             NotificationId = Guid.NewGuid(),
                             Title = "Xóa khóa học khỏi tìm kiếm thành công",
@@ -159,8 +161,9 @@ namespace Services.Implementations
                             CreatedAt = DateTime.UtcNow.AddHours(7),
                             Status = (Int32)NotificationEnum.UnRead
                         };
-                        _context.Notifications.Add(notification);
-                        _firebaseRealtimeDatabaseService.SetAsync<Models.Entities.Notification>($"notifications/{notification.UserId}/{notification.NotificationId}", notification);
+                        Models.Entities.Notification notification1 = _mapper.Map<Models.Entities.Notification>(notification);
+                        _context.Notifications.Add(notification1);
+                        _firebaseRealtimeDatabaseService.SetAsync<NotificationDTO>($"notifications/{notification.UserId}/{notification.NotificationId}", notification);
                         await _context.SaveChangesAsync();
                         await _appExtension.SendMail(new MailContent()
                         {
@@ -192,7 +195,7 @@ namespace Services.Implementations
                         _context.Schedules.RemoveRange(schedules);
                         _context.StudentCourses.Remove(studentCourse);
                     }
-                    var notification = new Models.Entities.Notification
+                    var notification = new NotificationDTO
                     {
                         NotificationId = Guid.NewGuid(),
                         Title = "Xóa khóa học thành công",
@@ -201,8 +204,9 @@ namespace Services.Implementations
                         CreatedAt = DateTime.UtcNow.AddHours(7),
                         Status = (Int32)NotificationEnum.UnRead
                     };
-                    _context.Notifications.Add(notification);
-                    _firebaseRealtimeDatabaseService.SetAsync<Models.Entities.Notification>($"notifications/{notification.UserId}/{notification.NotificationId}", notification);
+                    Models.Entities.Notification notification1 = _mapper.Map<Models.Entities.Notification>(notification);
+                    _context.Notifications.Add(notification1);
+                    _firebaseRealtimeDatabaseService.SetAsync<NotificationDTO>($"notifications/{notification.UserId}/{notification.NotificationId}", notification);
                     await _context.SaveChangesAsync();
                     await _appExtension.SendMail(new MailContent()
                     {
@@ -230,7 +234,7 @@ namespace Services.Implementations
             var courseOutline = _mapper.Map<CourseOutline>(courseOutlineRequest);
             courseOutline.CourseOutlineId = Guid.NewGuid();
             _context.CourseOutlines.Add(courseOutline);
-            var notification = new Models.Entities.Notification
+            var notification = new NotificationDTO
             {
                 NotificationId = Guid.NewGuid(),
                 Title = "Tạo đề cương khóa học thành công",
@@ -239,7 +243,8 @@ namespace Services.Implementations
                 CreatedAt = DateTime.UtcNow.AddHours(7),
                 Status = (Int32)NotificationEnum.UnRead
             };
-            _firebaseRealtimeDatabaseService.SetAsync<Models.Entities.Notification>($"notifications/{notification.UserId}/{notification.NotificationId}", notification);
+            Models.Entities.Notification notification1 = _mapper.Map<Models.Entities.Notification>(notification);
+            _firebaseRealtimeDatabaseService.SetAsync<NotificationDTO>($"notifications/{notification.UserId}/{notification.NotificationId}", notification);
             await _context.SaveChangesAsync();
             await _appExtension.SendMail(new MailContent()
             {
@@ -271,7 +276,7 @@ namespace Services.Implementations
                 courseOutline.Status = courseOutlineRequest.Status;
             }
             _context.CourseOutlines.Update(courseOutline);
-            var notification = new Models.Entities.Notification
+            var notification = new NotificationDTO
             {
                 NotificationId = Guid.NewGuid(),
                 Title = "Cập nhật đề cương khóa học thành công",
@@ -280,8 +285,9 @@ namespace Services.Implementations
                 CreatedAt = DateTime.UtcNow.AddHours(7),
                 Status = (Int32)NotificationEnum.UnRead
             };
-            _context.Notifications.Add(notification);
-            _firebaseRealtimeDatabaseService.SetAsync<Models.Entities.Notification>($"notifications/{notification.UserId}/{notification.NotificationId}", notification);
+            Models.Entities.Notification notification1 = _mapper.Map<Models.Entities.Notification>(notification);
+            _context.Notifications.Add(notification1);
+            _firebaseRealtimeDatabaseService.SetAsync<NotificationDTO>($"notifications/{notification.UserId}/{notification.NotificationId}", notification);
             await _context.SaveChangesAsync();
             await _appExtension.SendMail(new MailContent()
             {
@@ -310,7 +316,7 @@ namespace Services.Implementations
                 {
                     courseOutline.Status = (Int32)CourseEnum.Deleted;
                     _context.CourseOutlines.Update(courseOutline);
-                    var notification = new Models.Entities.Notification
+                    var notification = new NotificationDTO
                     {
                         NotificationId = Guid.NewGuid(),
                         Title = "Xóa đề cương khóa học khỏi tìm kiếm thành công",
@@ -319,8 +325,9 @@ namespace Services.Implementations
                         CreatedAt = DateTime.UtcNow.AddHours(7),
                         Status = (Int32)NotificationEnum.UnRead
                     };
-                    _context.Notifications.Add(notification);
-                    _firebaseRealtimeDatabaseService.SetAsync<Models.Entities.Notification>($"notifications/{notification.UserId}/{notification.NotificationId}", notification);
+                    Models.Entities.Notification notification1 = _mapper.Map<Models.Entities.Notification>(notification);
+                    _context.Notifications.Add(notification1);
+                    _firebaseRealtimeDatabaseService.SetAsync<NotificationDTO>($"notifications/{notification.UserId}/{notification.NotificationId}", notification);
                     await _context.SaveChangesAsync();
                     await _appExtension.SendMail(new MailContent()
                     {
@@ -334,7 +341,7 @@ namespace Services.Implementations
             else
             {
                 _context.CourseOutlines.Remove(courseOutline);
-                var notification = new Models.Entities.Notification
+                var notification = new NotificationDTO
                 {
                     NotificationId = Guid.NewGuid(),
                     Title = "Xóa đề cương khóa học thành công",
@@ -343,8 +350,9 @@ namespace Services.Implementations
                     CreatedAt = DateTime.UtcNow.AddHours(7),
                     Status = (Int32)NotificationEnum.UnRead
                 };
-                _context.Notifications.Add(notification);
-                _firebaseRealtimeDatabaseService.SetAsync<Models.Entities.Notification>($"notifications/{notification.UserId}/{notification.NotificationId}", notification);
+                Models.Entities.Notification notification1 = _mapper.Map<Models.Entities.Notification>(notification);
+                _context.Notifications.Add(notification1);
+                _firebaseRealtimeDatabaseService.SetAsync<NotificationDTO>($"notifications/{notification.UserId}/{notification.NotificationId}", notification);
                 await _context.SaveChangesAsync();
                 await _appExtension.SendMail(new MailContent()
                 {
@@ -366,7 +374,7 @@ namespace Services.Implementations
             }
             var coursePromotion = _mapper.Map<CoursePromotion>(coursePromotionRequest);
             _context.CoursePromotions.Add(coursePromotion);
-            var notification = new Models.Entities.Notification
+            var notification = new NotificationDTO
             {
                 NotificationId = Guid.NewGuid(),
                 Title = "Tạo mã giảm giá cho khóa học thành công",
@@ -375,8 +383,9 @@ namespace Services.Implementations
                 CreatedAt = DateTime.UtcNow.AddHours(7),
                 Status = (Int32)NotificationEnum.UnRead
             };
-            _context.Notifications.Add(notification);
-            _firebaseRealtimeDatabaseService.SetAsync<Models.Entities.Notification>($"notifications/{notification.UserId}/{notification.NotificationId}", notification);
+            Models.Entities.Notification notification1 = _mapper.Map<Models.Entities.Notification>(notification);
+            _context.Notifications.Add(notification1);
+            _firebaseRealtimeDatabaseService.SetAsync<NotificationDTO>($"notifications/{notification.UserId}/{notification.NotificationId}", notification);
             await _context.SaveChangesAsync();
             await _appExtension.SendMail(new MailContent()
             {
@@ -394,7 +403,7 @@ namespace Services.Implementations
                 return new StatusCodeResult(404);
             }
             _context.CoursePromotions.Remove(coursePromotion);
-            var notification = new Models.Entities.Notification
+            var notification = new NotificationDTO
             {
                 NotificationId = Guid.NewGuid(),
                 Title = "Xóa mã giảm giá khóa học thành công",
@@ -403,8 +412,9 @@ namespace Services.Implementations
                 CreatedAt = DateTime.UtcNow.AddHours(7),
                 Status = (Int32)NotificationEnum.UnRead
             };
-            _context.Notifications.Add(notification);
-            _firebaseRealtimeDatabaseService.SetAsync<Models.Entities.Notification>($"notifications/{notification.UserId}/{notification.NotificationId}", notification);
+            Models.Entities.Notification notification1 = _mapper.Map<Models.Entities.Notification>(notification);
+            _context.Notifications.Add(notification1);
+            _firebaseRealtimeDatabaseService.SetAsync<NotificationDTO>($"notifications/{notification.UserId}/{notification.NotificationId}", notification);
             await _context.SaveChangesAsync();
             await _appExtension.SendMail(new MailContent()
             {
@@ -423,7 +433,7 @@ namespace Services.Implementations
             }
             coursePromotion.PromotionId = coursePromotionRequest.PromotionId;
             _context.CoursePromotions.Update(coursePromotion);
-            var notification = new Models.Entities.Notification
+            var notification = new NotificationDTO
             {
                 NotificationId = Guid.NewGuid(),
                 Title = "Cập nhật mã giảm giá khóa học thành công",
@@ -432,8 +442,9 @@ namespace Services.Implementations
                 CreatedAt = DateTime.UtcNow.AddHours(7),
                 Status = (Int32)NotificationEnum.UnRead
             };
-            _context.Notifications.Add(notification);
-            _firebaseRealtimeDatabaseService.SetAsync<Models.Entities.Notification>($"notifications/{notification.UserId}/{notification.NotificationId}", notification);
+            Models.Entities.Notification notification1 = _mapper.Map<Models.Entities.Notification>(notification);
+            _context.Notifications.Add(notification1);
+            _firebaseRealtimeDatabaseService.SetAsync<NotificationDTO>($"notifications/{notification.UserId}/{notification.NotificationId}", notification);
             await _context.SaveChangesAsync();
             await _appExtension.SendMail(new MailContent()
             {
@@ -453,7 +464,7 @@ namespace Services.Implementations
             var promotion = _mapper.Map<Promotion>(createPromotion);
             promotion.PromotionId = Guid.NewGuid();
             _context.Promotions.Add(promotion);
-            var notification = new Models.Entities.Notification
+            var notification = new NotificationDTO
             {
                 NotificationId = Guid.NewGuid(),
                 Title = "Tạo mã giảm giá thành công",
@@ -462,8 +473,9 @@ namespace Services.Implementations
                 CreatedAt = DateTime.UtcNow.AddHours(7),
                 Status = (Int32)NotificationEnum.UnRead
             };
-            _context.Notifications.Add(notification);
-            _firebaseRealtimeDatabaseService.SetAsync<Models.Entities.Notification>($"notifications/{notification.UserId}/{notification.NotificationId}", notification);
+            Models.Entities.Notification notification1 = _mapper.Map<Models.Entities.Notification>(notification);
+            _context.Notifications.Add(notification1);
+            _firebaseRealtimeDatabaseService.SetAsync<NotificationDTO>($"notifications/{notification.UserId}/{notification.NotificationId}", notification);
             await _context.SaveChangesAsync();
             await _appExtension.SendMail(new MailContent()
             {
@@ -483,7 +495,7 @@ namespace Services.Implementations
             promotion.PromotionCode = updatePromotion.PromotionCode.ToUpper();
             promotion.Percentage = updatePromotion.Percentage;
             _context.Promotions.Update(promotion);
-            var notification = new Models.Entities.Notification
+            var notification = new NotificationDTO
             {
                 NotificationId = Guid.NewGuid(),
                 Title = "Cập nhật mã giảm giá thành công",
@@ -492,8 +504,9 @@ namespace Services.Implementations
                 CreatedAt = DateTime.UtcNow.AddHours(7),
                 Status = (Int32)NotificationEnum.UnRead
             };
-            _context.Notifications.Add(notification);
-            _firebaseRealtimeDatabaseService.SetAsync<Models.Entities.Notification>($"notifications/{notification.UserId}/{notification.NotificationId}", notification);
+            Models.Entities.Notification notification1 = _mapper.Map<Models.Entities.Notification>(notification);
+            _context.Notifications.Add(notification1);
+            _firebaseRealtimeDatabaseService.SetAsync<NotificationDTO>($"notifications/{notification.UserId}/{notification.NotificationId}", notification);
             await _context.SaveChangesAsync();
             await _appExtension.SendMail(new MailContent()
             {
@@ -511,7 +524,7 @@ namespace Services.Implementations
                 return new StatusCodeResult(404);
             }
             _context.Promotions.Remove(promotion);
-            var notification = new Models.Entities.Notification
+            var notification = new  NotificationDTO
             {
                 NotificationId = Guid.NewGuid(),
                 Title = "Xóa mã giảm giá thành công",
@@ -520,8 +533,9 @@ namespace Services.Implementations
                 CreatedAt = DateTime.UtcNow.AddHours(7),
                 Status = (Int32)NotificationEnum.UnRead
             };
-            _context.Notifications.Add(notification);
-            _firebaseRealtimeDatabaseService.SetAsync<Models.Entities.Notification>($"notifications/{notification.UserId}/{notification.NotificationId}", notification);
+            Models.Entities.Notification notification1 = _mapper.Map<Models.Entities.Notification>(notification);
+            _context.Notifications.Add(notification1);
+            _firebaseRealtimeDatabaseService.SetAsync<NotificationDTO>($"notifications/{notification.UserId}/{notification.NotificationId}", notification);
             await _context.SaveChangesAsync();
             await _appExtension.SendMail(new MailContent()
             {
