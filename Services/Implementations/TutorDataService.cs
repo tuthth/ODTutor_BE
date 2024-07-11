@@ -91,7 +91,7 @@ namespace Services.Implementations
                         {
                             CourseId = c.CourseId,
                             Description = c.Description
-                            
+
                         }).ToList(),
                         Subjects = t.TutorSubjectsNavigation.Select(ts => new Subject
                         {
@@ -127,7 +127,8 @@ namespace Services.Implementations
             catch (CrudException ex)
             {
                 throw new CrudException(HttpStatusCode.InternalServerError, "Get Available Tutor List Error ", ex.Message);
-            } catch (Exception ex)
+            }
+            catch (Exception ex)
             {
                 throw new CrudException(HttpStatusCode.InternalServerError, "Get Account Tutor List Error", ex.Message);
             }
@@ -191,7 +192,7 @@ namespace Services.Implementations
         public async Task<ActionResult<TutorRatingResponse>> GetTutorRating(Guid tutorId)
         {
             try
-            {   
+            {
                 var response = new TutorRatingResponse();
                 if (tutorId == null)
                 {
@@ -224,7 +225,7 @@ namespace Services.Implementations
                 {
                     throw new CrudException(HttpStatusCode.OK, "Hiện tại không ghi nhận feedback từ khách hàng!1", "");
                 }
-                var totalEndRating = (double) totalRating / totalRatingNumber;      
+                var totalEndRating = (double)totalRating / totalRatingNumber;
                 response.TutorId = tutorId;
                 response.TotalRatingNumber = tutorRatings.Count();
                 response.TotalRatingNumberOneStart = tutorRatingOneStart.Count();
@@ -238,17 +239,18 @@ namespace Services.Implementations
             catch (CrudException ex)
             {
                 throw ex;
-            } catch (Exception ex)
+            }
+            catch (Exception ex)
             {
                 throw new CrudException(HttpStatusCode.InternalServerError, "Get Tutor Rating Error", ex.Message);
             }
         }
 
         // Get Tutor Rating List By Tutor ID
-        public async Task<PageResults<TutorFeedBackResponse>> GetTutorFeedBackResponseByTutorID ( Guid tutorID, PagingRequest pagingRequest)
+        public async Task<PageResults<TutorFeedBackResponse>> GetTutorFeedBackResponseByTutorID(Guid tutorID, PagingRequest pagingRequest)
         {
             try
-            {   
+            {
                 if (tutorID == null)
                 {
                     throw new CrudException(HttpStatusCode.BadRequest, "Tutor ID is required or invalid", "Tutor ID is required");
@@ -273,17 +275,19 @@ namespace Services.Implementations
                 }
                 var result = PagingHelper<TutorFeedBackResponse>.Paging(tutorFeedBack, pagingRequest.Page, pagingRequest.PageSize);
                 return result;
-            } catch (CrudException ex)
+            }
+            catch (CrudException ex)
             {
                 throw ex;
-            } catch (Exception ex)
+            }
+            catch (Exception ex)
             {
                 throw new CrudException(HttpStatusCode.InternalServerError, "Get Tutor FeedBack Response Error", ex.Message);
             }
         }
 
         // Get Tutor Schedule By Tutor ID
-        public async Task<ActionResult<List<TutorScheduleResponse>>> GetAllTutorSlotRegistered (Guid tutorID)
+        public async Task<ActionResult<List<TutorScheduleResponse>>> GetAllTutorSlotRegistered(Guid tutorID)
         {
             try
             {
@@ -305,10 +309,12 @@ namespace Services.Implementations
                         }).ToList()
                     }).ToListAsync();
                 return tutorSchedule;
-            } catch (CrudException ex)
+            }
+            catch (CrudException ex)
             {
                 throw ex;
-            } catch (Exception ex)
+            }
+            catch (Exception ex)
             {
                 throw new CrudException(HttpStatusCode.InternalServerError, "Get Tutor Schedule Error", ex.Message);
             }
@@ -340,6 +346,37 @@ namespace Services.Implementations
             catch (Exception ex)
             {
                 throw new CrudException(HttpStatusCode.InternalServerError, "Update Tutor Information Error", ex.Message);
+            }
+        }
+
+        // Count All Subject of Tutor and get all Student Avatar
+        public async Task<TutorCountSubjectResponse> CountAllSubjectOfTutor(Guid tutorID)
+        {
+            try
+            {
+                var tutor = await _context.Tutors
+                        .Where(t => t.TutorId == tutorID)
+                        .Select(t => new TutorCountSubjectResponse
+                        {
+                            TotalSubject = t.TutorSubjectsNavigation.Count(),
+                            avatarUrl = t.BookingsNavigation
+                          .Select(tr => tr.StudentNavigation.UserNavigation.ImageUrl)
+                          .Distinct()
+                          .ToList()
+                        }).FirstOrDefaultAsync();
+                if (tutor.avatarUrl.Count == 0)
+                {
+                    throw new CrudException(HttpStatusCode.OK, "Hiện tại không có học sinh nào đăng ký học với bạn!", "");
+                }
+                return tutor;
+            }
+            catch (CrudException ex)
+            {
+                throw ex;
+            }
+            catch (Exception ex)
+            {
+                throw new CrudException(HttpStatusCode.InternalServerError, "Count All Subject Of Tutor Error", ex.Message);
             }
         }
 

@@ -8,6 +8,7 @@ using Services.Interfaces;
 
 namespace API.Controllers
 {
+    [Route("api/[controller]")]
     public class StudentController : ControllerBase
     {
         private readonly IStudentService _studentService;

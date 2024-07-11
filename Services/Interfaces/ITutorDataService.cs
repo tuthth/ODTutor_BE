@@ -18,5 +18,7 @@ namespace Services.Interfaces
         Task<PageResults<TutorFeedBackResponse>> GetTutorFeedBackResponseByTutorID(Guid tutorID, PagingRequest pagingRequest);
         Task<ActionResult<List<TutorScheduleResponse>>> GetAllTutorSlotRegistered(Guid tutorID);
         Task<IActionResult> UpdateTutorInformation(TutorInformationUpdate tutorInformationUpdate);
+        Task<TutorCountSubjectResponse> CountAllSubjectOfTutor(Guid tutorID);
+
     }
 }

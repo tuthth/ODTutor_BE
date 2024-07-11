@@ -69,5 +69,12 @@ namespace API.Controllers
             var response = await _tutorDataService.UpdateTutorInformation(tutorInformationUpdate);
             return response;
         }
+
+        [HttpGet("count/subject/{tutorID}")]
+        public async Task<ActionResult<TutorCountSubjectResponse>> CountAllSubjectOfTutor(Guid tutorID)
+        {
+            var response = await _tutorDataService.CountAllSubjectOfTutor(tutorID);
+            return response;
+        }
     }
 }
