@@ -359,14 +359,10 @@ namespace Services.Implementations
                         .Select(t => new TutorCountSubjectResponse
                         {
                             TotalSubject = t.TutorSubjectsNavigation.Count(),
-                            avatarUrl = t.BookingsNavigation
-                          .Select(tr => tr.StudentNavigation.UserNavigation.ImageUrl)
-                          .Distinct()
-                          .ToList()
                         }).FirstOrDefaultAsync();
-                if (tutor.avatarUrl.Count == 0)
+                if (tutor.TotalSubject == 0)
                 {
-                    throw new CrudException(HttpStatusCode.OK, "Hiện tại không có học sinh nào đăng ký học với bạn!", "");
+                    throw new CrudException(HttpStatusCode.NoContent,"No Subjects","");
                 }
                 return tutor;
             }

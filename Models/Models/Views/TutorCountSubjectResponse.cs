@@ -9,6 +9,5 @@ namespace Models.Models.Views
     public class TutorCountSubjectResponse
     {
         public int TotalSubject { get; set; }
-        public List<string> avatarUrl { get; set; }
     }
 }

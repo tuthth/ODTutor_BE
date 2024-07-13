@@ -22,7 +22,7 @@ namespace API.Controllers
             var rs = await _accountService.createAccount(accountRegisterRequest);
             if (rs is StatusCodeResult statusCodeResult)
             {
-                if (statusCodeResult.StatusCode == 201) { return StatusCode(StatusCodes.Status201Created, new { Message = "Tài khoản được tạo thành công" }); }
+                if (statusCodeResult.StatusCode == 201) { return StatusCode(StatusCodes.Status201Created, new { Message = "Tài khoản được tạo thành công"}); }
                 else if (statusCodeResult.StatusCode == 400) { return BadRequest(new { Message = "Tài khoản đã tồn tại" }); }
                 else if (statusCodeResult.StatusCode == 409) { return Conflict(new { Message = "Email đã đăng kí trước đó, vui lòng kiểm tra" }); }
             }
