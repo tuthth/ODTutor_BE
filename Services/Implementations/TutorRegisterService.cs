@@ -954,7 +954,8 @@ namespace Services.Implementations
                 foreach (var subject in tutorSubjects)
                 {
                     response.Add(new TutorSubjectListResponse
-                    {
+                    {   
+                        TutorSubjectId = subject.TutorSubjectId,
                         SubjectName = subject.SubjectNavigation.Title,
                         SubjectDescription = subject.SubjectNavigation.Content,
                         CreatedDate = subject.CreatedAt

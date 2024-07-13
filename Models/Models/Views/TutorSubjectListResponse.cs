@@ -8,7 +8,8 @@ using System.Threading.Tasks;
 namespace Models.Models.Views
 {
     public class TutorSubjectListResponse
-    {
+    {   
+        public Guid TutorSubjectId { get; set; }
         public string SubjectName { get; set; }
         public string SubjectDescription { get; set; }
         public DateTime CreatedDate { get; set; }
