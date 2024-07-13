@@ -32,5 +32,8 @@ namespace Services.Interfaces
         Task<ActionResult<TutorRegisterStep6Response>> GetTutorStep6TutorID(Guid tutorID);
         Task<ActionResult<PageResults<TutorAction>>> GetTutorActionByTutorId(Guid id, int size, int pageSize);
         Task<ActionResult<TutorAction>> GetTutorActionById(Guid id);
+        Task<IActionResult> CreateTutorSubjectList(TutorSubjectRegisterRequest request);
+        Task<ActionResult<PageResults<TutorSubjectListResponse>>> GetTutorSubjectList(Guid tutorID, int size, int Pagesize);
+        Task<IActionResult> RemoveTutorSubject(Guid tutorID, Guid subjectID);
     }   
 }

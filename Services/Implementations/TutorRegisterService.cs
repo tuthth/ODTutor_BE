@@ -894,5 +894,111 @@ namespace Services.Implementations
             }
             return date.AddDays(daysUntilMonday);
         }
+
+        // Create Tutor Subject List
+        public async Task<IActionResult> CreateTutorSubjectList(TutorSubjectRegisterRequest request)
+        {
+            try
+            {
+                List<TutorSubject> tutorSubjects = new List<TutorSubject>();
+                foreach (var subjectID in request.SubjectList)
+                {
+                    TutorSubject tutorSubject = new TutorSubject();
+                    tutorSubject.TutorSubjectId = Guid.NewGuid();
+                    tutorSubject.TutorId = request.TutorId;
+                    tutorSubject.SubjectId = subjectID;
+                    tutorSubject.CreatedAt = DateTime.UtcNow.AddHours(7);
+                    tutorSubjects.Add(tutorSubject);
+                }
+                // Kiểm tra tutor có bị trùng môn đăng kí không
+                var tutorSubjectList = await _context.TutorSubjects.Where(ts => ts.TutorId == request.TutorId).ToListAsync();
+                foreach (var subject in tutorSubjects)
+                {
+                    foreach (var tutorSubject in tutorSubjectList)
+                    {
+                        if (subject.SubjectId == tutorSubject.SubjectId)
+                        {
+                            throw new CrudException(HttpStatusCode.BadRequest, "Bạn đã đăng kí môn học này rồi", "");
+                        }
+                    }
+                }
+                if (tutorSubjects.Count < 0)
+                {
+                    throw new CrudException(HttpStatusCode.BadRequest, "You have to choose at least 1 subject", "");
+                }
+                else
+                {
+                    _context.TutorSubjects.AddRange(tutorSubjects);
+                    await _context.SaveChangesAsync();
+                }
+                throw new CrudException(HttpStatusCode.Created,"Bạn đã tạo môn học thành công","");
+            }
+            catch (CrudException ex)
+            {
+                throw ex;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.ToString());
+            }
+        }
+
+        // Get Tutor Subject List and Paging
+        public async Task<ActionResult<PageResults<TutorSubjectListResponse>>> GetTutorSubjectList(Guid tutorID , int size , int Pagesize)
+        {
+            List<TutorSubject> tutorSubjects = new List<TutorSubject>();
+            try
+            {
+                tutorSubjects = await _context.TutorSubjects.Where(ts => ts.TutorId == tutorID).Include(ts => ts.SubjectNavigation).ToListAsync();
+                List<TutorSubjectListResponse> response = new List<TutorSubjectListResponse>();
+                foreach (var subject in tutorSubjects)
+                {
+                    response.Add(new TutorSubjectListResponse
+                    {
+                        SubjectName = subject.SubjectNavigation.Title,
+                        SubjectDescription = subject.SubjectNavigation.Content,
+                        CreatedDate = subject.CreatedAt
+                    });
+                }
+                if(response.Count == 0)
+                {
+                    throw new CrudException(HttpStatusCode.OK, "Không tìm thấy môn học của gia sư", "");
+                }
+                var pageResults = PagingHelper<TutorSubjectListResponse>.Paging(response, size, Pagesize);
+                return pageResults;
+            }
+            catch(CrudException ex)
+            {
+                throw ex;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
+        // Remove Tutor Subject
+        public async Task<IActionResult> RemoveTutorSubject(Guid tutorID, Guid subjectID)
+        {
+            try
+            {
+                var tutorSubject = await _context.TutorSubjects.Where(ts => ts.TutorId == tutorID && ts.SubjectId == subjectID).FirstOrDefaultAsync();
+                if (tutorSubject == null)
+                {
+                    throw new CrudException(HttpStatusCode.OK, "Không tìm thấy môn học của gia sư", "");
+                }
+                _context.TutorSubjects.Remove(tutorSubject);
+                await _context.SaveChangesAsync();
+                throw new CrudException(HttpStatusCode.OK, "Xóa môn học thành công", "");
+            }
+            catch(CrudException ex)
+            {
+                throw ex;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
     }
 }

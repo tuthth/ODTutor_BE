@@ -9,6 +9,7 @@ using Emgu.CV.CvEnum;
 using Emgu.CV.Util;
 using System.Drawing;
 using AutoMapper;
+using System.Drawing.Printing;
 
 namespace API.Controllers
 {
@@ -304,6 +305,36 @@ namespace API.Controllers
         {
             var result = await _tutorRegisterService.GetTutorStep6TutorID(tutorID);
             return result;
+        }
+
+        /// <summary>
+        ///  Đăng kí môn học cho tutor
+        /// </summary>
+        [HttpPost("register/subject")]
+        public async Task<IActionResult> createTutorSubjectList([FromBody] TutorSubjectRegisterRequest request)
+        {
+            var response = await _tutorRegisterService.CreateTutorSubjectList(request);
+            return response;
+        }
+
+        /// <summary>
+        /// Lấy danh sach môn học của tutor
+        /// </summary>
+        [HttpGet("get/tutor-subject")]
+        public async Task<ActionResult<PageResults<TutorSubjectListResponse>>> getTutorSubjectList(Guid tutorID, int size, int pageSize)
+        {
+            var result = await _tutorRegisterService.GetTutorSubjectList(tutorID, size, pageSize);
+            return result;
+        }
+
+        /// <summary>
+        /// Xóa môn học dành cho tutor
+        /// </summary>
+        [HttpDelete("remove/tutor-subject/{tutorID}/{subjectID}")]
+        public async Task<IActionResult> removeTutorSubject(Guid tutorID, Guid subjectID)
+        {
+            var response = await _tutorRegisterService.RemoveTutorSubject(tutorID, subjectID);
+            return response;
         }
     }
 
