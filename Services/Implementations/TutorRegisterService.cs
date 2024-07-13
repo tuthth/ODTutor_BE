@@ -983,7 +983,7 @@ namespace Services.Implementations
         {
             try
             {
-                var tutorSubject = await _context.TutorSubjects.Where(ts => ts.TutorId == tutorID && ts.SubjectId == subjectID).FirstOrDefaultAsync();
+                var tutorSubject = await _context.TutorSubjects.Where(ts => ts.TutorId == tutorID && ts.TutorSubjectId == subjectID).FirstOrDefaultAsync();
                 if (tutorSubject == null)
                 {
                     throw new CrudException(HttpStatusCode.OK, "Không tìm thấy môn học của gia sư", "");
