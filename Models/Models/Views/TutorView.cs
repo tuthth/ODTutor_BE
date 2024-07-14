@@ -11,7 +11,6 @@ namespace Models.Models.Views
         public Guid TutorId { get; set; }
         public Guid UserId { get; set; }
         public string IdentityNumber { get; set; }
-        public string Level { get; set; }
         public decimal? PricePerHour { get; set; }
         public string Description { get; set; }
         public int Status { get; set; }

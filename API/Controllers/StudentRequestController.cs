@@ -217,5 +217,17 @@ namespace API.Controllers
             return Ok(result);
         }
 
+        /// <summary>
+        /// Get Tutor List Based On Subject In Student Request
+        /// </summary>
+        /// <param name="subjectId"></param>
+        /// <returns></returns>
+        [HttpGet("get/list/tutor")]
+        public async Task<ActionResult<List<TutorView>>> GetListTutorBasedOnSubject([FromQuery] List<Guid> subjectId)
+        {
+            var response = await _studentRequestService.GetListTutorBasedOnSubject(subjectId);
+            return response;
+        }
+
     }
 }

@@ -314,6 +314,7 @@ namespace Services.Implementations
                 throw new CrudException(HttpStatusCode.InternalServerError, ex.Message, "");
             }
         }
+
         public async Task<ActionResult<PageResults<StudentRequest>>> GetAllStudentRequestsPaging(PagingRequest request)
         {
             try
@@ -341,7 +342,39 @@ namespace Services.Implementations
             }
         }
 
-
-
+        // Get Tutor List Based On Subject
+        public async Task<ActionResult<List<TutorView>>> GetListTutorBasedOnSubject(List<Guid> subjectId)
+        {
+            try
+            {
+                var tutorListView = _context.TutorSubjects
+                    .Where(ts => subjectId.Contains(ts.SubjectId))
+                    .Select(ts => new TutorView
+                    {
+                        TutorId = ts.TutorId,
+                        UserId = ts.TutorNavigation.UserId,
+                        IdentityNumber = ts.TutorNavigation.IdentityNumber,
+                        PricePerHour = ts.TutorNavigation.PricePerHour,
+                        Description = ts.TutorNavigation.Description,
+                        Status = ts.TutorNavigation.Status,
+                        CreateAt = ts.TutorNavigation.CreateAt,
+                        UpdateAt = ts.TutorNavigation.UpdateAt,
+                        VideoUrl = ts.TutorNavigation.VideoUrl
+                    }).ToList();
+                if (tutorListView.Count == 0)
+                {
+                    throw new CrudException(HttpStatusCode.NoContent, "No Tutor Found", "");
+                }
+                return tutorListView;
+            }
+            catch (CrudException ex)
+            {
+                throw ex;
+            }
+            catch (Exception ex)
+            {
+                throw new CrudException(HttpStatusCode.InternalServerError, "Get List Tutor Based On Subject Error", ex.Message);
+            }
+        }
     }
 }
