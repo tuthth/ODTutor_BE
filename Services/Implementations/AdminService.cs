@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Models.Entities;
+using Models.Enumerables;
 using Models.Models.Requests;
 using Models.Models.Views;
 using Models.PageHelper;
@@ -12,7 +13,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using System.Web.Mvc;
+
 
 namespace Services.Implementations
 {
@@ -333,7 +334,6 @@ namespace Services.Implementations
                 throw new Exception(ex.ToString());
             }
         }
-
         public async Task<ActionResult<List<Moderator>>> GetModerators()
         {
             try
@@ -354,7 +354,7 @@ namespace Services.Implementations
         {
             try
             {
-                var moderator = await _context.Moderators.FirstOrDefaultAsync(c => c.ModeratorId == id || c.UserId == id );
+                var moderator = await _context.Moderators.FirstOrDefaultAsync(c => c.ModeratorId == id || c.UserId == id);
                 if (moderator == null)
                 {
                     return new StatusCodeResult(404);
@@ -398,6 +398,167 @@ namespace Services.Implementations
                 throw new Exception(ex.ToString());
             }
         }
-       
+        public async Task<IActionResult> GetStudentStatisticsByDayOfWeek()
+        {
+            try
+            {
+                var students = await _context.Students.Include(c => c.UserNavigation).ToListAsync();
+                if (students == null)
+                {
+                    return new StatusCodeResult(404);
+                }
+
+                var daysOfWeek = Enum.GetValues(typeof(DayOfWeek)).Cast<DayOfWeek>();
+
+                var studentsByDayAndTime = daysOfWeek.Select(day => new
+                {
+                    DayOfWeek = (int)day,
+                    StudentsRegisteredInMorning = students.Count(s => s.UserNavigation.CreatedAt.DayOfWeek == day && s.UserNavigation.CreatedAt.TimeOfDay < TimeSpan.FromHours(8)),
+                    StudentsRegisteredInAfternoon = students.Count(s => s.UserNavigation.CreatedAt.DayOfWeek == day && s.UserNavigation.CreatedAt.TimeOfDay >= TimeSpan.FromHours(8) && s.UserNavigation.CreatedAt.TimeOfDay < TimeSpan.FromHours(16)),
+                    StudentsRegisteredInEvening = students.Count(s => s.UserNavigation.CreatedAt.DayOfWeek == day && s.UserNavigation.CreatedAt.TimeOfDay >= TimeSpan.FromHours(16))
+                }).OrderBy(d => d.DayOfWeek).ToList();
+
+                return new JsonResult(new
+                {
+                    StudentsRegistered = students.Count,
+                    StudentsActive = students.Count(c => c.UserNavigation.Active),
+                    StudentsBanned = students.Count(c => c.UserNavigation.Banned),
+                    StudentsPremium = students.Count(c => c.UserNavigation.IsPremium == true),
+                    StudentsByDayAndTime = studentsByDayAndTime
+                });
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.ToString());
+            }
+        }
+        public async Task<IActionResult> GetStudentStatisticsByMonth()
+        {
+            try
+            {
+                var students = await _context.Students.Include(c => c.UserNavigation).ToListAsync();
+                if (students == null)
+                {
+                    return new StatusCodeResult(404);
+                }
+
+                var monthsOfYear = Enumerable.Range(1, 12);
+
+                var studentsByMonthAndTime = monthsOfYear.Select(month => new
+                {
+                    Month = month,
+                    StudentsRegisteredInMorning = students.Count(s => s.UserNavigation.CreatedAt.Month == month && s.UserNavigation.CreatedAt.TimeOfDay < TimeSpan.FromHours(8)),
+                    StudentsRegisteredInAfternoon = students.Count(s => s.UserNavigation.CreatedAt.Month == month && s.UserNavigation.CreatedAt.TimeOfDay >= TimeSpan.FromHours(8) && s.UserNavigation.CreatedAt.TimeOfDay < TimeSpan.FromHours(16)),
+                    StudentsRegisteredInEvening = students.Count(s => s.UserNavigation.CreatedAt.Month == month && s.UserNavigation.CreatedAt.TimeOfDay >= TimeSpan.FromHours(16))
+                }).OrderBy(d => d.Month).ToList();
+
+                return new JsonResult(new
+                {
+                    Year = DateTime.Now.Year,
+                    StudentsRegistered = students.Count,
+                    StudentsActive = students.Count(c => c.UserNavigation.Active),
+                    StudentsBanned = students.Count(c => c.UserNavigation.Banned),
+                    StudentsPremium = students.Count(c => c.UserNavigation.IsPremium),
+                    StudentsByMonthAndTime = studentsByMonthAndTime
+                });
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.ToString());
+            }
+        }
+        public async Task<IActionResult> GetBookingStatisticsByMonth()
+        {
+            try
+            {
+                var bookings = await _context.Bookings.Include(b => b.StudentNavigation).Include(b => b.TutorNavigation).ToListAsync();
+                if (bookings == null)
+                {
+                    return new StatusCodeResult(404);
+                }
+
+                var monthsOfYear = Enumerable.Range(1, 12);
+
+                var bookingsByMonthAndTime = monthsOfYear.Select(month => new
+                {
+                    Month = month,
+                    BookingsInMorning = bookings.Count(b => b.CreatedAt.Month == month && b.CreatedAt.TimeOfDay < TimeSpan.FromHours(8)),
+                    BookingsInAfternoon = bookings.Count(b => b.CreatedAt.Month == month && b.CreatedAt.TimeOfDay >= TimeSpan.FromHours(8) && b.CreatedAt.TimeOfDay < TimeSpan.FromHours(16)),
+                    BookingsInEvening = bookings.Count(b => b.CreatedAt.Month == month && b.CreatedAt.TimeOfDay >= TimeSpan.FromHours(16)),
+                    Finished = bookings.Count(b => b.CreatedAt.Month == month && b.Status == (Int32)BookingEnum.Finished),
+                    Cancelled = bookings.Count(b => b.CreatedAt.Month == month && b.Status == (Int32)BookingEnum.Cancelled),
+                    Success = bookings.Count(b => b.CreatedAt.Month == month && b.Status == (Int32)BookingEnum.Success),
+                    WaitForPayment = bookings.Count(b => b.CreatedAt.Month == month && b.Status == (Int32)BookingEnum.WaitingPayment),
+                    Learning = bookings.Count(b => b.CreatedAt.Month == month && b.Status == (Int32)BookingEnum.Learning)
+                }).OrderBy(d => d.Month).ToList();
+
+                return new JsonResult(new
+                {
+                    TotalBookings = bookings.Count,
+                    BookingsByMonthAndTime = bookingsByMonthAndTime
+                });
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.ToString());
+            }
+        }
+        public async Task<IActionResult> GetBookingTransactionStatisticsByMonth()
+        {
+            try
+            {
+                var bookingTransactions = await _context.BookingTransactions.Include(bt => bt.BookingNavigation).ToListAsync();
+                if (bookingTransactions == null)
+                {
+                    return new StatusCodeResult(404);
+                }
+
+                var monthsOfYear = Enumerable.Range(1, 12);
+
+                var transactionsByMonthAndTime = monthsOfYear.Select(month => new
+                {
+                    Month = month,
+                    TransactionsInMorning = bookingTransactions.Count(bt => bt.CreatedAt.Month == month && bt.Status == 0 && bt.CreatedAt.TimeOfDay < TimeSpan.FromHours(8)),
+                    TransactionsInAfternoon = bookingTransactions.Count(bt => bt.CreatedAt.Month == month && bt.Status == 0 && bt.CreatedAt.TimeOfDay >= TimeSpan.FromHours(8) && bt.CreatedAt.TimeOfDay < TimeSpan.FromHours(16)),
+                    TransactionsInEvening = bookingTransactions.Count(bt => bt.CreatedAt.Month == month && bt.Status == 0 && bt.CreatedAt.TimeOfDay >= TimeSpan.FromHours(16)),
+                    Approved = bookingTransactions.Count(bt => bt.CreatedAt.Month == month && bt.Status == (Int32)VNPayType.APPROVE),
+                    Pending = bookingTransactions.Count(bt => bt.CreatedAt.Month == month && bt.Status == (Int32)VNPayType.PENDING),
+                    Rejected = bookingTransactions.Count(bt => bt.CreatedAt.Month == month && bt.Status == (Int32)VNPayType.REJECT),
+                    TotalRevenues = bookingTransactions.Where(bt => bt.CreatedAt.Month == month && bt.Status == (Int32)VNPayType.APPROVE).Sum(bt => bt.Amount),
+                    TotalRevenuesInMorning = bookingTransactions.Where(bt => bt.CreatedAt.Month == month && bt.Status == (Int32)VNPayType.APPROVE && bt.CreatedAt.TimeOfDay < TimeSpan.FromHours(8)).Sum(bt => bt.Amount),
+                    TotalRevenuesInAfternoon = bookingTransactions.Where(bt => bt.CreatedAt.Month == month && bt.Status == (Int32)VNPayType.APPROVE && bt.CreatedAt.TimeOfDay >= TimeSpan.FromHours(8) && bt.CreatedAt.TimeOfDay < TimeSpan.FromHours(16)).Sum(bt => bt.Amount),
+                    TotalRevenuesInEvening = bookingTransactions.Where(bt => bt.CreatedAt.Month == month && bt.Status == (Int32)VNPayType.APPROVE && bt.CreatedAt.TimeOfDay >= TimeSpan.FromHours(16)).Sum(bt => bt.Amount),
+                    PendingRevenues = bookingTransactions.Where(bt => bt.CreatedAt.Month == month && bt.Status == (Int32)VNPayType.PENDING).Sum(bt => bt.Amount),
+                    PendingRevenuesInMorning = bookingTransactions.Where(bt => bt.CreatedAt.Month == month && bt.Status == (Int32)VNPayType.PENDING && bt.CreatedAt.TimeOfDay < TimeSpan.FromHours(8)).Sum(bt => bt.Amount),
+                    PendingRevenuesInAfternoon = bookingTransactions.Where(bt => bt.CreatedAt.Month == month && bt.Status == (Int32)VNPayType.PENDING && bt.CreatedAt.TimeOfDay >= TimeSpan.FromHours(8) && bt.CreatedAt.TimeOfDay < TimeSpan.FromHours(16)).Sum(bt => bt.Amount),
+                    PendingRevenuesInEvening = bookingTransactions.Where(bt => bt.CreatedAt.Month == month && bt.Status == (Int32)VNPayType.PENDING && bt.CreatedAt.TimeOfDay >= TimeSpan.FromHours(16)).Sum(bt => bt.Amount),
+                    RejectedRevenues = bookingTransactions.Where(bt => bt.CreatedAt.Month == month && bt.Status == (Int32)VNPayType.REJECT).Sum(bt => bt.Amount),
+                    RejectedRevenuesInMorning = bookingTransactions.Where(bt => bt.CreatedAt.Month == month && bt.Status == (Int32)VNPayType.REJECT && bt.CreatedAt.TimeOfDay < TimeSpan.FromHours(8)).Sum(bt => bt.Amount),
+                    RejectedRevenuesInAfternoon = bookingTransactions.Where(bt => bt.CreatedAt.Month == month && bt.Status == (Int32)VNPayType.REJECT && bt.CreatedAt.TimeOfDay >= TimeSpan.FromHours(8) && bt.CreatedAt.TimeOfDay < TimeSpan.FromHours(16)).Sum(bt => bt.Amount),
+                    RejectedRevenuesInEvening = bookingTransactions.Where(bt => bt.CreatedAt.Month == month && bt.Status == (Int32)VNPayType.REJECT && bt.CreatedAt.TimeOfDay >= TimeSpan.FromHours(16)).Sum(bt => bt.Amount)
+                }).OrderBy(d => d.Month).ToList();
+
+                return new JsonResult(new
+                {
+                    Year = DateTime.Now.Year,
+                    TotalTransactions = bookingTransactions.Count,
+                    ApprovedTransactions = bookingTransactions.Count(bt => bt.Status == (Int32)VNPayType.APPROVE),
+                    PendingTransactions = bookingTransactions.Count(bt => bt.Status == (Int32)VNPayType.PENDING),
+                    RejectedTransactions = bookingTransactions.Count(bt => bt.Status == (Int32)VNPayType.REJECT),
+                    TotalRevenues = bookingTransactions.Where(bt => bt.Status == (Int32)VNPayType.APPROVE).Sum(bt => bt.Amount),
+                    PendingRevenues = bookingTransactions.Where(bt => bt.Status == (Int32)VNPayType.PENDING).Sum(bt => bt.Amount),
+                    RejectedRevenues = bookingTransactions.Where(bt => bt.Status == (Int32)VNPayType.REJECT).Sum(bt => bt.Amount),
+                    TransactionsByMonthAndTime = transactionsByMonthAndTime
+                });
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.ToString());
+            }
+        }
+
+
+
+
     }
 }

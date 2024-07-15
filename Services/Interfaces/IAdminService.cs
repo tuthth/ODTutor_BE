@@ -35,5 +35,9 @@ namespace Services.Interfaces
         Task<ActionResult<Moderator>> GetModeratorById(Guid id);
         Task<ActionResult<List<Notification>>> GetNotifications();
         Task<ActionResult<List<Notification>>> GetNotificationsByUserId(Guid id);
+        Task<IActionResult> GetStudentStatisticsByDayOfWeek();
+        Task<IActionResult> GetStudentStatisticsByMonth();
+        Task<IActionResult> GetBookingStatisticsByMonth();
+        Task<IActionResult> GetBookingTransactionStatisticsByMonth();
     }
 }

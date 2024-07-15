@@ -490,6 +490,7 @@ namespace Services.Implementations
                 Status = transaction.Status
             });
         }
+        //chua lam chi tiet course
         public async Task<IActionResult> UpdateTransaction(Guid walletTransactionId, int choice, int updateStatus)
         {
             var wallet = await _context.WalletTransactions.FirstOrDefaultAsync(w => w.WalletTransactionId == walletTransactionId);
@@ -617,6 +618,8 @@ namespace Services.Implementations
                     _context.Notifications.Add(notification2);
                     _firebaseRealtimeDatabaseService.UpdateAsync<Models.Entities.Notification>($"notifications/{notification1.UserId}/{notification1.NotificationId}", notification1);
                     _firebaseRealtimeDatabaseService.UpdateAsync<Models.Entities.Notification>($"notifications/{notification2.UserId}/{notification2.NotificationId}", notification2);
+
+                    //student course: chua ro query
                 }
                 else if (choice == (Int32)UpdateTransactionType.Wallet)
                 {
@@ -670,6 +673,7 @@ namespace Services.Implementations
                     _firebaseRealtimeDatabaseService.UpdateAsync<Models.Entities.Notification>($"notifications/{notification1.UserId}/{notification1.NotificationId}", notification1);
                     _firebaseRealtimeDatabaseService.UpdateAsync<Models.Entities.Notification>($"notifications/{notification2.UserId}/{notification2.NotificationId}", notification2);
 
+                    //student course: chua ro query
                 }
                 else if (choice == (Int32)UpdateTransactionType.Unknown) { return new StatusCodeResult(406); }
             }
@@ -728,7 +732,7 @@ namespace Services.Implementations
                     _firebaseRealtimeDatabaseService.UpdateAsync<Models.Entities.Notification>($"notifications/{notification1.UserId}/{notification1.NotificationId}", notification1);
                     _firebaseRealtimeDatabaseService.UpdateAsync<Models.Entities.Notification>($"notifications/{notification2.UserId}/{notification2.NotificationId}", notification2);
                     var book = _context.Bookings.FirstOrDefault(b => b.BookingId == booking.BookingId);
-                    book.Status = (int)BookingEnum.Canceled;
+                    book.Status = (int)BookingEnum.Cancelled;
 
                     _context.Bookings.Update(book);
                 }
