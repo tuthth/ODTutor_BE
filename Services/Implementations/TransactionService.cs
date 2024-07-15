@@ -324,6 +324,15 @@ namespace Services.Implementations
             {
                 return new StatusCodeResult(404);
             }
+            var booking = _context.Bookings.FirstOrDefault(b => b.BookingId == transactionCreate.BookingId);
+            if (booking == null)
+            {
+                return new StatusCodeResult(404);
+            }
+            if(booking.Status != (int)BookingEnum.WaitingPayment)
+            {
+                return new StatusCodeResult(406);
+            }
             var senderWallet = _context.Wallets.Include(w => w.SenderCourseTransactionsNavigation.FirstOrDefault(w => w.SenderWalletId.Equals(transactionCreate.SenderId)));
             var receiverWallet = _context.Wallets.Include(w => w.ReceiverCourseTransactionsNavigation.FirstOrDefault(w => w.ReceiverWalletId.Equals(transactionCreate.ReceiverId)));
             if (senderWallet == null || receiverWallet == null)
@@ -409,6 +418,7 @@ namespace Services.Implementations
                 Status = transaction.Status
             });
         }
+        //chua xu ly chi tiet
         public async Task<IActionResult> CreateDepositVnPayCourse(CourseTransactionCreate transactionCreate)
         {
             var findUser = _context.Users.Include(u => u.WalletNavigation).FirstOrDefault(u => u.WalletNavigation.WalletId == transactionCreate.SenderId);
