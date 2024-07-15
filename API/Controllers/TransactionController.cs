@@ -29,7 +29,7 @@ namespace API.Controllers
         /// </summary>
         [HttpPost("wallet")]
         //[Authorize(Roles = "Student")]
-        public async Task<IActionResult> DepositVnpayBooking([FromBody] WalletTransactionCreate transactionCreate)
+        public async Task<IActionResult> DepositVnpayWallet([FromBody] WalletTransactionCreate transactionCreate)
         {
             var transaction = await _transactionService.CreateDepositToAccount(transactionCreate);
             if (transaction is IActionResult actionResult)
@@ -56,7 +56,7 @@ namespace API.Controllers
         /// <summary>
         ///         Transaction choice: 3 ( Premium ), not equal 3 == error 406
         /// </summary>
-        [HttpPatch("premium")]
+        [HttpPost("premium")]
         public async Task<IActionResult> UpgradeAccount([FromBody] WalletTransactionCreate transactionCreate)
         {
             var transaction = await _transactionService.UpgradeAccount(transactionCreate);

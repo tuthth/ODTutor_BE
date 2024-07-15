@@ -234,10 +234,14 @@ namespace Services.Implementations
             {
                 return new StatusCodeResult(406);
             }
-            var findUser = _context.Users.FirstOrDefault(u => u.Id == transactionCreate.SenderId);
+            var findUser = _context.Users.Include(u => u.WalletNavigation).FirstOrDefault(u => u.WalletNavigation.WalletId == transactionCreate.SenderId);
             if (findUser == null)
             {
                 return new StatusCodeResult(404);
+            }
+            if(findUser.IsPremium == true)
+            {
+                return new StatusCodeResult(409);
             }
             var senderWallet = _context.Wallets.Include(w => w.SenderCourseTransactionsNavigation.FirstOrDefault(w => w.SenderWalletId.Equals(transactionCreate.SenderId)));
             var receiverWallet = _context.Wallets.Include(w => w.ReceiverCourseTransactionsNavigation.FirstOrDefault(w => w.ReceiverWalletId.Equals(transactionCreate.ReceiverId)));
@@ -255,8 +259,30 @@ namespace Services.Implementations
                 Status = (int)VNPayType.APPROVE,
             };
             var receiveWallet = _context.Wallets.FirstOrDefault(w => w.WalletId == transactionCreate.ReceiverId);
-            receiveWallet.Amount += transactionCreate.Amount;
             var sendWallet = _context.Wallets.FirstOrDefault(w => w.WalletId == transactionCreate.SenderId);
+            if (sendWallet.Amount < transactionCreate.Amount)
+            {
+                await _appExtension.SendMail(new MailContent()
+                {
+                    To = findUser.Email,
+                    Subject = "Nâng cấp tài khoản",
+                    Body = "Giao dịch nâng cấp không hợp lệ, vui lòng kiểm tra lại số dư tài khoản."
+                });
+                var notificationError = new NotificationDTO
+                {
+                    NotificationId = Guid.NewGuid(),
+                    Title = "Giao dịch nâng cấp tài khoản",
+                    Content = "Giao dịch nâng cấp không hợp lệ, vui lòng kiểm tra lại số dư tài khoản.",
+                    UserId = findUser.Id,
+                    CreatedAt = DateTime.UtcNow.AddHours(7),
+                    Status = (int)NotificationEnum.UnRead
+                };
+                Models.Entities.Notification notification1 = _mapper.Map<Models.Entities.Notification>(notificationError);
+                _context.Notifications.Add(notification1);
+                _firebaseRealtimeDatabaseService.SetAsync<NotificationDTO>($"notifications/{notificationError.UserId}/{notificationError.NotificationId}", notificationError);
+                return new StatusCodeResult(409);
+            }
+            receiveWallet.Amount += transactionCreate.Amount;
             sendWallet.Amount -= transactionCreate.Amount;
 
             _context.WalletTransactions.Add(transaction);
@@ -283,13 +309,17 @@ namespace Services.Implementations
                 Subject = "Nâng cấp tài khoản",
                 Body = "Tài khoản của bạn đã được nâng cấp thành Premium. Hãy truy cập hệ thống để trải nghiệm đầy đủ tính năng. \nMã giao dịch: " + transaction.WalletTransactionId
             });
-            return new StatusCodeResult(200);
+            return new JsonResult(new
+            {
+                WalletTransactionId = transaction.WalletTransactionId,
+                Status = transaction.Status
+            });
         }
 
         public async Task<IActionResult> CreateDepositVnPayBooking(BookingTransactionCreate transactionCreate)
         {
             var user = _httpContextAccessor.HttpContext.User?.Claims?.FirstOrDefault(c => c.Type == "UserId")?.Value;
-            var findUser = _context.Users.FirstOrDefault(u => u.Id == transactionCreate.SenderId);
+            var findUser = _context.Users.Include(u => u.WalletNavigation).FirstOrDefault(u => u.WalletNavigation.WalletId == transactionCreate.SenderId);
             if (findUser == null)
             {
                 return new StatusCodeResult(404);
@@ -373,11 +403,15 @@ namespace Services.Implementations
                 Subject = "Xác nhận giao dịch",
                 Body = "Bạn đã tạo giao dịch booking với số tiền là " + transactionCreate.Amount + " VND. Vui lòng xác nhận giao dịch tại đây: " + transactionCreate.RedirectUrl
             });
-            return new StatusCodeResult(201);
+            return new JsonResult(new
+            {
+                BookingTransactionId = transaction.BookingTransactionId,
+                Status = transaction.Status
+            });
         }
         public async Task<IActionResult> CreateDepositVnPayCourse(CourseTransactionCreate transactionCreate)
         {
-            var findUser = _context.Users.FirstOrDefault(u => u.Id == transactionCreate.SenderId);
+            var findUser = _context.Users.Include(u => u.WalletNavigation).FirstOrDefault(u => u.WalletNavigation.WalletId == transactionCreate.SenderId);
             if (findUser == null)
             {
                 return new StatusCodeResult(404);
@@ -450,7 +484,11 @@ namespace Services.Implementations
                 Subject = "Xác nhận giao dịch",
                 Body = "Bạn đã tạo giao dịch course với số tiền là " + transactionCreate.Amount + " VND. Vui lòng xác nhận giao dịch tại đây: " + transactionCreate.RedirectUrl
             });
-            return new StatusCodeResult(201);
+            return new JsonResult(new
+            {
+                CourseTransactionId = transaction.CourseTransactionId,
+                Status = transaction.Status
+            });
         }
         public async Task<IActionResult> UpdateTransaction(Guid walletTransactionId, int choice, int updateStatus)
         {
