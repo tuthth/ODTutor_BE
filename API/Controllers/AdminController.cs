@@ -483,5 +483,65 @@ namespace API.Controllers
             if (result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
             throw new Exception("Lỗi không xác định");
         }
+        [HttpGet("get/booking-statistics/tutor/{tutorID}/month")]
+        public async Task<IActionResult> GetBookingStatisticsOf1TutorByMonth(Guid tutorID)
+        {
+            var result = await _adminService.GetBookingStatisticsOf1TutorByMonth(tutorID);
+            if (result is StatusCodeResult statusCodeResult)
+            {
+                if (statusCodeResult.StatusCode == 404) { return NotFound(new { Message = "Không tìm thấy thống kê đặt lịch của gia sư" }); }
+            }
+            if (result is JsonResult jsonResult)
+            {
+                return Ok(jsonResult.Value);
+            }
+            if (result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
+            throw new Exception("Lỗi không xác định");
+        }
+        [HttpGet("get/booking-statistics/top5-tutors/month")]
+        public async Task<IActionResult> GetBookingStatisticsTop5TutorsByMonth()
+        {
+            var result = await _adminService.GetBookingStatisticsTop5TutorsByMonth();
+            if (result is StatusCodeResult statusCodeResult)
+            {
+                if (statusCodeResult.StatusCode == 404) { return NotFound(new { Message = "Không tìm thấy thống kê đặt lịch của gia sư" }); }
+            }
+            if (result is JsonResult jsonResult)
+            {
+                return Ok(jsonResult.Value);
+            }
+            if (result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
+            throw new Exception("Lỗi không xác định");
+        }
+        [HttpGet("get/booking-transaction-statistics/tutor/{receiverID}/month")]
+        public async Task<IActionResult> GetBookingTransactionStatisticsOfATutorByMonth(Guid receiverID)
+        {
+            var result = await _adminService.GetBookingTransactionStatisticsOfATutorByMonth(receiverID);
+            if (result is StatusCodeResult statusCodeResult)
+            {
+                if (statusCodeResult.StatusCode == 404) { return NotFound(new { Message = "Không tìm thấy thống kê giao dịch đặt lịch của gia sư" }); }
+            }
+            if (result is JsonResult jsonResult)
+            {
+                return Ok(jsonResult.Value);
+            }
+            if (result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
+            throw new Exception("Lỗi không xác định");
+        }
+        [HttpGet("get/booking-transaction-statistics/top5-tutors/month")]
+        public async Task<IActionResult> GetBookingTransactionStatisticsTop5TutorsByMonth()
+        {
+            var result = await _adminService.GetBookingTransactionStatisticsTop5TutorsByMonth();
+            if (result is StatusCodeResult statusCodeResult)
+            {
+                if (statusCodeResult.StatusCode == 404) { return NotFound(new { Message = "Không tìm thấy thống kê giao dịch đặt lịch của gia sư" }); }
+            }
+            if (result is JsonResult jsonResult)
+            {
+                return Ok(jsonResult.Value);
+            }
+            if (result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
+            throw new Exception("Lỗi không xác định");
+        }
     }
 }

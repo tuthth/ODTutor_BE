@@ -39,5 +39,9 @@ namespace Services.Interfaces
         Task<IActionResult> GetStudentStatisticsByMonth();
         Task<IActionResult> GetBookingStatisticsByMonth();
         Task<IActionResult> GetBookingTransactionStatisticsByMonth();
+        Task<IActionResult> GetBookingStatisticsOf1TutorByMonth(Guid tutorId);
+        Task<IActionResult> GetBookingStatisticsTop5TutorsByMonth();
+        Task<IActionResult> GetBookingTransactionStatisticsOfATutorByMonth(Guid receiverId);
+        Task<IActionResult> GetBookingTransactionStatisticsTop5TutorsByMonth();
     }
 }
