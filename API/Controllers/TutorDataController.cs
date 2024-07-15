@@ -76,5 +76,15 @@ namespace API.Controllers
             var response = await _tutorDataService.CountAllSubjectOfTutor(tutorID);
             return response;
         }
+
+        /// <summary>
+        /// Thống kê ở trang tutor ( phần stats)
+        /// </summary>
+        [HttpGet("statistic/stats/{tutorID}")]
+        public async Task<ActionResult<TutorCountResponse>> CountTutorMoney(Guid tutorID)
+        {
+            var response = await _tutorDataService.CountTutorMoney(tutorID);
+            return response;
+        }
     }
 }
