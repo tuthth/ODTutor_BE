@@ -19,6 +19,7 @@ namespace Services.Interfaces
         Task<ActionResult<List<TutorScheduleResponse>>> GetAllTutorSlotRegistered(Guid tutorID);
         Task<IActionResult> UpdateTutorInformation(TutorInformationUpdate tutorInformationUpdate);
         Task<TutorCountSubjectResponse> CountAllSubjectOfTutor(Guid tutorID);
+        Task<TutorCountResponse> CountTutorMoney(Guid tutorID);
 
     }
 }

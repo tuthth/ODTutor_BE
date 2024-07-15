@@ -376,5 +376,52 @@ namespace Services.Implementations
             }
         }
 
+        // Count Tutor Money, Tutor Student ,Tutor completed hours, Tutor Course
+        public async Task<TutorCountResponse> CountTutorMoney(Guid tutorID)
+        {   
+            TutorCountResponse response  = new TutorCountResponse();
+            try
+            {   
+                // Get All Student 
+                var totalStudent = await _context.Bookings
+                    .Where(b => b.TutorId == tutorID && b.Status == (int)BookingEnum.Finished)
+                    .Select(b => b.StudentId)
+                    .Distinct()
+                    .CountAsync();
+                response.TutorStudent = totalStudent;
+
+                // Get All Hour
+                var totalHour = await _context.Bookings
+                    .Where(b => b.TutorId == tutorID && b.Status == (int)BookingEnum.Finished).CountAsync();
+                double totalHourDouble = (totalHour * 50)/60;
+                response.TutorHour = totalHourDouble;
+
+                // Get All Money
+                var totalMoneyBookingTransaction = await _context.BookingTransactions
+                    .Include(bt => bt.BookingNavigation)
+                    .Where(bt => bt.BookingNavigation.TutorId == tutorID && bt.BookingNavigation.Status == (int)BookingEnum.Finished)
+                    .SumAsync(bt => bt.Amount);
+                var totalMoneyCourseTransaction = await _context.CourseTransactions
+                    .Include(ct => ct.CourseNavigation)
+                    .Where(ct => ct.CourseNavigation.TutorId == tutorID)
+                    .SumAsync(ct => ct.Amount);
+                response.TutorMoney = totalMoneyBookingTransaction + totalMoneyCourseTransaction;
+
+                // Get All Course
+                var totalCourse = await _context.Courses
+                    .Where(c => c.TutorId == tutorID)
+                    .CountAsync();
+                return response;
+            }
+            catch (CrudException ex)
+            {
+                throw ex;
+            }
+            catch (Exception ex)
+            {
+                throw new CrudException(HttpStatusCode.InternalServerError, "Count Tutor Money Error", ex.Message);
+            }
+        }
+
     }
 }
