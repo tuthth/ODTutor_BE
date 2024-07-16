@@ -91,9 +91,29 @@ namespace API.Controllers
         ///  Lấy 5 sinh viên học nhiều nhất của tutor
         ///</summary>   
         [HttpGet("get/top5/{tutorID}")]
-        public async Task<ActionResult<List<StudentView>>> GetTop5StudentLearnMost(Guid tutorID)
+        public async Task<ActionResult<List<StudentStatisticView>>> GetTop5StudentLearnMost(Guid tutorID)
         {
             var response = await _tutorDataService.GetTop5StudentLearnMost(tutorID);
+            return response;
+        }
+
+        /// <summary>
+        /// Lấy số lượng sinh viên theo ngày trong tuần
+        /// </summary>
+        [HttpGet("get/dayofweek/{tutorID}")]
+        public async Task<ActionResult<List<StudentStatisticView>>> GetStudentStatisticByDayOfWeek(Guid tutorID, [FromQuery] int dayOfWeek)
+        {
+            var response = await _tutorDataService.GetStudentStatisticByDayOfWeek(tutorID, dayOfWeek);
+            return response;
+        }
+
+        /// <summary>
+        /// Lấy số lượng sinh viên theo tháng trong năm
+        ///</summary>
+        [HttpGet("get/monthofyear/{tutorID}")]
+        public async Task<ActionResult<List<StudentStatisticView>>> GetStudentStatisticByMonthOfYear(Guid tutorID, [FromQuery] int monthOfYear)
+        {
+            var response = await _tutorDataService.GetStudentStatisticByMonthOfYear(tutorID, monthOfYear);
             return response;
         }
     }

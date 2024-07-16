@@ -424,7 +424,7 @@ namespace Services.Implementations
         }
 
         // Get Top 5 Student Learn most of a tutor By tutor ID
-        public async Task<ActionResult<List<StudentView>>> GetTop5StudentLearnMost(Guid tutorID)
+        public async Task<ActionResult<List<StudentStatisticView>>> GetTop5StudentLearnMost(Guid tutorID)
         {
             try
             {
@@ -433,12 +433,12 @@ namespace Services.Implementations
                     .GroupBy(b => b.StudentId)
                     .OrderByDescending(b => b.Count())
                     .Take(5)
-                    .Select(b => new StudentView
+                    .Select(b => new StudentStatisticView
                     {
-                        StudentID = b.Key,
+                        StudentId = b.Key,
                         StudentName = b.FirstOrDefault().StudentNavigation.UserNavigation.Name,
                         StudentAvatar = b.FirstOrDefault().StudentNavigation.UserNavigation.ImageUrl,
-                        TotalHour = b.Count()
+                        TotalHours = b.Count()
                     }).ToListAsync();
                 return students;
             }
@@ -451,6 +451,69 @@ namespace Services.Implementations
                 throw new CrudException(HttpStatusCode.InternalServerError, "Get Top 5 Student Learn Most Error", ex.Message);
             }
         }
+
+        // Statistic all number of student who learn of a tutor and filtered by day in a week
+        public async Task<ActionResult<List<StudentStatisticView>>> GetStudentStatisticByDayOfWeek(Guid tutorID, int dayOfWeek)
+        {
+            try
+            {
+                var students = _context.Bookings
+                    .Where(b => b.TutorId == tutorID && b.Status == (int)BookingEnum.Finished)
+                    .AsEnumerable() // Chuyển đổi kết quả truy vấn thành một IEnumerable
+                    .Where(b => (int)b.CreatedAt.DayOfWeek == dayOfWeek) // Thực hiện lọc trong bộ nhớ
+                    .GroupBy(b => b.StudentId)
+                    .Select(b => new StudentStatisticView
+                    {
+                        StudentId = b.Key,
+                        StudentName = b.FirstOrDefault().StudentNavigation.UserNavigation.Name,
+                        StudentAvatar = b.FirstOrDefault().StudentNavigation.UserNavigation.ImageUrl,
+                        TotalHours = b.Count()
+                    }).ToList(); // Sử dụng ToList() thay vì ToListAsync()
+
+                return new ActionResult<List<StudentStatisticView>>(students);
+            }
+            catch (CrudException ex)
+            {
+                throw ex;
+            }
+            catch (Exception ex)
+            {
+                throw new CrudException(HttpStatusCode.InternalServerError, "Get Student Statistic By Day Of Week Error", ex.Message);
+            }
+        }
+
+        // Statistic all number of student who learn of a tutor and filtered by month in a year
+        public async Task<ActionResult<List<StudentStatisticView>>> GetStudentStatisticByMonthOfYear(Guid tutorID, int monthOfYear)
+        {
+            try
+            {
+                var students = _context.Bookings
+                    .Where(b => b.TutorId == tutorID && b.Status == (int)BookingEnum.Finished)
+                    .AsEnumerable() // Chuyển đổi kết quả truy vấn thành một IEnumerable
+                    .Where(b => b.CreatedAt.Month == monthOfYear) // Thực hiện lọc trong bộ nhớ
+                    .GroupBy(b => b.StudentId)
+                    .Select(b => new StudentStatisticView
+                    {
+                        StudentId = b.Key,
+                        StudentName = b.FirstOrDefault().StudentNavigation.UserNavigation.Name,
+                        StudentAvatar = b.FirstOrDefault().StudentNavigation.UserNavigation.ImageUrl,
+                        TotalHours = b.Count()
+                    }).ToList(); // Sử dụng ToList() thay vì ToListAsync()
+
+                return new ActionResult<List<StudentStatisticView>>(students);
+            }
+            catch (CrudException ex)
+            {
+                throw ex;
+            }
+            catch (Exception ex)
+            {
+                throw new CrudException(HttpStatusCode.InternalServerError, "Get Student Statistic By Month Of Year Error", ex.Message);
+            }
+        }
+
+
+
 
     }
 }
