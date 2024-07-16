@@ -20,6 +20,6 @@ namespace Services.Interfaces
         Task<IActionResult> UpdateTutorInformation(TutorInformationUpdate tutorInformationUpdate);
         Task<TutorCountSubjectResponse> CountAllSubjectOfTutor(Guid tutorID);
         Task<TutorCountResponse> CountTutorMoney(Guid tutorID);
-
+        Task<ActionResult<List<StudentView>>> GetTop5StudentLearnMost(Guid tutorID);
     }
 }

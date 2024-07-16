@@ -423,5 +423,34 @@ namespace Services.Implementations
             }
         }
 
+        // Get Top 5 Student Learn most of a tutor By tutor ID
+        public async Task<ActionResult<List<StudentView>>> GetTop5StudentLearnMost(Guid tutorID)
+        {
+            try
+            {
+                var students = await _context.Bookings
+                    .Where(b => b.TutorId == tutorID && b.Status == (int)BookingEnum.Finished)
+                    .GroupBy(b => b.StudentId)
+                    .OrderByDescending(b => b.Count())
+                    .Take(5)
+                    .Select(b => new StudentView
+                    {
+                        StudentID = b.Key,
+                        StudentName = b.FirstOrDefault().StudentNavigation.UserNavigation.Name,
+                        StudentAvatar = b.FirstOrDefault().StudentNavigation.UserNavigation.ImageUrl,
+                        TotalHour = b.Count()
+                    }).ToListAsync();
+                return students;
+            }
+            catch (CrudException ex)
+            {
+                throw ex;
+            }
+            catch (Exception ex)
+            {
+                throw new CrudException(HttpStatusCode.InternalServerError, "Get Top 5 Student Learn Most Error", ex.Message);
+            }
+        }
+
     }
 }

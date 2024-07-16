@@ -86,5 +86,15 @@ namespace API.Controllers
             var response = await _tutorDataService.CountTutorMoney(tutorID);
             return response;
         }
+
+        /// <summary>
+        ///  Lấy 5 sinh viên học nhiều nhất của tutor
+        ///</summary>   
+        [HttpGet("get/top5/{tutorID}")]
+        public async Task<ActionResult<List<StudentView>>> GetTop5StudentLearnMost(Guid tutorID)
+        {
+            var response = await _tutorDataService.GetTop5StudentLearnMost(tutorID);
+            return response;
+        }
     }
 }
