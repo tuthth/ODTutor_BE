@@ -324,6 +324,15 @@ namespace Services.Implementations
             {
                 return new StatusCodeResult(404);
             }
+            var booking = _context.Bookings.FirstOrDefault(b => b.BookingId == transactionCreate.BookingId);
+            if (booking == null)
+            {
+                return new StatusCodeResult(404);
+            }
+            if(booking.Status != (int)BookingEnum.WaitingPayment)
+            {
+                return new StatusCodeResult(406);
+            }
             var senderWallet = _context.Wallets.Include(w => w.SenderCourseTransactionsNavigation.FirstOrDefault(w => w.SenderWalletId.Equals(transactionCreate.SenderId)));
             var receiverWallet = _context.Wallets.Include(w => w.ReceiverCourseTransactionsNavigation.FirstOrDefault(w => w.ReceiverWalletId.Equals(transactionCreate.ReceiverId)));
             if (senderWallet == null || receiverWallet == null)
@@ -409,6 +418,7 @@ namespace Services.Implementations
                 Status = transaction.Status
             });
         }
+        //chua xu ly chi tiet
         public async Task<IActionResult> CreateDepositVnPayCourse(CourseTransactionCreate transactionCreate)
         {
             var findUser = _context.Users.Include(u => u.WalletNavigation).FirstOrDefault(u => u.WalletNavigation.WalletId == transactionCreate.SenderId);
@@ -490,6 +500,7 @@ namespace Services.Implementations
                 Status = transaction.Status
             });
         }
+        //chua lam chi tiet course
         public async Task<IActionResult> UpdateTransaction(Guid walletTransactionId, int choice, int updateStatus)
         {
             var wallet = await _context.WalletTransactions.FirstOrDefaultAsync(w => w.WalletTransactionId == walletTransactionId);
@@ -617,6 +628,8 @@ namespace Services.Implementations
                     _context.Notifications.Add(notification2);
                     _firebaseRealtimeDatabaseService.UpdateAsync<Models.Entities.Notification>($"notifications/{notification1.UserId}/{notification1.NotificationId}", notification1);
                     _firebaseRealtimeDatabaseService.UpdateAsync<Models.Entities.Notification>($"notifications/{notification2.UserId}/{notification2.NotificationId}", notification2);
+
+                    //student course: chua ro query
                 }
                 else if (choice == (Int32)UpdateTransactionType.Wallet)
                 {
@@ -670,6 +683,7 @@ namespace Services.Implementations
                     _firebaseRealtimeDatabaseService.UpdateAsync<Models.Entities.Notification>($"notifications/{notification1.UserId}/{notification1.NotificationId}", notification1);
                     _firebaseRealtimeDatabaseService.UpdateAsync<Models.Entities.Notification>($"notifications/{notification2.UserId}/{notification2.NotificationId}", notification2);
 
+                    //student course: chua ro query
                 }
                 else if (choice == (Int32)UpdateTransactionType.Unknown) { return new StatusCodeResult(406); }
             }
@@ -728,7 +742,7 @@ namespace Services.Implementations
                     _firebaseRealtimeDatabaseService.UpdateAsync<Models.Entities.Notification>($"notifications/{notification1.UserId}/{notification1.NotificationId}", notification1);
                     _firebaseRealtimeDatabaseService.UpdateAsync<Models.Entities.Notification>($"notifications/{notification2.UserId}/{notification2.NotificationId}", notification2);
                     var book = _context.Bookings.FirstOrDefault(b => b.BookingId == booking.BookingId);
-                    book.Status = (int)BookingEnum.Canceled;
+                    book.Status = (int)BookingEnum.Cancelled;
 
                     _context.Bookings.Update(book);
                 }

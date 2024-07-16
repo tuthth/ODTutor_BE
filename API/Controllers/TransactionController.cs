@@ -82,6 +82,12 @@ namespace API.Controllers
             }
             throw new Exception("Lỗi không xác định");
         }
+        /// <summary>
+        /// if booking status != 0, return 406
+        /// </summary>
+        /// <param name="transactionCreate"></param>
+        /// <returns></returns>
+        /// <exception cref="Exception"></exception>
         [HttpPost("booking")]
         //[Authorize(Roles = "Student")]
         public async Task<IActionResult> DepositVnpayBooking([FromBody] BookingTransactionCreate transactionCreate)
@@ -91,9 +97,10 @@ namespace API.Controllers
             {
                 if (actionResult is StatusCodeResult statusCodeResult)
                 {
-                    if (statusCodeResult.StatusCode == 404) { return NotFound(new { Message = "Không tìm thấy ví" }); }
+                    if (statusCodeResult.StatusCode == 404) { return NotFound(new { Message = "Không tìm thấy ví, hoặc lịch book" }); }
                     else if (statusCodeResult.StatusCode == 406) { return StatusCode(StatusCodes.Status406NotAcceptable, new { Message = "Giao dịch không rõ trạng thái" }); }
                     else if (statusCodeResult.StatusCode == 409) { return Conflict(new { Message = "Số dư tài khoản không đủ thực hiện giao dịch" }); }
+                    else if(statusCodeResult.StatusCode == 406) { return StatusCode(StatusCodes.Status406NotAcceptable, new { Message = "Booking này đã được xử lý trước đó, không thể thực hiện." }); }
                 }
                 if (actionResult is JsonResult okObjectResult)
                 {
