@@ -70,6 +70,7 @@ namespace Services.Implementations
                 account.Status = 1;
                 account.Banned = false;
                 account.Id = new Guid();
+                account.ImageUrl = "https://firebasestorage.googleapis.com/v0/b/capstone-c0906.appspot.com/o/defaultAva%2FDefaultAva.png?alt=media&token=7f4275d1-05c3-41ca-9ec4-091800bb5895";
                 _context.Users.Add(account);
                 _context.Students.Add(new Student
                 {

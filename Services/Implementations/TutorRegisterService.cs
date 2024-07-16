@@ -296,6 +296,35 @@ namespace Services.Implementations
                 throw new Exception(ex.ToString());
             }
         }
+/*        // Create Slots Based On Date, DayOfWeek, StartTime, EndTime
+        private async Task<List<TutorSlotAvailable>> generateSlotBasedOnProvidedDate(Guid tutorID, TutorRegistDate time)
+        {
+            List<TutorSlotAvailable> slotList = new List<TutorSlotAvailable>();
+            try
+            {
+                TimeSpan StartTime = time.StartTime;
+                TimeSpan EndTime = time.EndTime;
+                while (StartTime < EndTime)
+                {
+                    TutorSlotAvailable tutorSlot = new TutorSlotAvailable();
+                    tutorSlot.TutorSlotAvailableID = Guid.NewGuid();
+                    tutorSlot.TutorDateAvailableID = time.TutorDateAvailableID;
+                    tutorSlot.TutorID = tutorID;
+                    tutorSlot.StartTime = StartTime;
+                    tutorSlot.Status = (Int32)TutorSlotAvailabilityEnum.Available;
+                    tutorSlot.IsBooked = false;
+
+                    slotList.Add(tutorSlot);
+
+                    StartTime = StartTime.Add(new TimeSpan(1, 0, 0));
+
+                    // Check the time in next slot is over the end time 
+                    if (StartTime >= EndTime)
+                    {
+                        break;
+                    }
+                }
+            }*/
 
         // Create Tutor Schedule Part 2
         // Step 5: Create Schedule for Tutor
@@ -760,6 +789,7 @@ namespace Services.Implementations
                 throw new CrudException(HttpStatusCode.InternalServerError, ex.Message, "");
             }
         }
+
         /*-------Internal Site---------*/
 
         // Get All Tutor Subject List

@@ -221,5 +221,38 @@ namespace API.Controllers
             }
             throw new Exception("Lỗi không xác định");
         }
+
+        // Add Google Meet URL into Booking 
+        ////    
+        ///<summary>
+        /// Gắn đường link meet vô booking    
+        /// </summary>
+        [HttpPost("add/googlemeet/{bookingID}/{link}")]
+        public async Task<IActionResult> AddLinkMeeting(Guid bookingID, string link)
+        {
+            var result = await _bookingService.AddGoogleMeetUrl(bookingID, link);
+            return result;
+        }
+
+        ///<summary>
+        /// Lấy link booking 
+        /// </summary>
+
+        [HttpGet("get/googlemeet/{bookingID}")]
+        public async Task<ActionResult<string>> GetLinkMeeting(Guid bookingID)
+        {
+            var result = await _bookingService.GetGoogleMeetUrl(bookingID);
+            return result;
+        }
+
+        ///<summary>
+        /// Cập nhật link booking
+        /// </summary>
+        [HttpPut("update/googlemeet/{bookingID}/{link}")]
+        public async Task<IActionResult> UpdateLinkMeeting(Guid bookingID, string link)
+        {
+            var result = await _bookingService.UpdateGoogleMeetUrl(bookingID, link);
+            return result;
+        }
     }
 }

@@ -23,5 +23,8 @@ namespace Services.Interfaces
         Task<IActionResult> RemoveRating(Guid id);
         Task<IActionResult> StartLearning(Guid id);
         Task<IActionResult> FinishBooking(Guid id);
+        Task<IActionResult> AddGoogleMeetUrl(Guid bookingId, string meetingLink);
+        Task<ActionResult<string>> GetGoogleMeetUrl(Guid bookingId);
+        Task<IActionResult> UpdateGoogleMeetUrl(Guid bookingId, string meetingLink);
     }
 }

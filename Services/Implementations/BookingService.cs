@@ -434,5 +434,75 @@ namespace Services.Implementations
                 throw new Exception(ex.ToString());
             }
         }
+
+        // Add API Link To Booking 
+        public async Task<IActionResult> AddGoogleMeetUrl(Guid bookingId, string meetingLink)
+        {
+            try
+            {
+                var booking = _context.Bookings.FirstOrDefault(x => x.BookingId == bookingId);
+                if (booking == null)
+                {
+                    throw new CrudException(HttpStatusCode.NotFound, "Booking not found", "");
+                }
+                string decodedLink = Uri.UnescapeDataString(meetingLink);
+                booking.GoogleMeetUrl = decodedLink;
+                _context.Bookings.Update(booking);
+                await _context.SaveChangesAsync();
+                throw new CrudException(HttpStatusCode.OK, "Add Google Meet Url successfully", "");
+            }
+            catch (CrudException ex)
+            {
+                throw ex;
+            }
+            catch (Exception ex)
+            {
+                throw new CrudException(HttpStatusCode.InternalServerError, "", "");
+            }
+        }
+
+        // Get Link Meeting 
+        public async Task<ActionResult<string>> GetGoogleMeetUrl(Guid bookingId)
+        {
+            try
+            {
+                var booking = _context.Bookings.FirstOrDefault(x => x.BookingId == bookingId);
+                if (booking == null)
+                {
+                    return new StatusCodeResult(404);
+                }
+                return booking.GoogleMeetUrl;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.ToString());
+            }
+        }
+
+        // Update Booking Link Meeting 
+        public async Task<IActionResult> UpdateGoogleMeetUrl(Guid bookingId, string meetingLink)
+        {
+            try
+            {
+                var booking = _context.Bookings.FirstOrDefault(x => x.BookingId == bookingId);
+                if (booking == null)
+                {
+                    throw new CrudException(HttpStatusCode.NotFound, "Booking not found", "");
+                }
+                string decodeUrl = Uri.UnescapeDataString(meetingLink);
+                booking.GoogleMeetUrl = decodeUrl;
+                _context.Bookings.Update(booking);
+                await _context.SaveChangesAsync();
+                throw new CrudException(HttpStatusCode.OK, "Update Google Meet Url successfully", "");
+            }
+            catch (CrudException ex)
+            {
+                throw ex;
+            }
+            catch (Exception ex)
+            {
+                throw new CrudException(HttpStatusCode.InternalServerError, "", "");
+            }
+        }
     }
 }
