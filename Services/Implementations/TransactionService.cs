@@ -18,6 +18,7 @@ using NuGet.Protocol.Plugins;
 using Models.Models.Views;
 using Models.PageHelper;
 using FirebaseAdmin.Messaging;
+using System.Net;
 
 namespace Services.Implementations
 {
@@ -536,6 +537,7 @@ namespace Services.Implementations
 
                     _context.BookingTransactions.Update(booking);
                     _context.WalletTransactions.Update(wallet);
+                    
                     await _appExtension.SendMail(new MailContent()
                     {
                         To = sender.Email,

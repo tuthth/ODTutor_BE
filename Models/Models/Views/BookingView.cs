@@ -14,6 +14,7 @@ namespace Models.Models.Views
         public DateTime CreatedAt { get; set; }
         public TimeSpan Duration { get; set; }
         public DateTime ActualEndTime { get; set; }
+        public DateTime StudyTime { get; set; }
         public string? Message { get; set; }
         public decimal TotalPrice { get; set; }
         public int Status { get; set; }
