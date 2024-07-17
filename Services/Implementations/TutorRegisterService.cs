@@ -164,7 +164,7 @@ namespace Services.Implementations
 
         //Register Tutor Sub Information
         // Step 4: Get Sub Information
-        public async Task<IActionResult> RegisterSubTutorInformation( Guid tutorId, TutorSubInformationRequest tutorSubInformationRequest)
+        public async Task<IActionResult> RegisterSubTutorInformation(Guid tutorId, TutorSubInformationRequest tutorSubInformationRequest)
         {
             var tutor = await _context.Tutors.Where(x => x.TutorId == tutorId).FirstOrDefaultAsync();
             if (tutor == null)
@@ -296,35 +296,35 @@ namespace Services.Implementations
                 throw new Exception(ex.ToString());
             }
         }
-/*        // Create Slots Based On Date, DayOfWeek, StartTime, EndTime
-        private async Task<List<TutorSlotAvailable>> generateSlotBasedOnProvidedDate(Guid tutorID, TutorRegistDate time)
-        {
-            List<TutorSlotAvailable> slotList = new List<TutorSlotAvailable>();
-            try
-            {
-                TimeSpan StartTime = time.StartTime;
-                TimeSpan EndTime = time.EndTime;
-                while (StartTime < EndTime)
+        /*        // Create Slots Based On Date, DayOfWeek, StartTime, EndTime
+                private async Task<List<TutorSlotAvailable>> generateSlotBasedOnProvidedDate(Guid tutorID, TutorRegistDate time)
                 {
-                    TutorSlotAvailable tutorSlot = new TutorSlotAvailable();
-                    tutorSlot.TutorSlotAvailableID = Guid.NewGuid();
-                    tutorSlot.TutorDateAvailableID = time.TutorDateAvailableID;
-                    tutorSlot.TutorID = tutorID;
-                    tutorSlot.StartTime = StartTime;
-                    tutorSlot.Status = (Int32)TutorSlotAvailabilityEnum.Available;
-                    tutorSlot.IsBooked = false;
-
-                    slotList.Add(tutorSlot);
-
-                    StartTime = StartTime.Add(new TimeSpan(1, 0, 0));
-
-                    // Check the time in next slot is over the end time 
-                    if (StartTime >= EndTime)
+                    List<TutorSlotAvailable> slotList = new List<TutorSlotAvailable>();
+                    try
                     {
-                        break;
-                    }
-                }
-            }*/
+                        TimeSpan StartTime = time.StartTime;
+                        TimeSpan EndTime = time.EndTime;
+                        while (StartTime < EndTime)
+                        {
+                            TutorSlotAvailable tutorSlot = new TutorSlotAvailable();
+                            tutorSlot.TutorSlotAvailableID = Guid.NewGuid();
+                            tutorSlot.TutorDateAvailableID = time.TutorDateAvailableID;
+                            tutorSlot.TutorID = tutorID;
+                            tutorSlot.StartTime = StartTime;
+                            tutorSlot.Status = (Int32)TutorSlotAvailabilityEnum.Available;
+                            tutorSlot.IsBooked = false;
+
+                            slotList.Add(tutorSlot);
+
+                            StartTime = StartTime.Add(new TimeSpan(1, 0, 0));
+
+                            // Check the time in next slot is over the end time 
+                            if (StartTime >= EndTime)
+                            {
+                                break;
+                            }
+                        }
+                    }*/
 
         // Create Tutor Schedule Part 2
         // Step 5: Create Schedule for Tutor
@@ -431,7 +431,7 @@ namespace Services.Implementations
                 throw new Exception(ex.Message);
             }
         }
-        
+
         // Get All Tutor Information
         public async Task<ActionResult<List<TutorRegisterReponse>>> GetAllTutorRegisterInformation()
         {
@@ -598,10 +598,10 @@ namespace Services.Implementations
         public async Task<ActionResult<TutorRegisterStep1Response>> GetTutorStep1ByTutorID(Guid tutorID)
         {
             try
-            {   
+            {
                 TutorRegisterStep1Response response = new TutorRegisterStep1Response();
                 User user = await _context.Users.Where(x => x.TutorNavigation.TutorId == tutorID).FirstOrDefaultAsync();
-                if(user == null)
+                if (user == null)
                 {
                     throw new CrudException(HttpStatusCode.OK, "User not found", "");
                 }
@@ -614,7 +614,7 @@ namespace Services.Implementations
                 response.identifyNumber = tutor.IdentityNumber;
                 response.imageUrl = user.ImageUrl;
                 response.Name = user.Name;
-                response.Subjects =  await getAllSubjectOfTutor(tutorID);
+                response.Subjects = await getAllSubjectOfTutor(tutorID);
                 response.videoUrl = tutor.VideoUrl;
                 return response;
             }
@@ -628,7 +628,7 @@ namespace Services.Implementations
         public async Task<ActionResult<List<TutorRegisterStep2Response>>> GetTutorStep2ByTutorID(Guid tutorID)
         {
             try
-            {   
+            {
                 List<TutorRegisterStep2Response> response = new List<TutorRegisterStep2Response>();
                 User user = await _context.Users.Where(x => x.TutorNavigation.TutorId == tutorID).FirstOrDefaultAsync();
                 Tutor tutor = await _context.Tutors.Where(x => x.TutorId == tutorID).FirstOrDefaultAsync();
@@ -649,22 +649,24 @@ namespace Services.Implementations
                         EndYear = cert.EndYear
                     });
                 }
-                if(response.Count == 0)
+                if (response.Count == 0)
                 {
                     throw new CrudException(HttpStatusCode.OK, "Không ghi nhận chứng chỉ từ gia sư", "");
                 }
                 return response;
-            } catch (CrudException ex)
+            }
+            catch (CrudException ex)
             {
                 throw ex;
-            } catch (Exception ex)
+            }
+            catch (Exception ex)
             {
                 throw new CrudException(HttpStatusCode.InternalServerError, ex.Message, "");
             }
         }
 
         // Get Tutor Step 3 By Tutor ID
-        public async Task<ActionResult<List<TutorRegisterStep3Response>>> GetTutorStep3ByTutorID (Guid tutorID)
+        public async Task<ActionResult<List<TutorRegisterStep3Response>>> GetTutorStep3ByTutorID(Guid tutorID)
         {
             try
             {
@@ -697,14 +699,15 @@ namespace Services.Implementations
             catch (CrudException ex)
             {
                 throw ex;
-            } catch (Exception ex)
+            }
+            catch (Exception ex)
             {
                 throw new CrudException(HttpStatusCode.InternalServerError, ex.Message, "");
             }
         }
 
         // Get Tutor Step 4 By Tutor ID
-        public async Task<ActionResult<TutorRegisterStep4Response>> GetTutorStep4ByTutorID (Guid tutorID)
+        public async Task<ActionResult<TutorRegisterStep4Response>> GetTutorStep4ByTutorID(Guid tutorID)
         {
             try
             {
@@ -723,55 +726,66 @@ namespace Services.Implementations
             catch (CrudException ex)
             {
                 throw ex;
-            }catch(Exception ex)
+            }
+            catch (Exception ex)
             {
                 throw new CrudException(HttpStatusCode.InternalServerError, ex.Message, "");
             }
         }
 
         // Get Tutor Step 5 By TutorID
-        public async Task <ActionResult<List<TutorRegisterStep5Reponse>>> GetTutorStep5ByTutorID (Guid tutorID)
+        public async Task<ActionResult<List<TutorRegisterStep5Reponse>>> GetTutorStep5ByTutorID(Guid tutorID)
         {
+
             try
             {
                 List<TutorRegisterStep5Reponse> response = new List<TutorRegisterStep5Reponse>();
                 Tutor tutor = await _context.Tutors.Where(x => x.TutorId == tutorID).FirstOrDefaultAsync();
                 if (tutor == null)
                 {
-                    throw new CrudException(HttpStatusCode.OK, "Tutor not found", "");
+                    throw new CrudException(HttpStatusCode.NotFound, "Tutor not found", "");
                 }
-                List<TutorDateAvailable> tutorDateAvailableList = await _context.TutorDateAvailables.Where(x => x.TutorID == tutorID).ToListAsync();
-                if (tutorDateAvailableList.Count == 0)
+                List<TutorWeekAvailable> tutorWeekAvailableList = await _context.TutorWeekAvailables.Where(x => x.TutorId == tutorID).ToListAsync();
+                foreach (var week in tutorWeekAvailableList)
                 {
-                    throw new CrudException(HttpStatusCode.OK, "Chưa ghi nhận thời gian đăng ký của Tutor", "");
-                }
-                foreach (var date in tutorDateAvailableList)
-                {
-                    response.Add(new TutorRegisterStep5Reponse
+                    List<TutorDateAvailable> tutorDateAvailableList = await _context.TutorDateAvailables.Where(x => x.TutorWeekAvailableID == week.TutorWeekAvailableId).ToListAsync();
+                    foreach (var date in tutorDateAvailableList)
                     {
-                        dayOfWeek = date.DayOfWeek,
-                        startTime = date.StartTime,
-                        endTime = date.EndTime
-                    });
+                        List<TutorSlotAvailable> tutorSlotAvailables = await _context.TutorSlotAvailables.Where(x => x.TutorDateAvailableID == date.TutorDateAvailableID && x.Status == (Int32)TutorSlotAvailabilityEnum.Available && x.IsBooked == false).ToListAsync();
+                        foreach (var slot in tutorSlotAvailables)
+                        {
+                            response.Add(new TutorRegisterStep5Reponse
+                            {
+                                date = date.Date,
+                                dayOfWeek = date.DayOfWeek,
+                                startTime = slot.StartTime,
+                            });
+                        }
+                    }
+                }
+                if (response.Count == 0)
+                {
+                    throw new CrudException(HttpStatusCode.OK, "Chưa ghi nhận lịch học của gia sư", "");
                 }
                 return response;
-            } catch(CrudException ex)
+            }
+            catch (CrudException ex)
             {
                 throw ex;
-            } catch (Exception ex)
+            }
+            catch (Exception ex)
             {
                 throw new CrudException(HttpStatusCode.InternalServerError, ex.Message, "");
             }
         }
-
         // Get Tutor Step 6 By TutorID
-        public async Task <ActionResult<TutorRegisterStep6Response>> GetTutorStep6TutorID (Guid tutorID)
+        public async Task<ActionResult<TutorRegisterStep6Response>> GetTutorStep6TutorID(Guid tutorID)
         {
             try
             {
                 TutorRegisterStep6Response response = new TutorRegisterStep6Response();
                 Tutor tutor = await _context.Tutors.Where(x => x.TutorId == tutorID).FirstOrDefaultAsync();
-                if(tutor == null)
+                if (tutor == null)
                 {
                     throw new CrudException(HttpStatusCode.OK, "Tutor not found", "");
                 }
@@ -781,10 +795,12 @@ namespace Services.Implementations
                     throw new CrudException(HttpStatusCode.OK, "Chưa ghi nhận giá tiền đăng ký", "");
                 }
                 return response;
-            } catch (CrudException ex)
+            }
+            catch (CrudException ex)
             {
                 throw ex;
-            } catch (Exception ex)
+            }
+            catch (Exception ex)
             {
                 throw new CrudException(HttpStatusCode.InternalServerError, ex.Message, "");
             }
@@ -961,7 +977,7 @@ namespace Services.Implementations
                     _context.TutorSubjects.AddRange(tutorSubjects);
                     await _context.SaveChangesAsync();
                 }
-                throw new CrudException(HttpStatusCode.Created,"Bạn đã tạo môn học thành công","");
+                throw new CrudException(HttpStatusCode.Created, "Bạn đã tạo môn học thành công", "");
             }
             catch (CrudException ex)
             {
@@ -974,7 +990,7 @@ namespace Services.Implementations
         }
 
         // Get Tutor Subject List and Paging
-        public async Task<ActionResult<PageResults<TutorSubjectListResponse>>> GetTutorSubjectList(Guid tutorID , int size , int Pagesize)
+        public async Task<ActionResult<PageResults<TutorSubjectListResponse>>> GetTutorSubjectList(Guid tutorID, int size, int Pagesize)
         {
             List<TutorSubject> tutorSubjects = new List<TutorSubject>();
             try
@@ -984,21 +1000,21 @@ namespace Services.Implementations
                 foreach (var subject in tutorSubjects)
                 {
                     response.Add(new TutorSubjectListResponse
-                    {   
+                    {
                         TutorSubjectId = subject.TutorSubjectId,
                         SubjectName = subject.SubjectNavigation.Title,
                         SubjectDescription = subject.SubjectNavigation.Content,
                         CreatedDate = subject.CreatedAt
                     });
                 }
-                if(response.Count == 0)
+                if (response.Count == 0)
                 {
                     throw new CrudException(HttpStatusCode.OK, "Không tìm thấy môn học của gia sư", "");
                 }
                 var pageResults = PagingHelper<TutorSubjectListResponse>.Paging(response, size, Pagesize);
                 return pageResults;
             }
-            catch(CrudException ex)
+            catch (CrudException ex)
             {
                 throw ex;
             }
@@ -1022,7 +1038,7 @@ namespace Services.Implementations
                 await _context.SaveChangesAsync();
                 throw new CrudException(HttpStatusCode.OK, "Xóa môn học thành công", "");
             }
-            catch(CrudException ex)
+            catch (CrudException ex)
             {
                 throw ex;
             }

@@ -325,7 +325,9 @@ namespace Services.Implementations
             {
                 return new StatusCodeResult(404);
             }
-            var booking = _context.Bookings.FirstOrDefault(b => b.BookingId == transactionCreate.BookingId);
+            var booking = _context.Bookings
+                .Include(b => b.TutorNavigation)
+                .FirstOrDefault(b => b.BookingId == transactionCreate.BookingId);
             if (booking == null)
             {
                 return new StatusCodeResult(404);
@@ -393,7 +395,29 @@ namespace Services.Implementations
             _context.Wallets.Update(receiveWallet);
             _context.BookingTransactions.Add(transaction);
             _context.WalletTransactions.Add(senderTransaction);
-
+            // Changre status slot 
+            TimeSpan bookingTime = new TimeSpan(booking.StudyTime.Value.Hour, booking.StudyTime.Value.Minute, 0);
+            // Find the tutor available slot
+            DateTime bookingDate = booking.StudyTime.Value.Date;
+            TutorDateAvailable tutorDateAvailable = _context.TutorDateAvailables.FirstOrDefault(x => x.TutorID == booking.TutorNavigation.TutorId && x.Date.Date == bookingDate);
+            if (tutorDateAvailable == null)
+            {
+                throw new CrudException(HttpStatusCode.OK, "Tutor date available not found", "");
+            }
+            // Find the tutor slot available match the booking time
+            TutorSlotAvailable tutorSlotAvailable = _context.TutorSlotAvailables.FirstOrDefault(x => x.TutorDateAvailableID == tutorDateAvailable.TutorDateAvailableID && x.StartTime == bookingTime);
+            if (tutorSlotAvailable == null)
+            {
+                throw new CrudException(HttpStatusCode.OK, "Tutor slot available not found", "");
+            }
+            if (tutorSlotAvailable.IsBooked == true)
+            {
+                throw new CrudException(HttpStatusCode.Conflict, "Tutor slot available is booked", "");
+            }
+            tutorSlotAvailable.IsBooked = true;
+            tutorSlotAvailable.Status = (Int32)TutorSlotAvailabilityEnum.NotAvailable;
+            booking.Status = (Int32)TutorSlotAvailabilityEnum.NotAvailable;
+            await _context.SaveChangesAsync();
             var notification = new NotificationDTO
             {
                 NotificationId = Guid.NewGuid(),
@@ -572,9 +596,10 @@ namespace Services.Implementations
                     _context.Notifications.Add(notification2);
                     _firebaseRealtimeDatabaseService.UpdateAsync<Models.Entities.Notification>($"notifications/{notification1.UserId}/{notification1.NotificationId}", notification1);
                     _firebaseRealtimeDatabaseService.UpdateAsync<Models.Entities.Notification>($"notifications/{notification2.UserId}/{notification1.NotificationId}", notification2);
-                    var book = _context.Bookings.FirstOrDefault(b => b.BookingId == booking.BookingId);
+                    var book = _context.Bookings
+                        .Include(b => b.TutorNavigation)
+                        .FirstOrDefault(b => b.BookingId == booking.BookingId);
                     book.Status = (int)BookingEnum.Success;
-
                     _context.Bookings.Update(book);
                 }
                 else if (choice == (Int32)UpdateTransactionType.Course)

@@ -18,6 +18,8 @@ namespace Models.Entities
         public decimal ?TotalPrice { get; set; }
         public int Status { get; set; }
         public DateTime ?StudyTime { get;set; }
+        public DateTime? RescheduledTime { get; set; }
+        public bool? IsRescheduled { get;set; }
         public string? Description { get; set; }
         public string? GoogleMeetUrl {get; set;}
         public virtual Student? StudentNavigation {  get; set; }

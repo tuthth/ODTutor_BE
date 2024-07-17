@@ -504,5 +504,117 @@ namespace Services.Implementations
                 throw new CrudException(HttpStatusCode.InternalServerError, "", "");
             }
         }
+
+        // Dời lịch học
+        public async Task<IActionResult> RescheduleBooking(Guid bookingId, Guid senderId, DateTime newTime, string message)
+        {
+            try
+            {
+                var booking = _context.Bookings.FirstOrDefault(x => x.BookingId == bookingId);
+                if (booking == null)
+                {
+                    throw new CrudException(HttpStatusCode.NotFound, "Booking not found", "");
+                }
+                if (booking.Status == (Int32)BookingEnum.Finished)
+                {
+                    throw new CrudException(HttpStatusCode.Conflict, "Booking is finished", "");
+                }
+                if(booking.Status == (Int32)BookingEnum.WaittingConfirmRescheduleForTutor || booking.Status == (Int32)BookingEnum.WaittingConfirmRescheduleForStudent)
+                {
+                    throw new CrudException(HttpStatusCode.Conflict, "Booking is waiting for confirm reschedule", "");
+                } if(booking.Status == (Int32)BookingEnum.Cancelled)
+                {
+                    throw new CrudException(HttpStatusCode.Conflict, "Booking is cancelled", "");
+                }
+                if(booking.Status == (Int32)BookingEnum.WaitingPayment)
+                {
+                    throw new CrudException(HttpStatusCode.Conflict, "Booking is waiting for payment", "");
+                }
+                if (booking.IsRescheduled == true)
+                {
+                    throw new CrudException(HttpStatusCode.Conflict, "Booking is already rescheduled", "");
+                }
+                if (senderId == booking.StudentId)
+                {
+                    booking.Status = (Int32)BookingEnum.WaittingConfirmRescheduleForTutor;
+                }
+                else if (senderId == booking.TutorId)
+                {
+                    booking.Status = (Int32)BookingEnum.WaittingConfirmRescheduleForStudent;
+                }
+                booking.RescheduledTime = newTime;
+                booking.IsRescheduled = true;
+                booking.Message = message;
+                _context.Bookings.Update(booking);
+                await _context.SaveChangesAsync();
+                throw new CrudException(HttpStatusCode.OK, "Reschedule booking successfully", "");
+            }
+            catch (CrudException ex)
+            {
+                throw ex;
+            }
+            catch (Exception ex)
+            {
+                throw new CrudException(HttpStatusCode.InternalServerError, "", "");
+            }
+        }
+
+        // Xác nhận đổi lịch học 
+        public async Task<IActionResult> ConfirmRescheduleBooking(Guid bookingId)
+        {
+            try
+            {
+                var booking = _context.Bookings.FirstOrDefault(x => x.BookingId == bookingId);
+                if (booking == null)
+                {
+                    throw new CrudException(HttpStatusCode.NotFound, "Booking not found", "");
+                }
+                booking.Status = (Int32)BookingEnum.Success;
+                // Set Old Slot available for tutor when change booking time
+                TimeSpan bookingTime = new TimeSpan(booking.StudyTime.Value.Hour, booking.StudyTime.Value.Minute, 0);
+                Tutor tutor1 = _context.Tutors.FirstOrDefault(x => x.TutorId == booking.TutorId);
+                TutorDateAvailable tutorDateAvailable1 = _context.TutorDateAvailables.FirstOrDefault(x => x.TutorID == tutor1.TutorId && x.Date.Date == booking.StudyTime.Value.Date);
+                if (tutorDateAvailable1 == null)
+                {
+                    throw new CrudException(HttpStatusCode.OK, "Tutor date available not found", "");
+                }
+                TutorSlotAvailable tutorSlotAvailable1 = _context.TutorSlotAvailables.FirstOrDefault(x => x.TutorDateAvailableID == tutorDateAvailable1.TutorDateAvailableID && x.StartTime == bookingTime);
+                if (tutorSlotAvailable1 == null)
+                {
+                    throw new CrudException(HttpStatusCode.OK, "Tutor slot available not found", "");
+                }
+                tutorSlotAvailable1.IsBooked = false;
+                tutorSlotAvailable1.Status = (Int32)TutorSlotAvailabilityEnum.Available;
+                _context.TutorSlotAvailables.Update(tutorSlotAvailable1);
+                booking.StudyTime = booking.RescheduledTime;
+                _context.Bookings.Update(booking);
+                // Set Slot available for tutor when change booking time
+                Tutor tutor = _context.Tutors.FirstOrDefault(x => x.TutorId == booking.TutorId);
+                TutorDateAvailable tutorDateAvailable = _context.TutorDateAvailables.FirstOrDefault(x => x.TutorID == tutor.TutorId && x.Date.Date == booking.StudyTime.Value.Date);
+                if (tutorDateAvailable == null)
+                {
+                    throw new CrudException(HttpStatusCode.OK, "Tutor date available not found", "");
+                }
+                TutorSlotAvailable tutorSlotAvailable = _context.TutorSlotAvailables.FirstOrDefault(x => x.TutorDateAvailableID == tutorDateAvailable.TutorDateAvailableID && x.StartTime == booking.StudyTime.Value.TimeOfDay);
+                if (tutorSlotAvailable == null)
+                {
+                    throw new CrudException(HttpStatusCode.OK, "Tutor slot available not found", "");
+                }
+                tutorSlotAvailable.IsBooked = true;
+                tutorSlotAvailable.Status = (Int32)TutorSlotAvailabilityEnum.NotAvailable;
+
+                _context.TutorSlotAvailables.Update(tutorSlotAvailable);
+                await _context.SaveChangesAsync();
+                throw new CrudException(HttpStatusCode.OK, "Confirm reschedule booking successfully", "");
+            }
+            catch (CrudException ex)
+            {
+                throw ex;
+            }
+            catch (Exception ex)
+            {
+                throw new CrudException(HttpStatusCode.InternalServerError, "", "");
+            }
+        }
     }
 }

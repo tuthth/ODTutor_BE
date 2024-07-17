@@ -8,10 +8,9 @@ using System.Threading.Tasks;
 namespace Models.Models.Views
 {
     public class TutorRegisterStep5Reponse
-    {
+    {   
+        public DateTime? date { get; set; }
         public int? dayOfWeek { get; set; }
         public TimeSpan startTime { get; set; }
-        public TimeSpan endTime { get; set; }
-
     }
 }

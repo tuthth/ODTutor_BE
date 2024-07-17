@@ -99,7 +99,7 @@ namespace API.Controllers
         }
 
         /// <summary>
-        ///         Booking status: 1 ( Learning ), 2 ( Finsihed ), 3 ( Deleted ), 4 ( Success ), 0 ( Wait for payment ). Dùng 0 với 4 cho lúc thanh toán.
+        ///         Booking status: 1 ( Learning ), 2 ( Finsihed ), 3 ( Deleted ), 4 ( Success ), 0 ( Wait for payment ), 5 ( WaitingReschdeduleForStudent), 6 ( WaitingReschdeuleForTutor). Dùng 0 với 4 cho lúc thanh toán.
         /// </summary>
         [HttpPost("create/booking")]
         public async Task<IActionResult> CreateBooking(BookingRequest bookingRequest)
@@ -252,6 +252,26 @@ namespace API.Controllers
         public async Task<IActionResult> UpdateLinkMeeting(Guid bookingID, string link)
         {
             var result = await _bookingService.UpdateGoogleMeetUrl(bookingID, link);
+            return result;
+        }
+
+        ///<summary>
+        /// Dời Lịch học 
+        ///// <summary>
+        [HttpPost("reschedule/booking/{bookingID}/{senderID}/{newTime}/{message}")]
+        public async Task<IActionResult> RescheduleBooking(Guid bookingID, Guid senderID, DateTime newTime, string message)
+        {
+            var result = await _bookingService.RescheduleBooking(bookingID, senderID, newTime, message);
+            return result;
+        }
+
+        ///<summary>
+        /// Xác nhận dời lịch học 
+        /// </summary>
+        [HttpPut("confirm/reschedule/{bookingID}")]
+        public async Task<IActionResult> ConfirmRescheduleBooking(Guid bookingID)
+        {
+            var result = await _bookingService.ConfirmRescheduleBooking(bookingID);
             return result;
         }
     }
