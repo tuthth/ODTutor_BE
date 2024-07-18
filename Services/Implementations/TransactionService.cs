@@ -240,7 +240,7 @@ namespace Services.Implementations
             {
                 return new StatusCodeResult(404);
             }
-            if(findUser.IsPremium == true)
+            if (findUser.IsPremium == true)
             {
                 return new StatusCodeResult(409);
             }
@@ -319,7 +319,7 @@ namespace Services.Implementations
 
         public async Task<IActionResult> CreateDepositVnPayBooking(BookingTransactionCreate transactionCreate)
         {
-                var user = _httpContextAccessor.HttpContext.User?.Claims?.FirstOrDefault(c => c.Type == "UserId")?.Value;
+            var user = _httpContextAccessor.HttpContext.User?.Claims?.FirstOrDefault(c => c.Type == "UserId")?.Value;
             var findUser = _context.Users.Include(u => u.WalletNavigation).FirstOrDefault(u => u.WalletNavigation.WalletId == transactionCreate.SenderId);
             if (findUser == null)
             {
@@ -332,7 +332,7 @@ namespace Services.Implementations
             {
                 return new StatusCodeResult(404);
             }
-            if(booking.Status != (int)BookingEnum.WaitingPayment)
+            if (booking.Status != (int)BookingEnum.WaitingPayment)
             {
                 return new StatusCodeResult(406);
             }
@@ -402,17 +402,17 @@ namespace Services.Implementations
             TutorDateAvailable tutorDateAvailable = _context.TutorDateAvailables.FirstOrDefault(x => x.TutorID == booking.TutorNavigation.TutorId && x.Date.Date == bookingDate);
             if (tutorDateAvailable == null)
             {
-                throw new CrudException(HttpStatusCode.OK, "Tutor date available not found", "");
+                return new StatusCodeResult(452);
             }
             // Find the tutor slot available match the booking time
             TutorSlotAvailable tutorSlotAvailable = _context.TutorSlotAvailables.FirstOrDefault(x => x.TutorDateAvailableID == tutorDateAvailable.TutorDateAvailableID && x.StartTime == bookingTime);
             if (tutorSlotAvailable == null)
             {
-                throw new CrudException(HttpStatusCode.OK, "Tutor slot available not found", "");
+                return new StatusCodeResult(453);
             }
             if (tutorSlotAvailable.IsBooked == true)
             {
-                throw new CrudException(HttpStatusCode.Conflict, "Tutor slot available is booked", "");
+                return new StatusCodeResult(454);
             }
             tutorSlotAvailable.IsBooked = true;
             tutorSlotAvailable.Status = (Int32)TutorSlotAvailabilityEnum.NotAvailable;
@@ -561,7 +561,7 @@ namespace Services.Implementations
 
                     _context.BookingTransactions.Update(booking);
                     _context.WalletTransactions.Update(wallet);
-                    
+
                     await _appExtension.SendMail(new MailContent()
                     {
                         To = sender.Email,
@@ -878,18 +878,18 @@ namespace Services.Implementations
                 }
                 else if (choice == (Int32)UpdateTransactionType.Unknown) { return new StatusCodeResult(406); }
             }
-            else if (updateStatus == (Int32)VNPayType.CANCLED)
+            else if (updateStatus == (Int32)VNPayType.CANCELLED)
             {
                 if (choice == (Int32)UpdateTransactionType.Booking)
                 {
-                    wallet.Status = (int)VNPayType.CANCLED;
+                    wallet.Status = (int)VNPayType.CANCELLED;
                     var booking = _context.BookingTransactions.FirstOrDefault(b => b.BookingTransactionId == wallet.WalletTransactionId);
                     // Check the time when start boooking and when cancle booking (if more 12 hours can't cancle)
                     if (booking.CreatedAt.AddHours(12) < DateTime.UtcNow.AddHours(7))
-                    {   
+                    {
                         return new StatusCodeResult(204);
                     }
-                    booking.Status = (int)VNPayType.CANCLED;
+                    booking.Status = (int)VNPayType.CANCELLED;
 
                     //update wallet for sender and receiver
                     wallet.SenderWalletNavigation.LastBalanceUpdate = DateTime.UtcNow.AddHours(7);
@@ -907,20 +907,20 @@ namespace Services.Implementations
                         .Include(b => b.TutorNavigation)
                         .FirstOrDefault(b => b.BookingId == booking.BookingId);
                     book.Status = (int)BookingEnum.Cancelled;
-                    // Change the status Slot of Booking Cancled
+                    // Change the status Slot of Booking Cancelled
                     TimeSpan bookingTime = new TimeSpan(book.StudyTime.Value.Hour, book.StudyTime.Value.Minute, 0);
                     // Find the tutor available slot
                     DateTime bookingDate = book.StudyTime.Value.Date;
                     TutorDateAvailable tutorDateAvailable = _context.TutorDateAvailables.FirstOrDefault(x => x.TutorID == book.TutorNavigation.TutorId && x.Date.Date == bookingDate);
                     if (tutorDateAvailable == null)
                     {
-                        throw new CrudException(HttpStatusCode.OK, "Tutor date available not found", "");
+                        return new StatusCodeResult(452);
                     }
                     // Find the tutor slot available match the booking time
                     TutorSlotAvailable tutorSlotAvailable = _context.TutorSlotAvailables.FirstOrDefault(x => x.TutorDateAvailableID == tutorDateAvailable.TutorDateAvailableID && x.StartTime == bookingTime);
                     if (tutorSlotAvailable == null)
                     {
-                        throw new CrudException(HttpStatusCode.OK, "Tutor slot available not found", "");
+                        return new StatusCodeResult(453);
                     }
                     tutorSlotAvailable.IsBooked = false;
                     tutorSlotAvailable.Status = (Int32)TutorSlotAvailabilityEnum.Available;
@@ -1194,6 +1194,22 @@ namespace Services.Implementations
                 }
 
                 return paginatedBookingTransactions;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.ToString());
+            }
+        }
+        public async Task<ActionResult<BookingTransaction>> GetBookingTransactionByBookingId(Guid bookingId)
+        {
+            try
+            {
+                var bookingTransaction = _context.BookingTransactions.FirstOrDefault(c => c.BookingId == bookingId);
+                if (bookingTransaction == null)
+                {
+                    return new StatusCodeResult(404);
+                }
+                return bookingTransaction;
             }
             catch (Exception ex)
             {

@@ -101,6 +101,9 @@ namespace API.Controllers
                     else if (statusCodeResult.StatusCode == 406) { return StatusCode(StatusCodes.Status406NotAcceptable, new { Message = "Giao dịch không rõ trạng thái" }); }
                     else if (statusCodeResult.StatusCode == 409) { return Conflict(new { Message = "Số dư tài khoản không đủ thực hiện giao dịch" }); }
                     else if(statusCodeResult.StatusCode == 406) { return StatusCode(StatusCodes.Status406NotAcceptable, new { Message = "Booking này đã được xử lý trước đó, không thể thực hiện." }); }
+                    else if(statusCodeResult.StatusCode == 452) { return StatusCode(StatusCodes.Status404NotFound, new { Message = "Giáo viên không có lịch dạy vào ngày này" }); }
+                    else if(statusCodeResult.StatusCode == 453) { return StatusCode(StatusCodes.Status404NotFound, new { Message = "Giáo viên không có lịch dạy vào khung giờ này" }); }
+                    else if(statusCodeResult.StatusCode == 454) { return StatusCode(StatusCodes.Status409Conflict, new { Message = "Buổi học đã được đặt lịch trước đó" }); }
                 }
                 if (actionResult is JsonResult okObjectResult)
                 {
@@ -155,7 +158,8 @@ namespace API.Controllers
                     else if (statusCodeResult.StatusCode == 409) { return Conflict(new { Message = "Giao dịch đã được xử lý" }); }
                     else if (statusCodeResult.StatusCode == 200) { return Ok(new { Message = "Cập nhật giao dịch thành công" }); }
                     else if (statusCodeResult.StatusCode == 204) { return Conflict(new { Message = "Đã quá thời gian được hủy bỏ" }); }
-                    else if (statusCodeResult.StatusCode == 500) { return StatusCode(StatusCodes.Status500InternalServerError, new { Message = "Lỗi không xác định" }); }
+                    else if(statusCodeResult.StatusCode == 452) { return StatusCode(StatusCodes.Status404NotFound, new { Message = "Giáo viên không có lịch dạy vào ngày này" }); }
+                    else if(statusCodeResult.StatusCode == 453) { return StatusCode(StatusCodes.Status404NotFound, new { Message = "Giáo viên không có lịch dạy vào khung giờ này" }); }
                 }
                 if (actionResult is JsonResult okObjectResult)
                 {
@@ -427,6 +431,22 @@ namespace API.Controllers
             {
                 var bookingTransactionViews = _mapper.Map<PageResults<BookingTransaction>, PageResults<BookingTransactionView>>(bookingTransactions.Value);
                 return Ok(bookingTransactionViews);
+            }
+            if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
+            {
+                if (statusCodeResult.StatusCode == 404) { return NotFound(new { Message = "Không tìm thấy giao dịch đặt lịch" }); }
+            }
+            if ((IActionResult)result.Result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
+            throw new Exception("Lỗi không xác định");
+        }
+        [HttpGet("get/booking-transactions/bookingId/{bookingId}")]
+        public async Task<ActionResult<BookingTransactionView>> GetBookingTransactionByBookingID(Guid bookingId)
+        {
+            var result = await _transactionService.GetBookingTransactionByBookingId(bookingId);
+            if (result is ActionResult<BookingTransaction> bookingTransaction && result.Value != null)
+            {
+                var bookingTransactionView = _mapper.Map<BookingTransactionView>(bookingTransaction.Value);
+                return Ok(bookingTransactionView);
             }
             if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
             {
