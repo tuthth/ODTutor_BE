@@ -336,6 +336,26 @@ namespace API.Controllers
             var response = await _tutorRegisterService.RemoveTutorSubject(tutorID, subjectID);
             return response;
         }
+
+        ///// <summary>
+        ///  Tạo slot theo thời gian đăng kí của Tutor 
+        /// </summary> 
+        [HttpPost("create/slot-by-week-date")]
+        public async Task<IActionResult> createTutorSlotByWeekDate([FromBody] TutorRegistScheduleRequest request)
+        {
+            var response = await _tutorRegisterService.CreateTutorSlotByWeekDate(request);
+            return response;
+        }
+
+        /// <summary>
+        /// Xóa slot theo tutorSlotID
+        /// </summary>
+        [HttpDelete("delete/slot/{tutorSlotID}")]
+        public async Task<IActionResult> deleteSlotByTutorSlotID(Guid tutorSlotID)
+        {
+            var response = await _tutorRegisterService.DeleteSlotByTutorSlotID(tutorSlotID);
+            return response;
+        }
     }
 
 }

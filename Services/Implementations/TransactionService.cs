@@ -319,7 +319,7 @@ namespace Services.Implementations
 
         public async Task<IActionResult> CreateDepositVnPayBooking(BookingTransactionCreate transactionCreate)
         {
-            var user = _httpContextAccessor.HttpContext.User?.Claims?.FirstOrDefault(c => c.Type == "UserId")?.Value;
+                var user = _httpContextAccessor.HttpContext.User?.Claims?.FirstOrDefault(c => c.Type == "UserId")?.Value;
             var findUser = _context.Users.Include(u => u.WalletNavigation).FirstOrDefault(u => u.WalletNavigation.WalletId == transactionCreate.SenderId);
             if (findUser == null)
             {
@@ -770,6 +770,195 @@ namespace Services.Implementations
                     _firebaseRealtimeDatabaseService.UpdateAsync<Models.Entities.Notification>($"notifications/{notification2.UserId}/{notification2.NotificationId}", notification2);
                     var book = _context.Bookings.FirstOrDefault(b => b.BookingId == booking.BookingId);
                     book.Status = (int)BookingEnum.Cancelled;
+
+                    _context.Bookings.Update(book);
+                }
+                else if (choice == (Int32)UpdateTransactionType.Course)
+                {
+                    wallet.Status = (int)VNPayType.REJECT;
+                    var course = _context.CourseTransactions.FirstOrDefault(b => b.CourseTransactionId == wallet.WalletTransactionId);
+                    course.Status = (int)VNPayType.REJECT;
+
+                    //update wallet for sender and receiver
+                    wallet.SenderWalletNavigation.LastBalanceUpdate = DateTime.UtcNow.AddHours(7);
+                    wallet.SenderWalletNavigation.PendingAmount += course.Amount;
+                    wallet.SenderWalletNavigation.AvalaibleAmount += course.Amount;
+                    wallet.SenderWalletNavigation.Amount += course.Amount;
+
+                    wallet.ReceiverWalletNavigation.LastBalanceUpdate = DateTime.UtcNow.AddHours(7);
+                    wallet.ReceiverWalletNavigation.PendingAmount -= course.Amount;
+
+
+                    _context.CourseTransactions.Update(course);
+                    _context.WalletTransactions.Update(wallet);
+                    await _appExtension.SendMail(new MailContent()
+                    {
+                        To = sender.Email,
+                        Subject = "Xác nhận giao dịch",
+                        Body = "Giao dịch course của bạn đã được hủy bỏ. Mã giao dịch: " + wallet.WalletTransactionId
+                    });
+                    await _appExtension.SendMail(new MailContent()
+                    {
+                        To = receiver.Email,
+                        Subject = "Xác nhận giao dịch",
+                        Body = "Giao dịch course của bạn đã được hủy bỏ. Mã giao dịch: " + wallet.WalletTransactionId
+                    });
+                    var notification1 = new Models.Entities.Notification
+                    {
+                        NotificationId = Guid.NewGuid(),
+                        Title = "Giao dịch course",
+                        Content = "Giao dịch course của bạn đã được hủy bỏ. Mã giao dịch: " + wallet.WalletTransactionId,
+                        UserId = sender.Id,
+                        CreatedAt = DateTime.UtcNow.AddHours(7),
+                        Status = (int)NotificationEnum.UnRead
+                    };
+                    var notification2 = new Models.Entities.Notification
+                    {
+                        NotificationId = Guid.NewGuid(),
+                        Title = "Giao dịch course",
+                        Content = "Giao dịch course của bạn đã được hủy bỏ. Mã giao dịch: " + wallet.WalletTransactionId,
+                        UserId = receiver.Id,
+                        CreatedAt = DateTime.UtcNow.AddHours(7),
+                        Status = (int)NotificationEnum.UnRead
+                    };
+                    _context.Notifications.Add(notification1);
+                    _context.Notifications.Add(notification2);
+                    _firebaseRealtimeDatabaseService.UpdateAsync<Models.Entities.Notification>($"notifications/{notification1.UserId}/{notification1.NotificationId}", notification1);
+                    _firebaseRealtimeDatabaseService.UpdateAsync<Models.Entities.Notification>($"notifications/{notification2.UserId}/{notification2.NotificationId}", notification2);
+                }
+                else if (choice == (Int32)UpdateTransactionType.Wallet)
+                {
+                    wallet.Status = (int)VNPayType.REJECT;
+
+                    //update wallet for sender and receiver
+                    wallet.SenderWalletNavigation.LastBalanceUpdate = DateTime.UtcNow.AddHours(7);
+                    wallet.SenderWalletNavigation.PendingAmount += wallet.Amount;
+                    wallet.SenderWalletNavigation.AvalaibleAmount += wallet.Amount;
+                    wallet.SenderWalletNavigation.Amount += wallet.Amount;
+
+                    wallet.ReceiverWalletNavigation.LastBalanceUpdate = DateTime.UtcNow.AddHours(7);
+                    wallet.ReceiverWalletNavigation.PendingAmount -= wallet.Amount;
+
+
+                    _context.WalletTransactions.Update(wallet);
+                    await _appExtension.SendMail(new MailContent()
+                    {
+                        To = sender.Email,
+                        Subject = "Xác nhận giao dịch",
+                        Body = "Giao dịch ví của bạn đã được hủy bỏ. Mã giao dịch: " + wallet.WalletTransactionId
+                    });
+                    await _appExtension.SendMail(new MailContent()
+                    {
+                        To = receiver.Email,
+                        Subject = "Xác nhận giao dịch",
+                        Body = "Giao dịch ví của bạn đã được hủy bỏ. Mã giao dịch: " + wallet.WalletTransactionId
+                    });
+                    var notification1 = new Models.Entities.Notification
+                    {
+                        NotificationId = Guid.NewGuid(),
+                        Title = "Giao dịch ví",
+                        Content = "Giao dịch ví của bạn đã được hủy bỏ. Mã giao dịch: " + wallet.WalletTransactionId,
+                        UserId = sender.Id,
+                        CreatedAt = DateTime.UtcNow.AddHours(7),
+                        Status = (int)NotificationEnum.UnRead
+                    };
+                    var notification2 = new Models.Entities.Notification
+                    {
+                        NotificationId = Guid.NewGuid(),
+                        Title = "Giao dịch ví",
+                        Content = "Giao dịch ví của bạn đã được hủy bỏ. Mã giao dịch: " + wallet.WalletTransactionId,
+                        UserId = receiver.Id,
+                        CreatedAt = DateTime.UtcNow.AddHours(7),
+                        Status = (int)NotificationEnum.UnRead
+                    };
+                    _context.Notifications.Add(notification1);
+                    _context.Notifications.Add(notification2);
+                    _firebaseRealtimeDatabaseService.UpdateAsync<Models.Entities.Notification>($"notifications/{notification1.UserId}/{notification1.NotificationId}", notification1);
+                    _firebaseRealtimeDatabaseService.UpdateAsync<Models.Entities.Notification>($"notifications/{notification2.UserId}/{notification2.NotificationId}", notification2);
+                }
+                else if (choice == (Int32)UpdateTransactionType.Unknown) { return new StatusCodeResult(406); }
+            }
+            else if (updateStatus == (Int32)VNPayType.CANCLED)
+            {
+                if (choice == (Int32)UpdateTransactionType.Booking)
+                {
+                    wallet.Status = (int)VNPayType.CANCLED;
+                    var booking = _context.BookingTransactions.FirstOrDefault(b => b.BookingTransactionId == wallet.WalletTransactionId);
+                    // Check the time when start boooking and when cancle booking (if more 12 hours can't cancle)
+                    if (booking.CreatedAt.AddHours(12) < DateTime.UtcNow.AddHours(7))
+                    {   
+                        return new StatusCodeResult(204);
+                    }
+                    booking.Status = (int)VNPayType.CANCLED;
+
+                    //update wallet for sender and receiver
+                    wallet.SenderWalletNavigation.LastBalanceUpdate = DateTime.UtcNow.AddHours(7);
+                    wallet.SenderWalletNavigation.PendingAmount += booking.Amount;
+
+                    wallet.ReceiverWalletNavigation.LastBalanceUpdate = DateTime.UtcNow.AddHours(7);
+                    wallet.ReceiverWalletNavigation.PendingAmount -= booking.Amount;
+
+
+                    _context.BookingTransactions.Update(booking);
+                    _context.WalletTransactions.Update(wallet);
+
+                    // Find the booking and update the status
+                    var book = _context.Bookings
+                        .Include(b => b.TutorNavigation)
+                        .FirstOrDefault(b => b.BookingId == booking.BookingId);
+                    book.Status = (int)BookingEnum.Cancelled;
+                    // Change the status Slot of Booking Cancled
+                    TimeSpan bookingTime = new TimeSpan(book.StudyTime.Value.Hour, book.StudyTime.Value.Minute, 0);
+                    // Find the tutor available slot
+                    DateTime bookingDate = book.StudyTime.Value.Date;
+                    TutorDateAvailable tutorDateAvailable = _context.TutorDateAvailables.FirstOrDefault(x => x.TutorID == book.TutorNavigation.TutorId && x.Date.Date == bookingDate);
+                    if (tutorDateAvailable == null)
+                    {
+                        throw new CrudException(HttpStatusCode.OK, "Tutor date available not found", "");
+                    }
+                    // Find the tutor slot available match the booking time
+                    TutorSlotAvailable tutorSlotAvailable = _context.TutorSlotAvailables.FirstOrDefault(x => x.TutorDateAvailableID == tutorDateAvailable.TutorDateAvailableID && x.StartTime == bookingTime);
+                    if (tutorSlotAvailable == null)
+                    {
+                        throw new CrudException(HttpStatusCode.OK, "Tutor slot available not found", "");
+                    }
+                    tutorSlotAvailable.IsBooked = false;
+                    tutorSlotAvailable.Status = (Int32)TutorSlotAvailabilityEnum.Available;
+                    booking.Status = (int)TutorSlotAvailabilityEnum.Available;
+                    await _appExtension.SendMail(new MailContent()
+                    {
+                        To = sender.Email,
+                        Subject = "Xác nhận giao dịch",
+                        Body = "Giao dịch booking của bạn đã được hủy bỏ. Mã giao dịch: " + wallet.WalletTransactionId
+                    });
+                    await _appExtension.SendMail(new MailContent()
+                    {
+                        To = receiver.Email,
+                        Subject = "Xác nhận giao dịch",
+                        Body = "Giao dịch booking của bạn đã được hủy bỏ. Mã giao dịch: " + wallet.WalletTransactionId
+                    });
+                    var notification1 = new Models.Entities.Notification
+                    {
+                        NotificationId = Guid.NewGuid(),
+                        Title = "Giao dịch booking",
+                        Content = "Giao dịch booking của bạn đã được hủy bỏ. Mã giao dịch: " + wallet.WalletTransactionId,
+                        UserId = sender.Id,
+                        CreatedAt = DateTime.UtcNow.AddHours(7),
+                        Status = (int)NotificationEnum.UnRead
+                    };
+                    var notification2 = new Models.Entities.Notification
+                    {
+                        NotificationId = Guid.NewGuid(),
+                        Title = "Giao dịch booking",
+                        Content = "Giao dịch booking của bạn đã được hủy bỏ. Mã giao dịch: " + wallet.WalletTransactionId,
+                        UserId = receiver.Id,
+                        CreatedAt = DateTime.UtcNow.AddHours(7),
+                        Status = (int)NotificationEnum.UnRead
+                    };
+                    _context.Notifications.Add(notification1);
+                    _context.Notifications.Add(notification2);
+                    _firebaseRealtimeDatabaseService.UpdateAsync<Models.Entities.Notification>($"notifications/{notification1.UserId}/{notification1.NotificationId}", notification1);
+                    _firebaseRealtimeDatabaseService.UpdateAsync<Models.Entities.Notification>($"notifications/{notification2.UserId}/{notification2.NotificationId}", notification2);
 
                     _context.Bookings.Update(book);
                 }

@@ -756,6 +756,7 @@ namespace Services.Implementations
                         {
                             response.Add(new TutorRegisterStep5Reponse
                             {
+                                tutorSlotId = slot.TutorSlotAvailableID,
                                 date = date.Date,
                                 dayOfWeek = date.DayOfWeek,
                                 startTime = slot.StartTime,
@@ -778,6 +779,7 @@ namespace Services.Implementations
                 throw new CrudException(HttpStatusCode.InternalServerError, ex.Message, "");
             }
         }
+
         // Get Tutor Step 6 By TutorID
         public async Task<ActionResult<TutorRegisterStep6Response>> GetTutorStep6TutorID(Guid tutorID)
         {
@@ -1037,6 +1039,111 @@ namespace Services.Implementations
                 _context.TutorSubjects.Remove(tutorSubject);
                 await _context.SaveChangesAsync();
                 throw new CrudException(HttpStatusCode.OK, "Xóa môn học thành công", "");
+            }
+            catch (CrudException ex)
+            {
+                throw ex;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
+        // Create A Tutor Slot By Week, Date, Time
+        public async Task<IActionResult> CreateTutorSlotByWeekDate(TutorRegistScheduleRequest request)
+        {
+            try
+            {
+                // Tạo TutorWeekAvailable
+                TutorWeekAvailable tutorWeekAvailable = new TutorWeekAvailable
+                {
+                    TutorWeekAvailableId = Guid.NewGuid(),
+                    TutorId = request.TutorID,
+                    StartTime = request.StartTime,
+                    EndTime = request.EndTime
+                };
+                await _context.TutorWeekAvailables.AddAsync(tutorWeekAvailable);
+
+                // Tạo TutorDateAvailable và TutorSlotAvailable
+                foreach (var date in request.dateList)
+                {
+                    int dayOfWeek = (int)date.datee.DayOfWeek == 0 ? 7 : (int)date.datee.DayOfWeek;
+                    TutorDateAvailable tutorDateAvailable = new TutorDateAvailable
+                    {
+                        TutorDateAvailableID = Guid.NewGuid(),
+                        TutorID = request.TutorID,
+                        TutorWeekAvailableID = tutorWeekAvailable.TutorWeekAvailableId,
+                        Date = date.datee,
+                        DayOfWeek = dayOfWeek,
+                        StartTime = date.timeinDate.FirstOrDefault().StartTime, // Lấy StartTime từ thời gian đầu tiên trong ngày
+                        EndTime = date.timeinDate.LastOrDefault().EndTime // Lấy EndTime từ thời gian cuối cùng trong ngày
+                    };
+                    await _context.TutorDateAvailables.AddAsync(tutorDateAvailable);
+                    await _context.SaveChangesAsync();
+
+                    // Tạo các slot học dựa trên khoảng thời gian trong TutorStartTimeEndTimRegisterRequest
+                    foreach (var time in date.timeinDate)
+                    {
+                        TimeSpan currentSlotStartTime = time.StartTime;
+                        while (currentSlotStartTime < time.EndTime)
+                        {
+                            var slotEndTime = currentSlotStartTime.Add(TimeSpan.FromHours(1));
+                            if (slotEndTime > time.EndTime)
+                            {
+                                break;
+                            }
+
+                            TutorSlotAvailable tutorSlotAvailable = new TutorSlotAvailable
+                            {
+                                TutorSlotAvailableID = Guid.NewGuid(),
+                                TutorDateAvailableID = tutorDateAvailable.TutorDateAvailableID,
+                                TutorID = request.TutorID,
+                                StartTime = currentSlotStartTime,
+                                IsBooked = false,
+                                Status = (Int32)TutorSlotAvailabilityEnum.Available
+                            };
+                            await _context.TutorSlotAvailables.AddAsync(tutorSlotAvailable);
+                            await _context.SaveChangesAsync();
+                            currentSlotStartTime = slotEndTime;
+                        }
+                    }
+                }
+
+                await _context.SaveChangesAsync();
+                throw new CrudException(HttpStatusCode.Created, "Tạo lịch dạy thành công", "Thành công");
+            }
+            catch (CrudException ex)
+            {
+                throw ex;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
+        // Delete Slot By TutorSlotID
+        public async Task<IActionResult> DeleteSlotByTutorSlotID(Guid tutorSlotID)
+        {
+            try
+            {
+                var tutorSlot = await _context.TutorSlotAvailables.Where(ts => ts.TutorSlotAvailableID == tutorSlotID).FirstOrDefaultAsync();
+                if (tutorSlot == null)
+                {
+                    throw new CrudException(HttpStatusCode.OK, "Không tìm thấy slot học", "");
+                }
+                if(tutorSlot.Status == (Int32)TutorSlotAvailabilityEnum.Available)
+                {
+                    throw new CrudException(HttpStatusCode.OK, "Slot học đã được đặt, không thể xóa", "");
+                }
+                if(tutorSlot.IsBooked == true)
+                {
+                    throw new CrudException(HttpStatusCode.OK, "Slot học đã được đặt, không thể xóa", "");
+                }
+                _context.TutorSlotAvailables.Remove(tutorSlot);
+                await _context.SaveChangesAsync();
+                throw new CrudException(HttpStatusCode.OK, "Xóa slot học thành công", "");
             }
             catch (CrudException ex)
             {

@@ -4,13 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Models.Enumerables
+namespace Models.Models.Requests
 {
-    public enum VNPayType
+    public class TutoWeekAvailableCreateRequest
     {
-        APPROVE,
-        PENDING,
-        REJECT,
-        CANCLED
+      
     }
 }

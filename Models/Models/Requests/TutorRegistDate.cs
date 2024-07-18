@@ -8,9 +8,8 @@ namespace Models.Models.Requests
 {
     public class TutorRegistDate
     {
-        public DateTime Date { get; set; }
+        public DateTime datee { get; set; }
         public int DayOfWeek { get; set; } // 2: Monday ... 0: Sunday
-        public TimeSpan StartTime { get; set; }
-        public TimeSpan EndTime { get; set; }
+        public List<TutorStartTimeEndTimRegisterRequest> timeinDate { get; set; }
     }
 }

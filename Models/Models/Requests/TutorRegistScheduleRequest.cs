@@ -10,11 +10,9 @@ namespace Models.Models.Requests
     public class TutorRegistScheduleRequest
     {
         public Guid TutorID { get; set; }
-        [DateOfBirthValidation(ErrorMessage = "Date must be in the past.")]
         public DateTime StartTime { get; set; } // spend for Week
-        [DateOfBirthValidation(ErrorMessage = "Date must be in the past.")]
         public DateTime EndTime { get; set; } // spend for Week
-        //public List<TutorRegistDate> dateList { get; set;}
+        public List<TutorRegistDate> dateList { get; set;}
 
     }
 }

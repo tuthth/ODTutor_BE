@@ -139,7 +139,7 @@ namespace API.Controllers
             throw new Exception("Lỗi không xác định");
         }
         /// <summary>
-        /// Update choice: 1 ( Booking ), 2 ( Course ), 3 ( Wallet ); Update status: 0 ( Approve ), 1 ( Pending ) (Auto error), 2 ( Reject )
+        /// Update choice: 1 ( Booking ), 2 ( Course ), 3 ( Wallet ); Update status: 0 ( Approve ), 1 ( Pending ) (Auto error), 2 ( Reject ), 3 (Cancled )
         /// </summary>
 
         [HttpPut("update")]
@@ -154,6 +154,8 @@ namespace API.Controllers
                     else if (statusCodeResult.StatusCode == 406) { return StatusCode(StatusCodes.Status406NotAcceptable, new { Message = "Giao dịch không rõ trạng thái" }); }
                     else if (statusCodeResult.StatusCode == 409) { return Conflict(new { Message = "Giao dịch đã được xử lý" }); }
                     else if (statusCodeResult.StatusCode == 200) { return Ok(new { Message = "Cập nhật giao dịch thành công" }); }
+                    else if (statusCodeResult.StatusCode == 204) { return Conflict(new { Message = "Đã quá thời gian được hủy bỏ" }); }
+                    else if (statusCodeResult.StatusCode == 500) { return StatusCode(StatusCodes.Status500InternalServerError, new { Message = "Lỗi không xác định" }); }
                 }
                 if (actionResult is JsonResult okObjectResult)
                 {
