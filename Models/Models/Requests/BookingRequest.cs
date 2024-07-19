@@ -11,7 +11,7 @@ namespace Models.Models.Requests
     {
         public Guid StudentId { get; set; }
         public Guid TutorId { get; set; }
-        public DateTime StudyTime { get;set; }
+        public Guid TutorSlotAvalaibleID { get; set; }
     }
     public class UpdateBookingRequest : BookingRequest
     {

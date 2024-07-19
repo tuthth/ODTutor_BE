@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Models.Entities;
 using Models.Models.Requests;
 using Models.Models.Views;
 using System;
@@ -17,6 +18,7 @@ namespace Services.Interfaces
         Task<ActionResult<TutorRatingResponse>> GetTutorRating(Guid tutorId);
         Task<PageResults<TutorFeedBackResponse>> GetTutorFeedBackResponseByTutorID(Guid tutorID, PagingRequest pagingRequest);
         Task<ActionResult<List<TutorScheduleResponse>>> GetAllTutorSlotRegistered(Guid tutorID);
+        Task<ActionResult<TutorSlotResponse>> GetTutorSlotAvalaibleById(Guid tutorSlotAvalaibleId);
         Task<IActionResult> UpdateTutorInformation(TutorInformationUpdate tutorInformationUpdate);
         Task<TutorCountSubjectResponse> CountAllSubjectOfTutor(Guid tutorID);
         Task<TutorCountResponse> CountTutorMoney(Guid tutorID);

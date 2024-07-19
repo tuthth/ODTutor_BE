@@ -39,6 +39,19 @@ namespace Services.Implementations
                 BookingStep1Response response = new BookingStep1Response();
                 var student = _context.Users.Include(x => x.StudentNavigation).FirstOrDefault(x => x.StudentNavigation.StudentId == bookingRequest.StudentId);
                 var tutor = _context.Users.Include(x => x.TutorNavigation).FirstOrDefault(x => x.TutorNavigation.TutorId == bookingRequest.TutorId);
+                var tutorSlot = _context.TutorSlotAvailables.Include(x => x.TutorDateAvailable).FirstOrDefault(x => x.TutorSlotAvailableID == bookingRequest.TutorSlotAvalaibleID);
+                if (student == null)
+                {
+                    throw new CrudException(HttpStatusCode.NotFound, "Student not found", "");
+                }
+                if (tutor == null)
+                {
+                    throw new CrudException(HttpStatusCode.NotFound, "Tutor not found", "");
+                }
+                if (tutorSlot == null)
+                {
+                    throw new CrudException(HttpStatusCode.NotFound, "Tutor slot available not found", "");
+                }
                 if (student.Banned == true || tutor.Banned == true)
                 {
                     throw new CrudException(HttpStatusCode.Forbidden, "User is banned", "");
@@ -55,7 +68,9 @@ namespace Services.Implementations
                 {
                     throw new CrudException(HttpStatusCode.Forbidden, "Tutor is not confirmed email", "");
                 }
+                DateTime studyTime = new DateTime(tutorSlot.TutorDateAvailable.Date.Year, tutorSlot.TutorDateAvailable.Date.Month, tutorSlot.TutorDateAvailable.Date.Day, tutorSlot.StartTime.Hours, tutorSlot.StartTime.Minutes, tutorSlot.StartTime.Seconds);
                 var booking = _mapper.Map<Booking>(bookingRequest);
+                booking.StudyTime = studyTime;
                 booking.BookingId = Guid.NewGuid();
                 booking.CreatedAt = DateTime.UtcNow.AddHours(7);
                 booking.Status = (Int32)BookingEnum.WaitingPayment;

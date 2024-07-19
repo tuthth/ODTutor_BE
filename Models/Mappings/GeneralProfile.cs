@@ -120,6 +120,7 @@ namespace Models.Mappings
             CreateMap<TutorInformationUpdate, Tutor>();
             CreateMap<NotificationDTO, Notification>();
             CreateMap<Notification, NotificationDTO>();
+            CreateMap<TutorSlotAvailable, TutorSlotResponse>();
         }
     }
 }

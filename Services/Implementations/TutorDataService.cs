@@ -319,6 +319,23 @@ namespace Services.Implementations
                 throw new CrudException(HttpStatusCode.InternalServerError, "Get Tutor Schedule Error", ex.Message);
             }
         }
+        public async Task<ActionResult<TutorSlotResponse>> GetTutorSlotAvalaibleById(Guid tutorSlotAvalaibleId)
+        {
+            try
+            {
+                var tutorSLot = _context.TutorSlotAvailables.FirstOrDefault(c => c.TutorSlotAvailableID == tutorSlotAvalaibleId);
+                if (tutorSLot == null)
+                {
+                    throw new CrudException(HttpStatusCode.OK, "Tutor Slot Not Found", "Tutor Slot Not Found");
+                }
+                return _mapper.Map<TutorSlotResponse>(tutorSLot);
+            }
+            catch (Exception ex)
+            {
+
+                throw new Exception(ex.ToString());
+            }
+        }
 
         // Update Tutor Information
         public async Task<IActionResult> UpdateTutorInformation(TutorInformationUpdate tutorInformationUpdate)

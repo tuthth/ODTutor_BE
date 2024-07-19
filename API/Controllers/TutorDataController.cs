@@ -62,6 +62,12 @@ namespace API.Controllers
             var response = await _tutorDataService.GetAllTutorSlotRegistered(tutorID);
             return Ok(response);
         }
+        [HttpGet("get/slot/{tutorSlotAvalaibleId}")]
+        public async Task<ActionResult<TutorSlotResponse>> GetTutorSlotAvalaibleById(Guid tutorSlotAvalaibleId)
+        {
+            var response = await _tutorDataService.GetTutorSlotAvalaibleById(tutorSlotAvalaibleId);
+            return response;
+        }
 
         [HttpPut("update")]
         public async Task<IActionResult> UpdateTutorInformation([FromBody] TutorInformationUpdate tutorInformationUpdate)
