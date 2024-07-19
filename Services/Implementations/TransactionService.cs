@@ -399,23 +399,27 @@ namespace Services.Implementations
             TimeSpan bookingTime = new TimeSpan(booking.StudyTime.Value.Hour, booking.StudyTime.Value.Minute, 0);
             // Find the tutor available slot
             DateTime bookingDate = booking.StudyTime.Value.Date;
-            TutorDateAvailable tutorDateAvailable = _context.TutorDateAvailables.FirstOrDefault(x => x.TutorID == booking.TutorId && x.Date.Date == bookingDate);
-            if (tutorDateAvailable == null)
+            var tutorDateAvailables = _context.TutorDateAvailables
+                .Where(x => x.TutorID == booking.TutorId && x.Date.Date == bookingDate)
+                .Select(x => x.TutorDateAvailableID)
+                .ToList();
+            if (tutorDateAvailables == null)
             {
                 return new StatusCodeResult(452);
             }
-            // Find the tutor slot available match the booking time
-            TutorSlotAvailable tutorSlotAvailable = _context.TutorSlotAvailables.FirstOrDefault(x => x.TutorDateAvailableID == tutorDateAvailable.TutorDateAvailableID && x.StartTime == bookingTime);
-            if (tutorSlotAvailable == null)
+            var tutorSlotAvailables = _context.TutorSlotAvailables
+                .Where(x => tutorDateAvailables.Contains(x.TutorDateAvailable.TutorDateAvailableID) && x.StartTime == bookingTime)
+                .FirstOrDefault();
+            if (tutorSlotAvailables == null)
             {
                 return new StatusCodeResult(453);
             }
-            if (tutorSlotAvailable.IsBooked == true)
+            if (tutorSlotAvailables.IsBooked == true)
             {
                 return new StatusCodeResult(454);
             }
-            tutorSlotAvailable.IsBooked = true;
-            tutorSlotAvailable.Status = (Int32)TutorSlotAvailabilityEnum.NotAvailable;
+            tutorSlotAvailables.IsBooked = true;
+            tutorSlotAvailables.Status = (Int32)TutorSlotAvailabilityEnum.NotAvailable;
             booking.Status = (Int32)TutorSlotAvailabilityEnum.NotAvailable;
             await _context.SaveChangesAsync();
             var notification = new NotificationDTO

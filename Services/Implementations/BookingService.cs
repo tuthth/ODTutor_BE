@@ -68,6 +68,14 @@ namespace Services.Implementations
                 {
                     throw new CrudException(HttpStatusCode.Forbidden, "Tutor is not confirmed email", "");
                 }
+                if(tutorSlot.IsBooked == true)
+                {
+                    throw new CrudException(HttpStatusCode.Conflict, "Tutor slot available is booked", "");
+                }
+                if (tutorSlot.Status == (Int32)TutorSlotAvailabilityEnum.NotAvailable)
+                {
+                    throw new CrudException(HttpStatusCode.Conflict, "Tutor slot available is not available", "");
+                }
                 DateTime studyTime = new DateTime(tutorSlot.TutorDateAvailable.Date.Year, tutorSlot.TutorDateAvailable.Date.Month, tutorSlot.TutorDateAvailable.Date.Day, tutorSlot.StartTime.Hours, tutorSlot.StartTime.Minutes, tutorSlot.StartTime.Seconds);
                 var booking = _mapper.Map<Booking>(bookingRequest);
                 booking.StudyTime = studyTime;
