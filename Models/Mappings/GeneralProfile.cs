@@ -62,7 +62,8 @@ namespace Models.Mappings
             CreateMap<TutorRating, TutorRatingView>();
             CreateMap<TutorRatingImage, TutorRatingImageView>();
             CreateMap<Moderator, ModeratorView>();
-            CreateMap<Booking, BookingView>();
+            CreateMap<Booking, BookingView>()
+    .ForMember(dest => dest.BookingTransactionId, opt => opt.MapFrom(src => src.BookingTransactionNavigation.BookingTransactionId));
             CreateMap<Course, CourseView>();
             CreateMap<CourseOutline, CourseOutlineView>();
             CreateMap<CoursePromotion, CoursePromotionView>();

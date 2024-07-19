@@ -390,7 +390,9 @@ namespace Services.Implementations
         {
             try
             {
-                var booking = await _context.Bookings.FirstOrDefaultAsync(c => c.BookingId == id);
+                var booking = await _context.Bookings
+                    .Include(b => b.BookingTransactionNavigation)
+                    .FirstOrDefaultAsync(c => c.BookingId == id);
                 if (booking == null)
                 {
                     return new StatusCodeResult(404);
@@ -406,7 +408,9 @@ namespace Services.Implementations
         {
             try
             {
-                var bookings = await _context.Bookings.Where(c => c.StudentId == id).ToListAsync();
+                var bookings = await _context.Bookings
+                    .Include(b => b.BookingTransactionNavigation)
+                    .Where(c => c.StudentId == id).ToListAsync();
                 if (bookings == null)
                 {
                     return new StatusCodeResult(404);
@@ -422,7 +426,9 @@ namespace Services.Implementations
         {
             try
             {
-                var bookings = await _context.Bookings.Where(c => c.TutorId == id).ToListAsync();
+                var bookings = await _context.Bookings
+                    .Include(b => b.BookingTransactionNavigation)
+                    .Where(c => c.TutorId == id).ToListAsync();
                 if (bookings == null)
                 {
                     return new StatusCodeResult(404);
