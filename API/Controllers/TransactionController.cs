@@ -142,7 +142,7 @@ namespace API.Controllers
             throw new Exception("Lỗi không xác định");
         }
         /// <summary>
-        /// Update choice: 1 ( Booking ), 2 ( Course ), 3 ( Wallet ); Update status: 0 ( Approve ), 1 ( Pending ) (Auto error), 2 ( Reject ), 3 (Cancled )
+        /// Update choice: 1 ( Booking ), 2 ( Course ), 3 ( Wallet ); Update status: 0 ( Approve ), 1 ( Pending ) (Auto error), 2 ( Reject ), 3 (Cancelled )
         /// </summary>
 
         [HttpPut("update")]

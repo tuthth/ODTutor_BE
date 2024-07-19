@@ -399,7 +399,7 @@ namespace Services.Implementations
             TimeSpan bookingTime = new TimeSpan(booking.StudyTime.Value.Hour, booking.StudyTime.Value.Minute, 0);
             // Find the tutor available slot
             DateTime bookingDate = booking.StudyTime.Value.Date;
-            TutorDateAvailable tutorDateAvailable = _context.TutorDateAvailables.FirstOrDefault(x => x.TutorID == booking.TutorNavigation.TutorId && x.Date.Date == bookingDate);
+            TutorDateAvailable tutorDateAvailable = _context.TutorDateAvailables.FirstOrDefault(x => x.TutorID == booking.TutorId && x.Date.Date == bookingDate);
             if (tutorDateAvailable == null)
             {
                 return new StatusCodeResult(452);
