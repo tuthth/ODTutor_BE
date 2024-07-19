@@ -530,7 +530,35 @@ namespace Services.Implementations
         }
 
 
-
+        // Get Tutor From UserID
+        public async Task<ActionResult<TutorView>> GetTutorByUserID (Guid UserID)
+        {
+            try
+            {
+                var tutor = await _context.Tutors
+                    .Where(t => t.UserId == UserID)
+                    .Select(t => new TutorView
+                    {
+                        TutorId = t.TutorId,
+                        UserId = t.UserId,
+                        IdentityNumber = t.IdentityNumber,
+                        PricePerHour = t.PricePerHour,
+                        Description = t.Description,
+                        Status = t.Status,
+                        CreateAt = t.CreateAt,
+                        UpdateAt = t.UpdateAt,
+                        VideoUrl = t.VideoUrl
+                    }).FirstOrDefaultAsync();
+                return tutor;
+            } catch (CrudException ex)
+            {
+                throw new CrudException(HttpStatusCode.InternalServerError, "Get Tutor By UserID Error", ex.Message);
+            }
+            catch (Exception ex)
+            {
+                throw new CrudException(HttpStatusCode.InternalServerError, "Get Tutor By UserID Error", ex.Message);
+            }
+        }
 
     }
 }

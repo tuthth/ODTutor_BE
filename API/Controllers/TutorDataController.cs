@@ -1,7 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Models.Models.Requests;
 using Models.Models.Views;
+using Services;
 using Services.Interfaces;
+using System.Net;
 
 namespace API.Controllers
 {
@@ -122,5 +124,37 @@ namespace API.Controllers
             var response = await _tutorDataService.GetStudentStatisticByMonthOfYear(tutorID, monthOfYear);
             return response;
         }
+
+        /// <summary>
+        /// Lấy 1 tutor info từ userid 
+        /// </summary>
+        [HttpGet("get/tutor-userId/{userId}")]
+        public async Task<ActionResult<TutorView>> GetTutorByUserID(Guid userId)
+        {
+            try
+            {
+                if (!Guid.TryParse(userId.ToString(), out Guid validUserID))
+                {
+                    return BadRequest("UserID không hợp lệ.");
+                }
+
+                var response = await _tutorDataService.GetTutorByUserID(validUserID);
+                if (response == null)
+                {
+                    return NotFound("Tutor không được tìm thấy.");
+                }
+
+                return Ok(response);
+            }
+            catch (CrudException ex)
+            {
+                return StatusCode((int)HttpStatusCode.InternalServerError, ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode((int)HttpStatusCode.InternalServerError, ex.Message);
+            }
+        }
+
     }
 }
