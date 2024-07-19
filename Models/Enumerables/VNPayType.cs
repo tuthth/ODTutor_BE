@@ -11,6 +11,6 @@ namespace Models.Enumerables
         APPROVE,
         PENDING,
         REJECT,
-        CANCLED
+        CANCELLED
     }
 }

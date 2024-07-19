@@ -46,6 +46,8 @@ namespace Services.Interfaces
         Task<ActionResult<PageResults<CourseTransaction>>> GetCourseTransactionsByReceiverIdPaging(Guid id, PagingRequest request);
         Task<ActionResult<List<CourseTransaction>>> GetCourseTransactionsByCourseId(Guid id);
         Task<ActionResult<PageResults<CourseTransaction>>> GetCourseTransactionsByCourseIdPaging(Guid id, PagingRequest request);
-        
+        Task<ActionResult<BookingTransaction>> GetBookingTransactionByBookingId(Guid bookingId);
+
+
     }
 }
