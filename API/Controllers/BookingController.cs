@@ -258,10 +258,10 @@ namespace API.Controllers
         ///<summary>
         /// Dời Lịch học 
         ///// <summary>
-        [HttpPost("reschedule/booking/{bookingID}/{senderID}/{newTime}/{message}")]
-        public async Task<IActionResult> RescheduleBooking(Guid bookingID, Guid senderID, DateTime newTime, string message)
+        [HttpPost("reschedule/booking/{bookingID}/{senderID}/{newSlotId}/{message}")]
+        public async Task<IActionResult> RescheduleBooking(Guid bookingID, Guid senderID, Guid newSlotId, string message)
         {
-            var result = await _bookingService.RescheduleBooking(bookingID, senderID, newTime, message);
+            var result = await _bookingService.RescheduleBooking(bookingID, senderID, newSlotId, message);
             return result;
         }
 

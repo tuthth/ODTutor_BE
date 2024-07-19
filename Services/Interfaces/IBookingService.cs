@@ -26,7 +26,7 @@ namespace Services.Interfaces
         Task<IActionResult> AddGoogleMeetUrl(Guid bookingId, string meetingLink);
         Task<ActionResult<string>> GetGoogleMeetUrl(Guid bookingId);
         Task<IActionResult> UpdateGoogleMeetUrl(Guid bookingId, string meetingLink);
-        Task<IActionResult> RescheduleBooking(Guid bookingId, Guid senderId, DateTime newTime, string message);
+        Task<IActionResult> RescheduleBooking(Guid bookingId, Guid senderId, Guid newSlotId, string message);
         Task<IActionResult> ConfirmRescheduleBooking(Guid bookingId);
     }
 }

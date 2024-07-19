@@ -535,7 +535,7 @@ namespace Services.Implementations
         }
 
         // Dời lịch học
-        public async Task<IActionResult> RescheduleBooking(Guid bookingId, Guid senderId, DateTime newTime, string message)
+        public async Task<IActionResult> RescheduleBooking(Guid bookingId, Guid senderId, Guid newSlotId, string message)
         {
             try
             {
@@ -571,6 +571,30 @@ namespace Services.Implementations
                 {
                     booking.Status = (Int32)BookingEnum.WaittingConfirmRescheduleForStudent;
                 }
+                // Get Time Booking of Slot and Date of TutorDateAvailable based on tutodateid of slot and create a new DAteTime 
+                // Lấy thông tin slot mới
+                TutorSlotAvailable tutorSlotAvailable = _context.TutorSlotAvailables.FirstOrDefault(x => x.TutorSlotAvailableID == newSlotId);
+                if (tutorSlotAvailable == null)
+                {
+                    throw new CrudException(HttpStatusCode.NotFound, "Tutor slot not found", "");
+                }
+
+                // Lấy thông tin ngày từ TutorDateAvailable
+                TutorDateAvailable tutorDateAvailable = _context.TutorDateAvailables.FirstOrDefault(x => x.TutorDateAvailableID == tutorSlotAvailable.TutorDateAvailableID);
+                if (tutorDateAvailable == null)
+                {
+                    throw new CrudException(HttpStatusCode.NotFound, "Tutor date not found", "");
+                }
+
+                // Kết hợp ngày và giờ để tạo ra DateTime mới
+                DateTime newTime = new DateTime(
+                    tutorDateAvailable.Date.Year,
+                    tutorDateAvailable.Date.Month,
+                    tutorDateAvailable.Date.Day,
+                    tutorSlotAvailable.StartTime.Hours,
+                    tutorSlotAvailable.StartTime.Minutes,
+                    tutorSlotAvailable.StartTime.Seconds
+                );
                 booking.RescheduledTime = newTime;
                 booking.IsRescheduled = true;
                 booking.Message = message;
@@ -588,7 +612,7 @@ namespace Services.Implementations
             }
         }
 
-        // Xác nhận đổi lịch học 
+/*        // Xác nhận đổi lịch học 
         public async Task<IActionResult> ConfirmRescheduleBooking(Guid bookingId)
         {
             try
@@ -644,6 +668,75 @@ namespace Services.Implementations
             {
                 throw new CrudException(HttpStatusCode.InternalServerError, "", "");
             }
+        }*/
+
+        public async Task<IActionResult> ConfirmRescheduleBooking(Guid bookingId)
+        {
+            try
+            {
+                var booking = _context.Bookings.FirstOrDefault(x => x.BookingId == bookingId);
+                if (booking == null)
+                {
+                    throw new CrudException(HttpStatusCode.NotFound, "Booking not found", "");
+                }
+                booking.Status = (Int32)BookingEnum.Success;
+
+                // Update Old Slot
+                UpdateTutorSlotAvailability( bookingId,booking.StudyTime.Value, false);
+
+                // Update Booking StudyTime to RescheduledTime
+                booking.StudyTime = booking.RescheduledTime;
+
+                // Update New Slot
+                UpdateTutorSlotAvailability( bookingId,booking.RescheduledTime.Value, true);
+
+                _context.Bookings.Update(booking);
+                await _context.SaveChangesAsync();
+
+                return new OkObjectResult("Confirm reschedule booking successfully");
+            }
+            catch (CrudException ex)
+            {
+                throw ex;
+            }
+            catch (Exception ex)
+            {
+                throw new CrudException(HttpStatusCode.InternalServerError, ex.Message, "");
+            }
+        }
+
+        private void UpdateTutorSlotAvailability(Guid bookingId,DateTime dateTime, bool isBooked)
+        {   
+            var booking = _context.Bookings.FirstOrDefault(x => x.BookingId == bookingId);
+            DateTime bookingDate = booking.StudyTime.Value.Date;
+            var tutorDateAvailables = _context.TutorDateAvailables
+                .Where(x => x.TutorID == booking.TutorId && x.Date.Date == bookingDate)
+                .Select(x => x.TutorDateAvailableID)
+                .ToList();
+            if (tutorDateAvailables == null)
+            {
+                throw new CrudException(HttpStatusCode.NotFound, "Tutor date available not found", "");
+            }
+
+            // Changre status slot 
+            TimeSpan bookingTime = new TimeSpan(booking.StudyTime.Value.Hour, booking.StudyTime.Value.Minute, 0);
+            var tutorSlotAvailables = _context.TutorSlotAvailables
+                .Where(x => tutorDateAvailables.Contains(x.TutorDateAvailable.TutorDateAvailableID) && x.StartTime == bookingTime)
+                .FirstOrDefault();
+            if (tutorSlotAvailables == null)
+            {
+                throw new CrudException(HttpStatusCode.NotFound, "Tutor slot available not found", "");
+            }
+            tutorSlotAvailables.IsBooked = !tutorSlotAvailables.IsBooked;
+            if (tutorSlotAvailables.Status == (Int32)TutorSlotAvailabilityEnum.Available)
+            {
+                tutorSlotAvailables.Status = (Int32)TutorSlotAvailabilityEnum.NotAvailable;
+            }
+            else
+            {
+                tutorSlotAvailables.Status = (Int32)TutorSlotAvailabilityEnum.Available;
+            }
+            _context.TutorSlotAvailables.Update(tutorSlotAvailables);
         }
     }
 }
