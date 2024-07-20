@@ -76,6 +76,7 @@ namespace API.Configurations
             services.AddScoped<IMessageService, MessageService>();
             services.AddScoped<IUserInteractService, UserInteractionService>();
             services.AddScoped<IStudentService, StudentService>();
+            services.AddScoped<IReportService, ReportService>();
         }
         public static void AddSwagger(this IServiceCollection services)
         {
