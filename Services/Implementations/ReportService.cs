@@ -55,7 +55,7 @@ namespace Services.Implementations
                 CreatedAt = report.CreatedAt,
                 Status = 0
             };
-            Notification notification2x = _mapper.Map<Notification>(notification1);
+            Notification notification2x = _mapper.Map<Notification>(notification2);
             _context.Notifications.Add(notification1x);
             _context.Notifications.Add(notification2x);
             _firebaseRealtimeDatabaseService.SetAsync<NotificationDTO>($"notifications/{notification1.UserId}/{notification1.NotificationId}", notification1);

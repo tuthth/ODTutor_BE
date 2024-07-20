@@ -121,6 +121,8 @@ namespace Models.Mappings
             CreateMap<NotificationDTO, Notification>();
             CreateMap<Notification, NotificationDTO>();
             CreateMap<TutorSlotAvailable, TutorSlotResponse>();
+            CreateMap<Report, ReportRequest>();
+            CreateMap<ReportRequest, Report>();
         }
     }
 }
