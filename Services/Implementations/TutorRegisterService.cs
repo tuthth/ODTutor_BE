@@ -1091,9 +1091,8 @@ namespace Services.Implementations
                             var slotEndTime = currentSlotStartTime.Add(TimeSpan.FromHours(1));
                             if (slotEndTime > time.EndTime)
                             {
-                                break;
+                                slotEndTime= time.EndTime;
                             }
-
                             TutorSlotAvailable tutorSlotAvailable = new TutorSlotAvailable
                             {
                                 TutorSlotAvailableID = Guid.NewGuid(),
@@ -1106,6 +1105,10 @@ namespace Services.Implementations
                             await _context.TutorSlotAvailables.AddAsync(tutorSlotAvailable);
                             await _context.SaveChangesAsync();
                             currentSlotStartTime = slotEndTime;
+                            if (currentSlotStartTime >= time.EndTime)
+                            {
+                                break;
+                            }
                         }
                     }
                 }
