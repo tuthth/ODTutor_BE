@@ -563,14 +563,6 @@ namespace Services.Implementations
                 {
                     throw new CrudException(HttpStatusCode.Conflict, "Booking is already rescheduled", "");
                 }
-                if (senderId == booking.StudentId)
-                {
-                    booking.Status = (Int32)BookingEnum.WaittingConfirmRescheduleForTutor;
-                }
-                else if (senderId == booking.TutorId)
-                {
-                    booking.Status = (Int32)BookingEnum.WaittingConfirmRescheduleForStudent;
-                }
                 // Get Time Booking of Slot and Date of TutorDateAvailable based on tutodateid of slot and create a new DAteTime 
                 // Lấy thông tin slot mới
                 TutorSlotAvailable tutorSlotAvailable = _context.TutorSlotAvailables.FirstOrDefault(x => x.TutorSlotAvailableID == newSlotId);
@@ -595,6 +587,14 @@ namespace Services.Implementations
                     tutorSlotAvailable.StartTime.Minutes,
                     tutorSlotAvailable.StartTime.Seconds
                 );
+                if (senderId == booking.StudentId)
+                {
+                    booking.Status = (Int32)BookingEnum.WaittingConfirmRescheduleForTutor;
+                }
+                else if (senderId == booking.TutorId)
+                {
+                    booking.Status = (Int32)BookingEnum.WaittingConfirmRescheduleForStudent;
+                }
                 booking.RescheduledTime = newTime;
                 booking.IsRescheduled = true;
                 booking.Message = message;
