@@ -389,6 +389,8 @@ namespace Services.Implementations
                 return new StatusCodeResult(409);
             }
             sendWallet.PendingAmount -= transactionCreate.Amount;
+            sendWallet.AvalaibleAmount -= transactionCreate.Amount;
+            sendWallet.Amount -= transactionCreate.Amount;
             receiveWallet.PendingAmount += transactionCreate.Amount;
 
             _context.Wallets.Update(sendWallet);
@@ -553,10 +555,8 @@ namespace Services.Implementations
                     booking.Status = (int)VNPayType.APPROVE;
 
                     //update wallet for sender and receiver
-                    wallet.SenderWalletNavigation.Amount -= booking.Amount;
                     wallet.SenderWalletNavigation.LastBalanceUpdate = DateTime.UtcNow.AddHours(7);
                     wallet.SenderWalletNavigation.PendingAmount += booking.Amount;
-                    wallet.SenderWalletNavigation.AvalaibleAmount -= booking.Amount;
 
                     wallet.ReceiverWalletNavigation.Amount += booking.Amount;
                     wallet.ReceiverWalletNavigation.LastBalanceUpdate = DateTime.UtcNow.AddHours(7);
@@ -898,6 +898,8 @@ namespace Services.Implementations
                     //update wallet for sender and receiver
                     wallet.SenderWalletNavigation.LastBalanceUpdate = DateTime.UtcNow.AddHours(7);
                     wallet.SenderWalletNavigation.PendingAmount += booking.Amount;
+                    wallet.SenderWalletNavigation.AvalaibleAmount += booking.Amount;
+                    wallet.SenderWalletNavigation.Amount += booking.Amount;
 
                     wallet.ReceiverWalletNavigation.LastBalanceUpdate = DateTime.UtcNow.AddHours(7);
                     wallet.ReceiverWalletNavigation.PendingAmount -= booking.Amount;
@@ -911,23 +913,22 @@ namespace Services.Implementations
                         .Include(b => b.TutorNavigation)
                         .FirstOrDefault(b => b.BookingId == booking.BookingId);
                     book.Status = (int)BookingEnum.Cancelled;
-                    // Change the status Slot of Booking Cancelled
                     TimeSpan bookingTime = new TimeSpan(book.StudyTime.Value.Hour, book.StudyTime.Value.Minute, 0);
                     // Find the tutor available slot
                     DateTime bookingDate = book.StudyTime.Value.Date;
-                    TutorDateAvailable tutorDateAvailable = _context.TutorDateAvailables.FirstOrDefault(x => x.TutorID == book.TutorNavigation.TutorId && x.Date.Date == bookingDate);
-                    if (tutorDateAvailable == null)
+                    var tutorDateAvailables = _context.TutorDateAvailables
+                        .Where(x => x.TutorID == book.TutorId && x.Date.Date == bookingDate)
+                        .Select(x => x.TutorDateAvailableID)
+                        .ToList();
+                    if (tutorDateAvailables == null)
                     {
                         return new StatusCodeResult(452);
                     }
-                    // Find the tutor slot available match the booking time
-                    TutorSlotAvailable tutorSlotAvailable = _context.TutorSlotAvailables.FirstOrDefault(x => x.TutorDateAvailableID == tutorDateAvailable.TutorDateAvailableID && x.StartTime == bookingTime);
-                    if (tutorSlotAvailable == null)
-                    {
-                        return new StatusCodeResult(453);
-                    }
-                    tutorSlotAvailable.IsBooked = false;
-                    tutorSlotAvailable.Status = (Int32)TutorSlotAvailabilityEnum.Available;
+                    var tutorSlotAvailables = _context.TutorSlotAvailables
+                        .Where(x => tutorDateAvailables.Contains(x.TutorDateAvailable.TutorDateAvailableID) && x.StartTime == bookingTime)
+                        .FirstOrDefault();
+                    tutorSlotAvailables.IsBooked = false;
+                    tutorSlotAvailables.Status = (Int32)TutorSlotAvailabilityEnum.Available;
                     booking.Status = (int)TutorSlotAvailabilityEnum.Available;
                     await _appExtension.SendMail(new MailContent()
                     {
