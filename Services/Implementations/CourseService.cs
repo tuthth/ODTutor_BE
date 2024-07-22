@@ -545,6 +545,82 @@ namespace Services.Implementations
             });
             return new StatusCodeResult(204);
         }
+        public async Task<IActionResult> CreateCourseSlot(CourseSlotRequest request)
+        {
+            var course = await _context.Courses.Include(c => c.TutorNavigation).ThenInclude(c => c.UserNavigation).FirstOrDefaultAsync(c => c.CourseId == request.CourseId);
+            if (course == null)
+            {
+                return new StatusCodeResult(404);
+            }
+            var courseSlot = await _context.CourseSlots.FirstOrDefaultAsync(c => c.CourseId == request.CourseId && c.Description == request.Description);
+            if (courseSlot != null)
+            {
+                return new StatusCodeResult(409);
+            }
+            var courseSlotsExist = await _context.CourseSlots.Where(c => c.CourseId == request.CourseId).ToListAsync();
+            var newSlot = new CourseSlot
+            {
+                CourseSlotId = Guid.NewGuid(),
+                CourseId = request.CourseId,
+                Description = request.Description,
+                SlotNumber = courseSlotsExist.Count == 0 ? 1 : courseSlotsExist.Max(c => c.SlotNumber) + 1
+            };
+            _context.CourseSlots.Add(newSlot);
+            await _context.SaveChangesAsync();
+            return new StatusCodeResult(201);
+        }
+        public async Task<IActionResult> UpdateCourseSlot(UpdateCourseSlotRequest request)
+        {
+            var courseSlot = await _context.CourseSlots.Include(c => c.CourseNavigation).ThenInclude(c => c.TutorNavigation).ThenInclude(c => c.UserNavigation).FirstOrDefaultAsync(c => c.CourseSlotId == request.CourseSlotId);
+            if (courseSlot == null)
+            {
+                return new StatusCodeResult(404);
+            }
+            courseSlot.Description = request.Description;
+            _context.CourseSlots.Update(courseSlot);
+            await _context.SaveChangesAsync();
+            return new StatusCodeResult(200);
+        }
+        public async Task<IActionResult> SwapSlotNumber(CourseSlotSwapRequest request)
+        {
+            var courseSlot1 = await _context.CourseSlots.FirstOrDefaultAsync(c => c.CourseSlotId == request.CourseSlotId1);
+            var courseSlot2 = await _context.CourseSlots.FirstOrDefaultAsync(c => c.CourseSlotId == request.CourseSlotId2);
+            if(courseSlot1 == null || courseSlot2 == null)
+            {
+                return new StatusCodeResult(404);
+            }
+            if(courseSlot1.CourseId != courseSlot2.CourseId)
+            {
+                return new StatusCodeResult(409);
+            }
+            var temp = courseSlot1.SlotNumber;
+            courseSlot1.SlotNumber = courseSlot2.SlotNumber;
+            courseSlot2.SlotNumber = temp;
+            _context.CourseSlots.Update(courseSlot1);
+            _context.CourseSlots.Update(courseSlot2);
+            await _context.SaveChangesAsync();
+            return new StatusCodeResult(200);
+        }
+        public async Task<IActionResult> DeleteCourseSlot(Guid id)
+        {
+            var courseSlot = await _context.CourseSlots.Include(c => c.CourseNavigation).ThenInclude(c => c.TutorNavigation).ThenInclude(c => c.UserNavigation).FirstOrDefaultAsync(c => c.CourseSlotId == id);
+            if (courseSlot == null)
+            {
+                return new StatusCodeResult(404);
+            }
+            var courseId = courseSlot.CourseId;
+            var slotNumberToDelete = courseSlot.SlotNumber;
+
+            _context.CourseSlots.Remove(courseSlot);
+            var subsequentSlots = await _context.CourseSlots.Where(c => c.CourseId == courseId && c.SlotNumber > slotNumberToDelete).ToListAsync();
+            foreach (var slot in subsequentSlots)
+            {
+                slot.SlotNumber--;
+                _context.CourseSlots.Update(slot);
+            }
+            await _context.SaveChangesAsync();
+            return new StatusCodeResult(204);
+        }
         public async Task<ActionResult<List<Course>>> GetAllCourses()
         {
             try
@@ -657,6 +733,22 @@ namespace Services.Implementations
                 throw new Exception(ex.ToString());
             }
         }
+        public async Task<ActionResult<List<Promotion>>> GetPromotionsByTutorId(Guid tutorId)
+        {
+           try
+            {
+                var promotions = await _context.Promotions.Where(c => c.TutorId == tutorId).OrderBy(c => c.CreatedAt).ToListAsync();
+                if (promotions == null)
+                {
+                    return new StatusCodeResult(404);
+                }
+                return promotions;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.ToString());
+            }
+        }
         public async Task<ActionResult<Promotion>> GetPromotion(Guid id)
         {
             try
@@ -667,6 +759,54 @@ namespace Services.Implementations
                     return new StatusCodeResult(404);
                 }
                 return promotion;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.ToString());
+            }
+        }
+        public async Task<ActionResult<List<CourseSlot>>> GetAllCourseSlots()
+        {
+            try
+            {
+                var courseSlots = await _context.CourseSlots.OrderBy(c => c.CourseId).ToListAsync();
+                if (courseSlots == null)
+                {
+                    return new StatusCodeResult(404);
+                }
+                return courseSlots;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.ToString());
+            }
+        }
+        public async Task<ActionResult<CourseSlot>> GetCourseSlot(Guid id)
+        {
+            try
+            {
+                var courseSlot = await _context.CourseSlots.FirstOrDefaultAsync(c => c.CourseSlotId == id);
+                if (courseSlot == null)
+                {
+                    return new StatusCodeResult(404);
+                }
+                return courseSlot;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.ToString());
+            }
+        }
+        public async Task<ActionResult<List<CourseSlot>>> GetCourseSlotsByCourseId(Guid courseId)
+        {
+            try
+            {
+                var courseSlots = await _context.CourseSlots.Where(c => c.CourseId == courseId).ToListAsync();
+                if (courseSlots == null)
+                {
+                    return new StatusCodeResult(404);
+                }
+                return courseSlots;
             }
             catch (Exception ex)
             {

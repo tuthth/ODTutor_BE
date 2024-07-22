@@ -661,6 +661,18 @@ namespace Services.Implementations
                     _firebaseRealtimeDatabaseService.UpdateAsync<Models.Entities.Notification>($"notifications/{notification2.UserId}/{notification2.NotificationId}", notification2);
 
                     //student course: chua ro query
+                    var courses = _context.Courses.Include(c => c.TutorNavigation).FirstOrDefault(c => c.CourseId == course.CourseId);
+                    var student = _context.Students.FirstOrDefault(s => s.UserId == sender.Id);
+                    var studentCourse = new StudentCourse
+                    {
+                        StudentCourseId = Guid.NewGuid(),
+                        CourseId = course.CourseId,
+                        StudentId = student.StudentId,
+                        CreatedAt = DateTime.UtcNow.AddHours(7),
+                        Status = (int)CourseEnum.Active,
+                        GoogleMeetUrl = ""
+                    };
+                    _context.StudentCourses.Add(studentCourse);
                 }
                 else if (choice == (Int32)UpdateTransactionType.Wallet)
                 {

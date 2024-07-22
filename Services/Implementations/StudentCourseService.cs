@@ -2,6 +2,8 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Models.Entities;
+using Models.Enumerables;
+using Models.Models.Requests;
 using Services.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -15,6 +17,35 @@ namespace Services.Implementations
     {
         public StudentCourseService(ODTutorContext context, IMapper mapper) : base(context, mapper)
         {
+        }
+        public async Task<IActionResult> UpdateStudentCourse(UpdateStudentCourseRequest request)
+        {
+            var studentCourse = _context.StudentCourses.FirstOrDefault(c => c.StudentCourseId == request.StudentCourseId);
+            if (studentCourse == null)
+            {
+                return new StatusCodeResult(404);
+            }
+            _mapper.Map(request, studentCourse);
+            _context.StudentCourses.Update(studentCourse);
+            await _context.SaveChangesAsync();
+            return new StatusCodeResult(200);
+        }
+        public async Task<IActionResult> FinishStudentCourse(Guid studentCourseId)
+        {
+
+           var studentCourse = _context.StudentCourses.FirstOrDefault(c => c.StudentCourseId == studentCourseId);
+            if (studentCourse == null)
+            {
+                return new StatusCodeResult(404);
+            }
+            if(studentCourse.Status != (Int32)CourseEnum.Active)
+            {
+                return new StatusCodeResult(409);
+            }
+            studentCourse.Status = (Int32)CourseEnum.Finished;
+            _context.StudentCourses.Update(studentCourse);
+            await _context.SaveChangesAsync();
+            return new StatusCodeResult(200);
         }
         public async Task<ActionResult<List<StudentCourse>>> GetAllStudentCourses()
         {
