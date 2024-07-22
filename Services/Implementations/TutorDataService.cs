@@ -506,9 +506,10 @@ namespace Services.Implementations
             try
             {
                 var students = _context.Bookings
+                    .Include(b => b.StudentNavigation.UserNavigation) // Bổ sung Include để lấy thông tin User của Student
                     .Where(b => b.TutorId == tutorID && b.Status == (int)BookingEnum.Finished)
                     .AsEnumerable() // Chuyển đổi kết quả truy vấn thành một IEnumerable
-                    .Where(b => b.CreatedAt.Month == monthOfYear) // Thực hiện lọc trong bộ nhớ
+                    .Where(b => ConvertMonthOfYear(b.CreatedAt.Month) == monthOfYear) // Thực hiện lọc trong bộ nhớ
                     .GroupBy(b => b.StudentId)
                     .Select(b => new StudentStatisticView
                     {
@@ -575,6 +576,27 @@ namespace Services.Implementations
                 DayOfWeek.Saturday => 7,
                 DayOfWeek.Sunday => 0,
                 _ => -1 // Trường hợp không xác định
+            };
+        }
+
+        //Convert MonthOfYear to int
+        private int ConvertMonthOfYear(int monthOfYear)
+        {
+            return monthOfYear switch
+            {
+                1 => 1,
+                2 => 2,
+                3 => 3,
+                4 => 4,
+                5 => 5,
+                6 => 6,
+                7 => 7,
+                8 => 8,
+                9 => 9,
+                10 => 10,
+                11 => 11,
+                12 => 12,
+                _ => -1
             };
         }
 
