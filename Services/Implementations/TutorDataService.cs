@@ -475,9 +475,10 @@ namespace Services.Implementations
             try
             {
                 var students = _context.Bookings
+                    .Include(b => b.StudentNavigation.UserNavigation) // Bổ sung Include để lấy thông tin User của Student
                     .Where(b => b.TutorId == tutorID && b.Status == (int)BookingEnum.Finished)
                     .AsEnumerable() // Chuyển đổi kết quả truy vấn thành một IEnumerable
-                    .Where(b => (int)b.CreatedAt.DayOfWeek == dayOfWeek) // Thực hiện lọc trong bộ nhớ
+                    .Where(b => ConvertDayOfWeek(b.CreatedAt.DayOfWeek) == dayOfWeek) // Thực hiện lọc trong bộ nhớ
                     .GroupBy(b => b.StudentId)
                     .Select(b => new StudentStatisticView
                     {
@@ -558,6 +559,23 @@ namespace Services.Implementations
             {
                 throw new CrudException(HttpStatusCode.InternalServerError, "Get Tutor By UserID Error", ex.Message);
             }
+        }
+
+        // Convert DayOfWeek to int
+        private int ConvertDayOfWeek(DayOfWeek dayOfWeek)
+        {
+            // Chuyển đổi DayOfWeek thành giá trị số tương ứng
+            return dayOfWeek switch
+            {
+                DayOfWeek.Monday => 2,
+                DayOfWeek.Tuesday => 3,
+                DayOfWeek.Wednesday => 4,
+                DayOfWeek.Thursday => 5,
+                DayOfWeek.Friday => 6,
+                DayOfWeek.Saturday => 7,
+                DayOfWeek.Sunday => 0,
+                _ => -1 // Trường hợp không xác định
+            };
         }
 
     }
