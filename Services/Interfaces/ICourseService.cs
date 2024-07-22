@@ -23,6 +23,10 @@ namespace Services.Interfaces
         Task<IActionResult> CreatePromotion(CreatePromotion createPromotion);
         Task<IActionResult> UpdatePromotion(UpdatePromotion updatePromotion);
         Task<IActionResult> DeletePromotion(Guid id);
+        Task<IActionResult> CreateCourseSlot(CourseSlotRequest request);
+        Task<IActionResult> UpdateCourseSlot(UpdateCourseSlotRequest request);
+        Task<IActionResult> DeleteCourseSlot(Guid id);
+        Task<IActionResult> SwapSlotNumber(CourseSlotSwapRequest request);
         Task<ActionResult<List<Course>>> GetAllCourses();
         Task<ActionResult<Course>> GetCourse(Guid id);
         Task<ActionResult<List<CourseOutline>>> GetAllCourseOutlines();
@@ -30,6 +34,10 @@ namespace Services.Interfaces
         Task<ActionResult<List<CoursePromotion>>> GetAllCoursePromotions();
         Task<ActionResult<CoursePromotion>> GetCoursePromotion(Guid id);
         Task<ActionResult<List<Promotion>>> GetAllPromotions();
+        Task<ActionResult<List<Promotion>>> GetPromotionsByTutorId(Guid tutorId);
         Task<ActionResult<Promotion>> GetPromotion(Guid id);
+        Task<ActionResult<List<CourseSlot>>> GetAllCourseSlots();
+        Task<ActionResult<CourseSlot>> GetCourseSlot(Guid id);
+        Task<ActionResult<List<CourseSlot>>> GetCourseSlotsByCourseId(Guid id);
     }
 }

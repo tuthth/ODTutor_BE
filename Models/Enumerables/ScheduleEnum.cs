@@ -6,12 +6,11 @@ using System.Threading.Tasks;
 
 namespace Models.Enumerables
 {
-    public enum CourseEnum
+    public enum ScheduleEnum
     {
-        Unknown = 0,
-        Active = 1,
-        Inactive = 2,
-        Deleted = 3,
-        Finished = 4 
+        Pending = 0,
+        Learning = 1,
+        Finished = 2,
+        Cancelled = 3
     }
 }

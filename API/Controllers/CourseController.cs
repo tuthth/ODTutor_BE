@@ -234,6 +234,74 @@ namespace API.Controllers
             }
             throw new Exception("Lỗi không xác định");
         }
+        [HttpPost("create/course-slot")]
+        public async Task<IActionResult> CreateCourseSlot([FromBody] CourseSlotRequest request)
+        {
+            var result = await _courseService.CreateCourseSlot(request);
+            if (result is StatusCodeResult statusCodeResult)
+            {
+                if (statusCodeResult.StatusCode == 201) return StatusCode(StatusCodes.Status201Created, new { Message = "Tạo slot khóa học thành công" });
+                if (statusCodeResult.StatusCode == 400) return BadRequest(new { Message = "Dữ liệu không hợp lệ" });
+                if (statusCodeResult.StatusCode == 404) return Ok(new { Message = "Không tìm thấy khóa học" });
+
+            }
+            if (result is Exception exception)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
+            }
+            throw new Exception("Lỗi không xác định");
+        }
+        [HttpPut("update/course-slot")]
+        public async Task<IActionResult> UpdateCourseSlot([FromBody] UpdateCourseSlotRequest request)
+        {
+            var result = await _courseService.UpdateCourseSlot(request);
+            if (result is StatusCodeResult statusCodeResult)
+            {
+                if (statusCodeResult.StatusCode == 200) return Ok(new { Message = "Cập nhật slot khóa học thành công" });
+                if (statusCodeResult.StatusCode == 400) return BadRequest(new { Message = "Dữ liệu không hợp lệ" });
+                if (statusCodeResult.StatusCode == 404) return Ok(new { Message = "Không tìm thấy khóa học" });
+
+            }
+            if (result is Exception exception)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
+            }
+            throw new Exception("Lỗi không xác định");
+        }
+        [HttpDelete("delete/course-slot/{ID}")]
+        public async Task<IActionResult> DeleteCourseSlot(Guid ID)
+        {
+            var result = await _courseService.DeleteCourseSlot(ID);
+            if (result is StatusCodeResult statusCodeResult)
+            {
+                if (statusCodeResult.StatusCode == 204) return StatusCode(StatusCodes.Status204NoContent, new { Message = "Xóa slot khóa học thành công" });
+                if (statusCodeResult.StatusCode == 400) return BadRequest(new { Message = "Dữ liệu không hợp lệ" });
+                if (statusCodeResult.StatusCode == 404) return Ok(new { Message = "Không tìm thấy khóa học" });
+
+            }
+            if (result is Exception exception)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
+            }
+            throw new Exception("Lỗi không xác định");
+        }
+        [HttpPut("swap-slot-number")]
+        public async Task<IActionResult> SwapSlotNumber([FromBody] CourseSlotSwapRequest request)
+        {
+            var result = await _courseService.SwapSlotNumber(request);
+            if (result is StatusCodeResult statusCodeResult)
+            {
+                if (statusCodeResult.StatusCode == 200) return Ok(new { Message = "Đổi số thứ tự slot khóa học thành công" });
+                if (statusCodeResult.StatusCode == 400) return BadRequest(new { Message = "Dữ liệu không hợp lệ" });
+                if (statusCodeResult.StatusCode == 404) return Ok(new { Message = "Không tìm thấy khóa học" });
+
+            }
+            if (result is Exception exception)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
+            }
+            throw new Exception("Lỗi không xác định");
+        }
         [HttpGet("get/courses")]
         public async Task<ActionResult<List<CourseView>>> GetAllCourses()
         {
@@ -360,6 +428,25 @@ namespace API.Controllers
             if ((IActionResult)result.Result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
             throw new Exception("Lỗi không xác định");
         }
+        [HttpGet("get/promotions/{tutorID}")]
+        public async Task<ActionResult<List<PromotionView>>> GetPromotionsByTutorID(Guid tutorID)
+        {
+            var result = await _courseService.GetPromotionsByTutorId(tutorID);
+            if (result is ActionResult<List<Promotion>> promotions && result.Value != null)
+            {
+                var promotionViews = _mapper.Map<List<PromotionView>>(promotions.Value);
+                var promotionIn30Days = promotionViews.Where(x => x.CreatedAt >= DateTime.UtcNow.AddHours(7).AddDays(-30)).ToList();
+                var promotionInPrevious30Days = promotionViews.Where(x => x.CreatedAt < DateTime.UtcNow.AddHours(7).AddDays(-30) && x.CreatedAt >= DateTime.UtcNow.AddHours(7).AddDays(-60)).ToList();
+                var percentageChange = promotionInPrevious30Days.Count == 0 ? 100 : (promotionIn30Days.Count - promotionInPrevious30Days.Count) / promotionInPrevious30Days.Count * 100;
+                return Ok(new { Promotions = promotionViews, Count = promotionViews.Count, Last30Days = promotionIn30Days.Count, PercentageChange = percentageChange });
+            }
+            if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
+            {
+                if (statusCodeResult.StatusCode == 404) { return NotFound("Không tìm thấy khuyến mãi"); }
+            }
+            if ((IActionResult)result.Result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
+            throw new Exception("Lỗi không xác định");
+        }
         [HttpGet("get/promotion/{promotionID}")]
         public async Task<ActionResult<PromotionView>> GetPromotion(Guid promotionID)
         {
@@ -372,6 +459,54 @@ namespace API.Controllers
             if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
             {
                 if (statusCodeResult.StatusCode == 404) { return NotFound("Không tìm thấy khuyến mãi"); }
+            }
+            if ((IActionResult)result.Result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
+            throw new Exception("Lỗi không xác định");
+        }
+        [HttpGet("get/course-slots")]
+        public async Task<ActionResult<List<CourseSlotView>> > GetAllCourseSlots()
+        {
+            var result = await _courseService.GetAllCourseSlots();
+            if (result is ActionResult<List<CourseSlot>> courseSlots && result.Value != null)
+            {
+                var courseSlotViews = _mapper.Map<List<CourseSlotView>>(courseSlots.Value);
+                return Ok(new { CourseSlots = courseSlotViews, Count = courseSlotViews.Count});
+            }
+            if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
+            {
+                if (statusCodeResult.StatusCode == 404) { return NotFound("Không tìm thấy slot khóa học"); }
+            }
+            if ((IActionResult)result.Result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
+            throw new Exception("Lỗi không xác định");
+        }
+        [HttpGet("get/course-slot/{courseSlotID}")]
+        public async Task<ActionResult<CourseSlotView>> GetCourseSlot(Guid courseSlotID)
+        {
+            var result = await _courseService.GetCourseSlot(courseSlotID);
+            if (result is ActionResult<CourseSlot> courseSlot && result.Value != null)
+            {
+                var courseSlotView = _mapper.Map<CourseSlotView>(courseSlot.Value);
+                return Ok(courseSlotView);
+            }
+            if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
+            {
+                if (statusCodeResult.StatusCode == 404) { return NotFound("Không tìm thấy slot khóa học"); }
+            }
+            if ((IActionResult)result.Result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
+            throw new Exception("Lỗi không xác định");
+        }
+        [HttpGet("get/course-slots/{courseID}")]
+        public async Task<ActionResult<List<CourseSlotView>>> GetCourseSlotsByCourseID(Guid courseID)
+        {
+            var result = await _courseService.GetCourseSlotsByCourseId(courseID);
+            if (result is ActionResult<List<CourseSlot>> courseSlots && result.Value != null)
+            {
+                var courseSlotViews = _mapper.Map<List<CourseSlotView>>(courseSlots.Value);
+                return Ok(courseSlotViews);
+            }
+            if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
+            {
+                if (statusCodeResult.StatusCode == 404) { return NotFound("Không tìm thấy slot khóa học"); }
             }
             if ((IActionResult)result.Result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
             throw new Exception("Lỗi không xác định");

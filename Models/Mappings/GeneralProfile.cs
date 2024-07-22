@@ -123,6 +123,12 @@ namespace Models.Mappings
             CreateMap<TutorSlotAvailable, TutorSlotResponse>();
             CreateMap<Report, ReportRequest>();
             CreateMap<ReportRequest, Report>();
+            CreateMap<UpdateStudentCourseRequest, StudentCourse>();
+            CreateMap<StudentCourse, UpdateStudentCourseRequest>();
+            CreateMap<CourseSlot, CourseSlotRequest>();
+            CreateMap<CourseSlotRequest, CourseSlot>();
+            CreateMap<CourseSlot, UpdateCourseSlotRequest>();
+            CreateMap<UpdateCourseSlotRequest, CourseSlot>();
         }
     }
 }

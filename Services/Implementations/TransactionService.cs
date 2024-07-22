@@ -449,7 +449,6 @@ namespace Services.Implementations
                 Status = transaction.Status
             });
         }
-        //chua xu ly chi tiet
         public async Task<IActionResult> CreateDepositVnPayCourse(CourseTransactionCreate transactionCreate)
         {
             var findUser = _context.Users.Include(u => u.WalletNavigation).FirstOrDefault(u => u.WalletNavigation.WalletId == transactionCreate.SenderId);
@@ -531,7 +530,6 @@ namespace Services.Implementations
                 Status = transaction.Status
             });
         }
-        //chua lam chi tiet course
         public async Task<IActionResult> UpdateTransaction(Guid walletTransactionId, int choice, int updateStatus)
         {
             var wallet = await _context.WalletTransactions.FirstOrDefaultAsync(w => w.WalletTransactionId == walletTransactionId);
@@ -660,7 +658,18 @@ namespace Services.Implementations
                     _firebaseRealtimeDatabaseService.UpdateAsync<Models.Entities.Notification>($"notifications/{notification1.UserId}/{notification1.NotificationId}", notification1);
                     _firebaseRealtimeDatabaseService.UpdateAsync<Models.Entities.Notification>($"notifications/{notification2.UserId}/{notification2.NotificationId}", notification2);
 
-                    //student course: chua ro query
+                    var courses = _context.Courses.Include(c => c.TutorNavigation).FirstOrDefault(c => c.CourseId == course.CourseId);
+                    var student = _context.Students.FirstOrDefault(s => s.UserId == sender.Id);
+                    var studentCourse = new StudentCourse
+                    {
+                        StudentCourseId = Guid.NewGuid(),
+                        CourseId = course.CourseId,
+                        StudentId = student.StudentId,
+                        CreatedAt = DateTime.UtcNow.AddHours(7),
+                        Status = (int)CourseEnum.Active,
+                        GoogleMeetUrl = ""
+                    };
+                    _context.StudentCourses.Add(studentCourse);
                 }
                 else if (choice == (Int32)UpdateTransactionType.Wallet)
                 {
