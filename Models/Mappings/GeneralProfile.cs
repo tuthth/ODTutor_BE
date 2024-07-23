@@ -47,6 +47,7 @@ namespace Models.Mappings
             CreateMap<WalletTransaction, WalletTransactionCreate>();
             CreateMap<TutorExperience, TutorExperienceRequest>();
             CreateMap<TutorRating, TutorRatingRequest>();
+            CreateMap<TutorRatingRequest, TutorRating>();
             CreateMap<TutorRating, UpdateTutorRatingRequest>();
             CreateMap<User, UpdateAccountRequest>();
             CreateMap<User, UpdateUserAccountRequest>();

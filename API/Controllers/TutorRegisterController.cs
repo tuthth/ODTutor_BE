@@ -356,7 +356,16 @@ namespace API.Controllers
             var response = await _tutorRegisterService.DeleteSlotByTutorSlotID(tutorSlotID);
             return response;
         }
-    }
 
+        /// <summary>
+        /// Lấy tutor Rating List có Paging 
+        /// </summary>
+        [HttpGet("get/tutor-rating-list")]
+        public async Task<ActionResult<PageResults<TutorRatingListResponse>>> getTutorRatingList(Guid TutorId, int size, int PageSize)
+        {
+            var result = await _tutorRegisterService.GetTutorRatingList(TutorId, size, PageSize);
+            return result;
+        }
+    }
 }
 

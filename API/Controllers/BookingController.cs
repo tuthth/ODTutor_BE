@@ -274,5 +274,15 @@ namespace API.Controllers
             var result = await _bookingService.ConfirmRescheduleBooking(bookingID);
             return result;
         }
+
+        ///<summary>
+        /// Rating không cần hình
+        /// </summary>
+        [HttpPost("rate/booking/create/withoutimage")]
+        public async Task<IActionResult> RateBookingWithoutImage(TutorRatingRequest ratingRequest)
+        {
+            var result = await _bookingService.RateBookingsWithoutImage(ratingRequest);
+            return result;
+        }
     }
 }

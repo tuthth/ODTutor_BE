@@ -298,6 +298,33 @@ namespace Services.Implementations
             await _context.SaveChangesAsync();
             return new StatusCodeResult(201);
         }
+        public async Task<IActionResult> RateBookingsWithoutImage(TutorRatingRequest tutorRatingRequest)
+        {
+            var booking = _context.Bookings.FirstOrDefault(x => x.BookingId == tutorRatingRequest.BookingId);
+            if (booking == null || booking.Status != (Int32)BookingEnum.Finished)
+            {
+                return new StatusCodeResult(404);
+            }
+            var student = _context.Users
+                .Include(x => x.StudentNavigation)
+                .FirstOrDefault(x => x.StudentNavigation.StudentId == tutorRatingRequest.StudentId);
+            var tutor = _context.Users
+                .Include(x => x.TutorNavigation)
+                .FirstOrDefault(x => x.TutorNavigation.TutorId == tutorRatingRequest.TutorId);
+            if (student.Banned == true)
+            {
+                return new StatusCodeResult(406);
+            }
+            if (student.Active == false)
+            {
+                return new StatusCodeResult(406);
+            }
+            var tutorRating = _mapper.Map<TutorRating>(tutorRatingRequest);
+            tutorRating.TutorRatingId = Guid.NewGuid();
+            _context.TutorRatings.Add(tutorRating);
+            _context.SaveChanges();
+            return new StatusCodeResult(201);
+        }
         public async Task<IActionResult> UpdateRating(UpdateTutorRatingRequest request)
         {
             var tutorRating = _context.TutorRatings.FirstOrDefault(x => x.TutorRatingId == request.TutorRatingId);
@@ -611,64 +638,6 @@ namespace Services.Implementations
                 throw new CrudException(HttpStatusCode.InternalServerError, "", "");
             }
         }
-
-/*        // Xác nhận đổi lịch học 
-        public async Task<IActionResult> ConfirmRescheduleBooking(Guid bookingId)
-        {
-            try
-            {
-                var booking = _context.Bookings.FirstOrDefault(x => x.BookingId == bookingId);
-                if (booking == null)
-                {
-                    throw new CrudException(HttpStatusCode.NotFound, "Booking not found", "");
-                }
-                booking.Status = (Int32)BookingEnum.Success;
-                // Set Old Slot available for tutor when change booking time
-                TimeSpan bookingTime = new TimeSpan(booking.StudyTime.Value.Hour, booking.StudyTime.Value.Minute, 0);
-                Tutor tutor1 = _context.Tutors.FirstOrDefault(x => x.TutorId == booking.TutorId);
-                TutorDateAvailable tutorDateAvailable1 = _context.TutorDateAvailables.FirstOrDefault(x => x.TutorID == tutor1.TutorId && x.Date.Date == booking.StudyTime.Value.Date);
-                if (tutorDateAvailable1 == null)
-                {
-                    throw new CrudException(HttpStatusCode.OK, "Tutor date available not found", "");
-                }
-                TutorSlotAvailable tutorSlotAvailable1 = _context.TutorSlotAvailables.FirstOrDefault(x => x.TutorDateAvailableID == tutorDateAvailable1.TutorDateAvailableID && x.StartTime == bookingTime);
-                if (tutorSlotAvailable1 == null)
-                {
-                    throw new CrudException(HttpStatusCode.OK, "Tutor slot available not found", "");
-                }
-                tutorSlotAvailable1.IsBooked = false;
-                tutorSlotAvailable1.Status = (Int32)TutorSlotAvailabilityEnum.Available;
-                _context.TutorSlotAvailables.Update(tutorSlotAvailable1);
-                booking.StudyTime = booking.RescheduledTime;
-                _context.Bookings.Update(booking);
-                // Set Slot available for tutor when change booking time
-                Tutor tutor = _context.Tutors.FirstOrDefault(x => x.TutorId == booking.TutorId);
-                TutorDateAvailable tutorDateAvailable = _context.TutorDateAvailables.FirstOrDefault(x => x.TutorID == tutor.TutorId && x.Date.Date == booking.StudyTime.Value.Date);
-                if (tutorDateAvailable == null)
-                {
-                    throw new CrudException(HttpStatusCode.OK, "Tutor date available not found", "");
-                }
-                TutorSlotAvailable tutorSlotAvailable = _context.TutorSlotAvailables.FirstOrDefault(x => x.TutorDateAvailableID == tutorDateAvailable.TutorDateAvailableID && x.StartTime == booking.StudyTime.Value.TimeOfDay);
-                if (tutorSlotAvailable == null)
-                {
-                    throw new CrudException(HttpStatusCode.OK, "Tutor slot available not found", "");
-                }
-                tutorSlotAvailable.IsBooked = true;
-                tutorSlotAvailable.Status = (Int32)TutorSlotAvailabilityEnum.NotAvailable;
-
-                _context.TutorSlotAvailables.Update(tutorSlotAvailable);
-                await _context.SaveChangesAsync();
-                throw new CrudException(HttpStatusCode.OK, "Confirm reschedule booking successfully", "");
-            }
-            catch (CrudException ex)
-            {
-                throw ex;
-            }
-            catch (Exception ex)
-            {
-                throw new CrudException(HttpStatusCode.InternalServerError, "", "");
-            }
-        }*/
 
         public async Task<IActionResult> ConfirmRescheduleBooking(Guid bookingId)
         {

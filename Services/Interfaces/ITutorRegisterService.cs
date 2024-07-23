@@ -37,5 +37,6 @@ namespace Services.Interfaces
         Task<IActionResult> RemoveTutorSubject(Guid tutorID, Guid subjectID);
         Task<IActionResult> CreateTutorSlotByWeekDate(TutorRegistScheduleRequest request);
         Task<IActionResult> DeleteSlotByTutorSlotID(Guid tutorSlotID);
+        Task<ActionResult<PageResults<TutorRatingListResponse>>> GetTutorRatingList(Guid TutorId, int size, int PageSize);
     }   
 }

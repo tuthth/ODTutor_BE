@@ -1026,6 +1026,47 @@ namespace Services.Implementations
             }
         }
 
+        // Get Tutor Rating and Paging 
+        public async Task<ActionResult<PageResults<TutorRatingListResponse>>> GetTutorRatingList(Guid TutorId, int size, int PageSize)
+        {
+            List<TutorRatingListResponse> tutorRatingListResponses = new List<TutorRatingListResponse>();
+            try
+            {
+                var tutorRatingList = await _context.TutorRatings
+                    .Where(x => x.TutorId == TutorId)
+                    .ToListAsync();
+                foreach (var rating in tutorRatingList)
+                {
+                    var student = await _context.Students
+                        .Include(x => x.UserNavigation)
+                        .Where(x => x.StudentId == rating.StudentId).FirstOrDefaultAsync();
+                    var newResponse = new TutorRatingListResponse
+                    {
+                        TutorRatingId = rating.TutorRatingId,
+                        FullName = student.UserNavigation.Name,
+                        Image = student.UserNavigation.ImageUrl,
+                        Rating = rating.RatePoints,
+                        Content = rating.Content,
+                        CreatedDate = rating.CreatedAt
+                    };
+                    tutorRatingListResponses.Add(newResponse);
+                }
+                if (tutorRatingListResponses.Count == 0)
+                {
+                    throw new CrudException(HttpStatusCode.NoContent, "Không tìm thấy đánh giá của gia sư", "");
+                }
+                var pageResults = PagingHelper<TutorRatingListResponse>.Paging(tutorRatingListResponses, size, PageSize);
+                return pageResults;
+            }
+            catch (CrudException ex)
+            {
+                throw ex;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
         // Remove Tutor Subject
         public async Task<IActionResult> RemoveTutorSubject(Guid tutorID, Guid subjectID)
         {
