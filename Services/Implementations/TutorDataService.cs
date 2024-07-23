@@ -600,5 +600,34 @@ namespace Services.Implementations
             };
         }
 
+        // Get Student Statistic By Morning, Afternoon, Evening ( Morning : From 00:00:00 - 07:00:00, Afternoon : From 08:00:00 - 15:00:00, Evening : From 16:00:00 - 23:59:59)
+        public async Task<ActionResult<StudentStatisticNumberByTimeOfDatResponse>> GetNumberOfStudentPercentageByTimeOfDate (Guid tutorId)
+        {
+            try
+            {
+                var studentStatistic = new StudentStatisticNumberByTimeOfDatResponse();
+                var totalStudent = await _context.Bookings
+                    .Where(b => b.TutorId == tutorId && b.Status == (int)BookingEnum.Finished)
+                    .CountAsync();
+                var morningNumber = await _context.Bookings
+                    .Where(b => b.TutorId == tutorId && b.Status == (int)BookingEnum.Finished && b.StudyTime.Value.Hour >= 0 && b.StudyTime.Value.Hour <= 7)
+                    .CountAsync();
+                var afternoonNumber = await _context.Bookings.Where(b => b.TutorId == tutorId && b.Status == (int)BookingEnum.Finished && b.StudyTime.Value.Hour >= 8 && b.StudyTime.Value.Hour <= 15)
+                    .CountAsync();
+                var eveningNumber = await _context.Bookings.Where(b => b.TutorId == tutorId && b.Status == (int)BookingEnum.Finished && b.StudyTime.Value.Hour >= 16 && b.StudyTime.Value.Hour <= 23).CountAsync();
+                studentStatistic.Total = totalStudent;
+                studentStatistic.MoringNumber = morningNumber/totalStudent * 100;
+                studentStatistic.AfternoonNumber = afternoonNumber/totalStudent *100;
+                studentStatistic.EveningNumber = eveningNumber / totalStudent * 100;
+                return studentStatistic;
+            } catch(CrudException ex)
+            {
+                throw ex;
+            } catch (Exception ex)
+            {
+                throw new CrudException(HttpStatusCode.InternalServerError, "Get Number Of Student Percentage By Time Of Date Error", ex.Message);
+            }
+        }
+
     }
 }

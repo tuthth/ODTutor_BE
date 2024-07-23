@@ -156,5 +156,15 @@ namespace API.Controllers
             }
         }
 
+
+        /// <summary>
+        /// Thống kê số lượng học sinh theo thời gian trong ngày
+        /// </summary>
+        [HttpGet("get/number-student-by-time/{tutorId}")]
+        public async Task<ActionResult<StudentStatisticNumberByTimeOfDatResponse>> GetNumberOfStudentPercentageByTimeOfDate(Guid tutorId)
+        {
+            var response = await _tutorDataService.GetNumberOfStudentPercentageByTimeOfDate(tutorId);
+            return response;
+        }
     }
 }
