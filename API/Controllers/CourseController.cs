@@ -243,6 +243,7 @@ namespace API.Controllers
                 if (statusCodeResult.StatusCode == 201) return StatusCode(StatusCodes.Status201Created, new { Message = "Tạo slot khóa học thành công" });
                 if (statusCodeResult.StatusCode == 400) return BadRequest(new { Message = "Dữ liệu không hợp lệ" });
                 if (statusCodeResult.StatusCode == 404) return Ok(new { Message = "Không tìm thấy khóa học" });
+                if (statusCodeResult.StatusCode == 409) return Conflict(new { Message = "Có buổi học trùng nội dung" });
 
             }
             if (result is Exception exception)
@@ -294,7 +295,7 @@ namespace API.Controllers
                 if (statusCodeResult.StatusCode == 200) return Ok(new { Message = "Đổi số thứ tự slot khóa học thành công" });
                 if (statusCodeResult.StatusCode == 400) return BadRequest(new { Message = "Dữ liệu không hợp lệ" });
                 if (statusCodeResult.StatusCode == 404) return Ok(new { Message = "Không tìm thấy khóa học" });
-
+                if (statusCodeResult.StatusCode == 409) return Conflict(new { Message = "Không thể đổi số thứ tự slot khóa học" });
             }
             if (result is Exception exception)
             {

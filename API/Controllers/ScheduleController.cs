@@ -53,6 +53,7 @@ namespace API.Controllers
             {
                 if (statusCodeResult.StatusCode == 200) { return Ok(new { Message = "Đổi lịch học thành công" }); }
                 if (statusCodeResult.StatusCode == 404) { return NotFound(new { Message = "Không tìm thấy lịch học" }); }
+                if (statusCodeResult.StatusCode == 406) { return StatusCode(StatusCodes.Status406NotAcceptable, new { Message = "Không thể thay đổi lịch học trước khi bắt đầu slot đầu tiên trong 24h" });}
                 if (statusCodeResult.StatusCode == 409) { return Conflict(new { Message = "Khóa học đã kết thúc" }); }
             }
             if (result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
@@ -66,6 +67,7 @@ namespace API.Controllers
             {
                 if (statusCodeResult.StatusCode == 200) { return Ok(new { Message = "Đổi lịch học thành công" }); }
                 if (statusCodeResult.StatusCode == 404) { return NotFound(new { Message = "Không tìm thấy lịch học" }); }
+                if (statusCodeResult.StatusCode == 406) { return StatusCode(StatusCodes.Status406NotAcceptable, new { Message = "Không thể thay đổi lịch học trước khi bắt đầu slot đầu tiên trong 24h" });}
                 if (statusCodeResult.StatusCode == 409) { return Conflict(new { Message = "Khóa học đã kết thúc" }); }
             }
             if (result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });

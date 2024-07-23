@@ -322,7 +322,7 @@ namespace Services.Implementations
             var tutorRating = _mapper.Map<TutorRating>(tutorRatingRequest);
             tutorRating.TutorRatingId = Guid.NewGuid();
             _context.TutorRatings.Add(tutorRating);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
             return new StatusCodeResult(201);
         }
         public async Task<IActionResult> UpdateRating(UpdateTutorRatingRequest request)

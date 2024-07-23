@@ -26,8 +26,8 @@ namespace API.Controllers
             var result = await _studentCourseService.UpdateStudentCourse(request);
             if(result is StatusCodeResult statusCodeResult)
             {
-                if (statusCodeResult.StatusCode == 404) { return NotFound(new { Message = "Không tìm thấy khóa học sinh viên" }); }
-                if (statusCodeResult.StatusCode == 200) { return Ok(new { Message = "Cập nhật khóa học sinh viên thành công" }); }
+                if (statusCodeResult.StatusCode == 404) { return NotFound(new { Message = "Không tìm thấy khóa học" }); }
+                if (statusCodeResult.StatusCode == 200) { return Ok(new { Message = "Cập nhật khóa học thành công" }); }
             }
             if(result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
             throw new Exception("Lỗi không xác định");
@@ -38,9 +38,9 @@ namespace API.Controllers
             var result = await _studentCourseService.FinishStudentCourse(studentCourseID);
             if (result is StatusCodeResult statusCodeResult)
             {
-                if (statusCodeResult.StatusCode == 404) { return NotFound(new { Message = "Không tìm thấy khóa học sinh viên" }); }
-                if (statusCodeResult.StatusCode == 200) { return Ok(new { Message = "Kết thúc khóa học sinh viên thành công" }); }
-                if (statusCodeResult.StatusCode == 409) { return Conflict(new { Message = "Khóa học sinh viên đã kết thúc trước đó" }); }
+                if (statusCodeResult.StatusCode == 404) { return NotFound(new { Message = "Không tìm thấy khóa học" }); }
+                if (statusCodeResult.StatusCode == 200) { return Ok(new { Message = "Kết thúc khóa học thành công" }); }
+                if (statusCodeResult.StatusCode == 409) { return Conflict(new { Message = "Khóa học đã kết thúc trước đó" }); }
             }
             if (result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
             throw new Exception("Lỗi không xác định");
