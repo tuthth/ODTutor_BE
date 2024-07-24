@@ -626,6 +626,76 @@ namespace Services.Implementations
                 booking.IsRescheduled = true;
                 booking.Message = message;
                 _context.Bookings.Update(booking);
+                // Find user by StudnetId and TutorId
+                var student = _context.Users
+                    .Include(x => x.StudentNavigation)
+                    .FirstOrDefault(x => x.StudentNavigation.StudentId == booking.StudentId);
+                var tutor = _context.Users
+                    .Include(x => x.TutorNavigation)
+                    .FirstOrDefault(x => x.TutorNavigation.TutorId == booking.TutorId);
+                if(student == null || tutor == null)
+                {
+                    throw new CrudException(HttpStatusCode.NotFound, "Student or Tutor not found", "");
+                }
+                // Add Notification For student and tutor 
+                if (senderId == booking.StudentId    )
+                {                     
+                    NotificationDTO notification = new NotificationDTO();
+                    notification.NotificationId = Guid.NewGuid();
+                    notification.UserId = tutor.Id;
+                    notification.Title = "Yêu cầu dời lịch học";
+                    notification.Content = "Học sinh " + student.Name + " đã yêu cầu dời lịch học";
+                    notification.CreatedAt = DateTime.UtcNow.AddHours(7);
+                    Notification noti = _mapper.Map<Notification>(notification);
+                    _context.Notifications.Add(noti);
+                    // Lưu notification vào firestore
+                    _firebaseRealtimeDatabaseService.SetAsync<NotificationDTO>($"notifications/{notification.UserId}/{notification.NotificationId}", notification);
+
+                    // Send noti by email to student
+                    await _appExtension.SendMail(new MailContent()
+                    {
+                        To = student.Email,
+                        Subject = "Yêu cầu xác nhận đổi lịch học",
+                        Body = ". Vui lòng đợi sự phàn hồi từ tutor và kiểm tra email hoặc thông báo khi nhận được sự phản hồi. Chúc bạn có một ngày tốt lành"
+                    });
+
+                    // Send noti by email to tutor
+                    await _appExtension.SendMail(new MailContent()
+                    {
+                        To = tutor.Email,
+                        Subject = "Yêu cầu xác nhận đổi lịch học",
+                        Body = ". Học sinh " + student.Name + " đã yêu cầu dời lịch học. Vui lòng kiểm tra thông báo và email để xác nhận. Chúc bạn có một ngày tốt lành"
+                    });
+                }
+                else if (senderId == booking.TutorId)
+                {
+                    NotificationDTO notification = new NotificationDTO();
+                    notification.NotificationId = Guid.NewGuid();
+                    notification.UserId = student.Id;
+                    notification.Title = "Yêu cầu dời lịch học";
+                    notification.Content = "Gia sư " + tutor.Name + " đã yêu cầu dời lịch học";
+                    notification.CreatedAt = DateTime.UtcNow.AddHours(7);
+                    Notification noti = _mapper.Map<Notification>(notification);
+                    _context.Notifications.Add(noti);
+                    // Lưu notification vào firestore
+                    _firebaseRealtimeDatabaseService.SetAsync<NotificationDTO>($"notifications/{notification.UserId}/{notification.NotificationId}", notification);
+
+                    // Send noti by email to tutor
+                    await _appExtension.SendMail(new MailContent()
+                    {
+                        To = tutor.Email,
+                        Subject = "Yêu cầu xác nhận đổi lịch học",
+                        Body = ". Vui lòng đợi sự phàn hồi từ học sinh và kiểm tra email hoặc thông báo khi nhận được sự phản hồi. Chúc bạn có một ngày tốt lành"
+                    });
+
+                    // Send noti by email to student
+                    await _appExtension.SendMail(new MailContent()
+                    {
+                        To = student.Email,
+                        Subject = "Yêu cầu xác nhận đổi lịch học",
+                        Body = ". Gia sư " + tutor.Name + " đã yêu cầu dời lịch học. Vui lòng kiểm tra thông báo và email để xác nhận. Chúc bạn có một ngày tốt lành"
+                    });
+                }
                 await _context.SaveChangesAsync();
                 throw new CrudException(HttpStatusCode.OK, "Reschedule booking successfully", "");
             }
@@ -660,8 +730,54 @@ namespace Services.Implementations
                 UpdateTutorSlotAvailability( bookingId,booking.RescheduledTime.Value, true);
 
                 _context.Bookings.Update(booking);
-                await _context.SaveChangesAsync();
 
+                // Create a new notification for student and tutor
+                var student = _context.Users
+                    .Include(x => x.StudentNavigation)
+                    .FirstOrDefault(x => x.StudentNavigation.StudentId == booking.StudentId);
+                var tutor = _context.Users
+                    .Include(x => x.TutorNavigation)
+                    .FirstOrDefault(x => x.TutorNavigation.TutorId == booking.TutorId);
+                if (student == null || tutor == null)
+                {
+                    throw new CrudException(HttpStatusCode.NotFound, "Student or Tutor not found", "");
+                }
+                NotificationDTO notification = new NotificationDTO();
+                notification.NotificationId = Guid.NewGuid();
+                notification.UserId = student.Id;
+                notification.Title = "Xác nhận dời lịch học";
+                notification.Content = "Thời gian học đã xác nhận thay đổi vui lòng kiểm tra lại trong học phần của bạn";
+                notification.CreatedAt = DateTime.UtcNow.AddHours(7);
+                Notification noti = _mapper.Map<Notification>(notification);
+                _context.Notifications.Add(noti);
+                // Lưu notification vào firestore
+                _firebaseRealtimeDatabaseService.SetAsync<NotificationDTO>($"notifications/{notification.UserId}/{notification.NotificationId}", notification);
+
+                NotificationDTO notification2 = new NotificationDTO();
+                notification2.NotificationId = Guid.NewGuid();
+                notification2.UserId = tutor.Id;
+                notification2.Title = "Xác nhận dời lịch học";
+                notification2.Content = "Thời gian học đã xác nhận thay đổi vui lòng kiểm tra lại trong lịch dạy của bạn";
+                notification2.CreatedAt = DateTime.UtcNow.AddHours(7);
+                Notification noti2 = _mapper.Map<Notification>(notification2);
+                _context.Notifications.Add(noti2);
+                // Lưu notification vào firestore
+                _firebaseRealtimeDatabaseService.SetAsync<NotificationDTO>($"notifications/{notification2.UserId}/{notification2.NotificationId}", notification2);
+
+                // Send confirm email to student and tutor 
+                await _appExtension.SendMail(new MailContent()
+                {
+                    To = student.Email,
+                    Subject = "Xác nhận dời lịch học",
+                    Body = ". Thời gian học đã xác nhận thay đổi vui lòng kiểm tra lại trong học phần của bạn"
+                });
+                await _appExtension.SendMail(new MailContent()
+                {
+                    To = tutor.Email,
+                    Subject = "Xác nhận dời lịch học",
+                    Body = ". Thời gian học đã xác nhận thay đổi vui lòng kiểm tra lại trong lịch dạy của bạn"
+                });
+                await _context.SaveChangesAsync();
                 return new OkObjectResult("Confirm reschedule booking successfully");
             }
             catch (CrudException ex)
