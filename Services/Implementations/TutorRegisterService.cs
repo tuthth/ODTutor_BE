@@ -1217,9 +1217,9 @@ namespace Services.Implementations
                 }
                 if (tutor.Status == (Int32)TutorEnum.Active)
                 {
-                    tutor.Status = (Int32)TutorEnum.Blocked;
+                    tutor.Status = (Int32)TutorEnum.Paused;
                 }
-                else if (tutor.Status == (Int32)TutorEnum.Blocked)
+                else if (tutor.Status == (Int32)TutorEnum.Paused)
                 {
                     tutor.Status = (Int32)TutorEnum.Active;
                 }

@@ -11,9 +11,9 @@ namespace Models.Enumerables
         Pending = 0,
         Active = 1,
         Inprocessing = 2,
-        Blocked = 3,
+        Denny = 3,
         Banned = 4,
-        Pause = 5,
+        Paused = 5,
     }
     public enum TutorSlotAvailabilityEnum
     {   
