@@ -1198,5 +1198,40 @@ namespace Services.Implementations
                 throw new Exception(ex.Message);
             }
         }
+
+        // Block Tutor Status By TutorId
+        public async Task<IActionResult> BlockOrUnBlockTutorByTutorID (Guid tutorId)
+        {
+            try
+            {
+                var tutor = await _context.Tutors.Where(t => t.TutorId == tutorId).FirstOrDefaultAsync();
+                if (tutor == null)
+                {
+                    throw new CrudException(HttpStatusCode.OK, "Không tìm thấy gia sư", "");
+                }
+                // Check the tutor Booking Inprocessing 
+                var tutorBooking = await _context.Bookings.Where(b => b.TutorId == tutorId && b.Status == (Int32)BookingEnum.Success || b.Status == (Int32)BookingEnum.Learning).ToListAsync();
+                if (tutorBooking.Count > 0)
+                {
+                    throw new CrudException(HttpStatusCode.Conflict, "Gia sư đang có lịch học đang diễn ra, không thể thay đổi trạng thái", "");
+                }
+                if (tutor.Status == (Int32)TutorEnum.Active)
+                {
+                    tutor.Status = (Int32)TutorEnum.Blocked;
+                }
+                else if (tutor.Status == (Int32)TutorEnum.Blocked)
+                {
+                    tutor.Status = (Int32)TutorEnum.Active;
+                }
+                await _context.SaveChangesAsync();
+                throw new CrudException(HttpStatusCode.OK, "Thay đổi trạng thái thành công", "");
+            } catch (CrudException ex)
+            {
+                throw ex;
+            } catch (Exception ex)
+            {
+                throw new CrudException(HttpStatusCode.InternalServerError, ex.Message, "");
+            }
+        }
     }
 }

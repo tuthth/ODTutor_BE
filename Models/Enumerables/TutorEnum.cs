@@ -11,7 +11,7 @@ namespace Models.Enumerables
         Pending = 0,
         Active = 1,
         Inprocessing = 2,
-        Denny = 3,
+        Blocked = 3,
         Banned = 4,
         Pause = 5,
     }

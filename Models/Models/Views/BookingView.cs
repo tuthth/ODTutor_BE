@@ -20,6 +20,8 @@ namespace Models.Models.Views
         public int Status { get; set; }
         public string? Description { get; set; }
         public string? GoogleMeetUrl { get; set; }
-        public Guid? BookingTransactionId { get; set; } = null;
+        public Guid? BookingTransactionId { get; set; }
+        public DateTime? RescheduledTime { get; set; }
+        public bool IsRescheduled { get; set; }
     }
 }

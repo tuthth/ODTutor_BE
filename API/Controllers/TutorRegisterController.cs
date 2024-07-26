@@ -366,6 +366,16 @@ namespace API.Controllers
             var result = await _tutorRegisterService.GetTutorRatingList(TutorId, size, PageSize);
             return result;
         }
+
+        /// <summary>
+        /// Khóa hoặc mở tutor theo tutorID
+        /// </summary>
+        [HttpPut("block-or-unblock-tutor/{tutorId}")]
+        public async Task<IActionResult> blockOrUnBlockTutorByTutorID(Guid tutorId)
+        {
+            var response = await _tutorRegisterService.BlockOrUnBlockTutorByTutorID(tutorId);
+            return response;
+        }
     }
 }
 
