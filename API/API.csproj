@@ -24,29 +24,29 @@
     <PackageReference Include="AutoMapper" Version="13.0.1" />
     <PackageReference Include="Emgu.CV.runtime.windows" Version="4.9.0.5494" />
     <PackageReference Include="FirebaseAdmin" Version="3.0.0" />
-    <PackageReference Include="MailKit" Version="4.7.0" />
-    <PackageReference Include="Microsoft.AspNetCore.Authentication.Google" Version="8.0.6" />
-    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.6" />
+    <PackageReference Include="MailKit" Version="4.7.1.1" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.Google" Version="8.0.7" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.7" />
     <PackageReference Include="Microsoft.AspNetCore.Http" Version="2.2.2" />
     <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.2.0" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Abstractions" Version="2.2.0" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Formatters.Json" Version="2.2.0" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.6" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.6">
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.7" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.7">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="8.0.6" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.6" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.6">
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="8.0.7" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.7" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.7">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.0" />
     <PackageReference Include="Microsoft.Extensions.Logging" Version="8.0.0" />
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.21.0" />
-    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="8.0.2" />
-    <PackageReference Include="MimeKit" Version="4.7.0" />
+    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="8.0.3" />
+    <PackageReference Include="MimeKit" Version="4.7.1" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
   </ItemGroup>
