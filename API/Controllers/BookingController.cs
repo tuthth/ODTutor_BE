@@ -294,5 +294,15 @@ namespace API.Controllers
             var result = await _bookingService.RateBookingsWithoutImage(ratingRequest);
             return result;
         }
+
+        ///<summary>
+        /// Từ chối dời lịch 
+        /// </summary>
+        [HttpPut("reject/reschedule/{bookingID}")]
+        public async Task<IActionResult> RejectRescheduleBooking(Guid bookingID)
+        {
+            var result = await _bookingService.RejectRescheduleBooking(bookingID);
+            return result;
+        }
     }
 }

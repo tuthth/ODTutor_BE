@@ -634,6 +634,7 @@ namespace Services.Implementations
             }
         }
 
+        // Đồng ý dời lịch học
         public async Task<IActionResult> ConfirmRescheduleBooking(Guid bookingId)
         {
             try
@@ -714,6 +715,34 @@ namespace Services.Implementations
                 throw new CrudException(HttpStatusCode.InternalServerError, ex.Message, "");
             }
         }
+
+        // Từ chối dời lịch học 
+        public async Task<IActionResult> RejectRescheduleBooking(Guid bookingId)
+        {
+            try
+            {
+                var booking = _context.Bookings.FirstOrDefault(x => x.BookingId == bookingId);
+                if (booking == null)
+                {
+                    throw new CrudException(HttpStatusCode.NotFound, "Booking not found", "");
+                }
+                booking.Status = (Int32)BookingEnum.Success;
+                booking.IsRescheduled = false;
+                booking.RescheduledTime = null;
+                booking.Message = "";
+                _context.Bookings.Update(booking);
+                await _context.SaveChangesAsync();
+                return new OkObjectResult("Reject reschedule booking successfully");
+            }
+            catch (CrudException ex)
+            {
+                throw ex;
+            }
+            catch (Exception ex)
+            {
+                throw new CrudException(HttpStatusCode.InternalServerError, ex.Message, "");
+            }
+        }   
 
         private void UpdateTutorSlotAvailability(Guid bookingId,DateTime dateTime, bool isBooked)
         {   

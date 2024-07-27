@@ -29,5 +29,6 @@ namespace Services.Interfaces
         Task<IActionResult> RescheduleBooking(Guid bookingId, Guid senderId, Guid newSlotId, string message);
         Task<IActionResult> ConfirmRescheduleBooking(Guid bookingId);
         Task<IActionResult> RateBookingsWithoutImage(TutorRatingRequest tutorRatingRequest);
+        Task<IActionResult> RejectRescheduleBooking(Guid bookingId);
     }
 }
