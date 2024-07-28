@@ -101,5 +101,24 @@ namespace API.Controllers
             }
             throw new Exception("Lỗi không xác định");
         }
+
+        /// <summary>
+        /// Lấy tên của môn học trong booking nè 
+        /// </summary>
+        [HttpGet("get/tutorSubjectBooking")]
+        public async Task<ActionResult<TutorSubjectResponse>> GetTutorSubject(Guid tutorSubjectId)
+        {
+            var result = await _subjectService.GetTutorSubject(tutorSubjectId);
+            if (result is ActionResult<TutorSubjectResponse> tutorSubject && result.Value != null)
+            {
+                return Ok(tutorSubject.Value);
+            }
+            if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
+            {
+                if (statusCodeResult.StatusCode == 404) { return NotFound(new { Message = "Không tìm thấy môn học" }); }
+            }
+            if ((IActionResult)result.Result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
+            throw new Exception("Lỗi không xác định");
+        }
     }
 }

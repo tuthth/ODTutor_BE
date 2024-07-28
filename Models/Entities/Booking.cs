@@ -11,9 +11,11 @@ namespace Models.Entities
         public Guid BookingId { get; set; }
         public Guid StudentId { get; set; }
         public Guid TutorId { get; set; }
+        public Guid TutorSubjectId { get; set; }
         public DateTime CreatedAt { get; set; }
         public TimeSpan? Duration { get; set; }
         public DateTime? ActualEndTime { get; set; }
+        public string ? BookingContent { get; set; }
         public string? Message { get; set; }
         public decimal ?TotalPrice { get; set; }
         public int Status { get; set; }
@@ -26,5 +28,6 @@ namespace Models.Entities
         public virtual Tutor? TutorNavigation { get; set; }
         public virtual ICollection<TutorRating>? TutorRatingsNavigation { get; set; }
         public virtual BookingTransaction? BookingTransactionNavigation { get; set; }
+        public virtual TutorSubject? TutorSubjectNavigation { get; set; }
     }
 }

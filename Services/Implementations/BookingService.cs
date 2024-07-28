@@ -101,7 +101,76 @@ namespace Services.Implementations
                 throw new Exception(ex.ToString());
             }
         }
-
+        // Step 1: Create Booing (By Choose from Calendar Tutor)
+        public async Task<BookingStep1Response> CreateBookingVersion2(BookingRequestV2 bookingRequest)
+        {
+            try
+            {
+                BookingStep1Response response = new BookingStep1Response();
+                var student = _context.Users.Include(x => x.StudentNavigation).FirstOrDefault(x => x.StudentNavigation.StudentId == bookingRequest.StudentId);
+                var tutor = _context.Users.Include(x => x.TutorNavigation).FirstOrDefault(x => x.TutorNavigation.TutorId == bookingRequest.TutorId);
+                var tutorSlot = _context.TutorSlotAvailables.Include(x => x.TutorDateAvailable).FirstOrDefault(x => x.TutorSlotAvailableID == bookingRequest.TutorSlotAvalaibleID);
+                if (student == null)
+                {
+                    throw new CrudException(HttpStatusCode.NotFound, "Student not found", "");
+                }
+                if (tutor == null)
+                {
+                    throw new CrudException(HttpStatusCode.NotFound, "Tutor not found", "");
+                }
+                if (tutorSlot == null)
+                {
+                    throw new CrudException(HttpStatusCode.NotFound, "Tutor slot available not found", "");
+                }
+                if (student.Banned == true || tutor.Banned == true)
+                {
+                    throw new CrudException(HttpStatusCode.Forbidden, "User is banned", "");
+                }
+                if (student.Active == false || tutor.Active == false)
+                {
+                    throw new CrudException(HttpStatusCode.Forbidden, "User is not active", "");
+                }
+                if (student.EmailConfirmed == false)
+                {
+                    throw new CrudException(HttpStatusCode.Forbidden, "Student is not confirmed email", "");
+                }
+                if (tutor.EmailConfirmed == false)
+                {
+                    throw new CrudException(HttpStatusCode.Forbidden, "Tutor is not confirmed email", "");
+                }
+                if (tutorSlot.IsBooked == true)
+                {
+                    throw new CrudException(HttpStatusCode.Conflict, "Tutor slot available is booked", "");
+                }
+                if (tutorSlot.Status == (Int32)TutorSlotAvailabilityEnum.NotAvailable)
+                {
+                    throw new CrudException(HttpStatusCode.Conflict, "Tutor slot available is not available", "");
+                }
+                DateTime studyTime = new DateTime(tutorSlot.TutorDateAvailable.Date.Year, tutorSlot.TutorDateAvailable.Date.Month, tutorSlot.TutorDateAvailable.Date.Day, tutorSlot.StartTime.Hours, tutorSlot.StartTime.Minutes, tutorSlot.StartTime.Seconds);
+                var booking = _mapper.Map<Booking>(bookingRequest);
+                booking.StudyTime = studyTime;
+                booking.BookingId = Guid.NewGuid();
+                booking.CreatedAt = DateTime.UtcNow.AddHours(7);
+                booking.Status = (Int32)BookingEnum.WaitingPayment;
+                booking.Duration = TimeSpan.FromHours(1);
+                booking.TotalPrice = tutor.TutorNavigation.PricePerHour * 1;
+                booking.GoogleMeetUrl = "";
+                booking.Message = "";
+                booking.Description = "Lịch học của học sinh " + student.Name + " với gia sư " + tutor.Name;
+                response.BookingId = booking.BookingId;
+                _context.Bookings.Add(booking);
+                await _context.SaveChangesAsync();
+                return response;
+            }
+            catch (CrudException ex)
+            {
+                throw ex;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.ToString());
+            }
+        }
         // Step 2 : Payment Booking
         public async Task<IActionResult> PaymentForBooking (Guid bookingID)
         {
@@ -441,7 +510,6 @@ namespace Services.Implementations
                 throw new CrudException(HttpStatusCode.InternalServerError, "", "");
             }
         }
-
         // Get Link Meeting 
         public async Task<ActionResult<string>> GetGoogleMeetUrl(Guid bookingId)
         {
@@ -459,7 +527,6 @@ namespace Services.Implementations
                 throw new Exception(ex.ToString());
             }
         }
-
         // Update Booking Link Meeting 
         public async Task<IActionResult> UpdateGoogleMeetUrl(Guid bookingId, string meetingLink)
         {
@@ -485,7 +552,6 @@ namespace Services.Implementations
                 throw new CrudException(HttpStatusCode.InternalServerError, "", "");
             }
         }
-
         // Dời lịch học
         public async Task<IActionResult> RescheduleBooking(Guid bookingId, Guid senderId, Guid newSlotId, string message)
         {
@@ -633,7 +699,6 @@ namespace Services.Implementations
                 throw new CrudException(HttpStatusCode.InternalServerError, "", "");
             }
         }
-
         // Đồng ý dời lịch học
         public async Task<IActionResult> ConfirmRescheduleBooking(Guid bookingId)
         {
@@ -715,7 +780,6 @@ namespace Services.Implementations
                 throw new CrudException(HttpStatusCode.InternalServerError, ex.Message, "");
             }
         }
-
         // Từ chối dời lịch học 
         public async Task<IActionResult> RejectRescheduleBooking(Guid bookingId)
         {
@@ -742,8 +806,8 @@ namespace Services.Implementations
             {
                 throw new CrudException(HttpStatusCode.InternalServerError, ex.Message, "");
             }
-        }   
-
+        }
+        // UPdate gia sư lịch học
         private void UpdateTutorSlotAvailability(Guid bookingId,DateTime dateTime, bool isBooked)
         {   
             var booking = _context.Bookings.FirstOrDefault(x => x.BookingId == bookingId);

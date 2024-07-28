@@ -21,4 +21,9 @@ namespace Models.Enumerables
         NotAvailable = 1,
         Cancelled = 2,
     }
+    public enum TutorSubjectEnum
+    {
+        Available = 0,
+        NotAvailable = 1,
+    }
 }

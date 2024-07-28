@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Models.Entities;
 using Models.Enumerables;
+using Models.Models.Emails;
 using Models.Models.Requests;
 using Models.Models.Views;
 using Models.PageHelper;
@@ -11,6 +12,7 @@ using Services.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -762,6 +764,153 @@ namespace Services.Implementations
             catch (Exception ex)
             {
                 throw new Exception(ex.ToString());
+            }
+        }
+
+        // Accept Tutor Certificate by Moderator or Admin 
+        public async Task AcceptTutorCertificate(List<Guid> tutorCertificateId)
+        {
+            try
+            {
+                var tutorCertificates = await _context.TutorCertificates.Where(c => tutorCertificateId.Contains(c.TutorCertificateId)).ToListAsync();
+                if (tutorCertificates == null)
+                {
+                    throw new CrudException(HttpStatusCode.NotFound, "Not Found", "Tutor Certificate not found");
+                }
+                foreach (var tutorCertificate in tutorCertificates)
+                {
+                    tutorCertificate.IsVerified = true;
+                    // Gửi mail cho tutor khi được accept 
+                    var tutor = await _context.Tutors.FirstOrDefaultAsync(c => c.TutorId == tutorCertificate.TutorId);
+                    var user = await _context.Users.FirstOrDefaultAsync(c => c.Id == tutor.UserId);
+                    await _appExtension.SendMail(new MailContent()
+                    {
+                        To = user.Email,
+                        Subject = "Chứng chỉ đã được xác minh",
+                        Body = "Chứng chỉ của bạn đã được hệ thống xác minh và công nhận. Kiểm tra lại nhé nếu có gì sai sót liên hệ với chúng tôi nhé. Chúc bạn có một ngày tốt lành!" 
+                    });
+
+                    _context.TutorCertificates.Update(tutorCertificate);
+                    throw new CrudException(HttpStatusCode.OK, "OK", "Tutor Certificate is accepted");
+                }
+            } catch(CrudException ex)
+            {
+                throw ex;
+            }
+            catch (Exception ex)
+            {
+                throw new CrudException(HttpStatusCode.InternalServerError,"Internal Server Error","");
+            }
+        }
+
+        // Accept Tutor Experience by Moderator or Admin
+        public async Task AcceptTutorExperience(List<Guid> tutorExperienceId)
+        {
+            try
+            {
+                var tutorExperiences = await _context.TutorExperiences.Where(c => tutorExperienceId.Contains(c.TutorExperienceId)).ToListAsync();
+                if (tutorExperiences == null)
+                {
+                    throw new CrudException(HttpStatusCode.NotFound, "Not Found", "Tutor Experience not found");
+                }
+                foreach (var tutorExperience in tutorExperiences)
+                {
+                    tutorExperience.IsVerified = true;
+                    // Gửi mail cho tutor khi được accept 
+                    var tutor = await _context.Tutors.FirstOrDefaultAsync(c => c.TutorId == tutorExperience.TutorId);
+                    var user = await _context.Users.FirstOrDefaultAsync(c => c.Id == tutor.UserId);
+                    await _appExtension.SendMail(new MailContent()
+                    {
+                        To = user.Email,
+                        Subject = "Kinh nghiệm đã được xác minh",
+                        Body = "Kinh nghiệm của bạn đã được hệ thống xác minh và công nhận. Kiểm tra lại nhé nếu có gì sai sót liên hệ với chúng tôi nhé. Chúc bạn có một ngày tốt lành!"
+                    });
+
+                    _context.TutorExperiences.Update(tutorExperience);
+                    throw new CrudException(HttpStatusCode.OK, "OK", "Tutor Experience is accepted");
+                }
+            }
+            catch (CrudException ex)
+            {
+                throw ex;
+            }
+            catch (Exception ex)
+            {
+                throw new CrudException(HttpStatusCode.InternalServerError, "Internal Server Error", "");
+            }
+        }
+
+        // Deny Tutor Certificate by Moderator or Admin
+        public async Task DenyTutorCertificate(List<Guid> tutorCertificateId)
+        {
+            try
+            {
+                var tutorCertificates = await _context.TutorCertificates.Where(c => tutorCertificateId.Contains(c.TutorCertificateId)).ToListAsync();
+                if (tutorCertificates == null)
+                {
+                    throw new CrudException(HttpStatusCode.NotFound, "Not Found", "Tutor Certificate not found");
+                }
+                foreach (var tutorCertificate in tutorCertificates)
+                {
+                    tutorCertificate.IsVerified = false;
+                    // Gửi mail cho tutor khi bị từ chối
+                    var tutor = await _context.Tutors.FirstOrDefaultAsync(c => c.TutorId == tutorCertificate.TutorId);
+                    var user = await _context.Users.FirstOrDefaultAsync(c => c.Id == tutor.UserId);
+                    await _appExtension.SendMail(new MailContent()
+                    {
+                        To = user.Email,
+                        Subject = "Chứng chỉ bị từ chối",
+                        Body = "Chứng chỉ của bạn đã bị từ chối. Vui lòng kiểm tra lại thông tin và gửi lại cho chúng tôi. Chúc bạn có một ngày tốt lành!"
+                    });
+
+                    _context.TutorCertificates.Update(tutorCertificate);
+                    throw new CrudException(HttpStatusCode.OK, "OK", "Tutor Certificate is denied");
+                }
+            }
+            catch (CrudException ex)
+            {
+                throw ex;
+            }
+            catch (Exception ex)
+            {
+                throw new CrudException(HttpStatusCode.InternalServerError, "Internal Server Error", "");
+            }
+        }
+
+        // Deny Tutor Experience by Moderator or Admin
+        public async Task DenyTutorExperience(List<Guid> tutorExperienceId)
+        {
+            try
+            {
+                var tutorExperiences = await _context.TutorExperiences.Where(c => tutorExperienceId.Contains(c.TutorExperienceId)).ToListAsync();
+                if (tutorExperiences == null)
+                {
+                    throw new CrudException(HttpStatusCode.NotFound, "Not Found", "Tutor Experience not found");
+                }
+                foreach (var tutorExperience in tutorExperiences)
+                {
+                    tutorExperience.IsVerified = false;
+                    // Gửi mail cho tutor khi bị từ chối
+                    var tutor = await _context.Tutors.FirstOrDefaultAsync(c => c.TutorId == tutorExperience.TutorId);
+                    var user = await _context.Users.FirstOrDefaultAsync(c => c.Id == tutor.UserId);
+                    await _appExtension.SendMail(new MailContent()
+                    {
+                        To = user.Email,
+                        Subject = "Kinh nghiệm bị từ chối",
+                        Body = "Kinh nghiệm của bạn đã bị từ chối. Vui lòng kiểm tra lại thông tin và gửi lại cho chúng tôi. Chúc bạn có một ngày tốt lành!"
+                    });
+
+                    _context.TutorExperiences.Update(tutorExperience);
+                    throw new CrudException(HttpStatusCode.OK, "OK", "Tutor Experience is denied");
+                }
+            }
+            catch (CrudException ex)
+            {
+                throw ex;
+            }
+            catch (Exception ex)
+            {
+                throw new CrudException(HttpStatusCode.InternalServerError, "Internal Server Error", "");
             }
         }
     }

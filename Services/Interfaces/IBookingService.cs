@@ -30,5 +30,6 @@ namespace Services.Interfaces
         Task<IActionResult> ConfirmRescheduleBooking(Guid bookingId);
         Task<IActionResult> RateBookingsWithoutImage(TutorRatingRequest tutorRatingRequest);
         Task<IActionResult> RejectRescheduleBooking(Guid bookingId);
+        Task<BookingStep1Response> CreateBookingVersion2(BookingRequestV2 bookingRequest);
     }
 }

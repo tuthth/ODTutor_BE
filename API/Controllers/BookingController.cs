@@ -304,5 +304,26 @@ namespace API.Controllers
             var result = await _bookingService.RejectRescheduleBooking(bookingID);
             return result;
         }
+
+        /// <summary>
+        /// Tạo booking version 2 ( Sau review ngày thứ 7, 27/07/2024)
+        /// </summary>
+        [HttpPost("create/booking/v2")]
+        public async Task<IActionResult> CreateBookingVersion2(BookingRequestV2 bookingRequest)
+        {
+            var result = await _bookingService.CreateBookingVersion2(bookingRequest);
+            if (result is BookingStep1Response response) return StatusCode(StatusCodes.Status201Created, new { Message = "Đặt lịch học thành công, vui lòng đến mục Thanh toán", BookingId = response.BookingId });
+            if (result is IActionResult actionResult)
+            {
+                if (actionResult is StatusCodeResult statusCodeResult)
+                {
+                    if (statusCodeResult.StatusCode == 400) { return BadRequest(new { Message = "Dữ liệu không hợp lệ" }); }
+                    if (statusCodeResult.StatusCode == 406) { return StatusCode(StatusCodes.Status406NotAcceptable, new { Message = "Có tài khoản đang bị đình chỉ bởi hệ thống" }); }
+                    //if (statusCodeResult.StatusCode == 201) return StatusCode(StatusCodes.Status201Created, new { Message = "Đặt lịch học thành công, vui lòng đến mục Thanh toán" });
+                }
+                if (actionResult is Exception exception) StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
+            }
+            throw new Exception("Lỗi không xác định");
+        }
     }
 }

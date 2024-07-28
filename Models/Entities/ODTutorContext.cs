@@ -90,6 +90,11 @@ namespace Models.Entities
                 .HasOne(b => b.BookingTransactionNavigation)
                 .WithOne(bt => bt.BookingNavigation)
                 .HasForeignKey<BookingTransaction>(bt => bt.BookingId).OnDelete(DeleteBehavior.NoAction);
+            
+            modelBuilder.Entity<Booking>()
+                .HasOne(b => b.TutorSubjectNavigation)
+                .WithMany(ts => ts.BookingNavigation)
+                .HasForeignKey(b => b.TutorSubjectId).OnDelete(DeleteBehavior.NoAction);
 
             // BookingTransaction Entity Configuration
             modelBuilder.Entity<BookingTransaction>()

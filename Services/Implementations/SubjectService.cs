@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Models.Entities;
 using Models.Models.Requests;
+using Models.Models.Views;
 using Services.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -90,6 +91,31 @@ namespace Services.Implementations
             _context.Subjects.Remove(subject);
             await _context.SaveChangesAsync();
             return new StatusCodeResult(204);
+        }
+        // Get Tutor Subject By Tutor Subject ID
+        public async Task<ActionResult<TutorSubjectResponse>> GetTutorSubject(Guid tutorSubjectId)
+        {
+            try
+            {
+                var tutorSubject = await _context.TutorSubjects
+                    .Include(c => c.SubjectNavigation)
+                    .FirstOrDefaultAsync(c => c.TutorSubjectId == tutorSubjectId);
+                if (tutorSubject == null)
+                {
+                    return new StatusCodeResult(404);
+                }
+                var tutorSubjectResponse = new TutorSubjectResponse
+                {
+                    TutorSubjectId = tutorSubject.TutorSubjectId,
+                    TutorId = tutorSubject.TutorId,
+                    Title = tutorSubject.SubjectNavigation.Title,
+                };
+                return tutorSubjectResponse;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.ToString());
+            }
         }
     }
 }

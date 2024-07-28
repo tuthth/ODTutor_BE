@@ -234,6 +234,7 @@ namespace Services.Implementations
 
         // Register Tutor Schedule
         // Step 5: Create Schedule for Tutor
+
         public async Task<IActionResult> CreateTutorSlotSchedule(TutorRegistScheduleRequest tutorRegistScheduleRequest)
         {
             var tutor = await _context.Tutors.Where(x => x.TutorId == tutorRegistScheduleRequest.TutorID).FirstOrDefaultAsync();
@@ -469,6 +470,7 @@ namespace Services.Implementations
                 throw new Exception(ex.Message);
             }
         }
+
         public async Task<ActionResult<TutorAction>> GetTutorActionById(Guid id)
         {
             var tutorAction = await _context.TutorActions.Where(x => x.TutorActionId == id).FirstOrDefaultAsync();
@@ -853,6 +855,7 @@ namespace Services.Implementations
         // Check the Tutor Information 
 
         // Check the Tutor Subject 
+
         private async Task<bool> checkTutorSubject(Guid tutorId)
         {
             List<TutorSubject> list = new List<TutorSubject>();
@@ -956,6 +959,7 @@ namespace Services.Implementations
                     tutorSubject.TutorId = request.TutorId;
                     tutorSubject.SubjectId = subjectID;
                     tutorSubject.CreatedAt = DateTime.UtcNow.AddHours(7);
+                    tutorSubject.Status = (Int32)TutorSubjectEnum.Available;
                     tutorSubjects.Add(tutorSubject);
                 }
                 // Kiểm tra tutor có bị trùng môn đăng kí không
@@ -1077,9 +1081,16 @@ namespace Services.Implementations
                 {
                     throw new CrudException(HttpStatusCode.OK, "Không tìm thấy môn học của gia sư", "");
                 }
-                _context.TutorSubjects.Remove(tutorSubject);
+                if(tutorSubject.Status == (Int32)TutorSubjectEnum.NotAvailable)
+                {
+                    tutorSubject.Status = (Int32)TutorSubjectEnum.Available;
+                }
+                if (tutorSubject.Status == (Int32)TutorSubjectEnum.Available)
+                {
+                    tutorSubject.Status = (Int32)TutorSubjectEnum.NotAvailable;
+                }
                 await _context.SaveChangesAsync();
-                throw new CrudException(HttpStatusCode.OK, "Xóa môn học thành công", "");
+                throw new CrudException(HttpStatusCode.OK, "Cập nhật trạng thái môn học thành công", "");
             }
             catch (CrudException ex)
             {
@@ -1233,6 +1244,8 @@ namespace Services.Implementations
                 throw new CrudException(HttpStatusCode.InternalServerError, ex.Message, "");
             }
         }
+
+        
 
     }
 }
