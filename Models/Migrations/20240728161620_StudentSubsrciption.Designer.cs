@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Models.Entities;
 
@@ -11,9 +12,11 @@ using Models.Entities;
 namespace Models.Migrations
 {
     [DbContext(typeof(ODTutorContext))]
-    partial class ODTutorContextModelSnapshot : ModelSnapshot
+    [Migration("20240728161620_StudentSubsrciption")]
+    partial class StudentSubsrciption
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -30,9 +33,6 @@ namespace Models.Migrations
 
                     b.Property<DateTime?>("ActualEndTime")
                         .HasColumnType("datetime2");
-
-                    b.Property<string>("BookingContent")
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
@@ -70,16 +70,11 @@ namespace Models.Migrations
                     b.Property<Guid>("TutorId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("TutorSubjectId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.HasKey("BookingId");
 
                     b.HasIndex("StudentId");
 
                     b.HasIndex("TutorId");
-
-                    b.HasIndex("TutorSubjectId");
 
                     b.ToTable("Bookings");
                 });
@@ -802,9 +797,6 @@ namespace Models.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("Status")
-                        .HasColumnType("int");
-
                     b.Property<Guid>("SubjectId")
                         .HasColumnType("uniqueidentifier");
 
@@ -1045,17 +1037,9 @@ namespace Models.Migrations
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.HasOne("Models.Entities.TutorSubject", "TutorSubjectNavigation")
-                        .WithMany("BookingNavigation")
-                        .HasForeignKey("TutorSubjectId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
                     b.Navigation("StudentNavigation");
 
                     b.Navigation("TutorNavigation");
-
-                    b.Navigation("TutorSubjectNavigation");
                 });
 
             modelBuilder.Entity("Models.Entities.BookingTransaction", b =>
@@ -1618,11 +1602,6 @@ namespace Models.Migrations
             modelBuilder.Entity("Models.Entities.TutorRating", b =>
                 {
                     b.Navigation("TutorRatingImagesNavigation");
-                });
-
-            modelBuilder.Entity("Models.Entities.TutorSubject", b =>
-                {
-                    b.Navigation("BookingNavigation");
                 });
 
             modelBuilder.Entity("Models.Entities.TutorWeekAvailable", b =>

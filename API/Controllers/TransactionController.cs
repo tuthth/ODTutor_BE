@@ -54,7 +54,7 @@ namespace API.Controllers
             throw new Exception("Lỗi không xác định");
         }
         /// <summary>
-        ///         Transaction choice: 3 ( Premium ), not equal 3 == error 406
+        ///         Transaction choice: 3 ( Premium ), 4 (StudentSubscription), not equal 3 or 4 == error 406
         /// </summary>
         [HttpPost("premium")]
         public async Task<IActionResult> UpgradeAccount([FromBody] WalletTransactionCreate transactionCreate)
@@ -68,7 +68,7 @@ namespace API.Controllers
                         if (statusCodeResult.StatusCode == 404) { return NotFound(new { Message = "Không tìm thấy ví" }); }
                         else if (statusCodeResult.StatusCode == 406) { return StatusCode(StatusCodes.Status406NotAcceptable, "Chỉ phục vụ giao dịch nâng cấp tài khoản"); }
                         else if (statusCodeResult.StatusCode == 409) { return Conflict(new { Message = "Số dư tài khoản không đủ thực hiện giao dịch" }); }
-
+                        else if (statusCodeResult.StatusCode == 500) { return StatusCode(StatusCodes.Status500InternalServerError, new { Message = "Lỗi không xác định" }); }
                     }
                 }
                 if (actionResult is JsonResult okObjectResult)

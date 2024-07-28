@@ -58,7 +58,7 @@ namespace Services.Implementations
                     return new StatusCodeResult(400);
                 }
                 var account = _mapper.Map<User>(accountRegisterRequest);
-                
+
                 account.Password = _appExtension.CreateHashPassword(accountRegisterRequest.Password);
                 account.Name = accountRegisterRequest.FullName;
                 account.Active = true; // Default is true
@@ -66,6 +66,8 @@ namespace Services.Implementations
                 account.DateOfBirth = accountRegisterRequest.DateOfBirth;
                 account.PhoneNumber = accountRegisterRequest.PhoneNumber;
                 account.Fcm = "";
+                account.IsPremium = false;
+                account.HasBoughtSubscription = false;
                 account.GoogleId = "";
                 account.Status = 1;
                 account.Banned = false;
@@ -133,8 +135,8 @@ namespace Services.Implementations
                         FullName = payload.Name,
                         Email = payload.Email,
                         Password = passwordTemplate,
-                        ConfirmPassword = passwordTemplate, 
-                        DateOfBirth = DateTime.UtcNow.AddHours(7), 
+                        ConfirmPassword = passwordTemplate,
+                        DateOfBirth = DateTime.UtcNow.AddHours(7),
                         PhoneNumber = "00000"
                     };
                     await createAccount(registerRequest);
@@ -159,9 +161,9 @@ namespace Services.Implementations
                 throw new CrudException(HttpStatusCode.InternalServerError, ex.Message, "");
             }
         }
-        
+
         // Google Login V2
-        public async Task<LoginAccountResponse> LoginGoogle (LoginGoogleRequest request)
+        public async Task<LoginAccountResponse> LoginGoogle(LoginGoogleRequest request)
         {
             try
             {
@@ -170,7 +172,7 @@ namespace Services.Implementations
                     throw new CrudException(HttpStatusCode.BadRequest, "Information is Required", "");
                 var user = _context.Users.FirstOrDefault(u => u.Email == request.Email);
                 if (user == null)
-                {   
+                {
                     var account = await createAccountByGoogle(request);
                     if (account != null)
                     {
@@ -186,7 +188,7 @@ namespace Services.Implementations
                     }
                 }
                 else
-                {   
+                {
                     if (user.GoogleId == null || user.GoogleId == "")
                     {
                         user.GoogleId = request.GoogleId;
@@ -200,7 +202,8 @@ namespace Services.Implementations
                     };
                     return await _userService.LoginV2(loginRequest);
                 }
-            } catch(CrudException ex)
+            }
+            catch (CrudException ex)
             {
                 throw ex;
             }
@@ -220,18 +223,21 @@ namespace Services.Implementations
                     .FirstOrDefault(s => s.Id.Equals(UserID));
                 if (userInfo == null) return new StatusCodeResult(404);
 
-                    response.Status = userInfo.Status;
-                    response.Email = userInfo.Email;
-                    response.FullName = userInfo.Name;
-                    response.ImageUrl = userInfo.ImageUrl;
-                    response.PhoneNumber = userInfo.PhoneNumber;
-                    response.DateOfBirth = userInfo.DateOfBirth;
-                    response.EmailConfirmed = userInfo.EmailConfirmed;
-                    response.Active = userInfo.Active;
-                    response.Banned = userInfo.Banned;
-                    response.Status = userInfo.Status;
-                    response.EmailConfirmed = userInfo.EmailConfirmed;
-                    return response;
+                response.Status = userInfo.Status;
+                response.Email = userInfo.Email;
+                response.FullName = userInfo.Name;
+                response.ImageUrl = userInfo.ImageUrl;
+                response.PhoneNumber = userInfo.PhoneNumber;
+                response.DateOfBirth = userInfo.DateOfBirth;
+                response.EmailConfirmed = userInfo.EmailConfirmed;
+                response.Active = userInfo.Active;
+                response.Banned = userInfo.Banned;
+                response.BanExpiredAt = userInfo.BanExpiredAt;
+                response.EmailConfirmed = userInfo.EmailConfirmed;
+                response.IsPremium = userInfo.IsPremium;
+                response.HasBoughtSubscription = userInfo.HasBoughtSubscription;
+                response.RequestRefreshTime = userInfo.RequestRefreshTime;
+                return response;
             }
             catch (Exception ex)
             {
@@ -288,7 +294,11 @@ namespace Services.Implementations
                     EmailConfirmed = s.EmailConfirmed,
                     Active = s.Active,
                     Banned = s.Banned,
-                    Status = s.Status
+                    Status = s.Status,
+                    BanExpiredAt = s.BanExpiredAt,
+                    IsPremium = s.IsPremium,
+                    HasBoughtSubscription = s.HasBoughtSubscription,
+                    RequestRefreshTime = s.RequestRefreshTime
                 }).ToList();
                 return response;
             }
@@ -330,7 +340,9 @@ namespace Services.Implementations
                 account.DateOfBirth = DateTime.UtcNow.AddHours(7);
                 account.PhoneNumber = "123456789";
                 account.Status = 1;
-                account.Fcm ="";
+                account.IsPremium = false;
+                account.HasBoughtSubscription = false;
+                account.Fcm = "";
                 account.Banned = false;
                 account.Id = new Guid();
                 _context.Users.Add(account);
@@ -355,13 +367,13 @@ namespace Services.Implementations
                 var accountResponse = _mapper.Map<AccountResponse>(account);
                 return accountResponse;
             }
-            catch(CrudException ex)
+            catch (CrudException ex)
             {
                 throw ex;
             }
             catch (Exception ex)
             {
-                throw new CrudException(HttpStatusCode.InternalServerError,ex.Message,"");
+                throw new CrudException(HttpStatusCode.InternalServerError, ex.Message, "");
             }
         }
 

@@ -11,6 +11,7 @@ namespace Models.Enumerables
         Unknown,
         Deposit,
         Withdraw,
-        Upgrade
+        Upgrade,
+        StudentSubscription
     }
 }
