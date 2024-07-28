@@ -29,6 +29,28 @@ namespace Services.Implementations
         public async Task<IActionResult> CreateStudentRequest(CreateStudentRequest request)
         {
             Student student = _context.Students.FirstOrDefault(x => x.StudentId == request.StudentId);
+            var user = _context.Users.FirstOrDefault(x => x.Id == student.UserId);
+            if (user.HasBoughtSubscription == true && user.RequestRefreshTime <= DateTime.UtcNow.AddHours(7))
+            {
+                user.HasBoughtSubscription = false;
+                _context.Users.Update(user);
+                await _context.SaveChangesAsync();
+                return new StatusCodeResult(406);
+            }
+            var studentRequestCount = _context.StudentRequests
+                .Where(x => x.StudentId == request.StudentId && x.CreatedAt >= user.RequestRefreshTime)
+                .Count();
+
+            int maxRequests = user.HasBoughtSubscription ? 25 : 5;
+
+            if (studentRequestCount >= maxRequests)
+            {
+                return new StatusCodeResult(409);
+            }
+            if (studentRequestCount == 0)
+            {
+                user.RequestRefreshTime = DateTime.UtcNow.AddHours(7).AddDays(30);
+            }
             var subject = _context.Subjects.FirstOrDefault(x => x.SubjectId == request.SubjectId);
             if (student == null || subject == null)
             {
@@ -48,6 +70,7 @@ namespace Services.Implementations
                 Status = (Int32)NotificationEnum.UnRead
             };
             Models.Entities.Notification notification1x = _mapper.Map<Models.Entities.Notification>(notification);
+            _context.Users.Update(user);
             await _service.SetAsync<NotificationDTO>($"notifications/{notification.UserId}/{notification.NotificationId}", notification);
             await _service.SetAsync<StudentRequest>($"Studentrequest/{studentRequest.StudentRequestId}", studentRequest);
             await _context.Notifications.AddAsync(notification1x);

@@ -20,5 +20,9 @@ namespace Models.Models.Views
         public int Status { get; set; }
         public Boolean Active { get; set; }
         public Boolean Banned { get; set; }
+        public DateTime? BanExpiredAt { get; set; }
+        public Boolean IsPremium { get; set; }
+        public Boolean HasBoughtSubscription { get; set; }
+        public DateTime? RequestRefreshTime { get; set; }
     }
 }

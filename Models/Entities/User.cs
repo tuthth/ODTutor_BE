@@ -26,6 +26,8 @@ namespace Models.Entities
         public Boolean IsPremium { get; set; }
         public Boolean Banned { get; set; }
         public DateTime? BanExpiredAt { get; set; }
+        public Boolean HasBoughtSubscription { get; set; }
+        public DateTime? RequestRefreshTime { get; set; }
         public virtual ICollection<UserAuthentication>? UserAuthenticationNavigation { get; set; }
         public virtual ICollection<UserBlock>? CreateUserBlockNavigation {  get; set; }
         public virtual ICollection<UserBlock>? TargetUserBlockNavigation { get; set; }

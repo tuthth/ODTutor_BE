@@ -30,6 +30,8 @@ namespace API.Controllers
                 if (statusCodeResult.StatusCode == 404) { return NotFound(new { Message = "Không tìm thấy học sinh hoặc môn học" }); }
                 if (statusCodeResult.StatusCode == 403) { return StatusCode(StatusCodes.Status403Forbidden, new { Message = "Học sinh đang bị đình chỉ khỏi hệ thống" }); }
                 if (statusCodeResult.StatusCode == 201) { return StatusCode(StatusCodes.Status201Created, new { Message = "Tạo yêu cầu thành công" }); }
+                if (statusCodeResult.StatusCode == 409) { return StatusCode(StatusCodes.Status409Conflict, new { Message = "Đã hết lượt yêu cầu" }); }
+                if (statusCodeResult.StatusCode == 406) { return StatusCode(StatusCodes.Status406NotAcceptable, new { Message = "Gói nâng cấp đã hết hạn, vui lòng kiểm tra lại tài khoản" }); }
             }
             if (response is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
             throw new Exception("Lỗi không xác định");
@@ -197,7 +199,7 @@ namespace API.Controllers
             {
                 if (statusCodeResult.StatusCode == 404) { return NotFound(new { Message = "Không tìm thấy yêu cầu" }); }
                 if (statusCodeResult.StatusCode == 409) { return StatusCode(StatusCodes.Status409Conflict, new { Message = "Yêu cầu không thể xóa" }); }
-                if (statusCodeResult.StatusCode == 200) { return Ok(new { Message = "Xóa yêu cầu thành công" });}
+                if (statusCodeResult.StatusCode == 200) { return Ok(new { Message = "Xóa yêu cầu thành công" }); }
             }
             if (response is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
             throw new Exception("Lỗi không xác định");
@@ -207,7 +209,7 @@ namespace API.Controllers
         [HttpGet("get/status")]
         public async Task<ActionResult<List<StudentRequestView>>> GetStudentRequestsByStatus()
         {
-                var result = await _studentRequestService.GetStudentRequestsByStatus();
+            var result = await _studentRequestService.GetStudentRequestsByStatus();
             return Ok(result);
         }
         [HttpGet("get/status/paging")]
