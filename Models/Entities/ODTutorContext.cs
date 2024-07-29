@@ -26,6 +26,7 @@ namespace Models.Entities
         public DbSet<CourseTransaction> CourseTransactions { get; set; }
         public DbSet<Promotion> Promotions { get; set; }
         public DbSet<Report> Reports { get; set; }
+        public DbSet<ReportImages> ReportImages { get; set; }
         public DbSet<Schedule> Schedules { get; set; }
         public DbSet<Student> Students { get; set; }
         public DbSet<StudentCourse> StudentCourses { get; set; }
@@ -208,6 +209,14 @@ namespace Models.Entities
                 .HasOne(r => r.UserNavigation)
                 .WithMany(u => u.SenderUserReportNavigation)
                 .HasForeignKey(r => r.SenderUserId).OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<Report>()
+                .HasMany(r => r.ReportImages)
+                .WithOne(ri => ri.ReportNavigation)
+                .HasForeignKey(ri => ri.ReportId).OnDelete(DeleteBehavior.NoAction);
+            // ReprotImages Entity Configuration
+            modelBuilder.Entity<ReportImages>()
+                .HasKey(ri => ri.ReportImageId);
 
             // Schedule Entity Configuration
             modelBuilder.Entity<Schedule>()

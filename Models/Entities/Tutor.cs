@@ -7,7 +7,8 @@ using System.Threading.Tasks;
 namespace Models.Entities
 {
     public class Tutor
-    {
+    {   
+        // Tutor Information Basic 
         public Guid TutorId { get; set; }
         public Guid UserId { get; set; }
         public string IdentityNumber {  get; set; }
@@ -20,6 +21,14 @@ namespace Models.Entities
         public DateTime CreateAt {get;set;}
         public DateTime UpdateAt {get; set;}
         public string? VideoUrl { get; set; }
+
+        // Tutor Tutort Package
+        public bool HasBoughtSubscription { get; set; } // Có mua gói dịch vụ hay không 
+        public DateTime? SubcriptionStartDate { get; set; } // Ngày bắt đầu gói dịch vụ
+        public DateTime? SubcriptionEndDate { get; set; } // Ngày kết thúc gói dịch vụ
+        public int? SubcriptionType { get; set; } // Loại gói dịch vụ
+
+        // Navigation properties
         public virtual User? UserNavigation {get; set;}
         public virtual ICollection<Promotion> PromotionsNavigation { get; set; }
         public virtual ICollection<Course>? CoursesNavigation { get; set; }

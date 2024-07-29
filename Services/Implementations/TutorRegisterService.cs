@@ -197,6 +197,10 @@ namespace Services.Implementations
                 //Update Tutor Money
                 tutor.PricePerHour = request.Price;
                 tutor.Status = (Int32)TutorEnum.Pending;
+                tutor.HasBoughtSubscription = false;
+                tutor.SubcriptionStartDate = null;
+                tutor.SubcriptionEndDate = null;
+                tutor.SubcriptionType = (Int32)TutorPackageEnum.Standard;
                 await _context.SaveChangesAsync();
                 // Create a Tutor Action Log
                 TutorAction tutorRegister = new TutorAction();

@@ -17,5 +17,6 @@ namespace Models.Entities
         public int Status { get; set; }
 
         public virtual User? UserNavigation {  get; set; }
+        public virtual ICollection<ReportImages> ReportImages { get; set; }
     }
 }

@@ -16,7 +16,7 @@ namespace Models.Enumerables
         Paused = 5,
     }
     public enum TutorSlotAvailabilityEnum
-    {   
+    {
         Available = 0,
         NotAvailable = 1,
         Cancelled = 2,
@@ -25,5 +25,11 @@ namespace Models.Enumerables
     {
         Available = 0,
         NotAvailable = 1,
+    }
+
+    public enum TutorPackageEnum
+    {
+        Standard = 0,
+        Premium = 1,
     }
 }

@@ -33,6 +33,16 @@ namespace Services.Implementations
             report.CreatedAt = DateTime.UtcNow.AddHours(7);
             report.UpdatedAt = DateTime.UtcNow.AddHours(7);
             report.ReportId = Guid.NewGuid();
+            foreach (var item in reportRequest.ImageURLs)
+            {
+                var reportImage = new ReportImages()
+                {
+                    ReportImageId = Guid.NewGuid(),
+                    ReportId = report.ReportId,
+                    ImageURL = item
+                };
+                report.ReportImages.Add(reportImage);
+            }
             report.Status = (Int32)ReportEnum.Processing;
 
             _context.Reports.Add(report);
@@ -86,7 +96,17 @@ namespace Services.Implementations
             if (updateReportRequest.Status != (Int32)ReportEnum.Finished && updateReportRequest.Status != (Int32)ReportEnum.Cancelled) return new StatusCodeResult(406);
             report.Status = updateReportRequest.Status;
             report.UpdatedAt = updateReportRequest.UpdatedAt;
-            if(updateReportRequest.Status == (Int32)ReportEnum.Cancelled)
+            foreach (var item in updateReportRequest.ImageURLs)
+            {
+                var reportImage = new ReportImages()
+                {
+                    ReportImageId = Guid.NewGuid(),
+                    ReportId = report.ReportId,
+                    ImageURL = item
+                };
+                report.ReportImages.Add(reportImage);
+            }
+            if (updateReportRequest.Status == (Int32)ReportEnum.Cancelled)
             {
                 await _appExtension.SendMail(new MailContent()
                 {

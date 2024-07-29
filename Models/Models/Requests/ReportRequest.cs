@@ -11,6 +11,7 @@ namespace Models.Models.Requests
         public Guid SenderUserId { get; set; }
         public Guid TargetId { get; set; }
         public string? Content { get; set; }
+        public List<string>? ImageURLs { get; set; }
     }
     public class UpdateReportRequest : ReportRequest
     {
