@@ -33,15 +33,19 @@ namespace Services.Implementations
             report.CreatedAt = DateTime.UtcNow.AddHours(7);
             report.UpdatedAt = DateTime.UtcNow.AddHours(7);
             report.ReportId = Guid.NewGuid();
-            foreach (var item in reportRequest.ImageURLs)
+            // Check have image or not 
+            if (reportRequest.ImageURLs != null)
             {
-                var reportImage = new ReportImages()
+                foreach (var item in reportRequest.ImageURLs)
                 {
-                    ReportImageId = Guid.NewGuid(),
-                    ReportId = report.ReportId,
-                    ImageURL = item
-                };
-                report.ReportImages.Add(reportImage);
+                    var reportImage = new ReportImages()
+                    {
+                        ReportImageId = Guid.NewGuid(),
+                        ReportId = report.ReportId,
+                        ImageURL = item
+                    };
+                    report.ReportImages.Add(reportImage);
+                }
             }
             report.Status = (Int32)ReportEnum.Processing;
 

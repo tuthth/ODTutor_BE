@@ -231,5 +231,15 @@ namespace API.Controllers
             return response;
         }
 
+        /// <summary>
+        /// Get Stdent Request Based On Tutor Has Bought Subscription
+        /// </summary>
+        [HttpGet("get/tutor/{tutorId}")]
+        public async Task<ActionResult<List<StudentRequestView>>> GetStudentRequestBasedOnTutorHasBoughtSubscription(Guid tutorId)
+        {
+            var response = await _studentRequestService.GetStudentRequestBasedOnTutorHasBoughtSubscription(tutorId);
+            return Ok(response);
+
+        }
     }
 }
