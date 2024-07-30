@@ -19,6 +19,12 @@ namespace Models.Models.Views
         public string? EducationExperience { get; set; }
         public string? Motivation { get; set; }
         public string? VideoUrl { get; set; }
+        // Tutor Tutort Package
+        public bool HasBoughtSubscription { get; set; } // Có mua gói dịch vụ hay không 
+        public DateTime? SubcriptionStartDate { get; set; } // Ngày bắt đầu gói dịch vụ
+        public DateTime? SubcriptionEndDate { get; set; } // Ngày kết thúc gói dịch vụ
+        public int? SubcriptionType { get; set; } // Loại gói dịch vụ
+
         public List<Course> Courses { get; set; }
         public List<TutorCertificate> TutorCertificates { get; set; }
         public List<Subject> Subjects { get; set; }
