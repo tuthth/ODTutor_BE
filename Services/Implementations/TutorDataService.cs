@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Grpc.Core;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Models.Entities;
@@ -629,7 +630,37 @@ namespace Services.Implementations
             }
         }
 
-        // Thống kê doanh thu của tutor theo ngày cụ thể trong năm
+        // Count Tutor Message when they click to chat and plus 1 when they click 
+        public async Task<ActionResult<IActionResult>> CountTutorMessage(Guid tutorId)
+        {
+            try
+            {
+                var tutor = await _context.Tutors.FirstOrDefaultAsync(t => t.TutorId == tutorId);
+                if (tutor == null)
+                {
+                    throw new CrudException(HttpStatusCode.NotFound, "Tutor Not Found", "Tutor Not Found");
+                }
+
+                // Check Limit message Chat 
+                var maxMessages = tutor.HasBoughtSubscription == true ? 20 : 5;
+                if (tutor.CountMessageChat >= maxMessages)
+                {
+                    throw new CrudException(HttpStatusCode.BadRequest, "You have reached the limit of messages", "You have reached the limit of messages");
+                }
+                tutor.CountMessageChat += 1;
+                await _context.SaveChangesAsync();
+                throw new CrudException(HttpStatusCode.OK, "Count Tutor Message Success", "Count Tutor Message Success");
+            }
+            catch (CrudException ex)
+            {
+                throw ex;
+            }
+
+            catch (Exception ex)
+            {
+                throw new CrudException(HttpStatusCode.InternalServerError, "Count Tutor Message Error", ex.Message);
+            }
+        }
 
 
     }

@@ -27,6 +27,8 @@ namespace Models.Entities
         public DateTime? SubcriptionStartDate { get; set; } // Ngày bắt đầu gói dịch vụ
         public DateTime? SubcriptionEndDate { get; set; } // Ngày kết thúc gói dịch vụ
         public int? SubcriptionType { get; set; } // Loại gói dịch vụ
+        // Check số lần kiểm tra nhắn tin của tutor 
+        public int? CountMessageChat { get; set; }
 
         // Navigation properties
         public virtual User? UserNavigation {get; set;}

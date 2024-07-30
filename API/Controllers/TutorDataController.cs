@@ -166,5 +166,15 @@ namespace API.Controllers
             var response = await _tutorDataService.GetNumberOfStudentPercentageByTimeOfDate(tutorId);
             return response;
         }
+
+        /// <summary>
+        /// Check kiểm tra tin nhắn và đếm 
+        /// </summary>
+        [HttpPost("count-message/{tutorId}")]
+        public async Task<ActionResult<IActionResult>> CountTutorMessage(Guid tutorId)
+        {
+            var response = await _tutorDataService.CountTutorMessage(tutorId);
+            return response;
+        }
     }
 }

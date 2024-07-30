@@ -442,8 +442,11 @@ namespace Services.Implementations
                     }
                 }
                 else if (tutor.HasBoughtSubscription == true)
-                {
-                    foreach (var item in studentRequests)
+                {   
+                    var studentRequestVip = _context.StudentRequests
+                    .Where(sr => sr.Status == (Int32)StudentRequestEnum.Pending)
+                    .ToList();
+                    foreach (var item in studentRequestVip)
                     {
                         var studentRequestView = new StudentRequestView
                         {
