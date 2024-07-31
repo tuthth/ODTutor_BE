@@ -49,5 +49,6 @@ namespace Services.Interfaces
         Task<ActionResult<BookingTransaction>> GetBookingTransactionByBookingId(Guid bookingId);
         Task<IActionResult> HasBoughtTutorExperiencePackage(WalletTransactionCreate request);
         Task<IActionResult> UpdateTutorBackNormalTutor(Guid tutorId);
+        Task<IActionResult> HasBoughtTutorPackage(WalletTransactionCreate request);
     }
 }

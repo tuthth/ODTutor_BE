@@ -819,6 +819,27 @@ namespace API.Controllers
             }
         }
 
+        ///<summary>
+        /// Mua gói thành viên của gia sư
+        /// </summary>
+        [HttpPost("buy-tutor-package")]
+        public async Task<IActionResult> BuyTutorPackage(WalletTransactionCreate request)
+        {
+            var result = await _transactionService.HasBoughtTutorPackage(request);
+            if (result is StatusCodeResult statusCodeResult)
+            {
+                return statusCodeResult;
+            }
+            else if (result is JsonResult jsonResult)
+            {
+                return jsonResult;
+            }
+            else
+            {
+                return new StatusCodeResult(500);
+            }
+        }
+
         /// <summary>
         /// Update trạng thái gia sư sau khi hết gói
         /// </summary>

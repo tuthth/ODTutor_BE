@@ -146,5 +146,21 @@ namespace API.Controllers
             if (result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
             throw new Exception("Lỗi không xác định");
         }
+
+        /// <summary>
+        ///  Update lại hết tất cả số đêm chat của tutor
+        ///</summary>
+        [HttpPut("update/all-count-chat")]
+        public async Task<IActionResult> UpdateAllCountChatOfAllTutor()
+        {
+            var result = await _tutorManageService.UpdateAllCountChatOfAllTutor();
+            if (result is StatusCodeResult statusCodeResult)
+            {
+                if (statusCodeResult.StatusCode == 404) return Ok(new { Message = "Không tìm thấy tutor nào, vui lòng kiểm tra" });
+                if (statusCodeResult.StatusCode == 204) return StatusCode(StatusCodes.Status204NoContent, new { Message = "Cập nhật số đêm chat thành công" });
+            }
+            if (result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
+            throw new Exception("Lỗi không xác định");
+        }
     }
 }

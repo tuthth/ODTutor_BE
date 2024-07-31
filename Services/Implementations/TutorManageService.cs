@@ -227,5 +227,29 @@ namespace Services.Implementations
                 throw new Exception(ex.ToString());
             }
         }
+
+        // Update All CountChat Of All Tutor 
+        public async Task<IActionResult> UpdateAllCountChatOfAllTutor()
+        {
+            var tutors = await _context.Tutors.ToListAsync();
+            if (tutors == null || tutors.Count == 0)
+            {
+                return new StatusCodeResult(404);
+            }
+            try
+            {
+                foreach (var tutor in tutors)
+                {
+                    tutor.CountMessageChat = 0;
+                    _context.Tutors.Update(tutor);
+                }
+                await _context.SaveChangesAsync();
+                return new StatusCodeResult(204);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.ToString());
+            }
+        }
     }
 }
