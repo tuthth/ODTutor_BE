@@ -151,6 +151,11 @@ namespace Services.Implementations
           ActiveTitle = t.AttractiveTitle,
           EducationExperience = t.EducationExperience,
           Motivation = t.Motivation,
+          HasBoughtExperiencedPackage = t.HasBoughtExperiencedPackage,
+          HasBoughtSubscription = t.HasBoughtSubscription,
+          SubcriptionStartDate = t.SubcriptionStartDate,
+          SubcriptionEndDate = t.SubcriptionEndDate,
+          SubcriptionType = t.SubcriptionType,
           Courses = t.CoursesNavigation.Select(c => new Course
           {
               CourseId = c.CourseId,
