@@ -47,7 +47,7 @@ namespace Services.Interfaces
         Task<ActionResult<List<CourseTransaction>>> GetCourseTransactionsByCourseId(Guid id);
         Task<ActionResult<PageResults<CourseTransaction>>> GetCourseTransactionsByCourseIdPaging(Guid id, PagingRequest request);
         Task<ActionResult<BookingTransaction>> GetBookingTransactionByBookingId(Guid bookingId);
-
-
+        Task<IActionResult> HasBoughtTutorExperiencePackage(WalletTransactionCreate request);
+        Task<IActionResult> UpdateTutorBackNormalTutor(Guid tutorId);
     }
 }

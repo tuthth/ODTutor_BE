@@ -31,5 +31,6 @@ namespace Models.Enumerables
     {
         Standard = 0,
         Premium = 1,
+        Experience = 2,
     }
 }

@@ -12,6 +12,8 @@ namespace Models.Enumerables
         Deposit,
         Withdraw,
         Upgrade,
-        StudentSubscription
+        StudentSubscription,
+        TutorExperienceSubscription,
+        TutorSubscription,
     }
 }

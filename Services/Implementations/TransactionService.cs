@@ -19,6 +19,7 @@ using Models.Models.Views;
 using Models.PageHelper;
 using FirebaseAdmin.Messaging;
 using System.Net;
+using Models.Migrations;
 
 namespace Services.Implementations
 {
@@ -240,7 +241,8 @@ namespace Services.Implementations
             {
                 return new StatusCodeResult(404);
             }
-            if(transactionCreate.Choice == (Int32)VNPayTransactionType.Upgrade) {
+            if (transactionCreate.Choice == (Int32)VNPayTransactionType.Upgrade)
+            {
                 if (findUser.IsPremium == true)
                 {
                     return new StatusCodeResult(409);
@@ -317,7 +319,8 @@ namespace Services.Implementations
                     Status = transaction.Status
                 });
 
-            }else if(transactionCreate.Choice == (Int32)VNPayTransactionType.StudentSubscription)
+            }
+            else if (transactionCreate.Choice == (Int32)VNPayTransactionType.StudentSubscription)
             {
                 var senderWallet = _context.Wallets.Include(w => w.SenderCourseTransactionsNavigation.FirstOrDefault(w => w.SenderWalletId.Equals(transactionCreate.SenderId)));
                 var receiverWallet = _context.Wallets.Include(w => w.ReceiverCourseTransactionsNavigation.FirstOrDefault(w => w.ReceiverWalletId.Equals(transactionCreate.ReceiverId)));
@@ -392,6 +395,134 @@ namespace Services.Implementations
                 });
             }
             return new StatusCodeResult(500);
+        }
+
+
+        public async Task<IActionResult> HasBoughtTutorExperiencePackage(WalletTransactionCreate request)
+        {
+            try
+            {
+                var receiverId = new Guid("d71b17cc-7997-4b23-2adc-08dc93ff561f");
+                var findUser = _context.Users.Include(u => u.WalletNavigation).FirstOrDefault(u => u.Id == request.SenderId);
+                var receiver = _context.Users.Include(u => u.WalletNavigation)
+                        .FirstOrDefault(u => u.Id == receiverId);
+                if (findUser == null || receiver == null)
+                {
+                    return new StatusCodeResult(404);
+                }
+                // Find Wallet of FindUser
+                var walletUser = _context.Wallets.FirstOrDefault(w => w.WalletId == findUser.WalletNavigation.WalletId);
+                var walletReceiver = _context.Wallets.FirstOrDefault(w => w.WalletId == receiver.WalletNavigation.WalletId);
+                if (request.Choice == (Int32)VNPayTransactionType.TutorExperienceSubscription)
+                {
+                    var senderWallet = _context.Wallets.Include(w => w.SenderWalletTransactionsNavigation.FirstOrDefault(w => w.SenderWalletId.Equals(walletUser.WalletId)));
+                    var receiverWallet = _context.Wallets.Include(w => w.ReceiverWalletTransactionsNavigation.FirstOrDefault(w => w.ReceiverWalletId.Equals(walletReceiver.WalletId)));
+                    if (senderWallet == null || receiverWallet == null)
+                    {
+                        return new StatusCodeResult(404);
+                    }
+                    WalletTransaction transaction = new WalletTransaction
+                    {
+                        WalletTransactionId = Guid.NewGuid(),
+                        SenderWalletId = (Guid)walletUser.WalletId,
+                        ReceiverWalletId = (Guid)walletReceiver.WalletId,
+                        CreatedAt = DateTime.UtcNow.AddHours(7),
+                        Amount = request.Amount,
+                        Status = (int)VNPayType.APPROVE,
+                    };
+                    if (walletUser.Amount < request.Amount)
+                    {
+                        await _appExtension.SendMail(new MailContent()
+                        {
+                            To = findUser.Email,
+                            Subject = "Nâng cấp tài khoản",
+                            Body = "Giao dịch nâng cấp không hợp lệ, vui lòng kiểm tra lại số dư tài khoản."
+                        });
+                        var notificationError = new NotificationDTO
+                        {
+                            NotificationId = Guid.NewGuid(),
+                            Title = "Giao dịch nâng cấp tài khoản",
+                            Content = "Giao dịch nâng cấp không hợp lệ, vui lòng kiểm tra lại số dư tài khoản.",
+                            UserId = findUser.Id,
+                            CreatedAt = DateTime.UtcNow.AddHours(7),
+                            Status = (int)NotificationEnum.UnRead
+                        };
+                        Models.Entities.Notification notification1 = _mapper.Map<Models.Entities.Notification>(notificationError);
+                        _context.Notifications.Add(notification1);
+                        _firebaseRealtimeDatabaseService.SetAsync<NotificationDTO>($"notifications/{notificationError.UserId}/{notificationError.NotificationId}", notificationError);
+                        return new StatusCodeResult(409);
+                    }
+
+                    walletUser.Amount -= request.Amount;
+                    walletReceiver.Amount += request.Amount;
+
+                    _context.WalletTransactions.Add(transaction);
+                    _context.Wallets.Update(walletUser);
+                    _context.Wallets.Update(walletReceiver);
+                    Tutor tutor = _context.Tutors.FirstOrDefault(t => t.UserId == findUser.Id);
+                    tutor.HasBoughtExperiencedPackage = true;
+                    tutor.HasBoughtSubscription = true;
+                    tutor.SubcriptionStartDate = DateTime.UtcNow.AddHours(7);
+                    tutor.SubcriptionEndDate = DateTime.UtcNow.AddHours(7).AddMinutes(10);
+                    tutor.SubcriptionType = (Int32)TutorPackageEnum.Experience;
+                    _context.Update(tutor);
+                    var notification = new Models.Entities.Notification
+                    {
+                        NotificationId = Guid.NewGuid(),
+                        Title = "Nâng cấp tài khoản",
+                        Content = "Tài khoản",
+                        UserId = findUser.Id,
+                        CreatedAt = DateTime.UtcNow.AddHours(7),
+                        Status = (int)NotificationEnum.UnRead
+                    };
+                    _context.Notifications.Add(notification);
+                    _firebaseRealtimeDatabaseService.UpdateAsync<Models.Entities.Notification>($"notifications/{notification.UserId}/{notification.NotificationId}", notification);
+                    await _context.SaveChangesAsync();
+                    await _appExtension.SendMail(new MailContent()
+                    {
+                        To = findUser.Email,
+                        Subject = "Nâng cấp tài khoản",
+                        Body = " Cảm ơn bạn đã mua gói trải nghiệm bên chúng tôi cảm ơn bạn rất nhiều. Hãy truy cập hệ thống để trải nghiệm đầy đủ tính năng. \nMã giao dịch: " + transaction.WalletTransactionId
+                    });
+                    return new JsonResult(new
+                    {
+                        WalletTransactionId = transaction.WalletTransactionId,
+                        Status = transaction.Status
+                    });
+
+                }
+
+                return new StatusCodeResult(500);
+
+            }
+            catch (Exception ex)
+            {
+                return new StatusCodeResult(500);
+            }
+        }
+
+        // Update Tutor Back Normal Tutor When Experience Subscription End
+        public async Task<IActionResult> UpdateTutorBackNormalTutor(Guid tutorId)
+        {
+            try
+            {
+                var tutor = _context.Tutors.FirstOrDefault(t => t.TutorId == tutorId);
+                if (tutor == null)
+                {
+                    return new StatusCodeResult(404);
+                }
+                tutor.HasBoughtSubscription = false;
+                tutor.SubcriptionStartDate = null;
+                tutor.SubcriptionEndDate = null;
+                tutor.SubcriptionType = (Int32)TutorPackageEnum.Standard;
+                _context.Update(tutor);
+                await _context.SaveChangesAsync();
+                return new StatusCodeResult(200);
+            }
+            catch (Exception ex)
+            {
+                return new StatusCodeResult(500);
+            }
         }
 
         public async Task<IActionResult> CreateDepositVnPayBooking(BookingTransactionCreate transactionCreate)
@@ -540,7 +671,7 @@ namespace Services.Implementations
                 return new StatusCodeResult(404);
             }
 
-            CourseTransaction transaction = new CourseTransaction
+            Models.Entities.CourseTransaction transaction = new Models.Entities.CourseTransaction
             {
                 CourseTransactionId = Guid.NewGuid(),
                 SenderWalletId = (Guid)transactionCreate.SenderId,
@@ -1207,7 +1338,6 @@ namespace Services.Implementations
 
             return paginatedWalletTransactions;
         }
-
         public async Task<ActionResult<List<BookingTransaction>>> GetAllBookingTransactions()
         {
             try
@@ -1247,7 +1377,6 @@ namespace Services.Implementations
                 throw new Exception(ex.ToString());
             }
         }
-
         public async Task<ActionResult<List<BookingTransaction>>> GetBookingTransactionsBySenderId(Guid id)
         {
             try
@@ -1307,7 +1436,6 @@ namespace Services.Implementations
                 throw new Exception(ex.ToString());
             }
         }
-
         public async Task<ActionResult<List<BookingTransaction>>> GetBookingTransactionsByReceiverId(Guid id)
         {
             try
@@ -1605,7 +1733,7 @@ namespace Services.Implementations
                 throw new Exception(ex.ToString());
             }
         }
-        public async Task<ActionResult<List<CourseTransaction>>> GetAllCourseTransactions()
+        public async Task<ActionResult<List<Models.Entities.CourseTransaction>>> GetAllCourseTransactions()
         {
             try
             {
@@ -1621,7 +1749,7 @@ namespace Services.Implementations
                 throw new Exception(ex.ToString());
             }
         }
-        public async Task<ActionResult<PageResults<CourseTransaction>>> GetAllCourseTransactionsPaging(PagingRequest request)
+        public async Task<ActionResult<PageResults<Models.Entities.CourseTransaction>>> GetAllCourseTransactionsPaging(PagingRequest request)
         {
             try
             {
@@ -1631,7 +1759,7 @@ namespace Services.Implementations
                     return new StatusCodeResult(404);
                 }
 
-                var paginatedCourseTransactions = PagingHelper<CourseTransaction>.Paging(courseTransactionsList, request.Page, request.PageSize);
+                var paginatedCourseTransactions = PagingHelper<Models.Entities.CourseTransaction>.Paging(courseTransactionsList, request.Page, request.PageSize);
                 if (paginatedCourseTransactions == null)
                 {
                     return new StatusCodeResult(400);
@@ -1644,7 +1772,7 @@ namespace Services.Implementations
                 throw new Exception(ex.ToString());
             }
         }
-        public async Task<ActionResult<CourseTransaction>> GetCourseTransaction(Guid id)
+        public async Task<ActionResult<Models.Entities.CourseTransaction>> GetCourseTransaction(Guid id)
         {
             try
             {
@@ -1692,7 +1820,7 @@ namespace Services.Implementations
                 throw new Exception(ex.ToString());
             }
         }
-        public async Task<ActionResult<List<CourseTransaction>>> GetCourseTransactionsBySenderId(Guid id)
+        public async Task<ActionResult<List<Models.Entities.CourseTransaction>>> GetCourseTransactionsBySenderId(Guid id)
         {
             try
             {
@@ -1708,7 +1836,7 @@ namespace Services.Implementations
                 throw new Exception(ex.ToString());
             }
         }
-        public async Task<ActionResult<PageResults<CourseTransaction>>> GetCourseTransactionBySenderIdPaging(Guid id, PagingRequest request)
+        public async Task<ActionResult<PageResults<Models.Entities.CourseTransaction>>> GetCourseTransactionBySenderIdPaging(Guid id, PagingRequest request)
         {
             try
             {
@@ -1722,7 +1850,7 @@ namespace Services.Implementations
                     return new StatusCodeResult(404);
                 }
 
-                var paginatedCourseTransactions = PagingHelper<CourseTransaction>.Paging(courseTransactionsList, request.Page, request.PageSize);
+                var paginatedCourseTransactions = PagingHelper<Models.Entities.CourseTransaction>.Paging(courseTransactionsList, request.Page, request.PageSize);
                 if (paginatedCourseTransactions == null)
                 {
                     return new StatusCodeResult(400);
@@ -1735,7 +1863,7 @@ namespace Services.Implementations
                 throw new Exception(ex.ToString());
             }
         }
-        public async Task<ActionResult<List<CourseTransaction>>> GetCourseTransactionsByReceiverId(Guid id)
+        public async Task<ActionResult<List<Models.Entities.CourseTransaction>>> GetCourseTransactionsByReceiverId(Guid id)
         {
             try
             {
@@ -1751,7 +1879,7 @@ namespace Services.Implementations
                 throw new Exception(ex.ToString());
             }
         }
-        public async Task<ActionResult<PageResults<CourseTransaction>>> GetCourseTransactionsByReceiverIdPaging(Guid id, PagingRequest request)
+        public async Task<ActionResult<PageResults<Models.Entities.CourseTransaction>>> GetCourseTransactionsByReceiverIdPaging(Guid id, PagingRequest request)
         {
             try
             {
@@ -1765,7 +1893,7 @@ namespace Services.Implementations
                     return new StatusCodeResult(404);
                 }
 
-                var paginatedCourseTransactions = PagingHelper<CourseTransaction>.Paging(courseTransactionsList, request.Page, request.PageSize);
+                var paginatedCourseTransactions = PagingHelper<Models.Entities.CourseTransaction>.Paging(courseTransactionsList, request.Page, request.PageSize);
                 if (paginatedCourseTransactions == null)
                 {
                     return new StatusCodeResult(400);
@@ -1778,7 +1906,7 @@ namespace Services.Implementations
                 throw new Exception(ex.ToString());
             }
         }
-        public async Task<ActionResult<List<CourseTransaction>>> GetCourseTransactionsByCourseId(Guid id)
+        public async Task<ActionResult<List<Models.Entities.CourseTransaction>>> GetCourseTransactionsByCourseId(Guid id)
         {
             try
             {
@@ -1794,7 +1922,7 @@ namespace Services.Implementations
                 throw new Exception(ex.ToString());
             }
         }
-        public async Task<ActionResult<PageResults<CourseTransaction>>> GetCourseTransactionsByCourseIdPaging(Guid id, PagingRequest request)
+        public async Task<ActionResult<PageResults<Models.Entities.CourseTransaction>>> GetCourseTransactionsByCourseIdPaging(Guid id, PagingRequest request)
         {
             try
             {
@@ -1808,7 +1936,7 @@ namespace Services.Implementations
                     return new StatusCodeResult(404);
                 }
 
-                var paginatedCourseTransactions = PagingHelper<CourseTransaction>.Paging(courseTransactionsList, request.Page, request.PageSize);
+                var paginatedCourseTransactions = PagingHelper<Models.Entities.CourseTransaction>.Paging(courseTransactionsList, request.Page, request.PageSize);
                 if (paginatedCourseTransactions == null)
                 {
                     return new StatusCodeResult(400);

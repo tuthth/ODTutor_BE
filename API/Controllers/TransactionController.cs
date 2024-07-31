@@ -797,5 +797,47 @@ namespace API.Controllers
             if ((IActionResult)result.Result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
             throw new Exception("Lỗi không xác định");
         }
+
+        /// <summary>
+        /// Mua gói trải nghiệm gia sư
+        /// </summary>
+        [HttpPost("buy-experience-tutor-package")]
+        public async Task<IActionResult> BuyExperienceTutorPackage(WalletTransactionCreate request)
+        {
+            var result = await _transactionService.HasBoughtTutorExperiencePackage(request);
+            if (result is StatusCodeResult statusCodeResult)
+            {
+                return statusCodeResult;
+            }
+            else if (result is JsonResult jsonResult)
+            {
+                return jsonResult;
+            }
+            else
+            {
+                return new StatusCodeResult(500);
+            }
+        }
+
+        /// <summary>
+        /// Update trạng thái gia sư sau khi hết gói
+        /// </summary>
+        [HttpPut("update-tutor-status")]
+        public async Task<IActionResult> UpdateTutorStatus(Guid tutorID)
+        {
+            var result = await _transactionService.UpdateTutorBackNormalTutor(tutorID);
+            if (result is StatusCodeResult statusCodeResult)
+            {
+                return statusCodeResult;
+            }
+            else if (result is JsonResult jsonResult)
+            {
+                return jsonResult;
+            }
+            else
+            {
+                return new StatusCodeResult(500);
+            }
+        }
     }
 }
