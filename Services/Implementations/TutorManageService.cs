@@ -251,5 +251,45 @@ namespace Services.Implementations
                 throw new Exception(ex.ToString());
             }
         }
+
+        // Cập nhật gia sư khi thời gian gói dịch vụ kết thúc (bao gồm cả trải nghiệm và đăng ký gia sư)
+        public async Task<IActionResult> UpdateTutorWhenEndTimeOfPackageIsOver()
+        {
+            var tutors = await _context.Tutors.ToListAsync();
+            if (tutors == null || tutors.Count == 0)
+            {
+                return new StatusCodeResult(404);
+            }
+
+            try
+            {
+                DateTime now = DateTime.UtcNow.AddHours(7);
+
+                var tutorsToUpdate = new List<Tutor>();
+
+                foreach (var tutor in tutors)
+                {
+                    if (tutor.SubcriptionEndDate < now)
+                    {
+                        tutor.SubcriptionEndDate = null;
+                        tutor.SubcriptionStartDate = null;
+                        tutor.HasBoughtSubscription = false;
+                        tutor.SubcriptionType = 0;
+                        tutorsToUpdate.Add(tutor);
+                    }
+                }
+                if (tutorsToUpdate.Any())
+                {
+                    _context.Tutors.UpdateRange(tutorsToUpdate);
+                    await _context.SaveChangesAsync();
+                }
+
+                return new StatusCodeResult(204);
+            }
+            catch (Exception ex)
+            {
+                return new StatusCodeResult(500);
+            }
+        }
     }
 }

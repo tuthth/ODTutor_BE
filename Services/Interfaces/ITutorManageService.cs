@@ -21,5 +21,6 @@ namespace Services.Interfaces
         Task<IActionResult> DeleteTutorCertificate(Guid id);
         Task<IActionResult> DeleteRatingImage(Guid id);
         Task<IActionResult> UpdateAllCountChatOfAllTutor();
+        Task<IActionResult> UpdateTutorWhenEndTimeOfPackageIsOver();
     }
 }

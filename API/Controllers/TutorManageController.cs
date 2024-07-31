@@ -162,5 +162,21 @@ namespace API.Controllers
             if (result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
             throw new Exception("Lỗi không xác định");
         }
+
+        /// <summary>
+        /// Check and update tutor when end time of package is over
+        /// </summary>
+        [HttpPut("update/tutor-end-time-package")]
+        public async Task<IActionResult> UpdateTutorWhenEndTimeOfPackageIsOver()
+        {
+            var result = await _tutorManageService.UpdateTutorWhenEndTimeOfPackageIsOver();
+            if (result is StatusCodeResult statusCodeResult)
+            {
+                if (statusCodeResult.StatusCode == 404) return Ok(new { Message = "Không tìm thấy tutor nào, vui lòng kiểm tra" });
+                if (statusCodeResult.StatusCode == 204) return StatusCode(StatusCodes.Status204NoContent, new { Message = "Cập nhật tutor thành công" });
+            }
+            if (result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
+            throw new Exception("Lỗi không xác định");
+        }
     }
 }
