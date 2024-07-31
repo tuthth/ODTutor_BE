@@ -232,7 +232,7 @@ namespace Services.Implementations
 
         public async Task<IActionResult> UpgradeAccount(WalletTransactionCreate transactionCreate)
         {
-            if (transactionCreate.Choice != (Int32)VNPayTransactionType.Upgrade || transactionCreate.Choice != (Int32)VNPayTransactionType.StudentSubscription)
+            if (transactionCreate.Choice != (Int32)VNPayTransactionType.Upgrade && transactionCreate.Choice != (Int32)VNPayTransactionType.StudentSubscription)
             {
                 return new StatusCodeResult(406);
             }
