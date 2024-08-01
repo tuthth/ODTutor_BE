@@ -1086,11 +1086,11 @@ namespace Services.Implementations
                 {
                     throw new CrudException(HttpStatusCode.OK, "Không tìm thấy môn học của gia sư", "");
                 }
-                if(tutorSubject.Status == (Int32)TutorSubjectEnum.NotAvailable)
+                if (tutorSubject.Status == (Int32)TutorSubjectEnum.NotAvailable)
                 {
                     tutorSubject.Status = (Int32)TutorSubjectEnum.Available;
                 }
-                if (tutorSubject.Status == (Int32)TutorSubjectEnum.Available)
+                else if (tutorSubject.Status == (Int32)TutorSubjectEnum.Available)
                 {
                     tutorSubject.Status = (Int32)TutorSubjectEnum.NotAvailable;
                 }
