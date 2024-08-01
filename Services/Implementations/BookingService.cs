@@ -382,38 +382,6 @@ namespace Services.Implementations
             await _context.SaveChangesAsync();
             return new StatusCodeResult(204);
         }
-        public async Task<IActionResult> StartLearning(Guid id)
-        {
-            var booking = _context.Bookings.FirstOrDefault(x => x.BookingId == id);
-            if (booking == null)
-            {
-                return new StatusCodeResult(404);
-            }
-            if (booking.Status != (Int32)BookingEnum.Success)
-            {
-                return new StatusCodeResult(409);
-            }
-            booking.Status = (Int32)BookingEnum.Learning;
-            _context.Bookings.Update(booking);
-            await _context.SaveChangesAsync();
-            return new StatusCodeResult(200);
-        }
-        public async Task<IActionResult> FinishBooking(Guid id)
-        {
-            var booking = _context.Bookings.FirstOrDefault(x => x.BookingId == id);
-            if (booking == null)
-            {
-                return new StatusCodeResult(404);
-            }
-            if(booking.Status != (Int32)BookingEnum.Learning)
-            {
-                return new StatusCodeResult(409);
-            }
-            booking.Status = (Int32)BookingEnum.Finished;
-            _context.Bookings.Update(booking);
-            await _context.SaveChangesAsync();
-            return new StatusCodeResult(200);
-        }
         public async Task<ActionResult<List<Booking>>> GetAllBookings()
         {
             try
@@ -840,6 +808,92 @@ namespace Services.Implementations
                 tutorSlotAvailables.Status = (Int32)TutorSlotAvailabilityEnum.Available;
             }
             _context.TutorSlotAvailables.Update(tutorSlotAvailables);
+        }
+
+        public async Task<IActionResult> StartLearning(Guid id)
+        {
+            var booking = _context.Bookings.FirstOrDefault(x => x.BookingId == id);
+            if (booking == null)
+            {
+                return new StatusCodeResult(404);
+            }
+            if (booking.Status != (Int32)BookingEnum.Success)
+            {
+                return new StatusCodeResult(409);
+            }
+            booking.Status = (Int32)BookingEnum.Learning;
+            _context.Bookings.Update(booking);
+            await _context.SaveChangesAsync();
+            return new StatusCodeResult(200);
+        }
+        public async Task<IActionResult> FinishBooking(Guid id)
+        {
+            var booking = _context.Bookings.FirstOrDefault(x => x.BookingId == id);
+            if (booking == null)
+            {
+                return new StatusCodeResult(404);
+            }
+            if (booking.Status != (Int32)BookingEnum.Learning)
+            {
+                return new StatusCodeResult(409);
+            }
+            booking.Status = (Int32)BookingEnum.Finished;
+            _context.Bookings.Update(booking);
+            await _context.SaveChangesAsync();
+            return new StatusCodeResult(200);
+        }
+
+
+        // Update Start Learning of All Booking When the realtime in Hồ Chí Minh city == booking time
+        public async Task<IActionResult> UpdateStartLearningOfAllBoooking()
+        {
+            try
+            {
+                var bookings = _context.Bookings
+                    .Where(x => x.Status == (Int32)BookingEnum.Success && x.StudyTime.Value.Date == DateTime.UtcNow.AddHours(7).Date && x.StudyTime.Value.Hour == DateTime.UtcNow.AddHours(7).Hour && x.StudyTime.Value.Minute == DateTime.UtcNow.AddHours(7).Minute)
+                    .ToList();
+                if (bookings == null)
+                {
+                    return new StatusCodeResult(404);
+                }
+                foreach (var booking in bookings)
+                {
+                    booking.Status = (Int32)BookingEnum.Learning;
+                    _context.Bookings.Update(booking);
+                }
+                await _context.SaveChangesAsync();
+                return new StatusCodeResult(200);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.ToString());
+            }
+        }
+
+        // Update Finish Learning of All Booking When the realtime in Hồ Chí Minh city == booking time + 50 minutes
+        public async Task<IActionResult> UpdateFinishBookingOfAllBooking()
+        {
+            try
+            {
+                var bookings = _context.Bookings
+                    .Where(x => x.Status == (Int32)BookingEnum.Learning && x.StudyTime.Value.Date == DateTime.UtcNow.AddHours(7).Date && x.StudyTime.Value.Hour == DateTime.UtcNow.AddHours(7).Hour && x.StudyTime.Value.Minute == DateTime.UtcNow.AddHours(7).Minute + 50)
+                    .ToList();
+                if (bookings == null)
+                {
+                    return new StatusCodeResult(404);
+                }
+                foreach (var booking in bookings)
+                {
+                    booking.Status = (Int32)BookingEnum.Finished;
+                    _context.Bookings.Update(booking);
+                }
+                await _context.SaveChangesAsync();
+                return new StatusCodeResult(200);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.ToString());
+            }
         }
     }
 }

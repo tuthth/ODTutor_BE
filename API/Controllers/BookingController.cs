@@ -325,5 +325,41 @@ namespace API.Controllers
             }
             throw new Exception("Lỗi không xác định");
         }
+
+        ///<summary>
+        /// Cập nhật trạng thái bắt đầu học của tất cả booking
+        /// </summary>
+        [HttpPut("update/startlearning/all")]
+        public async Task<IActionResult> UpdateStartLearningOfAllBooking()
+        {
+            var result = await _bookingService.UpdateStartLearningOfAllBoooking();
+            if(result is IActionResult actionResult)
+            {
+                if (actionResult is StatusCodeResult statusCodeResult)
+                {
+                    if (statusCodeResult.StatusCode == 200) return Ok(new { Message = "Cập nhật trạng thái bắt đầu học thành công" });
+                    if (statusCodeResult.StatusCode == 404) return NotFound(new { Message = "Không tìm thấy lịch đặt" });
+                }
+            }
+            return StatusCode(StatusCodes.Status500InternalServerError, new { Message = "Lỗi không xác định" });
+        }
+
+        ///<summary>
+        /// Cập nhật trạng thái kết thúc học của tất cả booking
+        /// </summary>
+        [HttpPut("update/finishbooking/all")]
+        public async Task<IActionResult> UpdateFinishBookingOfAllBooking()
+        {
+            var result = await _bookingService.UpdateFinishBookingOfAllBooking();
+            if (result is IActionResult actionResult)
+            {
+                if (actionResult is StatusCodeResult statusCodeResult)
+                {
+                    if (statusCodeResult.StatusCode == 200) return Ok(new { Message = "Cập nhật trạng thái kết thúc học thành công" });
+                    if (statusCodeResult.StatusCode == 404) return NotFound(new { Message = "Không tìm thấy lịch đặt" });
+                }
+            }
+            return StatusCode(StatusCodes.Status500InternalServerError, new { Message = "Lỗi không xác định" });
+        }
     }
 }
