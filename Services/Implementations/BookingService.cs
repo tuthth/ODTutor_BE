@@ -850,7 +850,7 @@ namespace Services.Implementations
             try
             {
                 var bookings = _context.Bookings
-                    .Where(x => x.Status == (Int32)BookingEnum.Success && x.StudyTime.Value.Date == DateTime.UtcNow.AddHours(7).Date && x.StudyTime.Value.Hour == DateTime.UtcNow.AddHours(7).Hour && x.StudyTime.Value.Minute == DateTime.UtcNow.AddHours(7).Minute)
+                    .Where(x => x.Status == (Int32)BookingEnum.Success && x.StudyTime.Value.Date == DateTime.UtcNow.AddHours(7).Date && x.StudyTime.Value.Hour == DateTime.UtcNow.AddHours(7).Hour && x.StudyTime.Value.Minute >= DateTime.UtcNow.AddHours(7).Minute)
                     .ToList();
                 if (bookings == null)
                 {
@@ -876,7 +876,7 @@ namespace Services.Implementations
             try
             {
                 var bookings = _context.Bookings
-                    .Where(x => x.Status == (Int32)BookingEnum.Learning && x.StudyTime.Value.Date == DateTime.UtcNow.AddHours(7).Date && x.StudyTime.Value.Hour == DateTime.UtcNow.AddHours(7).Hour && x.StudyTime.Value.Minute == DateTime.UtcNow.AddHours(7).Minute + 50)
+                    .Where(x => x.Status == (Int32)BookingEnum.Learning && x.StudyTime.Value.Date == DateTime.UtcNow.AddHours(7).Date && x.StudyTime.Value.Hour == DateTime.UtcNow.AddHours(7).Hour && x.StudyTime.Value.Minute >= DateTime.UtcNow.AddHours(7).Minute + 50)
                     .ToList();
                 if (bookings == null)
                 {
