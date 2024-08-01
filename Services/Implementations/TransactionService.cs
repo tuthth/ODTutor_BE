@@ -466,14 +466,14 @@ namespace Services.Implementations
                     DateTime startTimeDate = DateTime.UtcNow.AddHours(7);
                     
                     // Định dạng ngày và giờ 
-                    string formatStartTimeDate  = startTimeDate.ToString("dd-MM-yyyy") + "00:00:00";
+                    string formatStartTimeDate  = startTimeDate.ToString("dd-MM-yyyy") + " 00:00:00";
                     tutor.SubcriptionStartDate = DateTime.ParseExact(formatStartTimeDate, "dd-MM-yyyy HH:mm:ss", null);
 
                     // Format endDate 
                     DateTime endTimeDate = DateTime.UtcNow.AddHours(7).AddDays(30);
 
                     // Định dạng ngày và giờ
-                    string formatEndTimeDate = endTimeDate.ToString("dd-MM-yyyy") + "00:00:00";
+                    string formatEndTimeDate = endTimeDate.ToString("dd-MM-yyyy") + " 00:00:00";
                     tutor.SubcriptionEndDate = DateTime.ParseExact(formatEndTimeDate, "dd-MM-yyyy HH:mm:ss", null);
                     tutor.SubcriptionType = (Int32)TutorPackageEnum.Experience;
                     _context.Update(tutor);
@@ -572,17 +572,16 @@ namespace Services.Implementations
                     _context.Wallets.Update(walletUser);
                     _context.Wallets.Update(walletReceiver);
                     Tutor tutor = _context.Tutors.FirstOrDefault(t => t.UserId == findUser.Id);
-                    tutor.HasBoughtExperiencedPackage = false;
                     tutor.HasBoughtSubscription = true;
                     // Format startDate
-                    DateTime startTimeDate = DateTime.UtcNow.AddHours(7);
+                    DateTime startTimeDate = DateTime.UtcNow.AddHours(7).Date;
                     // Định dạng ngày và giờ
-                    string formatStartTimeDate = startTimeDate.ToString("dd-MM-yyyy") + "00:00:00";
+                    string formatStartTimeDate = startTimeDate.ToString("dd-MM-yyyy") + " 00:00:00";
                     tutor.SubcriptionStartDate = DateTime.ParseExact(formatStartTimeDate, "dd-MM-yyyy HH:mm:ss", null);
                     // Format endDate
-                    DateTime endTimeDate = DateTime.UtcNow.AddHours(7).AddDays(30);
+                    DateTime endTimeDate = DateTime.UtcNow.AddHours(7).AddDays(30).Date;
                     // Định dạng ngày và giờ
-                    string formatEndTimeDate = endTimeDate.ToString("dd-MM-yyyy") + "00:00:00";
+                    string formatEndTimeDate = endTimeDate.ToString("dd-MM-yyyy") + " 00:00:00";
                     tutor.SubcriptionEndDate = DateTime.ParseExact(formatEndTimeDate, "dd-MM-yyyy HH:mm:ss", null);
                     tutor.SubcriptionType = (Int32)TutorPackageEnum.Premium;
                     _context.Update(tutor);

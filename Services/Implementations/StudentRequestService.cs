@@ -471,5 +471,76 @@ namespace Services.Implementations
                 throw new CrudException(HttpStatusCode.InternalServerError, "Get Student Request Based On Tutor Has Bought Subscription Error", ex.Message);
             }
         }
+
+        // View StudentRequest Paging Based On Tutor has bought subscription
+        public async Task<ActionResult<PageResults<StudentRequestView>>> ViewStudentRequestPagingBasedOnTutorHasBoughtSubscription(Guid tutorId, PagingRequest request)
+        {
+            try
+            {
+                var tutor = _context.Tutors.FirstOrDefault(t => t.TutorId == tutorId);
+                if (tutor == null)
+                {
+                    throw new CrudException(HttpStatusCode.NotFound, "Tutor Not Found", "");
+                }
+
+                var tutorSubjects = _context.TutorSubjects.Where(ts => ts.TutorId == tutorId).Select(ts => ts.SubjectId).ToList();
+                var studentRequests = _context.StudentRequests
+                    .Where(sr => tutorSubjects.Contains(sr.SubjectId) && sr.Status == (int)StudentRequestEnum.Pending)
+                    .ToList();
+                if (studentRequests.Count == 0)
+                {
+                    throw new CrudException(HttpStatusCode.NoContent, "No Student Request Found", "");
+                }
+
+                List<StudentRequestView> studentRequestViews = new List<StudentRequestView>();
+
+                if (tutor.SubcriptionType == 0)
+                {
+                    // Renew studentRequest list after 00:00 am everyday and have 10 latest items based on created date
+                    var studentRequest = studentRequests.OrderByDescending(sr => sr.CreatedAt).Take(10).ToList();
+                    foreach (var item in studentRequest)
+                    {
+                        var studentRequestView1 = new StudentRequestView
+                        {
+                            StudentRequestId = item.StudentRequestId,
+                            StudentId = item.StudentId,
+                            SubjectId = item.SubjectId,
+                            CreatedAt = item.CreatedAt,
+                            Message = item.Message,
+                            Status = item.Status
+                        };
+                        studentRequestViews.Add(studentRequestView1);
+                    }
+                }
+                else if (tutor.SubcriptionType == 2 || tutor.SubcriptionType == 1)
+                {
+                    var studentRequestVip = _context.StudentRequests
+                    .Where(sr => sr.Status == (Int32)StudentRequestEnum.Pending)
+                    .ToList();
+                    foreach (var item in studentRequestVip)
+                    {
+                        var studentRequestView = new StudentRequestView
+                        {
+                            StudentRequestId = item.StudentRequestId,
+                            StudentId = item.StudentId,
+                            SubjectId = item.SubjectId,
+                            CreatedAt = item.CreatedAt,
+                            Message = item.Message,
+                            Status = item.Status
+                        };
+                        studentRequestViews.Add(studentRequestView);
+                    }
+                }
+                var paginatedStudentRequests = PagingHelper<StudentRequestView>.Paging(studentRequestViews, request.Page, request.PageSize);
+                if (paginatedStudentRequests == null)
+                {
+                    return new StatusCodeResult(400);
+                }
+                return paginatedStudentRequests;
+            } catch (Exception ex)
+            {
+                return new StatusCodeResult(500);
+            }
+        }
     }
 }

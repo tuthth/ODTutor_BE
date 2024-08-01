@@ -26,5 +26,6 @@ namespace Services.Interfaces
         Task<IActionResult> DeleteStudentRequest(Guid id);
         Task<ActionResult<List<TutorView>>> GetListTutorBasedOnSubject(List<Guid> subjectId);
         Task<ActionResult<List<StudentRequestView>>> GetStudentRequestBasedOnTutorHasBoughtSubscription(Guid tutorId);
+        Task<ActionResult<PageResults<StudentRequestView>>> ViewStudentRequestPagingBasedOnTutorHasBoughtSubscription(Guid tutorId, PagingRequest request);
     }
 }

@@ -241,5 +241,15 @@ namespace API.Controllers
             return Ok(response);
 
         }
+
+        ///<summary>
+        /// View Student Request Paging Based On Tutor Has Bought Subscription
+        /// </summary>
+        [HttpGet("get/tutor/{tutorId}/paging")]
+        public async Task<ActionResult<PageResults<StudentRequestView>>> ViewStudentRequestPagingBasedOnTutorHasBoughtSubscription(Guid tutorId, [FromQuery] PagingRequest request)
+        {   
+            var response = await _studentRequestService.ViewStudentRequestPagingBasedOnTutorHasBoughtSubscription(tutorId, request);
+            return Ok(response);
+        }
     }
 }
