@@ -1014,7 +1014,8 @@ namespace Services.Implementations
                         TutorSubjectId = subject.TutorSubjectId,
                         SubjectName = subject.SubjectNavigation.Title,
                         SubjectDescription = subject.SubjectNavigation.Content,
-                        CreatedDate = subject.CreatedAt
+                        CreatedDate = subject.CreatedAt,
+                        Status = subject.Status
                     });
                 }
                 if (response.Count == 0)

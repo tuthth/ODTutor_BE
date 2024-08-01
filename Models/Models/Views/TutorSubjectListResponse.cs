@@ -13,5 +13,6 @@ namespace Models.Models.Views
         public string SubjectName { get; set; }
         public string SubjectDescription { get; set; }
         public DateTime CreatedDate { get; set; }
+        public int Status { get; set; }
     }
 }
