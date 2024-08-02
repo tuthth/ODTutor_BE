@@ -425,7 +425,7 @@ namespace Services.Implementations
                     StudentsRegistered = students.Count,
                     StudentsActive = students.Count(c => c.UserNavigation.Active),
                     StudentsBanned = students.Count(c => c.UserNavigation.Banned),
-                    StudentsPremium = students.Count(c => c.UserNavigation.IsPremium == true),
+                    StudentsSubscriptions = students.Count(c => c.UserNavigation.HasBoughtSubscription == true),
                     StudentsByDayAndTime = studentsByDayAndTime
                 });
             }
@@ -460,8 +460,77 @@ namespace Services.Implementations
                     StudentsRegistered = students.Count,
                     StudentsActive = students.Count(c => c.UserNavigation.Active),
                     StudentsBanned = students.Count(c => c.UserNavigation.Banned),
-                    StudentsPremium = students.Count(c => c.UserNavigation.IsPremium),
+                    StudentsSubscriptions = students.Count(c => c.UserNavigation.HasBoughtSubscription == true),
                     StudentsByMonthAndTime = studentsByMonthAndTime
+                });
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.ToString());
+            }
+        }
+        public async Task<IActionResult> GetTutorStatisticsByDayOfWeek()
+        {
+            try
+            {
+                var tutors = await _context.Tutors.Include(c => c.UserNavigation).ToListAsync();
+                if (tutors == null)
+                {
+                    return new StatusCodeResult(404);
+                }
+
+                var daysOfWeek = Enum.GetValues(typeof(DayOfWeek)).Cast<DayOfWeek>();
+
+                var tutorsByDayAndTime = daysOfWeek.Select(day => new
+                {
+                    DayOfWeek = (int)day,
+                    TutorsRegisteredInMorning = tutors.Count(t => t.UserNavigation.CreatedAt.DayOfWeek == day && t.UserNavigation.CreatedAt.TimeOfDay < TimeSpan.FromHours(8)),
+                    TutorsRegisteredInAfternoon = tutors.Count(t => t.UserNavigation.CreatedAt.DayOfWeek == day && t.UserNavigation.CreatedAt.TimeOfDay >= TimeSpan.FromHours(8) && t.UserNavigation.CreatedAt.TimeOfDay < TimeSpan.FromHours(16)),
+                    TutorsRegisteredInEvening = tutors.Count(t => t.UserNavigation.CreatedAt.DayOfWeek == day && t.UserNavigation.CreatedAt.TimeOfDay >= TimeSpan.FromHours(16))
+                }).OrderBy(d => d.DayOfWeek).ToList();
+
+                return new JsonResult(new
+                {
+                    TutorsRegistered = tutors.Count,
+                    TutorsActive = tutors.Count(c => c.UserNavigation.Active),
+                    TutorsBanned = tutors.Count(c => c.UserNavigation.Banned),
+                    TutorsPremium = tutors.Count(c => c.UserNavigation.IsPremium),
+                    TutorsByDayAndTime = tutorsByDayAndTime
+                });
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.ToString());
+            }
+        }
+        public async Task<IActionResult> GetTutorStatisticsByMonth()
+        {
+            try
+            {
+                var tutors = await _context.Tutors.Include(c => c.UserNavigation).ToListAsync();
+                if (tutors == null)
+                {
+                    return new StatusCodeResult(404);
+                }
+
+                var monthsOfYear = Enumerable.Range(1, 12);
+
+                var tutorsByMonthAndTime = monthsOfYear.Select(month => new
+                {
+                    Month = month,
+                    TutorsRegisteredInMorning = tutors.Count(t => t.UserNavigation.CreatedAt.Month == month && t.UserNavigation.CreatedAt.TimeOfDay < TimeSpan.FromHours(8)),
+                    TutorsRegisteredInAfternoon = tutors.Count(t => t.UserNavigation.CreatedAt.Month == month && t.UserNavigation.CreatedAt.TimeOfDay >= TimeSpan.FromHours(8) && t.UserNavigation.CreatedAt.TimeOfDay < TimeSpan.FromHours(16)),
+                    TutorsRegisteredInEvening = tutors.Count(t => t.UserNavigation.CreatedAt.Month == month && t.UserNavigation.CreatedAt.TimeOfDay >= TimeSpan.FromHours(16))
+                }).OrderBy(d => d.Month).ToList();
+
+                return new JsonResult(new
+                {
+                    Year = DateTime.Now.Year,
+                    TutorsRegistered = tutors.Count,
+                    TutorsActive = tutors.Count(c => c.UserNavigation.Active),
+                    TutorsBanned = tutors.Count(c => c.UserNavigation.Banned),
+                    TutorsPremium = tutors.Count(c => c.UserNavigation.IsPremium),
+                    TutorsByMonthAndTime = tutorsByMonthAndTime
                 });
             }
             catch (Exception ex)

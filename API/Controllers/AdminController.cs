@@ -453,6 +453,36 @@ namespace API.Controllers
             if (result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
             throw new Exception("Lỗi không xác định");
         }
+        [HttpGet("get/tutor-statistics/dow")]
+        public async Task<IActionResult> GetTutorStatisticsByDayOfWeek()
+        {
+            var result = await _adminService.GetTutorStatisticsByDayOfWeek();
+            if (result is StatusCodeResult statusCodeResult)
+            {
+                if (statusCodeResult.StatusCode == 404) { return NotFound(new { Message = "Không tìm thấy thống kê gia sư" }); }
+            }
+            if (result is JsonResult jsonResult)
+            {
+                return Ok(jsonResult.Value);
+            }
+            if (result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
+            throw new Exception("Lỗi không xác định");
+        }
+        [HttpGet("get/tutor-statistics/month")]
+        public async Task<IActionResult> GetTutorStatisticsByMonth()
+        {
+            var result = await _adminService.GetTutorStatisticsByMonth();
+            if (result is StatusCodeResult statusCodeResult)
+            {
+                if (statusCodeResult.StatusCode == 404) { return NotFound(new { Message = "Không tìm thấy thống kê gia sư" }); }
+            }
+            if (result is JsonResult jsonResult)
+            {
+                return Ok(jsonResult.Value);
+            }
+            if (result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
+            throw new Exception("Lỗi không xác định");
+        }
         [HttpGet("get/booking-statistics/month")]
         public async Task<IActionResult> GetBookingStatisticsByMonth()
         {
