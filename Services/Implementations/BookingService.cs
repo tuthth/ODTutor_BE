@@ -826,6 +826,7 @@ namespace Services.Implementations
             await _context.SaveChangesAsync();
             return new StatusCodeResult(200);
         }
+
         public async Task<IActionResult> FinishBooking(Guid id)
         {
             var booking = _context.Bookings.FirstOrDefault(x => x.BookingId == id);
@@ -844,29 +845,40 @@ namespace Services.Implementations
         }
 
 
-        // Update Start Learning of All Booking When the realtime in Hồ Chí Minh city == booking time
         public async Task<IActionResult> UpdateStartLearningOfAllBoooking()
         {
             try
             {
+                // Xác định múi giờ Hồ Chí Minh
+                var timezone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
+                var currentTimeInHoChiMinh = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, timezone);
+
+                // Truy vấn các booking có trạng thái thành công và thời gian học bắt đầu bằng thời gian hiện tại ở Hồ Chí Minh
                 var bookings = _context.Bookings
-                    .Where(x => x.Status == (Int32)BookingEnum.Success && x.StudyTime.Value.Date == DateTime.UtcNow.AddHours(7).Date && x.StudyTime.Value.Hour == DateTime.UtcNow.AddHours(7).Hour && x.StudyTime.Value.Minute == DateTime.UtcNow.AddHours(7).Minute)
+                    .Where(x => x.Status == (Int32)BookingEnum.Success
+                                && x.StudyTime.HasValue
+                                && x.StudyTime.Value.Date == currentTimeInHoChiMinh.Date
+                                && x.StudyTime.Value.Hour == currentTimeInHoChiMinh.Hour
+                                && x.StudyTime.Value.Minute <= currentTimeInHoChiMinh.Minute)
                     .ToList();
-                if (bookings == null)
+
+                if (bookings == null || !bookings.Any())
                 {
                     return new StatusCodeResult(404);
                 }
+
                 foreach (var booking in bookings)
                 {
                     booking.Status = (Int32)BookingEnum.Learning;
                     _context.Bookings.Update(booking);
                 }
+
                 await _context.SaveChangesAsync();
                 return new StatusCodeResult(200);
             }
             catch (Exception ex)
             {
-                throw new Exception(ex.ToString());
+                return new StatusCodeResult(500);
             }
         }
 
@@ -875,24 +887,33 @@ namespace Services.Implementations
         {
             try
             {
+                var timezone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
+                var currentTimeInHoChiMinh = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, timezone);
                 var bookings = _context.Bookings
-                    .Where(x => x.Status == (Int32)BookingEnum.Learning && x.StudyTime.Value.Date == DateTime.UtcNow.AddHours(7).Date && x.StudyTime.Value.Hour == DateTime.UtcNow.AddHours(7).Hour && x.StudyTime.Value.Minute ==   DateTime.UtcNow.AddHours(7).Minute + 50)
+                    .Where(x => x.Status == (Int32)BookingEnum.Learning
+                                && x.StudyTime.HasValue
+                                && x.StudyTime.Value.Date == currentTimeInHoChiMinh.Date
+                                && x.StudyTime.Value.Hour == currentTimeInHoChiMinh.Hour
+                                && x.StudyTime.Value.Minute <= currentTimeInHoChiMinh.Minute + 50)
                     .ToList();
-                if (bookings == null)
+
+                if (bookings == null || !bookings.Any())
                 {
                     return new StatusCodeResult(404);
                 }
+
                 foreach (var booking in bookings)
                 {
                     booking.Status = (Int32)BookingEnum.Finished;
                     _context.Bookings.Update(booking);
                 }
+
                 await _context.SaveChangesAsync();
                 return new StatusCodeResult(200);
             }
             catch (Exception ex)
             {
-                throw new Exception(ex.ToString());
+                return new StatusCodeResult(500);
             }
         }
     }

@@ -63,7 +63,7 @@ namespace API.Controllers
         [HttpPost("action")]
         public async Task<IActionResult> MakeActionReport(ReportAction action)
         {
-            var result = await _reportService.MakeActionReport(action);
+            var result = await _reportService.MakeActionReportWithUser(action);
             if (result is IActionResult actionResult)
             {
                 if (actionResult is StatusCodeResult statusCodeResult)

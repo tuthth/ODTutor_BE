@@ -28,5 +28,6 @@ namespace Services.Interfaces
         Task<ActionResult<TutorView>> GetTutorByUserID(Guid UserID);
         Task<ActionResult<StudentStatisticNumberByTimeOfDatResponse>> GetNumberOfStudentPercentageByTimeOfDate(Guid tutorId);
         Task<ActionResult<IActionResult>> CountTutorMessage(Guid tutorId);
+        Task<ActionResult<List<TutorSubjectResponse>>> GetTutorSubject(Guid tutorId);
     }
 }

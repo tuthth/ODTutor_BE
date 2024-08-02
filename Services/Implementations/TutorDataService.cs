@@ -667,6 +667,32 @@ namespace Services.Implementations
             }
         }
 
+        // Get Tutor Subject From TutorId 
+        public async Task<ActionResult<List<TutorSubjectResponse>>> GetTutorSubject(Guid tutorId)
+        {
+            try
+            {
+                var subjects = await _context.TutorSubjects
+                    .Include(ts => ts.SubjectNavigation)
+                    .Where(ts => ts.TutorId == tutorId)
+                    .Select(ts => new TutorSubjectResponse
+                    {
+                        TutorSubjectId = ts.TutorSubjectId,
+                        TutorId = ts.TutorId,
+                        Title = ts.SubjectNavigation.Title,
+                    }).ToListAsync();
+                return subjects;
+            }
+            catch (CrudException ex)
+            {
+                throw ex;
+            }
+            catch (Exception ex)
+            {
+                throw new CrudException(HttpStatusCode.InternalServerError, "Get Tutor Subject Error", ex.Message);
+            }
+        }
+
 
     }
 }

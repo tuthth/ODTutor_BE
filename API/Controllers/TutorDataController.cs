@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Models.Entities;
 using Models.Models.Requests;
 using Models.Models.Views;
 using Services;
@@ -174,6 +175,16 @@ namespace API.Controllers
         public async Task<ActionResult<IActionResult>> CountTutorMessage(Guid tutorId)
         {
             var response = await _tutorDataService.CountTutorMessage(tutorId);
+            return response;
+        }
+
+        /// <summary>
+        /// Lấy  Tutor Subject theo TutorId
+        /// </summary>
+        [HttpGet("get/tutorsubjects/{tutorId}")]
+        public async Task<ActionResult<List<TutorSubjectResponse>>> GetTutorSubject(Guid tutorId)
+        {
+            var response = await _tutorDataService.GetTutorSubject(tutorId);
             return response;
         }
     }

@@ -99,7 +99,7 @@ namespace API.Controllers
         }
 
         /// <summary>
-        ///         Booking status: 1 ( Learning ), 2 ( Finsihed ), 3 ( Deleted ), 4 ( Success ), 0 ( Wait for payment ), 5 ( WaitingReschdeduleForStudent), 6 ( WaitingReschdeuleForTutor). Dùng 0 với 4 cho lúc thanh toán.
+        /// Booking status: 1 ( Learning ), 2 ( Finsihed ), 3 ( Deleted ), 4 ( Success ), 0 ( Wait for payment ), 5 ( WaitingReschdeduleForStudent), 6 ( WaitingReschdeuleForTutor). Dùng 0 với 4 cho lúc thanh toán.
         /// </summary>
         [HttpPost("create/booking")]
         public async Task<IActionResult> CreateBooking(BookingRequest bookingRequest)

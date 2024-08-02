@@ -33,6 +33,7 @@ namespace Services.Implementations
             report.CreatedAt = DateTime.UtcNow.AddHours(7);
             report.UpdatedAt = DateTime.UtcNow.AddHours(7);
             report.ReportId = Guid.NewGuid();
+            report.Type = (Int32)ReportStatusEnum.User;
             // Check have image or not 
             if (reportRequest.ImageURLs != null)
             {
@@ -191,7 +192,7 @@ namespace Services.Implementations
             await _context.SaveChangesAsync();
             return new StatusCodeResult(200);
         }
-        public async Task<IActionResult> MakeActionReport(ReportAction action)
+        public async Task<IActionResult> MakeActionReportWithUser(ReportAction action)
         {
             var report = _context.Reports.FirstOrDefault(x => x.ReportId == action.ReportId);
             if (report == null) return new StatusCodeResult(404);

@@ -898,7 +898,7 @@ namespace Services.Implementations
             {
                 if (choice == (Int32)UpdateTransactionType.Booking)
                 {
-                    wallet.Status = (int)VNPayType.APPROVE;
+                    wallet.Status = (int)VNPayType.APPROVE; 
                     var booking = _context.BookingTransactions.FirstOrDefault(b => b.BookingTransactionId == wallet.WalletTransactionId);
                     booking.Status = (int)VNPayType.APPROVE;
 
@@ -910,7 +910,6 @@ namespace Services.Implementations
                     wallet.ReceiverWalletNavigation.LastBalanceUpdate = DateTime.UtcNow.AddHours(7);
                     wallet.ReceiverWalletNavigation.AvalaibleAmount += booking.Amount;
                     wallet.ReceiverWalletNavigation.PendingAmount -= booking.Amount;
-
                     _context.BookingTransactions.Update(booking);
                     _context.WalletTransactions.Update(wallet);
 
@@ -2091,7 +2090,6 @@ namespace Services.Implementations
                 throw new Exception(ex.ToString());
             }
         }
-
         // Get Transaction By UserId and Paging
         public async Task<ActionResult<PageResults<WalletTransactionViewVersion2>>>GetCourseTransactionsByUserIdPaging(Guid userId, PagingRequest request)
         {
@@ -2129,6 +2127,92 @@ namespace Services.Implementations
             catch (Exception ex)
             {
                 throw new Exception(ex.ToString());
+            }
+        }
+
+
+        public async Task<ActionResult> CheckAllBookingFinish()
+        {
+            try
+            {
+                // Xác định ngày của ngày hôm qua theo múi giờ Hồ Chí Minh
+                var timezone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
+                var currentDateTimeInHoChiMinh = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, timezone);
+                var startDate = currentDateTimeInHoChiMinh.Date.AddDays(-1);
+                var endDate = currentDateTimeInHoChiMinh.Date; // Ngày hôm nay
+
+                // Truy vấn các giao dịch hoàn thành vào ngày cụ thể
+                var bookingTransactions = await _context.BookingTransactions
+                    .Include(b => b.BookingNavigation)
+                    .Include(b => b.SenderWalletNavigation)
+                    .Include(b => b.ReceiverWalletNavigation)
+                    .Where(b => b.BookingNavigation.Status == (int)BookingEnum.Finished
+                                && b.BookingNavigation.StudyTime >= startDate
+                                && b.BookingNavigation.StudyTime < endDate)
+                    .ToListAsync();
+
+                if (bookingTransactions == null || !bookingTransactions.Any())
+                {
+                    return new StatusCodeResult(204);
+                }
+
+                foreach (var booking in bookingTransactions)
+                {
+                    var wallet = await _context.WalletTransactions.FirstOrDefaultAsync(w => w.WalletTransactionId == booking.BookingTransactionId);
+                    if (wallet == null)
+                    {
+                        return new StatusCodeResult(204);
+                    }
+                    wallet.Status = (int)VNPayType.APPROVE;
+                    wallet.SenderWalletNavigation.PendingAmount += booking.Amount;
+                    wallet.ReceiverWalletNavigation.LastBalanceUpdate = DateTime.UtcNow.AddHours(7);
+                    wallet.ReceiverWalletNavigation.PendingAmount -= booking.Amount;
+                    wallet.ReceiverWalletNavigation.AvalaibleAmount += booking.Amount;
+                    wallet.ReceiverWalletNavigation.Amount += booking.Amount;
+
+                    _context.WalletTransactions.Update(wallet);
+                    await _appExtension.SendMail(new MailContent()
+                    {
+                        To = booking.SenderWalletNavigation.UserNavigation.Email,
+                        Subject = "Xác nhận giao dịch",
+                        Body = "Giao dịch booking của bạn đã hoàn thành. Mã giao dịch: " + wallet.WalletTransactionId
+                    });
+                    await _appExtension.SendMail(new MailContent()
+                    {
+                        To = booking.ReceiverWalletNavigation.UserNavigation.Email,
+                        Subject = "Xác nhận giao dịch",
+                        Body = "Giao dịch booking của bạn đã hoàn thành. Mã giao dịch: " + wallet.WalletTransactionId
+                    });
+                    var notification1 = new NotificationDTO
+                    {
+                        NotificationId = Guid.NewGuid(),
+                        Title = "Giao dịch booking",
+                        Content = "Giao dịch booking của bạn đã hoàn thành. Mã giao dịch: " + wallet.WalletTransactionId,
+                        UserId = booking.SenderWalletNavigation.UserId,
+                        CreatedAt = DateTime.UtcNow.AddHours(7)
+                    };
+                    var notification2 = new NotificationDTO
+                    {
+                        NotificationId = Guid.NewGuid(),
+                        Title = "Giao dịch booking",
+                        Content = "Giao dịch booking của bạn đã hoàn thành. Mã giao dịch: " + wallet.WalletTransactionId,
+                        UserId = booking.ReceiverWalletNavigation.UserId,
+                        CreatedAt = DateTime.UtcNow.AddHours(7)
+                    };
+
+                    Models.Entities.Notification notification1x = _mapper.Map<Models.Entities.Notification>(notification1);
+                    Models.Entities.Notification notification2x = _mapper.Map<Models.Entities.Notification>(notification2);
+                    _context.Notifications.Add(notification1x);
+                    _context.Notifications.Add(notification2x);
+                    _firebaseRealtimeDatabaseService.UpdateAsync<NotificationDTO>($"notifications/{notification1.UserId}/{notification1.NotificationId}", notification1);
+                    _firebaseRealtimeDatabaseService.UpdateAsync<NotificationDTO>($"notifications/{notification2.UserId}/{notification2.NotificationId}", notification2);
+                    await _context.SaveChangesAsync();
+                }
+                return new StatusCodeResult(200);
+            }
+            catch (Exception ex)
+            {
+                return new StatusCodeResult(500);
             }
         }
 

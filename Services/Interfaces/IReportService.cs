@@ -13,7 +13,7 @@ namespace Services.Interfaces
     {
         Task<IActionResult> CreateReport(ReportRequest reportRequest);
         Task<IActionResult> UpdateReport(UpdateReportRequest updateReportRequest);
-        Task<IActionResult> MakeActionReport(ReportAction action);
+        Task<IActionResult> MakeActionReportWithUser(ReportAction action);
         Task<ActionResult<List<Report>>> GetAllReports();
         Task<ActionResult<Report>> GetReport(Guid id);
         Task<ActionResult<List<Report>>> GetReportsByUserId(Guid id);

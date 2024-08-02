@@ -1169,7 +1169,6 @@ namespace Services.Implementations
                         }
                     }
                 }
-
                 await _context.SaveChangesAsync();
                 throw new CrudException(HttpStatusCode.Created, "Tạo lịch dạy thành công", "Thành công");
             }

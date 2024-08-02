@@ -21,4 +21,9 @@ namespace Models.Enumerables
         NinetyDays,
         Lifetime
     }
+    public enum ReportStatusEnum
+    {
+        User,
+        Booking,
+    }
 }
