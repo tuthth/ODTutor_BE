@@ -37,6 +37,8 @@ namespace Services.Interfaces
         Task<ActionResult<List<Notification>>> GetNotificationsByUserId(Guid id);
         Task<IActionResult> GetStudentStatisticsByDayOfWeek();
         Task<IActionResult> GetStudentStatisticsByMonth();
+        Task<IActionResult> GetTutorStatisticsByDayOfWeek();
+        Task<IActionResult> GetTutorStatisticsByMonth();
         Task<IActionResult> GetBookingStatisticsByMonth();
         Task<IActionResult> GetBookingTransactionStatisticsByMonth();
         Task<IActionResult> GetBookingStatisticsOf1TutorByMonth(Guid tutorId);
