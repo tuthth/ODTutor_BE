@@ -429,6 +429,7 @@ namespace Services.Implementations
                         CreatedAt = DateTime.UtcNow.AddHours(7),
                         Amount = request.Amount,
                         Status = (int)VNPayType.APPROVE,
+                        Note = "Đăng kí gói thành viên trải nghiệm gia sư"
                     };
                     if (walletUser.Amount < request.Amount)
                     {
@@ -543,6 +544,7 @@ namespace Services.Implementations
                         CreatedAt = DateTime.UtcNow.AddHours(7),
                         Amount = request.Amount,
                         Status = (int)VNPayType.APPROVE,
+                        Note = "Nâng cấp tài khoản thành viên gia sư"
                     };
                     if (walletUser.Amount < request.Amount)
                     {
@@ -2088,5 +2090,44 @@ namespace Services.Implementations
                 throw new Exception(ex.ToString());
             }
         }
+
+        // Get Transaction By UserId and Paging
+        public async Task<ActionResult<PageResults<WalletTransactionViewVersion2>>>GetCourseTransactionsByUserIdPaging(Guid userId, PagingRequest request)
+        {
+            try
+            {
+                var walletTransactionsList = await _context.WalletTransactions
+                    .Include(user => user.ReceiverWalletNavigation)
+                    .Include(user => user.SenderWalletNavigation)
+                    .Where(c => c.SenderWalletNavigation.UserId == userId || c.ReceiverWalletNavigation.UserId == userId)
+                    .OrderByDescending(c => c.CreatedAt)
+                    .Select(c => new WalletTransactionViewVersion2
+                    {
+                        WalletTransactionId = c.WalletTransactionId,
+                        SenderId = c.SenderWalletNavigation.UserId,
+                        ReceiverId = c.ReceiverWalletNavigation.UserId,
+                        Amount = c.Amount,
+                        CreatedAt = c.CreatedAt,
+                        Status = c.Status,
+                        Note = c.Note,
+                    })
+                    .ToListAsync();
+                if(walletTransactionsList == null || !walletTransactionsList.Any())
+                {
+                    return new StatusCodeResult(404);
+                } 
+                var pagingWalletTransactions = PagingHelper<WalletTransactionViewVersion2>.Paging(walletTransactionsList, request.Page, request.PageSize);
+                if(pagingWalletTransactions == null)
+                {
+                    return new StatusCodeResult(400);
+                }
+                return pagingWalletTransactions;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.ToString());
+            }
+        }
+
     }
 }

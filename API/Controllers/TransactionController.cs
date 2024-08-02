@@ -860,5 +860,29 @@ namespace API.Controllers
                 return new StatusCodeResult(500);
             }
         }
+
+        /// <summary>
+        /// Get Transaction By ID
+        ///</summary>
+        [HttpGet("get/transaction/{userId}/paging")]
+        public async Task<ActionResult<PageResults<WalletTransactionViewVersion2>>> GetAllTransactionByUserId(Guid userId, int page, int pageSize)
+        {
+            var request = new PagingRequest
+            {
+                Page = page,
+                PageSize = pageSize
+            };
+            var result = await _transactionService.GetCourseTransactionsByUserIdPaging(userId, request);
+            if (result is ActionResult<PageResults<WalletTransactionViewVersion2>> walletTransactions && result.Value != null)
+            {
+                return Ok(result);
+            }
+            if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
+            {
+                if (statusCodeResult.StatusCode == 404) { return NotFound(new { Message = "Không tìm thấy bất cứ giao dịch nào" }); }
+            }
+            if ((IActionResult)result.Result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
+            throw new Exception("Lỗi không xác định");
+        }
     }
 }
