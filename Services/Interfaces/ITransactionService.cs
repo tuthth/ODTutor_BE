@@ -50,5 +50,6 @@ namespace Services.Interfaces
         Task<IActionResult> HasBoughtTutorExperiencePackage(WalletTransactionCreate request);
         Task<IActionResult> UpdateTutorBackNormalTutor(Guid tutorId);
         Task<IActionResult> HasBoughtTutorPackage(WalletTransactionCreate request);
+        Task<ActionResult<PageResults<WalletTransactionViewVersion2>>> GetCourseTransactionsByUserIdPaging(Guid userId, PagingRequest request);
     }
 }
