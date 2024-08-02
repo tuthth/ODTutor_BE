@@ -20,6 +20,7 @@ using Models.PageHelper;
 using FirebaseAdmin.Messaging;
 using System.Net;
 using Models.Migrations;
+using Org.BouncyCastle.Tls;
 
 namespace Services.Implementations
 {
@@ -2097,8 +2098,8 @@ namespace Services.Implementations
             try
             {
                 var walletTransactionsList = await _context.WalletTransactions
-                    .Include(user => user.ReceiverWalletNavigation)
-                    .Include(user => user.SenderWalletNavigation)
+                    .Include(user => user.ReceiverWalletNavigation.UserNavigation)
+                    .Include(user => user.SenderWalletNavigation.UserNavigation)
                     .Where(c => c.SenderWalletNavigation.UserId == userId || c.ReceiverWalletNavigation.UserId == userId)
                     .OrderByDescending(c => c.CreatedAt)
                     .Select(c => new WalletTransactionViewVersion2
@@ -2106,6 +2107,8 @@ namespace Services.Implementations
                         WalletTransactionId = c.WalletTransactionId,
                         SenderId = c.SenderWalletNavigation.UserId,
                         ReceiverId = c.ReceiverWalletNavigation.UserId,
+                        SenderName = c.SenderWalletNavigation.UserNavigation.Name,
+                        ReceiverName = c.ReceiverWalletNavigation.UserNavigation.Name,
                         Amount = c.Amount,
                         CreatedAt = c.CreatedAt,
                         Status = c.Status,
