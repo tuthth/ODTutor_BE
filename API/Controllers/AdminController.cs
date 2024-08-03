@@ -573,5 +573,55 @@ namespace API.Controllers
             if (result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
             throw new Exception("Lỗi không xác định");
         }
+
+
+        /// <summary>
+        /// Accept Tutor Certificates
+        /// </summary>
+        /// <param name="tutorCertificateIDs"></param>
+        /// <returns></returns>
+        [HttpPost("accept/tutor-certificates")]
+        public async Task<IActionResult> AcceptTutorCertificates(List<Guid> tutorCertificateIDs)
+        {
+            await _adminService.AcceptTutorCertificate(tutorCertificateIDs);
+            return Ok();
+        }
+
+        /// <summary>
+        /// Accept Tutor Experiences
+        /// </summary>
+        /// <param name="tutorExperienceIDs"></param>
+        /// <returns></returns>
+        [HttpPost("accept/tutor-experiences")]
+        public async Task<IActionResult> AcceptTutorExperiences(List<Guid> tutorExperienceIDs)
+        {
+            await _adminService.AcceptTutorExperience(tutorExperienceIDs);
+            return Ok();
+        }
+
+        /// <summary>
+        /// Deny Tutor Certificates
+        /// </summary>
+        /// <param name="tutorCertificateIDs"></param>
+        /// <returns></returns>
+        [HttpPost("deny/tutor-certificates")]
+        public async Task<IActionResult> DenyTutorCertificates(List<Guid> tutorCertificateIDs)
+        {
+            await _adminService.DenyTutorCertificate(tutorCertificateIDs);
+            return Ok();
+        }
+
+
+        /// <summary>
+        /// Deny Tutor Experiences
+        /// </summary>
+        /// <param name="tutorExperienceIDs"></param>
+        /// <returns></returns>
+        [HttpPost("deny/tutor-experiences")]
+        public async Task<IActionResult> DenyTutorExperiences(List<Guid> tutorExperienceIDs)
+        {
+            await _adminService.DenyTutorExperience(tutorExperienceIDs);
+            return Ok();
+        }
     }
 }

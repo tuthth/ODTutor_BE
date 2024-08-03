@@ -45,5 +45,9 @@ namespace Services.Interfaces
         Task<IActionResult> GetBookingStatisticsTop5TutorsByMonth();
         Task<IActionResult> GetBookingTransactionStatisticsOfATutorByMonth(Guid receiverId);
         Task<IActionResult> GetBookingTransactionStatisticsTop5TutorsByMonth();
+        Task AcceptTutorCertificate(List<Guid> tutorCertificateId);
+        Task AcceptTutorExperience(List<Guid> tutorExperienceId);
+        Task DenyTutorCertificate(List<Guid> tutorCertificateId);
+        Task DenyTutorExperience(List<Guid> tutorExperienceId);
     }
 }
