@@ -773,6 +773,7 @@ namespace Services.Implementations
             tutorSlotAvailables.IsBooked = true;
             tutorSlotAvailables.Status = (Int32)TutorSlotAvailabilityEnum.NotAvailable;
             booking.Status = (Int32)BookingEnum.Success;
+            _context.Bookings.Update(booking);
             await _context.SaveChangesAsync();
             var notification = new NotificationDTO
             {
