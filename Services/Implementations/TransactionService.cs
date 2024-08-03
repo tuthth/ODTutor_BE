@@ -2147,6 +2147,8 @@ namespace Services.Implementations
                     .Include(b => b.BookingNavigation)
                     .Include(b => b.SenderWalletNavigation)
                     .Include(b => b.ReceiverWalletNavigation)
+                    .Include(b => b.SenderWalletNavigation.UserNavigation)
+                    .Include(b => b.ReceiverWalletNavigation.UserNavigation)
                     .Where(b => b.BookingNavigation.Status == (int)BookingEnum.Finished
                                 && b.BookingNavigation.StudyTime >= startDate
                                 && b.BookingNavigation.StudyTime < endDate)
