@@ -51,5 +51,6 @@ namespace Services.Interfaces
         Task<IActionResult> UpdateTutorBackNormalTutor(Guid tutorId);
         Task<IActionResult> HasBoughtTutorPackage(WalletTransactionCreate request);
         Task<ActionResult<PageResults<WalletTransactionViewVersion2>>> GetCourseTransactionsByUserIdPaging(Guid userId, PagingRequest request);
+        Task<ActionResult> CheckAllBookingFinish();
     }
 }

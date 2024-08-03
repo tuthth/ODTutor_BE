@@ -884,5 +884,26 @@ namespace API.Controllers
             if ((IActionResult)result.Result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
             throw new Exception("Lỗi không xác định");
         }
+
+        ///<summary>
+        /// Send Money when booking is finised for Tutor
+        ///</summary>
+        [HttpPut("send-money")]
+        public async Task<IActionResult> SendMoney()
+        {
+            var result = await _transactionService.CheckAllBookingFinish();
+            if (result is StatusCodeResult statusCodeResult)
+            {
+                return statusCodeResult;
+            }
+            else if (result is JsonResult jsonResult)
+            {
+                return jsonResult;
+            }
+            else
+            {
+                return new StatusCodeResult(500);
+            }
+        }
     }
 }

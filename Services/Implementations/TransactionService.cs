@@ -2137,9 +2137,9 @@ namespace Services.Implementations
             {
                 // Xác định ngày của ngày hôm qua theo múi giờ Hồ Chí Minh
                 var timezone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
-                var currentDateTimeInHoChiMinh = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, timezone);
-                var startDate = currentDateTimeInHoChiMinh.Date.AddDays(-1);
-                var endDate = currentDateTimeInHoChiMinh.Date; // Ngày hôm nay
+                var currentTimeInHoChiMinh = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, timezone);
+                var startDate = currentTimeInHoChiMinh.Date.AddDays(-1);
+                var endDate = currentTimeInHoChiMinh.Date; // Ngày hôm nay
 
                 // Truy vấn các giao dịch hoàn thành vào ngày cụ thể
                 var bookingTransactions = await _context.BookingTransactions

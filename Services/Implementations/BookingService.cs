@@ -852,15 +852,14 @@ namespace Services.Implementations
                 // Xác định múi giờ Hồ Chí Minh
                 var timezone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
                 var currentTimeInHoChiMinh = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, timezone);
-                string formattedDayFromHoChiMinh = currentTimeInHoChiMinh.ToString("dd-MM-yyyy HH:mm:ss");
-                DateTime endDateTimeData = DateTime.ParseExact(formattedDayFromHoChiMinh, "dd-MM-yyyy HH:mm:ss", System.Globalization.CultureInfo.InvariantCulture);
+   
                 // Truy vấn các booking có trạng thái thành công và thời gian học bắt đầu bằng thời gian hiện tại ở Hồ Chí Minh
                 var bookings = _context.Bookings
                     .Where(x => x.Status == (Int32)BookingEnum.Success
                                 && x.StudyTime.HasValue
-                                && x.StudyTime.Value.Date == endDateTimeData.Date
-                                && x.StudyTime.Value.Hour == endDateTimeData.Hour
-                                && x.StudyTime.Value.Minute <= endDateTimeData.Minute)
+                                && x.StudyTime.Value.Date == currentTimeInHoChiMinh.Date
+                                && x.StudyTime.Value.Hour == currentTimeInHoChiMinh.Hour
+                                && x.StudyTime.Value.Minute <= currentTimeInHoChiMinh.Minute)
                     .ToList();
 
                 if (bookings == null || !bookings.Any())
@@ -890,14 +889,12 @@ namespace Services.Implementations
             {
                 var timezone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
                 var currentTimeInHoChiMinh = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, timezone);
-                string formattedDayFromHoChiMinh = currentTimeInHoChiMinh.ToString("dd-MM-yyyy HH:mm:ss");
-                DateTime endDateTimeData = DateTime.ParseExact(formattedDayFromHoChiMinh, "dd-MM-yyyy HH:mm:ss", System.Globalization.CultureInfo.InvariantCulture);
                 var bookings = _context.Bookings
                     .Where(x => x.Status == (Int32)BookingEnum.Learning
                                 && x.StudyTime.HasValue
-                                && x.StudyTime.Value.Date == endDateTimeData.Date
-                                && x.StudyTime.Value.Hour == endDateTimeData.Hour
-                                && x.StudyTime.Value.Minute <= endDateTimeData.Minute + 50)
+                                && x.StudyTime.Value.Date == currentTimeInHoChiMinh.Date
+                                && x.StudyTime.Value.Hour == currentTimeInHoChiMinh.Hour
+                                && x.StudyTime.Value.Minute <= currentTimeInHoChiMinh.Minute + 50)
                     .ToList();
 
                 if (bookings == null || !bookings.Any())
