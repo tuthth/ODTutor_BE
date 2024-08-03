@@ -42,7 +42,9 @@ namespace Services.Implementations
                Description = c.Description
 
            }).ToList(),
-           Subjects = t.TutorSubjectsNavigation.Select(ts => new Subject
+           Subjects = t.TutorSubjectsNavigation
+           .Where(ts => ts.Status == (int)TutorSubjectEnum.Available)
+           .Select(ts => new Subject
            {
                SubjectId = ts.SubjectId,
                Title = _context.Subjects.FirstOrDefault(s => s.SubjectId == ts.SubjectId).Title,
@@ -94,7 +96,9 @@ namespace Services.Implementations
                             Description = c.Description
 
                         }).ToList(),
-                        Subjects = t.TutorSubjectsNavigation.Select(ts => new Subject
+                        Subjects = t.TutorSubjectsNavigation
+                        .Where(ts => ts.Status == (int)TutorSubjectEnum.Available)
+                        .Select(ts => new Subject
                         {
                             SubjectId = ts.SubjectId,
                             Title = _context.Subjects.FirstOrDefault(s => s.SubjectId == ts.SubjectId).Title,
@@ -162,7 +166,9 @@ namespace Services.Implementations
               Description = c.Description
 
           }).ToList(),
-          Subjects = t.TutorSubjectsNavigation.Select(ts => new Subject
+          Subjects = t.TutorSubjectsNavigation
+          .Where(ts => ts.Status == (int)TutorSubjectEnum.Available)
+          .Select(ts => new Subject
           {
               SubjectId = ts.SubjectId,
               Title = _context.Subjects.FirstOrDefault(s => s.SubjectId == ts.SubjectId).Title,
@@ -674,7 +680,7 @@ namespace Services.Implementations
             {
                 var subjects = await _context.TutorSubjects
                     .Include(ts => ts.SubjectNavigation)
-                    .Where(ts => ts.TutorId == tutorId)
+                    .Where(ts => ts.TutorId == tutorId && ts.Status == (Int32)TutorSubjectEnum.Available)
                     .Select(ts => new TutorSubjectResponse
                     {
                         TutorSubjectId = ts.TutorSubjectId,
