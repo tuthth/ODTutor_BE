@@ -962,6 +962,7 @@ namespace Services.Implementations
                     bookingHistory.StudentName = booking.StudentNavigation.UserNavigation.Name;
                     bookingHistory.StudentAvatar = booking.StudentNavigation.UserNavigation.ImageUrl;
                     bookingHistory.SubjectName = booking.TutorSubjectNavigation.SubjectNavigation.Title;
+                    booking.StudyTime = booking.StudyTime;
                     bookingHistory.IsRated = booking.isRated;
                     if( booking.isRated == true)
                     {
