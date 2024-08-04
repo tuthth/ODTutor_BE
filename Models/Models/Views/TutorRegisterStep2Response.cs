@@ -14,5 +14,6 @@ namespace Models.Models.Views
         public string CertificateName { get; set; }
         public string StartYear { get; set; }
         public string EndYear { get; set; }
+        public bool IsVerified { get; set; }
     }
 }

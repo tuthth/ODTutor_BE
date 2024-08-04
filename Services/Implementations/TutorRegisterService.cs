@@ -652,7 +652,8 @@ namespace Services.Implementations
                         CertifiateForm = cert.CertificateFrom,
                         CertificateName = cert.CertificateName,
                         StartYear = cert.StartYear,
-                        EndYear = cert.EndYear
+                        EndYear = cert.EndYear,
+                        IsVerified = cert.IsVerified
                     });
                 }
                 if (response.Count == 0)
@@ -693,7 +694,8 @@ namespace Services.Implementations
                         Description = experience.Description,
                         Location = experience.Location,
                         StartDate = experience.StartDate,
-                        EndYear = experience.EndYear
+                        EndYear = experience.EndYear,
+                        IsVerified = experience.IsVerified
                     });
                 }
                 if (response.Count == 0)

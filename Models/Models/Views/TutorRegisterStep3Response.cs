@@ -14,5 +14,6 @@ namespace Models.Models.Views
         public DateTime? StartDate { get; set; }
         public DateTime? EndYear { get; set; }
         public string? imageUrl { get; set; }
+        public bool IsVerified { get; set; }
     }
 }
