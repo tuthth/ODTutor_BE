@@ -361,5 +361,30 @@ namespace API.Controllers
             }
             return StatusCode(StatusCodes.Status500InternalServerError, new { Message = "Lỗi không xác định" });
         }
+
+        // 
+        ///<summary>
+        ///Get Tutor's booking history
+        /// </summary>
+        [HttpGet("get/bookinghistory/tutor/{tutorID}")]
+        public async Task<ActionResult<PageResults<BookingHistoryResponse>>> GetBookingHistory(Guid tutorID, int page, int pageSize)
+        {
+            var request = new PagingRequest
+            {
+                Page = page,
+                PageSize = pageSize
+            };
+            var response = await _bookingService.GetBookingHistoryTutor(tutorID, request);
+            if (response is ActionResult<PageResults<BookingHistoryResponse>> result && result.Value != null)
+            {
+                return Ok(result.Value);
+            }
+            if ((IActionResult)response.Result is StatusCodeResult statusCodeResult)
+            {
+                if (statusCodeResult.StatusCode == 404) { return NotFound(new { Message = "Không tìm thấy lịch sử đặt lịch" }); }
+            }
+            if ((IActionResult)response.Result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
+            throw new Exception("Lỗi không xác định");
+        }
     }
 }

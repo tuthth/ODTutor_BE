@@ -24,6 +24,7 @@ namespace Models.Entities
         public bool? IsRescheduled { get;set; }
         public string? Description { get; set; }
         public string? GoogleMeetUrl {get; set;}
+        public bool isRated { get;set; } = false;
         public virtual Student? StudentNavigation {  get; set; }
         public virtual Tutor? TutorNavigation { get; set; }
         public virtual ICollection<TutorRating>? TutorRatingsNavigation { get; set; }

@@ -18,6 +18,8 @@ using System.Security.Claims;
 using System.Net;
 using Emgu.CV.XPhoto;
 using Models.Models.Views;
+using Microsoft.Build.Framework;
+using Models.PageHelper;
 
 namespace Services.Implementations
 {
@@ -299,6 +301,10 @@ namespace Services.Implementations
             {
                 return new StatusCodeResult(404);
             }
+            if(booking.isRated == true)
+            {
+                return new StatusCodeResult(406);
+            }
             var student = _context.Users
                 .Include(x => x.StudentNavigation)
                 .FirstOrDefault(x => x.StudentNavigation.StudentId == tutorRatingRequest.StudentId);
@@ -316,6 +322,8 @@ namespace Services.Implementations
             var tutorRating = _mapper.Map<TutorRating>(tutorRatingRequest);
             tutorRating.TutorRatingId = Guid.NewGuid();
             _context.TutorRatings.Add(tutorRating);
+            booking.isRated = true;
+            _context.Bookings.Update(booking);
             await _context.SaveChangesAsync();
             return new StatusCodeResult(201);
         }
@@ -916,5 +924,74 @@ namespace Services.Implementations
                 return new StatusCodeResult(500);
             }
         }
+
+        // Get Booking History of TutorId
+        public async Task<ActionResult<PageResults<BookingHistoryResponse>>> GetBookingHistoryTutor (Guid tutorId, PagingRequest request)
+        {
+            try
+            {
+                List<BookingHistoryResponse> response = new List<BookingHistoryResponse>();
+                var bookings = _context.Bookings
+                    .Include(x => x.StudentNavigation)
+                    .Include(x => x.StudentNavigation.UserNavigation)
+                    .Include(x => x.TutorNavigation)
+                    .Include(x => x.TutorNavigation.UserNavigation)
+                    .Include(x => x.TutorSubjectNavigation)
+                    .Include(x => x.TutorSubjectNavigation.SubjectNavigation)
+                    .Include(x => x.TutorRatingsNavigation)
+                    .Where(x => x.TutorId == tutorId)
+                    .ToList();
+                if (bookings == null)
+                {
+                    return new StatusCodeResult(404);
+                }
+                foreach (var booking in bookings)
+                {
+                    BookingHistoryResponse bookingHistory = new BookingHistoryResponse();
+                    bookingHistory.BookingId = booking.BookingId;
+                    bookingHistory.CreateAt = booking.CreatedAt;
+                    bookingHistory.Message = booking.Message;
+                    bookingHistory.TotalPrice = booking.TotalPrice.Value;
+                    bookingHistory.Status = booking.Status;
+                    TimeSpan startTime = new TimeSpan(booking.StudyTime.Value.Hour, booking.StudyTime.Value.Minute, 0);
+                    TimeSpan endTime = new TimeSpan(booking.StudyTime.Value.Hour, booking.StudyTime.Value.Minute + 50, 0);
+                    bookingHistory.StartTime = startTime;
+                    bookingHistory.EndTime = endTime;
+                    bookingHistory.TutorName = booking.TutorNavigation.UserNavigation.Name;
+                    bookingHistory.TutorAvatar = booking.TutorNavigation.UserNavigation.ImageUrl;
+                    bookingHistory.StudentName = booking.StudentNavigation.UserNavigation.Name;
+                    bookingHistory.StudentAvatar = booking.StudentNavigation.UserNavigation.ImageUrl;
+                    bookingHistory.SubjectName = booking.TutorSubjectNavigation.SubjectNavigation.Title;
+                    bookingHistory.IsRated = booking.isRated;
+                    if( booking.isRated == true)
+                    {
+                        TutorRating tutorRating = _context.TutorRatings.FirstOrDefault( tr => tr.BookingId == booking.BookingId);
+                        bookingHistory.RatePoints = tutorRating.RatePoints;
+                        bookingHistory.Content = tutorRating.Content;
+                        bookingHistory.DateRating = tutorRating.CreatedAt;
+                    } else
+                    {
+                        bookingHistory.RatePoints = null;
+                        bookingHistory.Content = "";
+                        bookingHistory.DateRating = null;
+                    }
+                    response.Add(bookingHistory);
+                }
+                var bookingHistoryResult = PagingHelper<BookingHistoryResponse>.Paging(response, request.Page, request.PageSize);
+                if (bookingHistoryResult == null)
+                {
+                    return new StatusCodeResult(404);
+                }
+                return bookingHistoryResult;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.ToString());
+            }
+        }
+
+        //Get Booking History of TutorId and Paging 
+
+        
     }
 }

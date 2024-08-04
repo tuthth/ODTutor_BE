@@ -33,5 +33,6 @@ namespace Services.Interfaces
         Task<BookingStep1Response> CreateBookingVersion2(BookingRequestV2 bookingRequest);
         Task<IActionResult> UpdateStartLearningOfAllBoooking();
         Task<IActionResult> UpdateFinishBookingOfAllBooking();
+        Task<ActionResult<PageResults<BookingHistoryResponse>>> GetBookingHistoryTutor(Guid tutorId, PagingRequest request);
     }
 }
