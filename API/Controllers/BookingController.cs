@@ -338,7 +338,7 @@ namespace API.Controllers
                 if (actionResult is StatusCodeResult statusCodeResult)
                 {
                     if (statusCodeResult.StatusCode == 200) return Ok(new { Message = "Cập nhật trạng thái bắt đầu học thành công" });
-                    if (statusCodeResult.StatusCode == 404) return NotFound(new { Message = "Không tìm thấy lịch đặt" });
+                    if (statusCodeResult.StatusCode == 404) return Ok(new { Message = "Không tìm thấy lịch đặt" });
                 }
             }
             return StatusCode(StatusCodes.Status500InternalServerError, new { Message = "Lỗi không xác định" });
@@ -356,7 +356,7 @@ namespace API.Controllers
                 if (actionResult is StatusCodeResult statusCodeResult)
                 {
                     if (statusCodeResult.StatusCode == 200) return Ok(new { Message = "Cập nhật trạng thái kết thúc học thành công" });
-                    if (statusCodeResult.StatusCode == 404) return NotFound(new { Message = "Không tìm thấy lịch đặt" });
+                    if (statusCodeResult.StatusCode == 404) return Ok(new { Message = "Không tìm thấy lịch đặt" });
                 }
             }
             return StatusCode(StatusCodes.Status500InternalServerError, new { Message = "Lỗi không xác định" });
