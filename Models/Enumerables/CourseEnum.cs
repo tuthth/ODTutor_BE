@@ -12,6 +12,7 @@ namespace Models.Enumerables
         Active = 1,
         Inactive = 2,
         Deleted = 3,
-        Finished = 4 
+        Finished = 4,
+        InProgress = 5
     }
 }

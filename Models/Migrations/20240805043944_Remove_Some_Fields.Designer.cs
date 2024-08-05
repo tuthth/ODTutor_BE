@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Models.Entities;
 
@@ -11,9 +12,11 @@ using Models.Entities;
 namespace Models.Migrations
 {
     [DbContext(typeof(ODTutorContext))]
-    partial class ODTutorContextModelSnapshot : ModelSnapshot
+    [Migration("20240805043944_Remove_Some_Fields")]
+    partial class Remove_Some_Fields
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -141,9 +144,6 @@ namespace Models.Migrations
                     b.Property<int>("Status")
                         .HasColumnType("int");
 
-                    b.Property<DateTime?>("StudyTime")
-                        .HasColumnType("datetime2");
-
                     b.Property<decimal>("TotalMoney")
                         .HasColumnType("decimal(18,2)");
 
@@ -153,14 +153,9 @@ namespace Models.Migrations
                     b.Property<Guid>("TutorId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("TutorSubjectId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.HasKey("CourseId");
 
                     b.HasIndex("TutorId");
-
-                    b.HasIndex("TutorSubjectId");
 
                     b.ToTable("Courses");
                 });
@@ -1142,15 +1137,7 @@ namespace Models.Migrations
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.HasOne("Models.Entities.TutorSubject", "TutorSubjectNavigation")
-                        .WithMany("CoursesNavigation")
-                        .HasForeignKey("TutorSubjectId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
                     b.Navigation("TutorNavigation");
-
-                    b.Navigation("TutorSubjectNavigation");
                 });
 
             modelBuilder.Entity("Models.Entities.CourseOutline", b =>
@@ -1696,8 +1683,6 @@ namespace Models.Migrations
             modelBuilder.Entity("Models.Entities.TutorSubject", b =>
                 {
                     b.Navigation("BookingNavigation");
-
-                    b.Navigation("CoursesNavigation");
                 });
 
             modelBuilder.Entity("Models.Entities.TutorWeekAvailable", b =>

@@ -11,6 +11,7 @@ using Services.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -23,20 +24,64 @@ namespace Services.Implementations
         {
             _firebaseRealtimeDatabaseService = firebaseRealtimeDatabaseService;
         }
+
+        // Create Course
         public async Task<IActionResult> CreateCourse(CourseRequest courseRequest)
         {
-            var tutor = await _context.Tutors.FirstOrDefaultAsync(c => c.TutorId == courseRequest.TutorId);
+            var tutor = await _context.Tutors
+                .Include(t => t.UserNavigation)
+                .FirstOrDefaultAsync(c => c.TutorId == courseRequest.TutorId);
+            var tutorSlot = _context.TutorSlotAvailables.Include(x => x.TutorDateAvailable).FirstOrDefault(x => x.TutorSlotAvailableID == courseRequest.TutorSlotAvalaibleID);
             if (tutor == null)
             {
                 return new StatusCodeResult(404);
             }
-            if (courseRequest.TotalMoney < 0 || courseRequest.TotalSlots < 0)
+            if (courseRequest.TotalMoney < 0 || courseRequest.TotalStudents < 0)
             {
                 return new StatusCodeResult(400);
             }
+            if (tutorSlot.IsBooked == true)
+            {
+                throw new CrudException(HttpStatusCode.Conflict, "Tutor slot available is booked", "");
+            }
+            if (tutorSlot.Status == (Int32)TutorSlotAvailabilityEnum.NotAvailable)
+            {
+                throw new CrudException(HttpStatusCode.Conflict, "Tutor slot available is not available", "");
+            }
+            DateTime studyTime = new DateTime(tutorSlot.TutorDateAvailable.Date.Year, tutorSlot.TutorDateAvailable.Date.Month, tutorSlot.TutorDateAvailable.Date.Day, tutorSlot.StartTime.Hours, tutorSlot.StartTime.Minutes, tutorSlot.StartTime.Seconds);
             var course = _mapper.Map<Course>(courseRequest);
             course.CourseId = Guid.NewGuid();
+            course.Status = (Int32)CourseEnum.Active;
+            course.StudyTime = studyTime;
+            course.CreatedAt = DateTime.UtcNow.AddHours(7);
             _context.Courses.Add(course);
+
+            // Update tutor slot available
+            // Find the tutor available slot
+            // Changre status slot 
+            TimeSpan courseTime = new TimeSpan(course.StudyTime.Value.Hour, course.StudyTime.Value.Minute, 0);
+            DateTime CourseDate = course.StudyTime.Value.Date;
+            var tutorDateAvailables = _context.TutorDateAvailables
+                .Where(x => x.TutorID == course.TutorId && x.Date.Date == CourseDate)
+                .Select(x => x.TutorDateAvailableID)
+                .ToList();
+            if (tutorDateAvailables == null)
+            {
+                return new StatusCodeResult(452);
+            }
+            var tutorSlotAvailables = _context.TutorSlotAvailables
+                .Where(x => tutorDateAvailables.Contains(x.TutorDateAvailable.TutorDateAvailableID) && x.StartTime == courseTime)
+                .FirstOrDefault();
+            if (tutorSlotAvailables == null)
+            {
+                return new StatusCodeResult(453);
+            }
+            if (tutorSlotAvailables.IsBooked == true)
+            {
+                return new StatusCodeResult(454);
+            }
+            tutorSlotAvailables.IsBooked = true;
+            tutorSlotAvailables.Status = (Int32)TutorSlotAvailabilityEnum.NotAvailable;
             var notification = new NotificationDTO
             {
                 NotificationId = Guid.NewGuid(),
@@ -58,6 +103,9 @@ namespace Services.Implementations
             });
             return new StatusCodeResult(201);
         }
+
+
+
         public async Task<IActionResult> UpdateCourse(UpdateCourseRequest courseRequest)
         {
             var tutor = await _context.Tutors.Include(c => c.UserNavigation).FirstOrDefaultAsync(c => c.TutorId == courseRequest.TutorId);
@@ -67,7 +115,7 @@ namespace Services.Implementations
                 return new StatusCodeResult(404);
             }
             if(course.Status == (Int32)CourseEnum.Deleted) return new StatusCodeResult(409);
-            if (courseRequest.TotalMoney < 0 || courseRequest.TotalSlots < 0)
+            if (courseRequest.TotalMoney < 0 || courseRequest.TotalStudents < 0)
             {
                 return new StatusCodeResult(400);
             }
@@ -79,17 +127,13 @@ namespace Services.Implementations
             {
                 course.TotalMoney = courseRequest.TotalMoney;
             }
-            if (courseRequest.TotalSlots > 0 && courseRequest.TotalSlots != course.TotalSlots)
+            if (courseRequest.TotalStudents > 0 && courseRequest.TotalStudents != course.TotalStudent)
             {
-                course.TotalSlots = courseRequest.TotalSlots;
+                course.TotalStudent = courseRequest.TotalStudents;
             }
             if (courseRequest.Note != null && !courseRequest.Note.Equals(course.Note))
             {
                 course.Note = courseRequest.Note;
-            }
-            if (courseRequest.Status > 0 && courseRequest.Status != course.Status)
-            {
-                course.Status = courseRequest.Status;
             }
             _context.Courses.Update(course);
             var notification = new NotificationDTO
@@ -813,5 +857,86 @@ namespace Services.Implementations
                 throw new Exception(ex.ToString());
             }
         }
+
+        // Student Register Student Course 
+        public async Task<IActionResult> RegisterCourse(RegisterCourseRequest request)
+        {
+            var course = await _context.Courses.Include(c => c.TutorNavigation).ThenInclude(c => c.UserNavigation).FirstOrDefaultAsync(c => c.CourseId == request.CourseId);
+            var student = await _context.Students.Include(c => c.UserNavigation).FirstOrDefaultAsync(c => c.StudentId == request.StudentId);
+            if (course == null || student == null)
+            {
+                return new StatusCodeResult(404);
+            }
+            // Kiểm tra đã đủ sô lượng trong khóa học chưa
+            var studentCourses = await _context.StudentCourses.Where(c => c.CourseId == request.CourseId).ToListAsync();
+            if (studentCourses.Count >= course.TotalStudent)
+            {
+                return new StatusCodeResult(409);
+            }
+            course.TotalStudent += 1;
+            var studentCourse = new StudentCourse
+            {
+                StudentCourseId = Guid.NewGuid(),
+                CourseId = request.CourseId,
+                StudentId = request.StudentId,
+                Status = (Int32)CourseEnum.Active
+            };
+            _context.StudentCourses.Add(studentCourse);
+            var notification = new NotificationDTO
+            {
+                NotificationId = Guid.NewGuid(),
+                Title = "Đăng ký khóa học thành công",
+                Content = "Bạn đã đăng ký khóa học thành công. Bạn có thể sử dụng tài khoản của mình để kiểm tra thông tin khóa học.",
+                UserId = student.UserId,
+                CreatedAt = DateTime.UtcNow.AddHours(7),
+                Status = (Int32)NotificationEnum.UnRead
+            };
+            Models.Entities.Notification notification1 = _mapper.Map<Models.Entities.Notification>(notification);
+            _context.Notifications.Add(notification1);
+            _firebaseRealtimeDatabaseService.SetAsync<NotificationDTO>($"notifications/{notification.UserId}/{notification.NotificationId}", notification);
+            await _context.SaveChangesAsync();
+            await _appExtension.SendMail(new MailContent()
+            {
+                To = student.UserNavigation.Email,
+                Subject = "[ODTutor] Đăng ký khóa học thành công",
+                Body = "Bạn đã đăng ký khóa học thành công. Bạn có thể sử dụng tài khoản của mình để kiểm tra thông tin khóa học."
+            });
+            return new StatusCodeResult(201);
+        }
+
+        // Cancle Register Student Course
+        public async Task<IActionResult> CancelCourse(CancleCourseRequest request)
+        {
+            var studentCourse = await _context
+                .StudentCourses.Include(c => c.CourseNavigation).ThenInclude(c => c.TutorNavigation).ThenInclude(c => c.UserNavigation).FirstOrDefaultAsync(c => c.StudentCourseId == request.RegisterCourseId);
+            if (studentCourse == null)
+            {
+                return new StatusCodeResult(404);
+            }
+            var course = await _context.Courses.FirstOrDefaultAsync(c => c.CourseId == studentCourse.CourseId);
+            course.TotalStudent -= 1;
+            _context.StudentCourses.Remove(studentCourse);
+            _context.Courses.Update(course);
+            var notification = new NotificationDTO
+            {
+                NotificationId = Guid.NewGuid(),
+                Title = "Hủy đăng ký khóa học thành công",
+                Content = "Bạn đã hủy đăng ký khóa học thành công. Bạn có thể sử dụng tài khoản của mình để kiểm tra thông tin khóa học.",
+                UserId = studentCourse.StudentNavigation.UserId,
+                CreatedAt = DateTime.UtcNow.AddHours(7),
+                Status = (Int32)NotificationEnum.UnRead
+            };
+            Models.Entities.Notification notification1 = _mapper.Map<Models.Entities.Notification>(notification);
+            _context.Notifications.Add(notification1);
+            _firebaseRealtimeDatabaseService.SetAsync<NotificationDTO>($"notifications/{notification.UserId}/{notification.NotificationId}", notification);
+            await _context.SaveChangesAsync();
+            await _appExtension.SendMail(new MailContent()
+            {
+                To = studentCourse.StudentNavigation.UserNavigation.Email,
+                Subject = "[ODTutor] Hủy đăng ký khóa học thành công",
+                Body = "Bạn đã hủy đăng ký khóa học thành công. Bạn có thể sử dụng tài khoản của mình để kiểm tra thông tin khóa học."
+            });
+            return new StatusCodeResult(200);
+        }   
     }
 }

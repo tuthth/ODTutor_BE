@@ -19,7 +19,6 @@ namespace Models.Entities
         public string PhoneNumber { get; set; }
         public DateTime DateOfBirth { get; set; }
         public int Status { get; set; }
-        public string? Fcm { get;set; }
         public string? GoogleId { get; set; }
         public Boolean Active { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow.AddHours(7);
@@ -27,7 +26,6 @@ namespace Models.Entities
         public Boolean Banned { get; set; }
         public DateTime? BanExpiredAt { get; set; }
         public Boolean HasBoughtSubscription { get; set; }
-        public DateTime? RequestRefreshTime { get; set; }
         public virtual ICollection<UserAuthentication>? UserAuthenticationNavigation { get; set; }
         public virtual ICollection<UserBlock>? CreateUserBlockNavigation {  get; set; }
         public virtual ICollection<UserBlock>? TargetUserBlockNavigation { get; set; }

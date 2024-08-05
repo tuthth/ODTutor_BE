@@ -144,6 +144,10 @@ namespace Models.Entities
                 .WithOne(cs => cs.CourseNavigation)
                 .HasForeignKey(cs => cs.CourseId).OnDelete(DeleteBehavior.NoAction);
 
+            modelBuilder.Entity<Course>()
+                .HasOne(c => c.TutorSubjectNavigation)
+                .WithMany(ts => ts.CoursesNavigation)
+                .HasForeignKey(c => c.TutorSubjectId).OnDelete(DeleteBehavior.NoAction);
 
             //CourseTransaction Entity Configuration
             modelBuilder.Entity<CourseTransaction>()

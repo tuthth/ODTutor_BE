@@ -17,5 +17,6 @@ namespace Models.Entities
         public virtual Tutor? TutorNavigation {  get; set; }
         public virtual Subject? SubjectNavigation {  get; set; }
         public virtual ICollection<Booking>? BookingNavigation { get; set; }
+        public virtual ICollection<Course>? CoursesNavigation { get; set; }
     }
 }

@@ -39,5 +39,7 @@ namespace Services.Interfaces
         Task<ActionResult<List<CourseSlot>>> GetAllCourseSlots();
         Task<ActionResult<CourseSlot>> GetCourseSlot(Guid id);
         Task<ActionResult<List<CourseSlot>>> GetCourseSlotsByCourseId(Guid id);
+        Task<IActionResult> RegisterCourse(RegisterCourseRequest request);
+        Task<IActionResult> CancelCourse(CancleCourseRequest request);
     }
 }

@@ -65,7 +65,6 @@ namespace Services.Implementations
                 account.EmailConfirmed = false;
                 account.DateOfBirth = accountRegisterRequest.DateOfBirth;
                 account.PhoneNumber = accountRegisterRequest.PhoneNumber;
-                account.Fcm = "";
                 account.IsPremium = false;
                 account.HasBoughtSubscription = false;
                 account.GoogleId = "";
@@ -234,9 +233,7 @@ namespace Services.Implementations
                 response.Banned = userInfo.Banned;
                 response.BanExpiredAt = userInfo.BanExpiredAt;
                 response.EmailConfirmed = userInfo.EmailConfirmed;
-                response.IsPremium = userInfo.IsPremium;
                 response.HasBoughtSubscription = userInfo.HasBoughtSubscription;
-                response.RequestRefreshTime = userInfo.RequestRefreshTime;
                 return response;
             }
             catch (Exception ex)
@@ -298,7 +295,6 @@ namespace Services.Implementations
                     BanExpiredAt = s.BanExpiredAt,
                     IsPremium = s.IsPremium,
                     HasBoughtSubscription = s.HasBoughtSubscription,
-                    RequestRefreshTime = s.RequestRefreshTime
                 }).ToList();
                 return response;
             }
@@ -342,7 +338,6 @@ namespace Services.Implementations
                 account.Status = 1;
                 account.IsPremium = false;
                 account.HasBoughtSubscription = false;
-                account.Fcm = "";
                 account.Banned = false;
                 account.Id = new Guid();
                 _context.Users.Add(account);

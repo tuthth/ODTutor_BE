@@ -10,11 +10,12 @@ namespace Models.Models.Requests
     public class CourseRequest
     {
         public Guid TutorId { get; set; }
+        public Guid TutorSubjectId { get; set; }
         public string? Description { get; set; }
         public decimal TotalMoney { get; set; }
-        public int TotalSlots { get; set; }
+        public int TotalStudents { get; set; }
         public string? Note { get; set; }
-        public int Status { get; set; }
+        public Guid TutorSlotAvalaibleID { get; set; }
     }
     public class UpdateCourseRequest : CourseRequest
     {
