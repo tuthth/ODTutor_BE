@@ -386,5 +386,24 @@ namespace API.Controllers
             if ((IActionResult)response.Result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
             throw new Exception("Lỗi không xác định");
         }
+
+
+        ///<summary>
+        /// Check Booking When is in Waiting for Schedule but do not have accept
+        /// </summary>
+        [HttpPut("check/allBooking/isWaiting")]
+        public async Task<IActionResult> CheckBookingIsRequiredChangeSchedule()
+        {
+            var result = await _bookingService.CheckBookingIsRequiredChangeSchedule();
+            if(result is IActionResult actionResult)
+            {
+                if (actionResult is StatusCodeResult statusCodeResult)
+                {
+                    if (statusCodeResult.StatusCode == 200) return Ok(new { Message = "Cập nhật trạng thái bắt đầu học thành công" });
+                    if (statusCodeResult.StatusCode == 404) return Ok(new { Message = "Không tìm thấy lịch đặt như yêu cầu" });
+                }
+            }
+            return StatusCode(StatusCodes.Status500InternalServerError, new { Message = "Lỗi không xác định" });
+        }
     }
 }

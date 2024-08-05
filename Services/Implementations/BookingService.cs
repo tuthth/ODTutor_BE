@@ -20,6 +20,8 @@ using Emgu.CV.XPhoto;
 using Models.Models.Views;
 using Microsoft.Build.Framework;
 using Models.PageHelper;
+using Models.Migrations;
+using NuGet.Protocol.Plugins;
 
 namespace Services.Implementations
 {
@@ -70,7 +72,7 @@ namespace Services.Implementations
                 {
                     throw new CrudException(HttpStatusCode.Forbidden, "Tutor is not confirmed email", "");
                 }
-                if(tutorSlot.IsBooked == true)
+                if (tutorSlot.IsBooked == true)
                 {
                     throw new CrudException(HttpStatusCode.Conflict, "Tutor slot available is booked", "");
                 }
@@ -174,7 +176,7 @@ namespace Services.Implementations
             }
         }
         // Step 2 : Payment Booking
-        public async Task<IActionResult> PaymentForBooking (Guid bookingID)
+        public async Task<IActionResult> PaymentForBooking(Guid bookingID)
         {
             try
             {
@@ -210,7 +212,7 @@ namespace Services.Implementations
                 }
                 // Find the tutor available slot
                 TutorDateAvailable tutorDateAvailable = _context.TutorDateAvailables.FirstOrDefault(x => x.TutorID == tutor.TutorId && x.Date.Date == booking.StudyTime);
-                if(tutorDateAvailable == null)
+                if (tutorDateAvailable == null)
                 {
                     throw new CrudException(HttpStatusCode.OK, "Tutor date available not found", "");
                 }
@@ -251,10 +253,12 @@ namespace Services.Implementations
                 // Lưu tất cả thay đổi vào cơ sở dữ liệu
                 await _context.SaveChangesAsync();
                 throw new CrudException(HttpStatusCode.Created, "Payment for booking successfully", "");
-            } catch(CrudException ex)
+            }
+            catch (CrudException ex)
             {
                 throw ex;
-            } catch (Exception ex)
+            }
+            catch (Exception ex)
             {
                 throw new Exception(ex.ToString());
             }
@@ -301,7 +305,7 @@ namespace Services.Implementations
             {
                 return new StatusCodeResult(404);
             }
-            if(booking.isRated == true)
+            if (booking.isRated == true)
             {
                 return new StatusCodeResult(406);
             }
@@ -542,14 +546,15 @@ namespace Services.Implementations
                 {
                     throw new CrudException(HttpStatusCode.Conflict, "Booking is finished", "");
                 }
-                if(booking.Status == (Int32)BookingEnum.WaittingConfirmRescheduleForTutor || booking.Status == (Int32)BookingEnum.WaittingConfirmRescheduleForStudent)
+                if (booking.Status == (Int32)BookingEnum.WaittingConfirmRescheduleForTutor || booking.Status == (Int32)BookingEnum.WaittingConfirmRescheduleForStudent)
                 {
                     throw new CrudException(HttpStatusCode.Conflict, "Booking is waiting for confirm reschedule", "");
-                } if(booking.Status == (Int32)BookingEnum.Cancelled)
+                }
+                if (booking.Status == (Int32)BookingEnum.Cancelled)
                 {
                     throw new CrudException(HttpStatusCode.Conflict, "Booking is cancelled", "");
                 }
-                if(booking.Status == (Int32)BookingEnum.WaitingPayment)
+                if (booking.Status == (Int32)BookingEnum.WaitingPayment)
                 {
                     throw new CrudException(HttpStatusCode.Conflict, "Booking is waiting for payment", "");
                 }
@@ -600,13 +605,13 @@ namespace Services.Implementations
                 var tutor = _context.Users
                     .Include(x => x.TutorNavigation)
                     .FirstOrDefault(x => x.TutorNavigation.TutorId == booking.TutorId);
-                if(student == null || tutor == null)
+                if (student == null || tutor == null)
                 {
                     throw new CrudException(HttpStatusCode.NotFound, "Student or Tutor not found", "");
                 }
                 // Add Notification For student and tutor 
-                if (senderId == booking.StudentId    )
-                {                     
+                if (senderId == booking.StudentId)
+                {
                     NotificationDTO notification = new NotificationDTO();
                     notification.NotificationId = Guid.NewGuid();
                     notification.UserId = tutor.Id;
@@ -688,13 +693,13 @@ namespace Services.Implementations
                 booking.Status = (Int32)BookingEnum.Success;
 
                 // Update Old Slot
-                UpdateTutorSlotAvailability( bookingId,booking.StudyTime.Value, false);
+                UpdateTutorSlotAvailability(bookingId, booking.StudyTime.Value, false);
 
                 // Update Booking StudyTime to RescheduledTime
                 booking.StudyTime = booking.RescheduledTime;
 
                 // Update New Slot
-                UpdateTutorSlotAvailability( bookingId,booking.RescheduledTime.Value, true);
+                UpdateTutorSlotAvailability(bookingId, booking.RescheduledTime.Value, true);
 
                 _context.Bookings.Update(booking);
 
@@ -784,8 +789,8 @@ namespace Services.Implementations
             }
         }
         // UPdate gia sư lịch học
-        private void UpdateTutorSlotAvailability(Guid bookingId,DateTime dateTime, bool isBooked)
-        {   
+        private void UpdateTutorSlotAvailability(Guid bookingId, DateTime dateTime, bool isBooked)
+        {
             var booking = _context.Bookings.FirstOrDefault(x => x.BookingId == bookingId);
             DateTime bookingDate = booking.StudyTime.Value.Date;
             var tutorDateAvailables = _context.TutorDateAvailables
@@ -852,7 +857,6 @@ namespace Services.Implementations
             return new StatusCodeResult(200);
         }
 
-
         public async Task<IActionResult> UpdateStartLearningOfAllBoooking()
         {
             try
@@ -860,7 +864,7 @@ namespace Services.Implementations
                 // Xác định múi giờ Hồ Chí Minh
                 var timezone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
                 var currentTimeInHoChiMinh = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, timezone);
-   
+
                 // Truy vấn các booking có trạng thái thành công và thời gian học bắt đầu bằng thời gian hiện tại ở Hồ Chí Minh
                 var bookings = _context.Bookings
                     .Where(x => x.Status == (Int32)BookingEnum.Success
@@ -926,7 +930,7 @@ namespace Services.Implementations
         }
 
         // Get Booking History of TutorId
-        public async Task<ActionResult<PageResults<BookingHistoryResponse>>> GetBookingHistoryTutor (Guid tutorId, PagingRequest request)
+        public async Task<ActionResult<PageResults<BookingHistoryResponse>>> GetBookingHistoryTutor(Guid tutorId, PagingRequest request)
         {
             try
             {
@@ -964,13 +968,14 @@ namespace Services.Implementations
                     bookingHistory.SubjectName = booking.TutorSubjectNavigation.SubjectNavigation.Title;
                     booking.StudyTime = booking.StudyTime;
                     bookingHistory.IsRated = booking.isRated;
-                    if( booking.isRated == true)
+                    if (booking.isRated == true)
                     {
-                        TutorRating tutorRating = _context.TutorRatings.FirstOrDefault( tr => tr.BookingId == booking.BookingId);
+                        TutorRating tutorRating = _context.TutorRatings.FirstOrDefault(tr => tr.BookingId == booking.BookingId);
                         bookingHistory.RatePoints = tutorRating.RatePoints;
                         bookingHistory.Content = tutorRating.Content;
                         bookingHistory.DateRating = tutorRating.CreatedAt;
-                    } else
+                    }
+                    else
                     {
                         bookingHistory.RatePoints = null;
                         bookingHistory.Content = "";
@@ -991,8 +996,113 @@ namespace Services.Implementations
             }
         }
 
-        //Get Booking History of TutorId and Paging 
+        // Check Booking Is Required Change Schedule Before 30 minutes 
+        public async Task<IActionResult> CheckBookingIsRequiredChangeSchedule()
+        {
+            try
+            {
+                var timezone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
+                var currentTimeInHoChiMinh = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, timezone);
+                var bookings = _context.Bookings
+                    .Include(b => b.BookingTransactionNavigation)
+                    .Where(x => x.Status == (Int32)BookingEnum.WaittingConfirmRescheduleForTutor
+                     || x.Status == (Int32)BookingEnum.WaittingConfirmRescheduleForStudent
+                     && x.StudyTime.HasValue
+                     && x.StudyTime.Value.Date == currentTimeInHoChiMinh.Date
+                     && x.StudyTime.Value.Hour == currentTimeInHoChiMinh.Hour
+                     && x.StudyTime.Value.Minute <= currentTimeInHoChiMinh.Minute)
+                    .ToList();
 
-        
+                if (bookings == null || !bookings.Any())
+                {
+                    return new StatusCodeResult(404);
+                }
+
+                foreach (var booking in bookings)
+                {
+                    booking.Status = (Int32)BookingEnum.Cancelled;
+                    _context.Bookings.Update(booking);
+
+                    // Thực hiện chuyển tiền ngược lại cho student
+                    var wallet = await _context.WalletTransactions.FirstOrDefaultAsync(w => w.WalletTransactionId == booking.BookingTransactionNavigation.BookingTransactionId);
+                    if (wallet == null)
+                    {
+                        return new StatusCodeResult(404);
+                    }
+                    wallet.Status = (Int32)VNPayType.CANCELLED;
+                    var bookingTransaction = _context.BookingTransactions.FirstOrDefault(b => b.BookingTransactionId == wallet.WalletTransactionId);
+                    var sender = await _context.Users.Include(c => c.WalletNavigation).FirstOrDefaultAsync(u => u.WalletNavigation.WalletId == wallet.SenderWalletId);
+                    var receiver = await _context.Users.Include(c => c.WalletNavigation).FirstOrDefaultAsync(u => u.WalletNavigation.WalletId == wallet.ReceiverWalletId);
+                    //update wallet for sender and receiver
+                    wallet.SenderWalletNavigation.LastBalanceUpdate = DateTime.UtcNow.AddHours(7);
+                    wallet.SenderWalletNavigation.PendingAmount += bookingTransaction.Amount;
+                    wallet.SenderWalletNavigation.AvalaibleAmount += bookingTransaction.Amount;
+                    wallet.SenderWalletNavigation.Amount += bookingTransaction.Amount;
+
+                    wallet.ReceiverWalletNavigation.LastBalanceUpdate = DateTime.UtcNow.AddHours(7);
+                    wallet.ReceiverWalletNavigation.PendingAmount -= bookingTransaction.Amount;
+                    TimeSpan bookingTime = new TimeSpan(booking.StudyTime.Value.Hour, booking.StudyTime.Value.Minute, 0);
+                    // Find the tutor available slot
+                    DateTime bookingDate = booking.StudyTime.Value.Date;
+                    var tutorDateAvailables = _context.TutorDateAvailables
+                        .Where(x => x.TutorID == booking.TutorId && x.Date.Date == bookingDate)
+                        .Select(x => x.TutorDateAvailableID)
+                        .ToList();
+                    if (tutorDateAvailables == null)
+                    {
+                        return new StatusCodeResult(452);
+                    }
+                    var tutorSlotAvailables = _context.TutorSlotAvailables
+                        .Where(x => tutorDateAvailables.Contains(x.TutorDateAvailable.TutorDateAvailableID) && x.StartTime == bookingTime)
+                        .FirstOrDefault();
+                    tutorSlotAvailables.IsBooked = false;
+                    tutorSlotAvailables.Status = (Int32)TutorSlotAvailabilityEnum.Available;
+                    await _appExtension.SendMail(new MailContent()
+                    {
+                        To = sender.Email,
+                        Subject = "Xác nhận giao dịch",
+                        Body = "Giao dịch booking của bạn đã được hủy bỏ. Mã giao dịch: " + wallet.WalletTransactionId
+                    });
+                    await _appExtension.SendMail(new MailContent()
+                    {
+                        To = receiver.Email,
+                        Subject = "Xác nhận giao dịch",
+                        Body = "Giao dịch booking của bạn đã được hủy bỏ. Mã giao dịch: " + wallet.WalletTransactionId
+                    });
+                    var notification1 = new Models.Entities.Notification
+                    {
+                        NotificationId = Guid.NewGuid(),
+                        Title = "Giao dịch booking",
+                        Content = "Giao dịch booking của bạn đã được hủy bỏ. Mã giao dịch: " + wallet.WalletTransactionId,
+                        UserId = sender.Id,
+                        CreatedAt = DateTime.UtcNow.AddHours(7),
+                        Status = (int)NotificationEnum.UnRead
+                    };
+                    var notification2 = new Models.Entities.Notification
+                    {
+                        NotificationId = Guid.NewGuid(),
+                        Title = "Giao dịch booking",
+                        Content = "Giao dịch booking của bạn đã được hủy bỏ. Mã giao dịch: " + wallet.WalletTransactionId,
+                        UserId = receiver.Id,
+                        CreatedAt = DateTime.UtcNow.AddHours(7),
+                        Status = (int)NotificationEnum.UnRead
+                    };
+                    _context.Notifications.Add(notification1);
+                    _context.Notifications.Add(notification2);
+                    _firebaseRealtimeDatabaseService.UpdateAsync<Models.Entities.Notification>($"notifications/{notification1.UserId}/{notification1.NotificationId}", notification1);
+                    _firebaseRealtimeDatabaseService.UpdateAsync<Models.Entities.Notification>($"notifications/{notification2.UserId}/{notification2.NotificationId}", notification2);
+                    _context.BookingTransactions.Update(bookingTransaction);
+                    _context.WalletTransactions.Update(wallet);
+                }
+                await _context.SaveChangesAsync();
+                return new StatusCodeResult(200);
+            }
+            catch (Exception ex)
+            {
+                return new StatusCodeResult(500);
+            }
+        }
+
+
     }
 }

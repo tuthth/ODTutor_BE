@@ -1288,7 +1288,6 @@ namespace Services.Implementations
                         .FirstOrDefault();
                     tutorSlotAvailables.IsBooked = false;
                     tutorSlotAvailables.Status = (Int32)TutorSlotAvailabilityEnum.Available;
-                    booking.Status = (int)TutorSlotAvailabilityEnum.Available;
                     await _appExtension.SendMail(new MailContent()
                     {
                         To = sender.Email,
