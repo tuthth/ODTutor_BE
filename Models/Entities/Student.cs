@@ -10,7 +10,7 @@ namespace Models.Entities
     {
         public Guid StudentId {  get; set; }
         public Guid UserId { get; set; }
-
+        public int StudentRequestCount { get; set; }
         public virtual User? UserNavigation { get; set; }
         public virtual ICollection<StudentRequest>? StudentRequestsNavigation { get; set; }
         public virtual ICollection<StudentCourse>? StudentCoursesNavigation { get; set; }

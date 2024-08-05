@@ -27,5 +27,7 @@ namespace Services.Interfaces
         Task<ActionResult<List<TutorView>>> GetListTutorBasedOnSubject(List<Guid> subjectId);
         Task<ActionResult<List<StudentRequestView>>> GetStudentRequestBasedOnTutorHasBoughtSubscription(Guid tutorId);
         Task<ActionResult<PageResults<StudentRequestView>>> ViewStudentRequestPagingBasedOnTutorHasBoughtSubscription(Guid tutorId, PagingRequest request);
+        Task<IActionResult> ResetStudentRequestCount();
+        Task<IActionResult> ResetStudenWhentheyEndSubcription();
     }
 }

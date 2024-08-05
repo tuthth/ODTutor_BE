@@ -251,5 +251,39 @@ namespace API.Controllers
             var response = await _studentRequestService.ViewStudentRequestPagingBasedOnTutorHasBoughtSubscription(tutorId, request);
             return Ok(response);
         }
+
+        /// <summary>
+        /// Reset Count Student Do not buy subscription  Request
+        /// </summary>
+        [HttpPut("update/tutors/Request")]
+        public async Task<IActionResult> ResetStudentRequestCount()
+        {
+            var response = await _studentRequestService.ResetStudentRequestCount();
+            if (response is StatusCodeResult statusCodeResult)
+            {
+                if (statusCodeResult.StatusCode == 200) { return Ok(new { Message = "Reset thành công" }); }
+
+            }
+            if (response is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
+            throw new Exception("Lỗi không xác định");
+        }
+
+        /// <summary>
+        /// Reset Studnet when they end subscription
+        ///</summary>
+        [HttpPut("update/tutors/Request/EndSubscription")]
+        public async Task<IActionResult> ResetStudentRequestCountEndSubscription()
+        {
+            var response = await _studentRequestService.ResetStudenWhentheyEndSubcription();
+            if (response is StatusCodeResult statusCodeResult)
+            {   
+                if(statusCodeResult.StatusCode == 204) { return Ok(new { Message ="Khong co ai het" }); }
+                if (statusCodeResult.StatusCode == 200) { return Ok(new { Message = "Reset thành công" }); }
+
+            }
+            if (response is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
+            throw new Exception("Lỗi không xác định");
+        }
+        
     }
 }

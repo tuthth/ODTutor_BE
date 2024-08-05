@@ -30,26 +30,20 @@ namespace Services.Implementations
         {
             Student student = _context.Students.FirstOrDefault(x => x.StudentId == request.StudentId);
             var user = _context.Users.FirstOrDefault(x => x.Id == student.UserId);
-            if (user.HasBoughtSubscription == true && user.RequestRefreshTime <= DateTime.UtcNow.AddHours(7))
+            if (user.HasBoughtSubscription == true)
             {
-                user.HasBoughtSubscription = false;
-                _context.Users.Update(user);
-                await _context.SaveChangesAsync();
-                return new StatusCodeResult(406);
+                // Check CountStudentRequest
+                if (student.StudentRequestCount >= 25)
+                {
+                    return new StatusCodeResult(409);
+                }
             }
-            var studentRequestCount = _context.StudentRequests
-                .Where(x => x.StudentId == request.StudentId && x.CreatedAt >= user.RequestRefreshTime)
-                .Count();
-
-            int maxRequests = user.HasBoughtSubscription ? 25 : 5;
-
-            if (studentRequestCount >= maxRequests)
+            else if (user.HasBoughtSubscription == false)
             {
-                return new StatusCodeResult(409);
-            }
-            if (studentRequestCount == 0)
-            {
-                user.RequestRefreshTime = DateTime.UtcNow.AddHours(7).AddDays(30);
+                if(student.StudentRequestCount >= 5)
+                {
+                    return new StatusCodeResult(409);
+                }
             }
             var subject = _context.Subjects.FirstOrDefault(x => x.SubjectId == request.SubjectId);
             if (student == null || subject == null)
@@ -60,6 +54,8 @@ namespace Services.Implementations
             studentRequest.CreatedAt = DateTime.UtcNow.AddHours(7);
             studentRequest.StudentRequestId = Guid.NewGuid();
             studentRequest.Status = (Int32)StudentRequestEnum.Pending;
+            student.StudentRequestCount += 1;
+            _context.Students.Update(student);
             var notification = new NotificationDTO
             {
                 NotificationId = Guid.NewGuid(),
@@ -442,7 +438,7 @@ namespace Services.Implementations
                     }
                 }
                 else if (tutor.HasBoughtSubscription == true)
-                {   
+                {
                     var studentRequestVip = _context.StudentRequests
                     .Where(sr => sr.Status == (Int32)StudentRequestEnum.Pending)
                     .ToList();
@@ -537,10 +533,69 @@ namespace Services.Implementations
                     return new StatusCodeResult(400);
                 }
                 return paginatedStudentRequests;
-            } catch (Exception ex)
+            }
+            catch (Exception ex)
             {
                 return new StatusCodeResult(500);
             }
+        }
+
+        // Function reset StudentRequestCount == 0
+        public async Task<IActionResult> ResetStudentRequestCount()
+        {
+            var studentsList = _context.Students
+                .Include(st => st.UserNavigation)
+                .Where(st => st.UserNavigation.HasBoughtSubscription == false)
+                .ToList();
+            foreach (var student in studentsList)
+            {
+                student.StudentRequestCount = 0;
+                _context.Students.Update(student);
+            }
+            await _context.SaveChangesAsync();
+            return new StatusCodeResult(200);
+        }
+
+        // Function reset StudentRequestCount when they end hasSubcription
+        public async Task<IActionResult> ResetStudenWhentheyEndSubcription()
+        {
+            var studentList = _context.Students
+                .Include(st => st.UserNavigation)
+                .Where(st => st.UserNavigation.HasBoughtSubscription == true && st.StudentRequestCount == 25)
+                .ToList();
+            if(studentList.Count == 0)
+            {
+                return new StatusCodeResult(204);
+            }
+            foreach (var student in studentList)
+            {   
+                student.UserNavigation.HasBoughtSubscription = false;
+                student.StudentRequestCount = 0;
+                // Gửi thông báo cho user
+                var notification = new NotificationDTO
+                {
+                    NotificationId = Guid.NewGuid(),
+                    Title = "Gói dịch vụ của bạn đã hết hạn",
+                    Content = "Vui lòng gia hạn gói dịch vụ để tiếp tục sử dụng các dịch vụ của chúng tôi",
+                    UserId = student.UserId,
+                    CreatedAt = DateTime.UtcNow.AddHours(7),
+                    Status = (Int32)NotificationEnum.UnRead
+                };
+                Models.Entities.Notification notification1x = _mapper.Map<Models.Entities.Notification>(notification);
+                await _context.Notifications.AddAsync(notification1x);
+                await _service.SetAsync<NotificationDTO>($"notifications/{notification.UserId}/{notification.NotificationId}", notification);
+                // Gửi email đến cho user để thông báo 
+                await _appExtension.SendMail(new Models.Models.Emails.MailContent()
+                {
+                    To = student.UserNavigation.Email,
+                    Subject = "Thông báo hết lượt tạo yêu cầu",
+                    Body = "Bạn đã hết số lượt tạo yêu cầu. Bạn có thể mua thêm để có những trải nghiệm tốt hơn. Cảm ơn vì đã sử dụng dịch vụ của chúng tôi"
+                });
+                _context.Users.Update(student.UserNavigation);
+                _context.Students.Update(student);
+            }
+            await _context.SaveChangesAsync();
+            return new StatusCodeResult(200);
         }
     }
 }
