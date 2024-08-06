@@ -11,6 +11,7 @@ namespace Models.Entities
     {
         public Guid TutorCertificateId { get; set; }
         public Guid TutorId { get; set; }
+        public Guid? CertificateTypeId { get; set; }
         public string?ImageUrl { get; set; }
         public string CertificateName { get; set; }
         public string CertificateDescription { get; set; }
@@ -19,5 +20,6 @@ namespace Models.Entities
         public string EndYear { get; set; }
         public bool IsVerified { get; set; }
         public virtual Tutor? TutorNavigation {  get; set; }
+        public virtual CertificateType? CertificateTypeNavigation { get; set; }
     }
 }

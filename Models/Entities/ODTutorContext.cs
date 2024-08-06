@@ -18,6 +18,7 @@ namespace Models.Entities
         }
         public DbSet<Booking> Bookings { get; set; }
         public DbSet<BookingTransaction> BookingTransactions { get; set; }
+        public DbSet<CertificateType> CertificateTypes { get; set; }
         public DbSet<Course> Courses {get; set;}
         public DbSet<CourseOutline> CourseOutlines { get; set; }
         public DbSet<CoursePromotion> CoursePromotions { get; set; }
@@ -54,8 +55,8 @@ namespace Models.Entities
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             // Use your preferred connection string here
-            optionsBuilder.UseSqlServer(GetConnectionStrings()).EnableSensitiveDataLogging();
-            //optionsBuilder.UseSqlServer("Server=14.225.205.28;uid=sa;pwd=Abc@123123;Database=ODTutor;Encrypt=false;TrustServerCertificate=true;");
+            //optionsBuilder.UseSqlServer(GetConnectionStrings()).EnableSensitiveDataLogging();
+            optionsBuilder.UseSqlServer("Server=14.225.205.28;uid=sa;pwd=Abc@123123;Database=ODTutor;Encrypt=false;TrustServerCertificate=true;");
             //optionsBuilder.UseSqlServer("Server=(local);uid=sa;pwd=12345;Database=ODTutor;Encrypt=false;TrustServerCertificate=true;");
             //optionsBuilder.UseSqlServer(GetConnectionStrings());
             //optionsBuilder.UseSqlServer("Server=(local);uid=sa;pwd=12345;Database=ODTutor;Encrypt=false;TrustServerCertificate=true;");
@@ -111,6 +112,16 @@ namespace Models.Entities
                 .WithMany(w => w.ReceiverBookingTransactionsNavigation)
                 .HasForeignKey(bt => bt.ReceiverWalletId).OnDelete(DeleteBehavior.NoAction);
 
+            // CertificateType Entity Configuration
+            modelBuilder.Entity<CertificateType>(entity =>
+            {
+                entity.HasKey(ct => ct.CertificateTypeId);
+
+                entity.HasMany(ct => ct.TutorCertificatesNavigation)
+                    .WithOne(tc => tc.CertificateTypeNavigation)
+                    .HasForeignKey(tc => tc.CertificateTypeId)
+                    .OnDelete(DeleteBehavior.NoAction); // Add this configuration
+            });
             // Course Entity Configuration
             modelBuilder.Entity<Course>()
                 .HasKey(c => c.CourseId);
@@ -318,13 +329,20 @@ namespace Models.Entities
                 .WithOne(te => te.TutorNavigation)
                 .HasForeignKey(te => te.TutorId).OnDelete(DeleteBehavior.NoAction);
             // TutorCertificate Entity Configuration
-            modelBuilder.Entity<TutorCertificate>()
-                .HasKey(tc => tc.TutorCertificateId);
+            modelBuilder.Entity<TutorCertificate>(entity =>
+            {
+                entity.HasKey(tc => tc.TutorCertificateId);
 
-            modelBuilder.Entity<TutorCertificate>()
-                .HasOne(tc => tc.TutorNavigation)
-                .WithMany(t => t.TutorCertificatesNavigation)
-                .HasForeignKey(tc => tc.TutorId).OnDelete(DeleteBehavior.NoAction);
+                entity.HasOne(tc => tc.TutorNavigation)
+                    .WithMany(t => t.TutorCertificatesNavigation)
+                    .HasForeignKey(tc => tc.TutorId)
+                    .OnDelete(DeleteBehavior.NoAction);
+
+                entity.HasOne(tc => tc.CertificateTypeNavigation)
+                    .WithMany(ct => ct.TutorCertificatesNavigation)
+                    .HasForeignKey(tc => tc.CertificateTypeId)
+                    .OnDelete(DeleteBehavior.NoAction);
+            });
 
             // TutorRating Entity Configuration
             modelBuilder.Entity<TutorRating>()
