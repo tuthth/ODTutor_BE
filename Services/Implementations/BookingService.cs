@@ -945,6 +945,7 @@ namespace Services.Implementations
                     .Include(x => x.TutorRatingsNavigation)
                     .Include(x => x.BookingTransactionNavigation)
                     .Where(x => x.TutorId == tutorId)
+                    .OrderByDescending(x => x.CreatedAt)
                     .ToList();
                 if (bookings == null)
                 {
