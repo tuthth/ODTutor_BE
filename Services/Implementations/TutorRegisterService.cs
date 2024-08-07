@@ -111,6 +111,7 @@ namespace Services.Implementations
                     certificate.ImageUrl = urlLink.ImageUrl;
                     certificate.CertificateFrom = urlLink.CertificateFrom;
                     certificate.CertificateName = urlLink.CertificateName;
+                    certificate.CertificateTypeId = urlLink.CertificateTypeId;
                     certificate.CertificateDescription = urlLink.CertificateDescription;
                     certificate.StartYear = urlLink.StartYear;
                     certificate.EndYear = urlLink.EndYear;

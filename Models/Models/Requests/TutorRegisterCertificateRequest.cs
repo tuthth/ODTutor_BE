@@ -12,6 +12,7 @@ namespace Models.Models.Requests
         public string CertificateName { get; set; }
         public string CertificateDescription { get; set; }
         public string CertificateFrom { get; set; }
+        public Guid CertificateTypeId { get; set; }
         public string StartYear { get; set; }
         public string EndYear { get; set; }
     }

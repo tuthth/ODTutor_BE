@@ -52,5 +52,7 @@ namespace Services.Interfaces
         Task<IActionResult> HasBoughtTutorPackage(WalletTransactionCreate request);
         Task<ActionResult<PageResults<WalletTransactionViewVersion2>>> GetCourseTransactionsByUserIdPaging(Guid userId, PagingRequest request);
         Task<ActionResult> CheckAllBookingFinish();
+        Task<ActionResult<List<WalletTransaction>>> GetSubscriptionTransactionsOfWalletId(Guid walletId);
+        Task<ActionResult<List<WalletTransaction>>> GetAllSubscriptionTransactions();
     }
 }

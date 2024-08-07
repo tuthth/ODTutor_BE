@@ -905,5 +905,37 @@ namespace API.Controllers
                 return new StatusCodeResult(500);
             }
         }
+        [HttpGet("transaction/subscription/{walletId}")]
+        public async Task<ActionResult<List<WalletTransactionView>>> GetTransactionBySubscription(Guid walletId)
+        {
+            var result = await _transactionService.GetSubscriptionTransactionsOfWalletId(walletId);
+            if (result is ActionResult<List<WalletTransaction>> walletTransactions && result.Value != null)
+            {
+                var walletTransactionViews = _mapper.Map<List<WalletTransactionView>>(walletTransactions.Value);
+                return Ok(walletTransactionViews);
+            }
+            if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
+            {
+                if (statusCodeResult.StatusCode == 404) { return NotFound(new { Message = "Không tìm thấy giao dịch ví" }); }
+            }
+            if ((IActionResult)result.Result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
+            throw new Exception("Lỗi không xác định");
+        }
+        [HttpGet("transaction/subscriptions")]
+        public async Task<ActionResult<List<WalletTransactionView>>> GetSubscriptionTransactions()
+        {
+            var result = await _transactionService.GetAllSubscriptionTransactions();
+            if (result is ActionResult<List<WalletTransaction>> walletTransactions && result.Value != null)
+            {
+                var walletTransactionViews = _mapper.Map<List<WalletTransactionView>>(walletTransactions.Value);
+                return Ok(walletTransactionViews);
+            }
+            if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
+            {
+                if (statusCodeResult.StatusCode == 404) { return NotFound(new { Message = "Không tìm thấy giao dịch ví" }); }
+            }
+            if ((IActionResult)result.Result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
+            throw new Exception("Lỗi không xác định");
+        }
     }
 }
