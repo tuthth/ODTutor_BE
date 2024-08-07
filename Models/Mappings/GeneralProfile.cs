@@ -133,6 +133,10 @@ namespace Models.Mappings
             CreateMap<UpdateCourseSlotRequest, CourseSlot>();
             CreateMap<Booking, BookingRequestV2>();
             CreateMap<BookingRequestV2, Booking>();
+            CreateMap<CertificateType, CertificateTypeRequest>();
+            CreateMap<CertificateTypeRequest, CertificateType>();
+            CreateMap<CertificateType, UpdateCertificateTypeRequest>();
+            CreateMap<UpdateCertificateTypeRequest, CertificateType>();
         }
     }
 }
