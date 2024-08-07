@@ -868,18 +868,24 @@ namespace Services.Implementations
                 return new StatusCodeResult(404);
             }
             // Kiểm tra đã đủ sô lượng trong khóa học chưa
-            var studentCourses = await _context.StudentCourses.Where(c => c.CourseId == request.CourseId).ToListAsync();
+            var studentCourses = await _context.StudentCourses
+                .Where(c => c.CourseId == request.CourseId 
+                && c.Status == (Int32)StudentCourseEnum.Success)
+                .ToListAsync();
             if (studentCourses.Count >= course.TotalStudent)
             {
                 return new StatusCodeResult(409);
             }
-            course.TotalStudent += 1;
             var studentCourse = new StudentCourse
             {
                 StudentCourseId = Guid.NewGuid(),
                 CourseId = request.CourseId,
                 StudentId = request.StudentId,
-                Status = (Int32)CourseEnum.Active
+                Status = (Int32)StudentCourseEnum.Success,
+                CreatedAt = DateTime.UtcNow.AddHours(7),
+                StartDate = course.StudyTime.Value,
+                // Cộng thêm 50 phút cho end date 
+                EndDate = course.StudyTime.Value.AddMinutes(50)
             };
             _context.StudentCourses.Add(studentCourse);
             var notification = new NotificationDTO
@@ -904,6 +910,7 @@ namespace Services.Implementations
             return new StatusCodeResult(201);
         }
 
+
         // Cancle Register Student Course
         public async Task<IActionResult> CancelCourse(CancleCourseRequest request)
         {
@@ -914,7 +921,6 @@ namespace Services.Implementations
                 return new StatusCodeResult(404);
             }
             var course = await _context.Courses.FirstOrDefaultAsync(c => c.CourseId == studentCourse.CourseId);
-            course.TotalStudent -= 1;
             _context.StudentCourses.Remove(studentCourse);
             _context.Courses.Update(course);
             var notification = new NotificationDTO

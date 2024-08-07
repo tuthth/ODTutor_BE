@@ -14,12 +14,14 @@ namespace Models.Entities
         public DateTime CreatedAt {  get; set; }
         public string? Description { get; set; }
         public decimal TotalMoney { get; set; }
-        public int TotalStudent { get;set; }
         public string? Note { get; set; }
         public int Status { get; set; }
         public DateTime? StudyTime { get; set; }
+        public string? ImageUrl { get; set; }
         public virtual Tutor? TutorNavigation { get; set; }
-        
+        public int TotalStudent { get; set; }
+        public string? GoogleMeetUrl { get; set; }
+
         public virtual ICollection<StudentCourse>? StudentCoursesNavigation { get; set; }
         public virtual ICollection<CourseOutline>? CourseOutlinesNavigation { get; set; }
         public virtual ICollection<CoursePromotion>? CoursePromotionsNavigation { get; set; }

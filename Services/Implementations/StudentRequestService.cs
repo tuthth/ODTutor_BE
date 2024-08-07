@@ -87,7 +87,7 @@ namespace Services.Implementations
             studentRequest.SubjectId = request.SubjectId;
             studentRequest.Message = request.Message;
             studentRequest.Status = (Int32)StudentRequestEnum.Pending;
-            studentRequest.CreatedAt = DateTime.Now;
+            studentRequest.CreatedAt = DateTime.UtcNow.AddHours(7);
             var studentRequestDTO = new StudentRequestDTO
             {
                 StudentRequestId = request.StudentRequestId,

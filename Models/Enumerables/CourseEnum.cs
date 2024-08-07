@@ -15,4 +15,10 @@ namespace Models.Enumerables
         Finished = 4,
         InProgress = 5
     }
+    public enum StudentCourseEnum
+    {
+        Success = 1,
+        Failed = 2,
+        Canceled = 3
+    }
 }

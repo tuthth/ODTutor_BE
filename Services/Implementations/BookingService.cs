@@ -943,6 +943,7 @@ namespace Services.Implementations
                     .Include(x => x.TutorSubjectNavigation)
                     .Include(x => x.TutorSubjectNavigation.SubjectNavigation)
                     .Include(x => x.TutorRatingsNavigation)
+                    .Include(x => x.BookingTransactionNavigation)
                     .Where(x => x.TutorId == tutorId)
                     .ToList();
                 if (bookings == null)
@@ -966,7 +967,7 @@ namespace Services.Implementations
                     bookingHistory.StudentName = booking.StudentNavigation.UserNavigation.Name;
                     bookingHistory.StudentAvatar = booking.StudentNavigation.UserNavigation.ImageUrl;
                     bookingHistory.SubjectName = booking.TutorSubjectNavigation.SubjectNavigation.Title;
-                    booking.StudyTime = booking.StudyTime;
+                    bookingHistory.StudyTime = booking.StudyTime;
                     bookingHistory.IsRated = booking.isRated;
                     if (booking.isRated == true)
                     {
@@ -981,6 +982,9 @@ namespace Services.Implementations
                         bookingHistory.Content = "";
                         bookingHistory.DateRating = null;
                     }
+                    bookingHistory.BookingTransactionId = booking.BookingTransactionNavigation.BookingTransactionId;
+                    bookingHistory.BookingTransactionDate = booking.BookingTransactionNavigation.CreatedAt;
+                    bookingHistory.BookingTransactionStatus = booking.BookingTransactionNavigation.Status;
                     response.Add(bookingHistory);
                 }
                 var bookingHistoryResult = PagingHelper<BookingHistoryResponse>.Paging(response, request.Page, request.PageSize);

@@ -9,12 +9,14 @@ namespace Models.Models.Views
 {
     public class BookingHistoryResponse
     {
-        public Guid BookingId { get; set; }
-        public DateTime CreateAt { get; set; }
+        public Guid? BookingId { get; set; }
+        public Guid? BookingTransactionId { get;set; }
+        public DateTime? BookingTransactionDate { get; set; }
+        public DateTime? CreateAt { get; set; }
         public string? Message { get; set;}
-        public decimal TotalPrice { get; set; }
-        public int Status { get; set; }
-        public DateTime StudyTime { get; set; }
+        public decimal? TotalPrice { get; set; }
+        public int? Status { get; set; }
+        public DateTime? StudyTime { get; set; }
         public TimeSpan? StartTime { get; set; }
         public TimeSpan? EndTime { get; set; }
         public string? TutorName { get; set; }
@@ -26,5 +28,6 @@ namespace Models.Models.Views
         public int? RatePoints { get; set; }
         public string? Content { get; set; }
         public DateTime? DateRating { get; set; }
+        public int? BookingTransactionStatus { get; set; }
     }
 }

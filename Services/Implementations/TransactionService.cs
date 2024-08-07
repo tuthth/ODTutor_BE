@@ -2099,6 +2099,7 @@ namespace Services.Implementations
                     .Include(user => user.ReceiverWalletNavigation.UserNavigation)
                     .Include(user => user.SenderWalletNavigation.UserNavigation)
                     .Where(c => c.SenderWalletNavigation.UserId == userId || c.ReceiverWalletNavigation.UserId == userId)
+                    .Where(c => c.Status == (int)VNPayType.APPROVE)
                     .OrderByDescending(c => c.CreatedAt)
                     .Select(c => new WalletTransactionViewVersion2
                     {

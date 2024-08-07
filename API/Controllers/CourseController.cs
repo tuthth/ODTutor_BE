@@ -512,5 +512,45 @@ namespace API.Controllers
             if ((IActionResult)result.Result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
             throw new Exception("Lỗi không xác định");
         }
+
+        // Student register course
+        [HttpPost("register-course")]
+        public async Task<IActionResult> RegisterCourse([FromBody] RegisterCourseRequest request)
+        {
+            var result = await _courseService.RegisterCourse(request);
+            if (result is StatusCodeResult statusCodeResult)
+            {
+                if (statusCodeResult.StatusCode == 201) return StatusCode(StatusCodes.Status201Created, new { Message = "Đăng ký khóa học thành công" });
+                if (statusCodeResult.StatusCode == 400) return BadRequest(new { Message = "Dữ liệu không hợp lệ" });
+                if (statusCodeResult.StatusCode == 404) return Ok(new { Message = "Không tìm thấy khóa học" });
+                if (statusCodeResult.StatusCode == 409) return Conflict(new { Message = "Số lượng học sinh đã đủ" });
+                if (statusCodeResult.StatusCode == 500) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = "Lỗi không xác định" });
+            }
+            if (result is Exception exception)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
+            }
+            throw new Exception("Lỗi không xác định");
+        }
+
+        // Cancle course 
+        [HttpPost("cancel-course")]
+        public async Task<IActionResult> CancelCourse([FromBody] CancleCourseRequest request)
+        {
+            var result = await _courseService.CancelCourse(request);
+            if (result is StatusCodeResult statusCodeResult)
+            {
+                if (statusCodeResult.StatusCode == 204) return StatusCode(StatusCodes.Status204NoContent, new { Message = "Hủy khóa học thành công" });
+                if (statusCodeResult.StatusCode == 400) return BadRequest(new { Message = "Dữ liệu không hợp lệ" });
+                if (statusCodeResult.StatusCode == 404) return Ok(new { Message = "Không tìm thấy khóa học" });
+                if (statusCodeResult.StatusCode == 409) return Conflict(new { Message = "Khóa học đã bắt đầu không thể hủy" });
+                if (statusCodeResult.StatusCode == 500) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = "Lỗi không xác định" });
+            }
+            if (result is Exception exception)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
+            }
+            throw new Exception("Lỗi không xác định");
+        }
     }
 }
