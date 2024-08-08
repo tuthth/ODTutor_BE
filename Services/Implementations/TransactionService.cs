@@ -262,6 +262,7 @@ namespace Services.Implementations
                     CreatedAt = DateTime.UtcNow.AddHours(7),
                     Amount = transactionCreate.Amount,
                     Status = (int)VNPayType.APPROVE,
+                    Note = "Nâng cấp tài khoản giáo viên"
                 };
                 var receiveWallet = _context.Wallets.FirstOrDefault(w => w.WalletId == transactionCreate.ReceiverId);
                 var sendWallet = _context.Wallets.FirstOrDefault(w => w.WalletId == transactionCreate.SenderId);
@@ -337,6 +338,7 @@ namespace Services.Implementations
                     CreatedAt = DateTime.UtcNow.AddHours(7),
                     Amount = transactionCreate.Amount,
                     Status = (int)VNPayType.APPROVE,
+                    Note = "Nâng cấp tài khoản học viên"
                 };
                 var receiveWallet = _context.Wallets.FirstOrDefault(w => w.WalletId == transactionCreate.ReceiverId);
                 var sendWallet = _context.Wallets.FirstOrDefault(w => w.WalletId == transactionCreate.SenderId);
@@ -430,7 +432,7 @@ namespace Services.Implementations
                         CreatedAt = DateTime.UtcNow.AddHours(7),
                         Amount = request.Amount,
                         Status = (int)VNPayType.APPROVE,
-                        Note = "Đăng kí gói thành viên trải nghiệm gia sư"
+                        Note = "Nâng cấp tài khoản gói thành viên trải nghiệm gia sư"
                     };
                     if (walletUser.Amount < request.Amount)
                     {
@@ -2217,6 +2219,38 @@ namespace Services.Implementations
                 return new StatusCodeResult(500);
             }
         }
-
+        public async Task<ActionResult<List<WalletTransaction>>> GetSubscriptionTransactionsOfWalletId(Guid walletId)
+        {
+            try
+            {
+                var list = await _context.WalletTransactions.OrderByDescending(c => c.CreatedAt).Where(c => c.Note.Contains("Nâng cấp tài khoản") && c.SenderWalletId == walletId).ToListAsync();
+                if(list == null)
+                {
+                    return new StatusCodeResult(404);
+                }
+                return list;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.ToString());
+            }
+        }
+        public async Task<ActionResult<List<WalletTransaction>>> GetAllSubscriptionTransactions()
+        {
+            Guid adminWallet = Guid.Parse("E91703BF-5651-4F9A-5D51-08DC93FF5629");
+           try
+            {
+                var list = await _context.WalletTransactions.OrderByDescending(c => c.CreatedAt).Where(c => c.Note.Contains("Nâng cấp tài khoản") && c.ReceiverWalletId == adminWallet).ToListAsync();
+                if(list == null)
+                {
+                    return new StatusCodeResult(404);
+                }
+                return list.ToList();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.ToString());
+            }
+        }
     }
 }

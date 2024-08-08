@@ -54,6 +54,7 @@ namespace Services.Implementations
            TutorCertificates = t.TutorCertificatesNavigation.Select(tc => new TutorCertificate
            {
                TutorCertificateId = tc.TutorCertificateId,
+               CertificateTypeId = tc.CertificateTypeId,
                CertificateName = tc.CertificateName,
                CertificateFrom = tc.CertificateFrom,
                StartYear = tc.StartYear,
@@ -108,6 +109,7 @@ namespace Services.Implementations
                         TutorCertificates = t.TutorCertificatesNavigation.Select(tc => new TutorCertificate
                         {
                             TutorCertificateId = tc.TutorCertificateId,
+                            CertificateTypeId = tc.CertificateTypeId,
                             CertificateName = tc.CertificateName,
                             CertificateFrom = tc.CertificateFrom,
                             StartYear = tc.StartYear,
@@ -178,6 +180,7 @@ namespace Services.Implementations
           TutorCertificates = t.TutorCertificatesNavigation.Select(tc => new TutorCertificate
           {
               TutorCertificateId = tc.TutorCertificateId,
+              CertificateTypeId = tc.CertificateTypeId,
               CertificateName = tc.CertificateName,
               CertificateFrom = tc.CertificateFrom,
               StartYear = tc.StartYear,
