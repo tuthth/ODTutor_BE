@@ -292,6 +292,18 @@ namespace API.Controllers
         public async Task<IActionResult> RateBookingWithoutImageV2([FromBody]TutorRatingRequest ratingRequest)
         {
             var result = await _bookingService.RateBookingsWithoutImage(ratingRequest);
+            if(result is IActionResult actionResult)
+            {
+                if (actionResult is StatusCodeResult statusCodeResult)
+                {
+                    if (statusCodeResult.StatusCode == 400) { return BadRequest(new { Message = "Dữ liệu không hợp lệ" }); }
+                    if (statusCodeResult.StatusCode == 404) return Ok(new { Message = "Không tìm thấy lịch đặt đã hoàn thành" });
+                    if (statusCodeResult.StatusCode == 406) { return StatusCode(StatusCodes.Status406NotAcceptable, new { Message = "Tài khoản student đang bị đình chỉ bởi hệ thống" }); }
+                    if(statusCodeResult.StatusCode ==409) { return StatusCode(StatusCodes.Status409Conflict, new { Message = "Đánh giá đã tồn tại" }); }
+                    if (statusCodeResult.StatusCode == 201) return StatusCode(StatusCodes.Status201Created, new { Message = "Đánh giá thành công" });
+                }
+                if (actionResult is Exception exception) StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
+            }
             return result;
         }
 

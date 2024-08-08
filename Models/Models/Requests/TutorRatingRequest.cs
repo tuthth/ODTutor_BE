@@ -14,7 +14,7 @@ namespace Models.Models.Requests
         public int RatePoints { get; set; }
         public string Content { get; set; }
         public Guid BookingId { get; set; }
-        public List<IFormFile> ImageFiles { get; set; }
+        public List<IFormFile>? ImageFiles { get; set; }
     }
     public class UpdateTutorRatingRequest : TutorRatingRequest
     {

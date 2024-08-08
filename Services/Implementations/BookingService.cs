@@ -323,8 +323,19 @@ namespace Services.Implementations
             {
                 return new StatusCodeResult(406);
             }
-            var tutorRating = _mapper.Map<TutorRating>(tutorRatingRequest);
+            // Check booking is Rated
+            if (booking.isRated == true)
+            {
+                return new StatusCodeResult(409);
+            }
+            TutorRating tutorRating = new TutorRating();
             tutorRating.TutorRatingId = Guid.NewGuid();
+            tutorRating.CreatedAt = DateTime.UtcNow.AddHours(7);
+            tutorRating.RatePoints = tutorRatingRequest.RatePoints;
+            tutorRating.Content = tutorRatingRequest.Content;
+            tutorRating.StudentId = tutorRatingRequest.StudentId;
+            tutorRating.TutorId = tutorRatingRequest.TutorId;
+            tutorRating.BookingId = tutorRatingRequest.BookingId;
             _context.TutorRatings.Add(tutorRating);
             booking.isRated = true;
             _context.Bookings.Update(booking);
