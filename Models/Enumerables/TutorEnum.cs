@@ -25,6 +25,8 @@ namespace Models.Enumerables
     {
         Available = 0,
         NotAvailable = 1,
+        InProgress = 2,
+        Banned = 3,
     }
 
     public enum TutorPackageEnum

@@ -17,5 +17,6 @@ namespace Models.Enumerables
     public enum TutorActionTypeEnum
     {
         TutorRegister = 1,
+        TutorRegisterSubject = 2,
     }
 }

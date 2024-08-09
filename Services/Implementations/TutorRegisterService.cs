@@ -966,7 +966,7 @@ namespace Services.Implementations
                     tutorSubject.TutorId = request.TutorId;
                     tutorSubject.SubjectId = subjectID;
                     tutorSubject.CreatedAt = DateTime.UtcNow.AddHours(7);
-                    tutorSubject.Status = (Int32)TutorSubjectEnum.Available;
+                    tutorSubject.Status = (Int32)TutorSubjectEnum.InProgress;
                     tutorSubjects.Add(tutorSubject);
                 }
                 // Kiểm tra tutor có bị trùng môn đăng kí không
@@ -1087,15 +1087,27 @@ namespace Services.Implementations
                 var tutorSubject = await _context.TutorSubjects.Where(ts => ts.TutorId == tutorID && ts.TutorSubjectId == subjectID).FirstOrDefaultAsync();
                 if (tutorSubject == null)
                 {
-                    throw new CrudException(HttpStatusCode.OK, "Không tìm thấy môn học của gia sư", "");
+                    throw new CrudException(HttpStatusCode.NotFound, "Không tìm thấy môn học của gia sư", "");
+                }
+                if(tutorSubject.Status == (Int32)TutorSubjectEnum.InProgress)
+                {
+                    throw new CrudException(HttpStatusCode.Forbidden, "Môn học đang trong quá trình xử lý, không thể xóa", "");
+                }
+                if(tutorSubject.Status == (Int32)TutorSubjectEnum.Banned)
+                {
+                    TimeSpan timeRemaining = tutorSubject.ExpeireAt.Value - DateTime.UtcNow.AddHours(7);
+                    throw new CrudException(HttpStatusCode.Conflict, "Môn học vẫn trong thời gian khóa vui lòng quay trở lại sau" + timeRemaining, "");
                 }
                 if (tutorSubject.Status == (Int32)TutorSubjectEnum.NotAvailable)
-                {
+                {   
+
                     tutorSubject.Status = (Int32)TutorSubjectEnum.Available;
                 }
                 else if (tutorSubject.Status == (Int32)TutorSubjectEnum.Available)
-                {
-                    tutorSubject.Status = (Int32)TutorSubjectEnum.NotAvailable;
+                {   
+                    
+                    tutorSubject.Status = (Int32)TutorSubjectEnum.Banned;
+                    tutorSubject.ExpeireAt = DateTime.UtcNow.AddHours(7).AddDays(14);
                 }
                 await _context.SaveChangesAsync();
                 throw new CrudException(HttpStatusCode.OK, "Cập nhật trạng thái môn học thành công", "");
@@ -1252,7 +1264,195 @@ namespace Services.Implementations
             }
         }
 
-        
+        // Lấy tất cả các môn học mà tutor chưa đăng ký
+        public async Task<ActionResult<List<SubjectView>>> GetAllSubjectWithoutTutorSubject(Guid tutorID)
+        {
+            try
+            {
+                // Lấy danh sách các môn học mà tutor đã đăng ký
+                var tutorSubjectList = await _context.TutorSubjects
+                    .Where(ts => ts.TutorId == tutorID)
+                    .Select(ts => ts.SubjectId)
+                    .ToListAsync();
+
+                // Lấy danh sách tất cả các môn học
+                var subjectList = await _context.Subjects.ToListAsync();
+
+                // Lọc ra các môn học chưa được tutor đăng ký
+                var response = subjectList
+                    .Where(subject => !tutorSubjectList.Contains(subject.SubjectId))
+                    .Select(subject => new SubjectView
+                    {
+                        SubjectId = subject.SubjectId,
+                        Title = subject.Title,
+                        Content = subject.Content,
+                        Note = subject.Note // Giả sử Subject có thuộc tính Note
+                    })
+                    .ToList();
+                if (response.Count == 0)
+                {
+                    throw new CrudException(HttpStatusCode.OK, "Không tìm thấy môn học", "");
+                }
+
+                throw new CrudException(HttpStatusCode.OK, "Lấy danh sách môn học thành công", "");
+            }
+            catch (CrudException ex)
+            {
+                throw ex;
+            }
+            catch (Exception ex)
+            {
+                throw new CrudException(HttpStatusCode.InternalServerError, ex.Message, "");
+            }
+        }
+
+        // Change Status for All Tutor Subject When The Expried Day = DateTime.Now
+        public async Task<IActionResult> ChangeStatusForAllTutorSubject()
+        {
+            try
+            {
+                var tutorSubjectList = await _context.TutorSubjects.ToListAsync();
+                if(tutorSubjectList.Count == 0)
+                {
+                    throw new CrudException(HttpStatusCode.OK, "Không tìm thấy môn học của gia sư", "");
+                }
+                foreach (var tutorSubject in tutorSubjectList)
+                {
+                    if (tutorSubject.Status == (Int32)TutorSubjectEnum.Banned)
+                    {
+                        if (tutorSubject.ExpeireAt <= DateTime.UtcNow.AddHours(7))
+                        {
+                            tutorSubject.Status = (Int32)TutorSubjectEnum.NotAvailable;
+                        }
+                    }
+                }
+                await _context.SaveChangesAsync();
+                throw new CrudException(HttpStatusCode.OK, "Cập nhật trạng thái môn học thành công", "");
+            }
+            catch (CrudException ex)
+            {
+                throw ex;
+            }
+            catch (Exception ex)
+            {
+                throw new CrudException(HttpStatusCode.InternalServerError, ex.Message, "");
+            }
+        }
+
+
+        // Get All Tutor Subject List Need to solve of all Tutor Based On Tutor Action Type and Status
+        // Lấy danh sách gia sư có yêu cầu đăng ký môn học
+        public async Task<AcceptOrRegisterProcessOfTutorSubject> getAllTutorWantToRegisterSubject()
+        {
+            try
+            {
+                // Lấy tất cả gia sư và bao gồm thông tin người dùng liên quan
+                var tutors = await _context.Tutors
+                    .Include(t => t.UserNavigation)
+                    .ToListAsync();
+
+                // Danh sách người dùng sẽ được trả về
+                var userViews = new List<UserView>();
+
+                // Lặp qua danh sách gia sư để kiểm tra yêu cầu đăng ký môn học
+                foreach (var tutor in tutors)
+                {
+                    // Tìm tất cả các yêu cầu đăng ký môn học của gia sư với ActionType và Status nhất định
+                    var tutorActions = await _context.TutorActions
+                        .Where(x => x.TutorId == tutor.TutorId &&
+                                    x.ActionType == (int)TutorActionTypeEnum.TutorRegisterSubject &&
+                                    x.Status == (int)TutorActionEnum.Pending)
+                        .ToListAsync();
+
+                    // Nếu có yêu cầu, thêm người dùng vào danh sách nếu chưa có
+                    if (tutorActions.Any())
+                    {
+                        var user = tutor.UserNavigation;
+
+                        // Kiểm tra xem người dùng đã có trong danh sách chưa
+                        if (!userViews.Any(u => u.Id == user.Id))
+                        {
+                            userViews.Add(new UserView
+                            {
+                                Id = user.Id,
+                                Name = user.Name,
+                                Email = user.Email,
+                                PhoneNumber = user.PhoneNumber,
+                                DateOfBirth = user.DateOfBirth,
+                                Status = user.Status,
+                                Active = user.Active,
+                                CreatedAt = user.CreatedAt,
+                                IsPremium = user.IsPremium,
+                                Banned = user.Banned,
+                                BanExpiredAt = user.BanExpiredAt
+                            });
+                        }
+                    }
+                }
+                // Tạo và trả về kết quả
+                var response = new AcceptOrRegisterProcessOfTutorSubject
+                {
+                    TutorActionRegisterSubject = userViews
+                };
+
+                return response;
+            }
+            catch (Exception ex)
+            {
+                // Xử lý lỗi và trả về thông báo lỗi
+                throw new CrudException(HttpStatusCode.InternalServerError, ex.Message, "");
+            }
+        }
+
+
+        // Lấy tất cả danh sách môn học của tutor đang cần duyệt đăng kí
+        public async Task<ActionResult<List<TutorSubjectListResponse>>> getAllTutorSubjectNeedToApprove()
+        {
+            try
+            {
+                // Lấy tất cả các yêu cầu đăng ký môn học của gia sư
+                var tutorActions = await _context.TutorActions
+                    .Where(x => x.ActionType == (int)TutorActionTypeEnum.TutorRegisterSubject &&
+                                                   x.Status == (int)TutorActionEnum.Pending)
+                    .ToListAsync();
+
+                // Danh sách môn học sẽ được trả về
+                var tutorSubjectList = new List<TutorSubjectListResponse>();
+
+                // Lặp qua danh sách yêu cầu đăng ký môn học để lấy thông tin môn học
+                foreach (var tutorAction in tutorActions)
+                {
+                    // Lấy thông tin môn học của gia sư
+                    var tutorSubjects = await _context.TutorSubjects
+                        .Where(x => x.TutorId == tutorAction.TutorId)
+                        .Include(x => x.SubjectNavigation)
+                        .ToListAsync();
+
+                    // Lặp qua danh sách môn học để thêm vào danh sách trả về
+                    foreach (var tutorSubject in tutorSubjects)
+                    {
+                        tutorSubjectList.Add(new TutorSubjectListResponse
+                        {
+                            TutorSubjectId = tutorSubject.TutorSubjectId,
+                            SubjectName = tutorSubject.SubjectNavigation.Title,
+                            SubjectDescription = tutorSubject.SubjectNavigation.Content,
+                            CreatedDate = tutorSubject.CreatedAt,
+                            Status = tutorSubject.Status
+                        });
+                    }
+                }
+
+                // Trả về danh sách môn học
+                return tutorSubjectList;
+            }
+            catch (Exception ex)
+            {
+                // Xử lý lỗi và trả về thông báo lỗi
+                throw new CrudException(HttpStatusCode.InternalServerError, ex.Message, "");
+            }
+        }
+
+
 
     }
 }

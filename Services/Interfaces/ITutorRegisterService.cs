@@ -39,5 +39,7 @@ namespace Services.Interfaces
         Task<IActionResult> DeleteSlotByTutorSlotID(Guid tutorSlotID);
         Task<ActionResult<PageResults<TutorRatingListResponse>>> GetTutorRatingList(Guid TutorId, int size, int PageSize);
         Task<IActionResult> BlockOrUnBlockTutorByTutorID(Guid tutorId);
+        Task<ActionResult<List<SubjectView>>> GetAllSubjectWithoutTutorSubject(Guid tutorID);
+        Task<IActionResult> ChangeStatusForAllTutorSubject();
     }   
 }

@@ -376,6 +376,26 @@ namespace API.Controllers
             var response = await _tutorRegisterService.BlockOrUnBlockTutorByTutorID(tutorId);
             return response;
         }
+
+        ///<summary>
+        ///Lấy danh sach subject dựa trên cái tutor đã đăng kí
+        ///</summary>
+        [HttpGet("get-tutor-not-register/{tutorId}")]
+        public async Task<ActionResult<List<SubjectView>>> getTutorNotRegisterSubject(Guid tutorId)
+        {
+            var result = await _tutorRegisterService.GetAllSubjectWithoutTutorSubject(tutorId);
+            return result;
+        }
+
+        /// <summary>
+        /// Change Status of Tutor Subject When they has expried Time is end 
+        /// </summary>
+        [HttpPut("change-status-tutor-subject")]
+        public async Task<IActionResult> changeStatusTutorSubject()
+        {
+            var response = await _tutorRegisterService.ChangeStatusForAllTutorSubject();
+            return response;
+        }
     }
 }
 

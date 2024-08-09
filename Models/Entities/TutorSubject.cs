@@ -13,6 +13,7 @@ namespace Models.Entities
         public Guid TutorId { get; set; }
         public Guid SubjectId { get; set; } 
         public DateTime CreatedAt {  get; set; }
+        public DateTime? ExpeireAt { get; set; }
         public int Status { get; set; }
         public virtual Tutor? TutorNavigation {  get; set; }
         public virtual Subject? SubjectNavigation {  get; set; }

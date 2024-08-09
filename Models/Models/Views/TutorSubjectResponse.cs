@@ -11,5 +11,6 @@ namespace Models.Models.Views
         public Guid TutorSubjectId { get; set; }
         public Guid TutorId { get; set; }
         public string Title { get; set; }
+        public int? Status { get; set; }
     }
 }

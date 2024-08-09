@@ -386,17 +386,21 @@ namespace Services.Implementations
         {
             try
             {
-                var tutor = await _context.Tutors
-                        .Where(t => t.TutorId == tutorID)
-                        .Select(t => new TutorCountSubjectResponse
-                        {
-                            TotalSubject = t.TutorSubjectsNavigation.Count(),
-                        }).FirstOrDefaultAsync();
-                if (tutor.TotalSubject == 0)
-                {
-                    throw new CrudException(HttpStatusCode.NoContent,"No Subjects","");
-                }
-                return tutor;
+                var tutorCountSubjectResponse = new TutorCountSubjectResponse();
+                var totalSubject = await _context.TutorSubjects
+                    .Where(ts => ts.TutorId == tutorID)
+                    .CountAsync();
+                tutorCountSubjectResponse.TotalSubject = totalSubject;
+                tutorCountSubjectResponse.TutorSubjectActive = await _context.TutorSubjects
+                    .Where(ts => ts.TutorId == tutorID && ts.Status == (int)TutorSubjectEnum.Available)
+                    .CountAsync();
+                tutorCountSubjectResponse.TutorSubjectInactive = await _context.TutorSubjects
+                    .Where(ts => ts.TutorId == tutorID && ts.Status == (int)TutorSubjectEnum.NotAvailable)
+                    .CountAsync();
+                tutorCountSubjectResponse.TutorSubjectPending = await _context.TutorSubjects
+                    .Where(ts => ts.TutorId == tutorID && ts.Status == (int)TutorSubjectEnum.InProgress)
+                    .CountAsync();
+                return tutorCountSubjectResponse;
             }
             catch (CrudException ex)
             {
