@@ -1294,7 +1294,7 @@ namespace Services.Implementations
                     throw new CrudException(HttpStatusCode.OK, "Không tìm thấy môn học", "");
                 }
 
-                throw new CrudException(HttpStatusCode.OK, "Lấy danh sách môn học thành công", "");
+                return response;
             }
             catch (CrudException ex)
             {
