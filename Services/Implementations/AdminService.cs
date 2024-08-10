@@ -1142,7 +1142,7 @@ namespace Services.Implementations
                     ModeratorId = Guid.Parse("a8267106-edfd-4057-998a-64eac4045fec"),
                     ActionType = (int)TutorActionTypeEnum.TutorRegisterSubject,
                     CreateAt = DateTime.Now,
-                    Description = "Tutor Subject is accepted",
+                    Description = "Xác nhận môn học gia sư đăng kí",
                     Status = (int)TutorActionEnum.Accept,
                     ReponseDate = DateTime.Now,
                 };
@@ -1187,7 +1187,7 @@ namespace Services.Implementations
                     ModeratorId = Guid.Parse("a8267106-edfd-4057-998a-64eac4045fec"),
                     ActionType = (int)TutorActionTypeEnum.TutorRegisterSubject,
                     CreateAt = DateTime.Now,
-                    Description = "Tutor Subject is denied",
+                    Description = "Từ chối môn học gia sư đăng kí",
                     Status = (int)TutorActionEnum.Reject,
                     ReponseDate = DateTime.Now,
                 };

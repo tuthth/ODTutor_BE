@@ -727,6 +727,26 @@ namespace API.Controllers
             if(result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
             throw new Exception("Lỗi không xác định");
         }
+
+        /// <summary>
+        /// Accept Tutor Subjects
+        /// </summary>
+        [HttpPost("accept/tutor-subjects")]
+        public async Task<IActionResult> AcceptTutorSubjects(Guid tutorSubjectIDs)
+        {
+            await _adminService.AcceptTutorSubject(tutorSubjectIDs);
+            return Ok();
+        }
+
+        /// <summary>
+        /// Deny Tutor Subjects
+        /// </summary>
+        [HttpPost("deny/tutor-subjects")]
+        public async Task<IActionResult> DenyTutorSubjects(Guid tutorSubjectIDs)
+        {
+            await _adminService.DenyTutorSubject(tutorSubjectIDs);
+            return Ok();
+        }
     }
 }
     
