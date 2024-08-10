@@ -2,6 +2,7 @@
 using Models.Entities;
 using Models.Models.Requests;
 using Models.Models.Views;
+using Settings.Subscription;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -52,6 +53,13 @@ namespace Services.Interfaces
         Task<PageResults<TutorActionResponse>> getTutorActionResponse(PagingRequest pagingRequest);
         Task<PageResults<TutorSubjectInProgressResponse>> GetAllTutorHaveSubjectInProgress(PagingRequest pagingRequest);
         Task<List<TutorSubjectPreviewAdminResponse>> GetTutorSubjectByTutorId(Guid tutorId);
+        Task<IActionResult> GetFreeTutorSubscription();
+        Task<IActionResult> GetBasicTutorSubscription();
+        Task<IActionResult> GetPremiumTutorSubscription();
+        Task<IActionResult> UpdateTutorSubscription(TutorSubscriptionSetting setting, int choice);
+        Task<IActionResult> GetFreeStudentSubscription();
+        Task<IActionResult> GetPremiumStudentSubscription();
+        Task<IActionResult> UpdateStudentSubscription(StudentSubscriptionSetting setting, int choice);
         Task AcceptTutorSubject(Guid tutorSubjectId);
         Task DenyTutorSubject(Guid tutorSubjectId);
     }

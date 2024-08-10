@@ -1,9 +1,11 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Models.Entities;
 using Models.Models.Requests;
 using Models.Models.Views;
 using Services.Interfaces;
+using Settings.Subscription;
 
 namespace API.Controllers
 {
@@ -663,25 +665,67 @@ namespace API.Controllers
             var result = await _adminService.GetTutorSubjectByTutorId(tutorID);
             return result;
         }
-
+        [HttpGet("tutor-subscriptions/free")]
+        [AllowAnonymous]
+        public async Task<IActionResult> GetTutorSubscriptionFree() => await _adminService.GetFreeTutorSubscription();
+        [HttpGet("tutor-subscriptions/basic")]
+        [AllowAnonymous]
+        public async Task<IActionResult> GetTutorSubscriptionBasic() => await _adminService.GetBasicTutorSubscription();
+        [HttpGet("tutor-subscriptions/premium")]
+        [AllowAnonymous]
+        public async Task<IActionResult> GetTutorSubscriptionPremium() => await _adminService.GetPremiumTutorSubscription();
         /// <summary>
-        /// Accept Tutor Subject Register
+        /// 1: Free, 2: Basic, 3: Premium
         /// </summary>
-        [HttpPost("accept/tutor-subjects")]
-        public async Task<IActionResult> AcceptTutorSubjects(Guid tutorSubjectIDs)
+        /// <param name="choice"></param>
+        /// <param name="tutorSubscriptionSetting"></param>
+        /// <returns></returns>
+        /// <exception cref="Exception"></exception>
+        [HttpPut("tutor-subscriptions/update/{choice}")]
+        public async Task<IActionResult> UpdateTutorSubscription(int choice, [FromBody] TutorSubscriptionSetting tutorSubscriptionSetting)
         {
-            await _adminService.AcceptTutorSubject(tutorSubjectIDs);
-            return Ok();
+            var result = await _adminService.UpdateTutorSubscription(tutorSubscriptionSetting, choice);
+            if(result is JsonResult jsonResult)
+            {
+                return Ok(jsonResult.Value);
+            }
+            if(result is StatusCodeResult statusCodeResult)
+            {
+                if(statusCodeResult.StatusCode == 404) { return NotFound(new { Message = "Không tìm thấy gói đăng ký gia sư" }); }
+                if(statusCodeResult.StatusCode == 400) { return BadRequest(new { Message = "Dữ liệu không hợp lệ" }); }
+            }
+            if(result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
+            throw new Exception("Lỗi không xác định");
         }
 
+        [HttpGet("student-subscriptions/free")]
+        [AllowAnonymous]
+        public async Task<IActionResult> GetStudentSubscriptionFree() => await _adminService.GetFreeStudentSubscription();
+        [HttpGet("student-subscriptions/premium")]
+        [AllowAnonymous]
+        public async Task<IActionResult> GetStudentSubscriptionPremium() => await _adminService.GetPremiumStudentSubscription();
         /// <summary>
-        /// Deny Tutor Subject Register
+        /// 1: Free, 2: Premium
         /// </summary>
-        [HttpPost("deny/tutor-subjects")]
-        public async Task<IActionResult> DenyTutorSubjects(Guid tutorSubjectIDs)
+        /// <param name="choice"></param>
+        /// <param name="studentSubscriptionSetting"></param>
+        /// <returns></returns>
+        /// <exception cref="Exception"></exception>
+        [HttpPut("student-subscriptions/update/{choice}")]
+        public async Task<IActionResult> UpdateStudentSubscription(int choice, [FromBody] StudentSubscriptionSetting studentSubscriptionSetting)
         {
-            await _adminService.DenyTutorSubject(tutorSubjectIDs);
-            return Ok();
+            var result = await _adminService.UpdateStudentSubscription(studentSubscriptionSetting, choice);
+            if(result is JsonResult jsonResult)
+            {
+                return Ok(jsonResult.Value);
+            }
+            if(result is StatusCodeResult statusCodeResult)
+            {
+                if(statusCodeResult.StatusCode == 404) { return NotFound(new { Message = "Không tìm thấy gói đăng ký học sinh" }); }
+                if(statusCodeResult.StatusCode == 400) { return BadRequest(new { Message = "Dữ liệu không hợp lệ" }); }
+            }
+            if(result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
+            throw new Exception("Lỗi không xác định");
         }
     }
 }
