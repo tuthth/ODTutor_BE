@@ -2,18 +2,22 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Models.Entities;
 using Models.Enumerables;
 using Models.Models.Emails;
 using Models.Models.Requests;
 using Models.Models.Views;
 using Models.PageHelper;
+using Newtonsoft.Json;
 using Services.Interfaces;
+using Settings.Subscription;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 
@@ -21,8 +25,18 @@ namespace Services.Implementations
 {
     public class AdminService : BaseService, IAdminService
     {
+        private readonly Dictionary<string, TutorSubscriptionSetting> _subscriptions;
+        private readonly Dictionary<string, StudentSubscriptionSetting> _studentSubscriptions;
         public AdminService(ODTutorContext odContext, IMapper mapper) : base(odContext, mapper)
         {
+            _subscriptions = new Dictionary<string, TutorSubscriptionSetting>();
+            _subscriptions["mienPhi"] = _tutorSubscriptionConfiguration.GetSection("mienPhi").Get<TutorSubscriptionSetting>();
+            _subscriptions["traiNghiem"] = _tutorSubscriptionConfiguration.GetSection("traiNghiem").Get<TutorSubscriptionSetting>();
+            _subscriptions["thanhVien"] = _tutorSubscriptionConfiguration.GetSection("thanhVien").Get<TutorSubscriptionSetting>();
+
+            _studentSubscriptions = new Dictionary<string, StudentSubscriptionSetting>();
+            _studentSubscriptions["mienPhi"] = _studentSubscriptionConfiguration.GetSection("mienPhi").Get<StudentSubscriptionSetting>();
+            _studentSubscriptions["thanhVien"] = _studentSubscriptionConfiguration.GetSection("thanhVien").Get<StudentSubscriptionSetting>();
         }
         public async Task<ActionResult<List<User>>> GetAllUsers()
         {
@@ -1103,6 +1117,68 @@ namespace Services.Implementations
             {
                 throw new CrudException(HttpStatusCode.InternalServerError, "Internal Server Error", "");
             }
+        }
+        public async Task<IActionResult> GetFreeTutorSubscription() => new JsonResult(_subscriptions["mienPhi"]);
+        public async Task<IActionResult> GetBasicTutorSubscription() => new JsonResult(_subscriptions["traiNghiem"]);
+        public async Task<IActionResult> GetPremiumTutorSubscription() => new JsonResult(_subscriptions["thanhVien"]);
+        public async Task<IActionResult> UpdateTutorSubscription(TutorSubscriptionSetting setting, int choice)
+        {
+            List<TutorSubscriptionSetting> tutorSubscriptionSettings = new List<TutorSubscriptionSetting>();
+            TutorSubscriptionSetting subscriptionSetting = new TutorSubscriptionSetting();
+            switch (choice)
+            {
+                case 1:
+                    subscriptionSetting = _subscriptions["mienPhi"];
+                    break;
+                case 2:
+                    subscriptionSetting = _subscriptions["traiNghiem"];
+                    break;
+                case 3:
+                    subscriptionSetting = _subscriptions["thanhVien"];
+                    break;
+                default:
+                    return new StatusCodeResult(400);
+            }
+            subscriptionSetting.Price = setting.Price;
+            subscriptionSetting.RequestViewPerDay = setting.RequestViewPerDay;
+            subscriptionSetting.ContactPerDay = setting.ContactPerDay;
+
+            await SaveTutorSubscriptionsAsync();
+            return new JsonResult(subscriptionSetting);
+        }
+        private async Task SaveTutorSubscriptionsAsync()
+        {
+            var json = JsonConvert.SerializeObject(_subscriptions, Formatting.Indented);
+            await File.WriteAllTextAsync("tutorSubscription.json", json);
+        }
+        public async Task<IActionResult> GetFreeStudentSubscription() => new JsonResult(_studentSubscriptions["mienPhi"]);
+        public async Task<IActionResult> GetPremiumStudentSubscription() => new JsonResult(_studentSubscriptions["thanhVien"]);
+        public async Task<IActionResult> UpdateStudentSubscription(StudentSubscriptionSetting setting, int choice)
+        {
+            List<StudentSubscriptionSetting> studentSubscriptionSettings = new List<StudentSubscriptionSetting>();
+            StudentSubscriptionSetting subscriptionSetting = new StudentSubscriptionSetting();
+            switch (choice)
+            {
+                case 1:
+                    subscriptionSetting = _studentSubscriptions["mienPhi"];
+                    break;
+                case 2:
+                    subscriptionSetting = _studentSubscriptions["thanhVien"];
+                    break;
+                default:
+                    return new StatusCodeResult(400);
+            }
+            subscriptionSetting.Price = setting.Price;
+            subscriptionSetting.RequestCreatePerDay = setting.RequestCreatePerDay;
+            subscriptionSetting.ContactPerDay = setting.ContactPerDay;
+
+            await SaveStudentSubscriptionsAsync();
+            return new JsonResult(subscriptionSetting);
+        }
+        private async Task SaveStudentSubscriptionsAsync()
+        {
+            var json = JsonConvert.SerializeObject(_subscriptions, Formatting.Indented);
+            await File.WriteAllTextAsync("studentSubscription.json", json);
         }
     }
 }

@@ -1,0 +1,23 @@
+{
+  "mienPhi": {
+    "name": "Miễn phí",
+    "price": 0,
+    "requestViewPerDay": 10,
+    "contactPerDay": 5,
+    "viewType": "latest-only"
+  },
+  "traiNghiem": {
+    "name": "Trải nghiệm",
+    "price": 49000,
+    "requestViewPerDay": 20,
+    "contactPerDay": 20,
+    "viewType": "unlimited"
+  },
+  "thanhVien": {
+    "name": "Miễn phí",
+    "price": 149000,
+    "requestViewPerDay": 20,
+    "contactPerDay": 20,
+    "viewType": "unlimited"
+  }
+}
