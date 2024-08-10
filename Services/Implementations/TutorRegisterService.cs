@@ -69,6 +69,8 @@ namespace Services.Implementations
                     tutorSubject1.TutorId = tutor.TutorId;
                     tutorSubject1.SubjectId = subjectID;
                     tutorSubject1.CreatedAt = DateTime.UtcNow.AddHours(7);
+                    tutorSubject1.ExpeireAt = DateTime.UtcNow.AddHours(7);
+                    tutorSubject1.Status = (Int32)TutorSubjectEnum.Available;
                     tutorSubject.Add(tutorSubject1);
                 }
                 if (tutorSubject.Count < 0)
