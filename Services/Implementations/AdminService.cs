@@ -1197,6 +1197,7 @@ namespace Services.Implementations
                     Subject = "Môn học bị từ chối",
                     Body = "Môn học của bạn đã bị từ chối. Vui lòng kiểm tra lại thông tin và gửi lại cho chúng tôi. Chúc bạn có một ngày tốt lành!"
                 });
+                _context.TutorActions.Add(tutorAction);
                 _context.TutorSubjects.Remove(tutorSubject);
                 _context.SaveChanges();
                 throw new CrudException(HttpStatusCode.OK, "OK", "Tutor Subject is denied");
