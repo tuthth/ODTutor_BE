@@ -10,7 +10,7 @@
     <PackageReference Include="AutoMapper" Version="13.0.1" />
     <PackageReference Include="Emgu.CV" Version="4.9.0.5494" />
     <PackageReference Include="Emgu.CV.Bitmap" Version="4.9.0.5494" />
-    <PackageReference Include="FirebaseAdmin" Version="3.0.0" />
+    <PackageReference Include="FirebaseAdmin" Version="2.4.1" />
     <PackageReference Include="FireSharp" Version="2.0.4" />
     <PackageReference Include="Google.Apis.Calendar.v3" Version="1.68.0.3473" />
     <PackageReference Include="Google.Cloud.Firestore" Version="3.8.0" />
