@@ -623,5 +623,20 @@ namespace API.Controllers
             await _adminService.DenyTutorExperience(tutorExperienceIDs);
             return Ok();
         }
+
+        /// <summary>
+        /// Get Tutor Action Paging 
+        /// </summary>
+        [HttpGet("get/tutor-action-response")]
+        public async Task<ActionResult<PageResults<TutorActionResponse>>> GetTutorActionResponse(int page, int pageSize)
+        {
+            var request = new PagingRequest
+            {
+                Page = page,
+                PageSize = pageSize
+            };
+            var result = await _adminService.getTutorActionResponse(request);
+            return result;
+        }
     }
 }

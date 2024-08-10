@@ -983,6 +983,50 @@ namespace Services.Implementations
             }
         }
 
+        // Get All Tutor Action Logs
+        public async Task<PageResults<TutorActionResponse>> getTutorActionResponse (PagingRequest pagingRequest)
+        {
+            try
+            {
+               var tutorActionLogs = await _context.TutorActions
+              .Include(c => c.TutorNavigation)
+              .Include(c => c.TutorNavigation.UserNavigation)
+              .Include(c => c.ModeratorNavigation)
+              .Include(c => c.ModeratorNavigation.UserNavigation)
+              .ToListAsync();
+                if (tutorActionLogs == null)
+                {
+                    throw new CrudException(HttpStatusCode.NotFound, "Not Found", "Tutor Action Logs not found");
+                }
+                List<TutorActionResponse> response = new List<TutorActionResponse>();
+                foreach (var tutorActionLog in tutorActionLogs)
+                {
+                    TutorActionResponse tutorAccountResponse = new TutorActionResponse();
+                    tutorAccountResponse.TutorId = tutorActionLog.TutorId;
+                    tutorAccountResponse.tutorName = tutorActionLog.TutorNavigation.UserNavigation.Name;
+                    tutorAccountResponse.ModeratorId = tutorActionLog.ModeratorId;
+                    tutorAccountResponse.moderatorName = tutorActionLog.ModeratorNavigation.UserNavigation.Name;
+                    tutorAccountResponse.ActionType = tutorActionLog.ActionType;
+                    tutorAccountResponse.CreateAt = tutorActionLog.CreateAt;
+                    tutorAccountResponse.Description = tutorActionLog.Description;
+                    tutorAccountResponse.TutorActionId = tutorActionLog.TutorActionId;
+                    tutorAccountResponse.ReponseDate = tutorActionLog.ReponseDate;
+                    tutorAccountResponse.MeetingLink = tutorActionLog.MeetingLink;
+                    tutorAccountResponse.Status = tutorActionLog.Status;
+                    response.Add(tutorAccountResponse);
+                }
+                var pagingResponse = PagingHelper<TutorActionResponse>.Paging(response, pagingRequest.Page, pagingRequest.PageSize);
+                return pagingResponse;
+            } catch (CrudException ex)
+            {
+                throw ex;
+            } catch (Exception ex)
+            {
+                throw new CrudException(HttpStatusCode.InternalServerError, "Internal Server Error", "");
+            }
+
+        }
+
 
     }
 }
