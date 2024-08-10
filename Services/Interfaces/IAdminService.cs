@@ -50,5 +50,7 @@ namespace Services.Interfaces
         Task DenyTutorCertificate(List<Guid> tutorCertificateId);
         Task DenyTutorExperience(List<Guid> tutorExperienceId);
         Task<PageResults<TutorActionResponse>> getTutorActionResponse(PagingRequest pagingRequest);
+        Task<PageResults<TutorSubjectInProgressResponse>> GetAllTutorHaveSubjectInProgress(PagingRequest pagingRequest);
+        Task<List<TutorSubjectPreviewAdminResponse>> GetTutorSubjectByTutorId(Guid tutorId);
     }
 }

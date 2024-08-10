@@ -856,19 +856,20 @@ namespace Services.Implementations
                     {
                         To = user.Email,
                         Subject = "Chứng chỉ đã được xác minh",
-                        Body = "Chứng chỉ của bạn đã được hệ thống xác minh và công nhận. Kiểm tra lại nhé nếu có gì sai sót liên hệ với chúng tôi nhé. Chúc bạn có một ngày tốt lành!" 
+                        Body = "Chứng chỉ của bạn đã được hệ thống xác minh và công nhận. Kiểm tra lại nhé nếu có gì sai sót liên hệ với chúng tôi nhé. Chúc bạn có một ngày tốt lành!"
                     });
 
                     _context.TutorCertificates.Update(tutorCertificate);
                     throw new CrudException(HttpStatusCode.OK, "OK", "Tutor Certificate is accepted");
                 }
-            } catch(CrudException ex)
+            }
+            catch (CrudException ex)
             {
                 throw ex;
             }
             catch (Exception ex)
             {
-                throw new CrudException(HttpStatusCode.InternalServerError,"Internal Server Error","");
+                throw new CrudException(HttpStatusCode.InternalServerError, "Internal Server Error", "");
             }
         }
 
@@ -984,16 +985,16 @@ namespace Services.Implementations
         }
 
         // Get All Tutor Action Logs
-        public async Task<PageResults<TutorActionResponse>> getTutorActionResponse (PagingRequest pagingRequest)
+        public async Task<PageResults<TutorActionResponse>> getTutorActionResponse(PagingRequest pagingRequest)
         {
             try
             {
-               var tutorActionLogs = await _context.TutorActions
-              .Include(c => c.TutorNavigation)
-              .Include(c => c.TutorNavigation.UserNavigation)
-              .Include(c => c.ModeratorNavigation)
-              .Include(c => c.ModeratorNavigation.UserNavigation)
-              .ToListAsync();
+                var tutorActionLogs = await _context.TutorActions
+               .Include(c => c.TutorNavigation)
+               .Include(c => c.TutorNavigation.UserNavigation)
+               .Include(c => c.ModeratorNavigation)
+               .Include(c => c.ModeratorNavigation.UserNavigation)
+               .ToListAsync();
                 if (tutorActionLogs == null)
                 {
                     throw new CrudException(HttpStatusCode.NotFound, "Not Found", "Tutor Action Logs not found");
@@ -1017,16 +1018,91 @@ namespace Services.Implementations
                 }
                 var pagingResponse = PagingHelper<TutorActionResponse>.Paging(response, pagingRequest.Page, pagingRequest.PageSize);
                 return pagingResponse;
-            } catch (CrudException ex)
+            }
+            catch (CrudException ex)
             {
                 throw ex;
-            } catch (Exception ex)
+            }
+            catch (Exception ex)
             {
                 throw new CrudException(HttpStatusCode.InternalServerError, "Internal Server Error", "");
             }
 
         }
 
+        // Get Tutor Need To Accept 
+        public async Task<PageResults<TutorSubjectInProgressResponse>> GetAllTutorHaveSubjectInProgress(PagingRequest pagingRequest)
+        {
+            try
+            {
+                var tutors = await _context.Tutors
+              .Include(c => c.UserNavigation)
+              .Include(c => c.TutorSubjectsNavigation)
+              .Where(c => c.TutorSubjectsNavigation.Any(s => s.Status == (int)TutorSubjectEnum.InProgress))
+              .ToListAsync();
+                if (tutors == null)
+                {
+                    throw new CrudException(HttpStatusCode.NotFound, "Not Found", "Tutor not found");
+                }
+                List<TutorSubjectInProgressResponse> response = new List<TutorSubjectInProgressResponse>();
+                foreach (var tutor in tutors)
+                {
+                    TutorSubjectInProgressResponse tutorSubjectInProgressResponse = new TutorSubjectInProgressResponse();
+                    tutorSubjectInProgressResponse.TutorId = tutor.TutorId;
+                    tutorSubjectInProgressResponse.TutorName = tutor.UserNavigation.Name;
+                    tutorSubjectInProgressResponse.TutorAvatar = tutor.UserNavigation.ImageUrl;
+                    tutorSubjectInProgressResponse.Status = tutor.Status;
+                    tutorSubjectInProgressResponse.TutorEmail = tutor.UserNavigation.Email;
+                    response.Add(tutorSubjectInProgressResponse);
+                }
+                var pagingResponse = PagingHelper<TutorSubjectInProgressResponse>.Paging(response, pagingRequest.Page, pagingRequest.PageSize);
+                return pagingResponse;
+            }
+            catch (CrudException ex)
+            {
+                throw ex;
+            }
+            catch (Exception ex)
+            {
+                throw new CrudException(HttpStatusCode.InternalServerError, "Internal Server Error", "");
+            }
+        }
 
+        // Get TutorSubjectNeedToAccept By TutorId
+        public async Task<List<TutorSubjectPreviewAdminResponse>> GetTutorSubjectByTutorId (Guid tutorId)
+        {
+            try
+            {
+                var tutorSubjects = _context.TutorSubjects
+                    .Include(c => c.SubjectNavigation)
+                    .Include(c => c.TutorNavigation)
+                    .Include(c => c.TutorNavigation.UserNavigation)
+                    .Where(c => c.TutorId == tutorId && c.Status == (int)TutorSubjectEnum.InProgress)
+                    .ToList();
+                if (tutorSubjects == null)
+                {
+                    throw new CrudException(HttpStatusCode.NotFound, "Not Found", "Tutor Subject not found");
+                }
+                List<TutorSubjectPreviewAdminResponse> response = new List<TutorSubjectPreviewAdminResponse>();
+                foreach (var tutorSubject in tutorSubjects)
+                {
+                    TutorSubjectPreviewAdminResponse tutorSubjectPreviewAdminResponse = new TutorSubjectPreviewAdminResponse();
+                    tutorSubjectPreviewAdminResponse.TutorSubjectId = tutorSubject.TutorSubjectId;
+                    tutorSubjectPreviewAdminResponse.TutorId = tutorSubject.TutorId;
+                    tutorSubjectPreviewAdminResponse.TutorName = tutorSubject.TutorNavigation.UserNavigation.Name;
+                    tutorSubjectPreviewAdminResponse.TutorAvatar = tutorSubject.TutorNavigation.UserNavigation.ImageUrl;
+                    tutorSubjectPreviewAdminResponse.SubjectName = tutorSubject.SubjectNavigation.Title;
+                    response.Add(tutorSubjectPreviewAdminResponse);
+                }
+                return response;
+            } catch(CrudException ex)
+            {
+                throw ex;
+            }
+            catch (Exception ex)
+            {
+                throw new CrudException(HttpStatusCode.InternalServerError, "Internal Server Error", "");
+            }
+        }
     }
 }

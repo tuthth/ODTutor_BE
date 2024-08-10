@@ -638,5 +638,30 @@ namespace API.Controllers
             var result = await _adminService.getTutorActionResponse(request);
             return result;
         }
+
+        /// <summary>
+        /// Get Tutor List Which have tutosubects ion processing
+        /// </summary>
+        [HttpGet("get-tutor-subjectss")]
+        public async Task<PageResults<TutorSubjectInProgressResponse>> GetTutorSubjects(int page, int pageSize)
+        {   
+            var request = new PagingRequest
+            {
+                Page = page,
+                PageSize = pageSize
+            }; 
+            var result = await _adminService.GetAllTutorHaveSubjectInProgress(request);
+            return result;
+        }
+
+        /// <summary>
+        /// Get TutorSubject By TutorID In Processing
+        /// </summary>
+        [HttpGet("get-tutor-subjects/{tutorID}")]
+        public async Task<List<TutorSubjectPreviewAdminResponse>> GetTutorSubjectByTutorID(Guid tutorID)
+        {
+            var result = await _adminService.GetTutorSubjectByTutorId(tutorID);
+            return result;
+        }
     }
 }
