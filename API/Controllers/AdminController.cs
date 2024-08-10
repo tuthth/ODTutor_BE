@@ -663,5 +663,26 @@ namespace API.Controllers
             var result = await _adminService.GetTutorSubjectByTutorId(tutorID);
             return result;
         }
+
+        /// <summary>
+        /// Accept Tutor Subject Register
+        /// </summary>
+        [HttpPost("accept/tutor-subjects")]
+        public async Task<IActionResult> AcceptTutorSubjects(Guid tutorSubjectIDs)
+        {
+            await _adminService.AcceptTutorSubject(tutorSubjectIDs);
+            return Ok();
+        }
+
+        /// <summary>
+        /// Deny Tutor Subject Register
+        /// </summary>
+        [HttpPost("deny/tutor-subjects")]
+        public async Task<IActionResult> DenyTutorSubjects(Guid tutorSubjectIDs)
+        {
+            await _adminService.DenyTutorSubject(tutorSubjectIDs);
+            return Ok();
+        }
     }
 }
+    

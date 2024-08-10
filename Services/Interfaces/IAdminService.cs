@@ -52,5 +52,7 @@ namespace Services.Interfaces
         Task<PageResults<TutorActionResponse>> getTutorActionResponse(PagingRequest pagingRequest);
         Task<PageResults<TutorSubjectInProgressResponse>> GetAllTutorHaveSubjectInProgress(PagingRequest pagingRequest);
         Task<List<TutorSubjectPreviewAdminResponse>> GetTutorSubjectByTutorId(Guid tutorId);
+        Task AcceptTutorSubject(Guid tutorSubjectId);
+        Task DenyTutorSubject(Guid tutorSubjectId);
     }
 }

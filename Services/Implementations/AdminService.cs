@@ -1069,7 +1069,7 @@ namespace Services.Implementations
         }
 
         // Get TutorSubjectNeedToAccept By TutorId
-        public async Task<List<TutorSubjectPreviewAdminResponse>> GetTutorSubjectByTutorId (Guid tutorId)
+        public async Task<List<TutorSubjectPreviewAdminResponse>> GetTutorSubjectByTutorId(Guid tutorId)
         {
             try
             {
@@ -1095,7 +1095,99 @@ namespace Services.Implementations
                     response.Add(tutorSubjectPreviewAdminResponse);
                 }
                 return response;
-            } catch(CrudException ex)
+            }
+            catch (CrudException ex)
+            {
+                throw ex;
+            }
+            catch (Exception ex)
+            {
+                throw new CrudException(HttpStatusCode.InternalServerError, "Internal Server Error", "");
+            }
+        }
+
+        // Accept Tutor Subject by Moderator or Admin
+        public async Task AcceptTutorSubject(Guid tutorSubjectId)
+        {
+            try
+            {
+                var tutorSubject = await _context.TutorSubjects.FirstOrDefaultAsync(c => c.TutorSubjectId == tutorSubjectId);
+                if (tutorSubject == null)
+                {
+                    throw new CrudException(HttpStatusCode.NotFound, "Not Found", "Tutor Subject not found");
+                }
+
+                tutorSubject.Status = (int)TutorSubjectEnum.Available;
+                // Gửi mail cho tutor khi được accept 
+                var tutor = await _context.Tutors.FirstOrDefaultAsync(c => c.TutorId == tutorSubject.TutorId);
+                var user = await _context.Users.FirstOrDefaultAsync(c => c.Id == tutor.UserId);
+                // Ghi log tutor action 
+                var tutorAction = new TutorAction()
+                {
+                    TutorId = tutor.TutorId,
+                    ModeratorId = Guid.Parse("a8267106-edfd-4057-998a-64eac4045fec"),
+                    ActionType = (int)TutorActionTypeEnum.TutorRegisterSubject,
+                    CreateAt = DateTime.Now,
+                    Description = "Tutor Subject is accepted",
+                    Status = (int)TutorActionEnum.Accept,
+                    ReponseDate = DateTime.Now,
+                };
+                await _appExtension.SendMail(new MailContent()
+                {
+                    To = user.Email,
+                    Subject = "Môn học đã được xác nhận",
+                    Body = "Môn học của bạn đã được hệ thống xác nhận và công nhận. Kiểm tra lại nhé nếu có gì sai sót liên hệ với chúng tôi nhé. Chúc bạn có một ngày tốt lành!"
+                });
+                _context.TutorActions.Add(tutorAction);
+                _context.TutorSubjects.Update(tutorSubject);
+                _context.SaveChanges();
+                throw new CrudException(HttpStatusCode.OK, "OK", "Tutor Subject is accepted");
+            }
+            catch (CrudException ex)
+            {
+                throw ex;
+            }
+            catch (Exception ex)
+            {
+                throw new CrudException(HttpStatusCode.InternalServerError, "Internal Server Error", "");
+            }
+        }
+
+        // Deny Tutor Subject by Moderator or Admin
+        public async Task DenyTutorSubject(Guid tutorSubjectId)
+        {
+            try
+            {
+                var tutorSubject = await _context.TutorSubjects.FirstOrDefaultAsync(c => c.TutorSubjectId == tutorSubjectId);
+                if (tutorSubject == null)
+                {
+                    throw new CrudException(HttpStatusCode.NotFound, "Not Found", "Tutor Subject not found");
+                }
+                // Gửi mail cho tutor khi bị từ chối
+                var tutor = await _context.Tutors.FirstOrDefaultAsync(c => c.TutorId == tutorSubject.TutorId);
+                var user = await _context.Users.FirstOrDefaultAsync(c => c.Id == tutor.UserId);
+                // Ghi log tutor action
+                var tutorAction = new TutorAction()
+                {
+                    TutorId = tutor.TutorId,
+                    ModeratorId = Guid.Parse("a8267106-edfd-4057-998a-64eac4045fec"),
+                    ActionType = (int)TutorActionTypeEnum.TutorRegisterSubject,
+                    CreateAt = DateTime.Now,
+                    Description = "Tutor Subject is denied",
+                    Status = (int)TutorActionEnum.Reject,
+                    ReponseDate = DateTime.Now,
+                };
+                await _appExtension.SendMail(new MailContent()
+                {
+                    To = user.Email,
+                    Subject = "Môn học bị từ chối",
+                    Body = "Môn học của bạn đã bị từ chối. Vui lòng kiểm tra lại thông tin và gửi lại cho chúng tôi. Chúc bạn có một ngày tốt lành!"
+                });
+                _context.TutorSubjects.Remove(tutorSubject);
+                _context.SaveChanges();
+                throw new CrudException(HttpStatusCode.OK, "OK", "Tutor Subject is denied");
+            }
+            catch (CrudException ex)
             {
                 throw ex;
             }
