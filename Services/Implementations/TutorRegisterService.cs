@@ -58,8 +58,10 @@ namespace Services.Implementations
                 tutor.Status = (Int32)TutorEnum.Inprocessing; // "2" is InProcessing
                 tutor.CreateAt = DateTime.UtcNow.AddHours(7);
                 tutor.UpdateAt = DateTime.UtcNow.AddHours(7);
+                tutor.HasBoughtExperiencedPackage = false;
+                tutor.CountMessageChat = 0;
+                tutor.HasBoughtSubscription = false;
                 _context.Tutors.Add(tutor);
-                await _context.SaveChangesAsync();
                 // Add Tutor Subject List
                 List<TutorSubject> tutorSubject = new List<TutorSubject>();
                 foreach (var subjectID in tutorSubjectId)
@@ -86,6 +88,7 @@ namespace Services.Implementations
                 {
                     TutorID = tutor.TutorId
                 };
+                await _context.SaveChangesAsync();
                 return response;
             }
             catch (Exception ex)
@@ -1209,7 +1212,7 @@ namespace Services.Implementations
                 {
                     throw new CrudException(HttpStatusCode.OK, "Không tìm thấy slot học", "");
                 }
-                if(tutorSlot.Status == (Int32)TutorSlotAvailabilityEnum.Available)
+                if(tutorSlot.Status == (Int32)TutorSlotAvailabilityEnum.NotAvailable)
                 {
                     throw new CrudException(HttpStatusCode.OK, "Slot học đã được đặt, không thể xóa", "");
                 }
