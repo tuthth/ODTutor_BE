@@ -1241,7 +1241,8 @@ namespace Services.Implementations
         private async Task SaveTutorSubscriptionsAsync()
         {
             var json = JsonConvert.SerializeObject(_subscriptions, Formatting.Indented);
-            await File.WriteAllTextAsync("tutorSubscription.json", json);
+            string path = Path.Combine(Directory.GetCurrentDirectory(), "Properties", "tutorSubscription.json");
+            await File.WriteAllTextAsync(path, json);
         }
         public async Task<IActionResult> GetFreeStudentSubscription() => new JsonResult(_studentSubscriptions["mienPhi"]);
         public async Task<IActionResult> GetPremiumStudentSubscription() => new JsonResult(_studentSubscriptions["thanhVien"]);
@@ -1270,7 +1271,8 @@ namespace Services.Implementations
         private async Task SaveStudentSubscriptionsAsync()
         {
             var json = JsonConvert.SerializeObject(_subscriptions, Formatting.Indented);
-            await File.WriteAllTextAsync("studentSubscription.json", json);
+            string path = Path.Combine(Directory.GetCurrentDirectory(), "Properties", "studentSubscription.json");
+            await File.WriteAllTextAsync(path, json);
         }
 
         // Get All Tutor Subscription and Paging 
