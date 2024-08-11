@@ -747,6 +747,61 @@ namespace API.Controllers
             await _adminService.DenyTutorSubject(tutorSubjectIDs);
             return Ok();
         }
+
+        /// <summary>
+        /// Lấy hết danh sách các tutorSub and Paging
+        /// </summary>
+        [HttpGet("get-all-tutor-subscriptions")]
+        public async Task<ActionResult<PageResults<TutorSubscriptionSetting>>> GetAllTutorSubscriptions(int page, int pageSize)
+        {
+            var request = new PagingRequest
+            {
+                Page = page,
+                PageSize = pageSize
+            };
+            var result = await _adminService.GetAllTutorSubscription(request);
+            return Ok(result);
+        }
+
+        /// <summary>
+        /// Tạo một cái tutorSubscriptions
+        /// </summary>
+        [HttpPost("create-tutor-subscriptions")]
+        public async Task<IActionResult> CreateTutorSubscriptions([FromBody] TutorSubscriptionRequest tutorSubscriptionSetting)
+        {
+            await _adminService.CreateTutorSubscription(tutorSubscriptionSetting);
+            return Ok();
+        }
+
+        /// <summary>
+        /// Thay đổi trạng thái của tutor subscriptions
+        /// </summary>
+        [HttpPut("change-tutor-subscriptions-status")]
+        public async Task<IActionResult> ChangeTutorSubscriptionsStatus(string name)
+        {
+            await _adminService.UpdateTutorSubscriptionStatus(name);
+            return Ok();
+        }
+
+        /// <summary>
+        /// Cập nhật tutor subscriptions
+        /// </summary>
+        [HttpPost("update-tutor-subscriptions")]
+        public async Task<IActionResult> UpdateTutorSubscriptions([FromBody] TutorSubscriptionRequest tutorSubscriptionSetting, string name)
+        {
+            await _adminService.UpdateTutorSubscription(tutorSubscriptionSetting, name);
+            return Ok();
+        }
+
+        /// <summary>
+        /// Xóa tutor Subscription 
+        /// </summary>
+        [HttpDelete("delete-tutor-subscriptions")]
+        public async Task<IActionResult> DeleteTutorSubscriptions(string name)
+        {
+            await _adminService.RemoveTutorSubscription(name);
+            return Ok();
+        }
     }
 }
     

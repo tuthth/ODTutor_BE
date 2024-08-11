@@ -4,17 +4,14 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Settings.Subscription
+namespace Models.Models.Requests
 {
-    public class TutorSubscriptionSetting
-    {   
-        public string Name {get; set;}
+    public class TutorSubscriptionRequest
+    {
         public string TutorNameSubscription { get; set; }
         public String Description { get; set; }
-        public decimal Price {get; set;}
-        public int Type {get; set;}
-        public int Status { get; set; }
-        public DateTime CreatedAt { get; set; }
+        public decimal Price { get; set; }
+        public int Types { get; set; }
         public List<String> MutualDescriptions { get; set; }
         public List<String> PrivateDescriptions { get; set; }
     }

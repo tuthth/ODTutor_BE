@@ -19,6 +19,7 @@ using System.Net;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
+using static Models.Enumerables.TutorSubscriptionEnum;
 
 
 namespace Services.Implementations
@@ -1233,8 +1234,6 @@ namespace Services.Implementations
                     return new StatusCodeResult(400);
             }
             subscriptionSetting.Price = setting.Price;
-            subscriptionSetting.RequestViewPerDay = setting.RequestViewPerDay;
-            subscriptionSetting.ContactPerDay = setting.ContactPerDay;
 
             await SaveTutorSubscriptionsAsync();
             return new JsonResult(subscriptionSetting);
@@ -1273,5 +1272,144 @@ namespace Services.Implementations
             var json = JsonConvert.SerializeObject(_subscriptions, Formatting.Indented);
             await File.WriteAllTextAsync("studentSubscription.json", json);
         }
+
+        // Get All Tutor Subscription and Paging 
+        public async Task<PageResults<TutorSubscriptionSetting>> GetAllTutorSubscription(PagingRequest pagingRequest)
+        {
+            try
+            {
+                List<TutorSubscriptionSetting> tutorSubscriptionSettings = new List<TutorSubscriptionSetting>();
+                foreach (var subscription in _subscriptions)
+                {
+                    var setting = subscription.Value;
+                    setting.Name = subscription.Key;
+                    tutorSubscriptionSettings.Add(setting);
+                }
+                var pagingResponse = PagingHelper<TutorSubscriptionSetting>.Paging(tutorSubscriptionSettings, pagingRequest.Page, pagingRequest.PageSize);
+                return pagingResponse;
+            }
+            catch (Exception ex)
+            {
+                throw new CrudException(HttpStatusCode.InternalServerError, "Internal Server Error", "");
+            }
+        }
+
+        // Create New Tutor Subscription
+        public async Task<IActionResult> CreateTutorSubscription(TutorSubscriptionRequest setting)
+        {
+            try
+            {
+                // Thêm cái mutalDescription và Private Description vào đây
+                List<String> mutualDescriptions = new List<String>();
+                List<String> privateDescriptions = new List<String>();
+                foreach ( var textString in setting.MutualDescriptions)
+                {
+                    mutualDescriptions.Add(textString);
+                }
+                foreach (var textString in setting.PrivateDescriptions)
+                {
+                    privateDescriptions.Add(textString);
+                }
+                TutorSubscriptionSetting settings = new TutorSubscriptionSetting()
+                {   
+                    Name = GenerateRandomCode(),
+                    TutorNameSubscription = setting.TutorNameSubscription,
+                    Price = setting.Price,
+                    Type = setting.Types,
+                    CreatedAt = DateTime.Now,
+                    Status = (Int32)TutorSubscriptionStatusEnum.Inactive,
+                    MutualDescriptions = mutualDescriptions,
+                    PrivateDescriptions = privateDescriptions
+                };
+                _subscriptions.Add(settings.Name, settings);
+                await SaveTutorSubscriptionsAsync();
+                return new JsonResult(settings);
+            }
+            catch (Exception ex)
+            {
+                throw new CrudException(HttpStatusCode.InternalServerError, "Internal Server Error", "");
+            }
+        }
+
+        // Update Status Tutor Subscription Inactive or Active 
+        public async Task<IActionResult> UpdateTutorSubscriptionStatus(string name)
+        {
+            try
+            {
+                if (!_subscriptions.ContainsKey(name))
+                {
+                    throw new CrudException(HttpStatusCode.NotFound, "Not Found", "Tutor Subscription not found");
+                }
+                if (_subscriptions[name].Status == (Int32)TutorSubscriptionStatusEnum.Active)
+                {
+                    _subscriptions[name].Status = (Int32)TutorSubscriptionStatusEnum.Inactive;
+                }
+                else
+                {
+                    _subscriptions[name].Status = (Int32)TutorSubscriptionStatusEnum.Active;
+                }
+                await SaveTutorSubscriptionsAsync();
+                // Trả về mã trạng thái OK với thông báo thành công
+                return new JsonResult(_subscriptions[name]);
+            }
+            catch (Exception ex)
+            {
+                // Trả về mã trạng thái InternalServerError với thông báo lỗi
+                throw new CrudException(HttpStatusCode.InternalServerError, "Internal Server Error", "");
+            }
+        }
+
+        // Update Tutor Subscription
+        public async Task<IActionResult> UpdateTutorSubscription(TutorSubscriptionRequest setting, string name)
+        {
+            try
+            {
+                if (!_subscriptions.ContainsKey(name))
+                {
+                    throw new CrudException(HttpStatusCode.NotFound, "Not Found", "Tutor Subscription not found");
+                }
+                _subscriptions[name].TutorNameSubscription = setting.TutorNameSubscription;
+                _subscriptions[name].Price = setting.Price;
+                _subscriptions[name].Type = setting.Types;
+                _subscriptions[name].MutualDescriptions = setting.MutualDescriptions;
+                _subscriptions[name].PrivateDescriptions = setting.PrivateDescriptions;
+                await SaveTutorSubscriptionsAsync();
+                return new JsonResult(_subscriptions[name]);
+            }
+            catch (Exception ex)
+            {
+                throw new CrudException(HttpStatusCode.InternalServerError, "Internal Server Error", "");
+            }
+        }
+
+        // Remove Tutor Subscription
+        public async Task<IActionResult> RemoveTutorSubscription(string name)
+        {
+            try
+            {
+                if (!_subscriptions.ContainsKey(name))
+                {
+                    throw new CrudException(HttpStatusCode.NotFound, "Not Found", "Tutor Subscription not found");
+                }
+                _subscriptions.Remove(name);
+                await SaveTutorSubscriptionsAsync();
+                return new StatusCodeResult(200);
+            }
+            catch (Exception ex)
+            {
+                throw new CrudException(HttpStatusCode.InternalServerError, "Internal Server Error", "");
+            }
+        }
+
+        // Generate Tutor Subscription
+        private static string GenerateRandomCode()
+        {
+            Random random = new Random();
+            int firstNumber = random.Next(100, 1000); // Số ngẫu nhiên từ 100 đến 999
+            int secondNumber = random.Next(100, 1000); // Số ngẫu nhiên từ 100 đến 999
+
+            return $"#SUB{firstNumber}{secondNumber}";
+        }
+
     }
 }

@@ -1,23 +1,46 @@
 {
   "mienPhi": {
-    "name": "Miễn phí",
-    "price": 0,
-    "requestViewPerDay": 10,
-    "contactPerDay": 5,
-    "viewType": "latest-only"
+    "Name": "Miễn phí",
+    "TutorNameSubscription": "",
+    "Description": "",
+    "Price": 0.0,
+    "Type": 0,
+    "Status": 0,
+    "CreatedAt": "0001-01-01T00:00:00",
+    "MutualDescriptions": null,
+    "PrivateDescriptions": null
   },
   "traiNghiem": {
-    "name": "Trải nghiệm",
-    "price": 49000,
-    "requestViewPerDay": 20,
-    "contactPerDay": 20,
-    "viewType": "unlimited"
+    "Name": "Trải nghiệm",
+    "TutorNameSubscription": "",
+    "Description": "",
+    "Price": 49000.0,
+    "Type": 0,
+    "Status": 0,
+    "CreatedAt": "0001-01-01T00:00:00",
+    "MutualDescriptions": null,
+    "PrivateDescriptions": null
   },
   "thanhVien": {
-    "name": "Miễn phí",
-    "price": 149000,
-    "requestViewPerDay": 20,
-    "contactPerDay": 20,
-    "viewType": "unlimited"
+    "Name": "Miễn phí",
+    "TutorNameSubscription": "",
+    "Description": "",
+    "Price": 149000.0,
+    "Type": 0,
+    "Status": 0,
+    "CreatedAt": "0001-01-01T00:00:00",
+    "MutualDescriptions": null,
+    "PrivateDescriptions": null
+  },
+  "#SUB407415": {
+    "Name": "#SUB407415",
+    "TutorNameSubscription": "string",
+    "Description": null,
+    "Price": 0.0,
+    "Type": 0,
+    "Status": 1,
+    "CreatedAt": "2024-08-11T13:13:36.2131735+07:00",
+    "MutualDescriptions": null,
+    "PrivateDescriptions": null
   }
 }
