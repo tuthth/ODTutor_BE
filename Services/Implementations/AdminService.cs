@@ -1327,7 +1327,7 @@ namespace Services.Implementations
             }
             catch (Exception ex)
             {
-                throw new CrudException(HttpStatusCode.InternalServerError, "Internal Server Error", "");
+                throw new Exception(ex.ToString());
             }
         }
 
