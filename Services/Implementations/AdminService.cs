@@ -1241,7 +1241,8 @@ namespace Services.Implementations
         private async Task SaveTutorSubscriptionsAsync()
         {
             var json = JsonConvert.SerializeObject(_subscriptions, Formatting.Indented);
-            await File.WriteAllTextAsync("tutorSubscription.json", json);
+            string path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "tutorSubscription2.json");
+            await File.WriteAllTextAsync(path, json);
         }
         public async Task<IActionResult> GetFreeStudentSubscription() => new JsonResult(_studentSubscriptions["mienPhi"]);
         public async Task<IActionResult> GetPremiumStudentSubscription() => new JsonResult(_studentSubscriptions["thanhVien"]);
@@ -1270,7 +1271,8 @@ namespace Services.Implementations
         private async Task SaveStudentSubscriptionsAsync()
         {
             var json = JsonConvert.SerializeObject(_subscriptions, Formatting.Indented);
-            await File.WriteAllTextAsync("studentSubscription.json", json);
+            string path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "studentSubscription2.json");
+            await File.WriteAllTextAsync(path, json);
         }
 
         // Get All Tutor Subscription and Paging 
@@ -1327,7 +1329,7 @@ namespace Services.Implementations
             }
             catch (Exception ex)
             {
-                throw new CrudException(HttpStatusCode.InternalServerError, "Internal Server Error", "");
+                throw new Exception(ex.ToString());
             }
         }
 
