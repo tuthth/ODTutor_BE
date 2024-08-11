@@ -246,6 +246,7 @@ namespace Services.Implementations
                 notification.Title = "Đặt lịch thành công";
                 notification.Content = "Bạn đã đặt lịch học thành công";
                 notification.CreatedAt = DateTime.UtcNow.AddHours(7);
+                notification.Status = (Int32)NotificationEnum.UnRead;
                 Notification noti = _mapper.Map<Notification>(notification);
                 _context.Notifications.Add(noti);
                 // Lưu notification vào firestore
@@ -629,6 +630,7 @@ namespace Services.Implementations
                     notification.Title = "Yêu cầu dời lịch học";
                     notification.Content = "Học sinh " + student.Name + " đã yêu cầu dời lịch học";
                     notification.CreatedAt = DateTime.UtcNow.AddHours(7);
+                    notification.Status = (Int32)NotificationEnum.UnRead;
                     Notification noti = _mapper.Map<Notification>(notification);
                     _context.Notifications.Add(noti);
                     // Lưu notification vào firestore
@@ -658,6 +660,7 @@ namespace Services.Implementations
                     notification.Title = "Yêu cầu dời lịch học";
                     notification.Content = "Gia sư " + tutor.Name + " đã yêu cầu dời lịch học";
                     notification.CreatedAt = DateTime.UtcNow.AddHours(7);
+                    notification.Status = (Int32)NotificationEnum.UnRead;
                     Notification noti = _mapper.Map<Notification>(notification);
                     _context.Notifications.Add(noti);
                     // Lưu notification vào firestore
@@ -731,6 +734,7 @@ namespace Services.Implementations
                 notification.Title = "Xác nhận dời lịch học";
                 notification.Content = "Thời gian học đã xác nhận thay đổi vui lòng kiểm tra lại trong học phần của bạn";
                 notification.CreatedAt = DateTime.UtcNow.AddHours(7);
+                notification.Status = (Int32)NotificationEnum.UnRead;
                 Notification noti = _mapper.Map<Notification>(notification);
                 _context.Notifications.Add(noti);
                 // Lưu notification vào firestore
@@ -742,6 +746,7 @@ namespace Services.Implementations
                 notification2.Title = "Xác nhận dời lịch học";
                 notification2.Content = "Thời gian học đã xác nhận thay đổi vui lòng kiểm tra lại trong lịch dạy của bạn";
                 notification2.CreatedAt = DateTime.UtcNow.AddHours(7);
+                notification.Status = (Int32)NotificationEnum.UnRead;
                 Notification noti2 = _mapper.Map<Notification>(notification2);
                 _context.Notifications.Add(noti2);
                 // Lưu notification vào firestore

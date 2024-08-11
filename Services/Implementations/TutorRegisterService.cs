@@ -591,9 +591,9 @@ namespace Services.Implementations
                 notification.NotificationId = Guid.NewGuid();
                 notification.UserId = tutor.UserId;
                 notification.Title = "Yêu cầu xét duyệt trở thành gia sư đã bị từ chối";
-                notification.Content = "Yêu cầu của bạn đã bị từ chối. Vui lòng liên hệ với hệ thống để biết thêm thông tin.";
+                notification.Content = "Yêu cầu của bạn đã bị từ chối. Hiện tại bạn không thể đăng kí thành gia sư trong vòng 14 ngày. Vui lòng liên hệ với hệ thống để biết thêm thông tin.";
                 notification.CreatedAt = DateTime.UtcNow.AddHours(7);
-                notification.Status = (Int32)NotificationEnum.Deleted;
+                notification.Status = (Int32)NotificationEnum.UnRead;
                 Notification notification1x = _mapper.Map<Notification>(notification);
                 await _context.Notifications.AddAsync(notification1x);
                 _firebaseService.SetAsync<NotificationDTO>($"notifications/{notification.UserId}/{notification.NotificationId}", notification);
