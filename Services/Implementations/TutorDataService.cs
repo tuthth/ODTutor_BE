@@ -162,6 +162,7 @@ namespace Services.Implementations
           SubcriptionStartDate = t.SubcriptionStartDate,
           SubcriptionEndDate = t.SubcriptionEndDate,
           SubcriptionType = t.SubcriptionType,
+          CreateAt = t.CreateAt,
           Courses = t.CoursesNavigation.Select(c => new Course
           {
               CourseId = c.CourseId,

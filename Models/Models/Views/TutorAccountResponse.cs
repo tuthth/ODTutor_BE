@@ -19,6 +19,7 @@ namespace Models.Models.Views
         public string? EducationExperience { get; set; }
         public string? Motivation { get; set; }
         public string? VideoUrl { get; set; }
+        public DateTime? CreateAt { get; set; }
 
         // Tutor Tutort Package
         public bool HasBoughtSubscription { get; set; } // Có mua gói dịch vụ hay không 
