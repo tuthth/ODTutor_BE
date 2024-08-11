@@ -58,10 +58,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Content Update="wwwroot\studentSubscription.json">
+    <Content Update="wwwroot\studentSubscription2.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Update="wwwroot\tutorSubscription.json">
+    <Content Update="wwwroot\tutorSubscription2.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>

@@ -20,8 +20,8 @@ namespace Services
         protected readonly IMapper _mapper;
         protected readonly AppExtension _appExtension;
         protected readonly IConfiguration _configuration = new ConfigurationBuilder().AddJsonFile("appsettings.json").Build();
-        protected readonly IConfiguration _tutorSubscriptionConfiguration = new ConfigurationBuilder().AddJsonFile(Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "tutorSubscription.json")).Build();
-        protected readonly IConfiguration _studentSubscriptionConfiguration = new ConfigurationBuilder().AddJsonFile(Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "studentSubscription.json")).Build();
+        protected readonly IConfiguration _tutorSubscriptionConfiguration = new ConfigurationBuilder().AddJsonFile(Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "tutorSubscription2.json")).Build();
+        protected readonly IConfiguration _studentSubscriptionConfiguration = new ConfigurationBuilder().AddJsonFile(Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "studentSubscription2.json")).Build();
         protected readonly IOptions<MailSetting> _mailSettings;
         protected readonly IOptions<JWTSetting> _jwtSettings;
         public BaseService(ODTutorContext context, IMapper mapper)

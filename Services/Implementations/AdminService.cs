@@ -1241,7 +1241,7 @@ namespace Services.Implementations
         private async Task SaveTutorSubscriptionsAsync()
         {
             var json = JsonConvert.SerializeObject(_subscriptions, Formatting.Indented);
-            string path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "tutorSubscription.json");
+            string path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "tutorSubscription2.json");
             await File.WriteAllTextAsync(path, json);
         }
         public async Task<IActionResult> GetFreeStudentSubscription() => new JsonResult(_studentSubscriptions["mienPhi"]);
@@ -1271,7 +1271,7 @@ namespace Services.Implementations
         private async Task SaveStudentSubscriptionsAsync()
         {
             var json = JsonConvert.SerializeObject(_subscriptions, Formatting.Indented);
-            string path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "studentSubscription.json");
+            string path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "studentSubscription2.json");
             await File.WriteAllTextAsync(path, json);
         }
 
