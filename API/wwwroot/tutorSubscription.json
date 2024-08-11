@@ -31,20 +31,5 @@
     "CreatedAt": "0001-01-01T00:00:00",
     "MutualDescriptions": null,
     "PrivateDescriptions": null
-  },
-  "#SUB197370": {
-    "Name": "#SUB197370",
-    "TutorNameSubscription": "vapco",
-    "Description": null,
-    "Price": 77777.0,
-    "Type": 1,
-    "Status": 1,
-    "CreatedAt": "2024-08-11T15:11:19.3036838+07:00",
-    "MutualDescriptions": [
-      "string"
-    ],
-    "PrivateDescriptions": [
-      "string"
-    ]
   }
 }
