@@ -802,6 +802,16 @@ namespace API.Controllers
             await _adminService.RemoveTutorSubscription(name);
             return Ok();
         }
+
+        /// <summary>
+        /// Create Tutor Subscription 
+        /// </summary>
+        [HttpPost("create-tutor-subscriptions-v2")]
+        public async Task<IActionResult> CreateTutorSubscriptionsV2([FromBody] TutorSubscriptionRequest tutorSubscriptionSetting)
+        {
+            await _adminService.CreateAndSaveSubscriptionInFireStore(tutorSubscriptionSetting);
+            return Ok();
+        }
     }
 }
     

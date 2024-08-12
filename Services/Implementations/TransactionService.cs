@@ -2257,7 +2257,7 @@ namespace Services.Implementations
 
 
         // Cancle Booking if before 12h of study time return money to sender and after 12h of study time return money to receiver
-        public async Task<ActionResult> CancelBooking(Guid walletTransactionId)
+        public async Task<IActionResult> CancelBooking(Guid walletTransactionId)
         {
             try
             {
@@ -2287,9 +2287,9 @@ namespace Services.Implementations
                     // Xử lý hoàn tiền
                     wallet.Status = (int)VNPayType.APPROVE;
                     wallet.SenderWalletNavigation.LastBalanceUpdate = DateTime.UtcNow.AddHours(7);
-                    wallet.SenderWalletNavigation.PendingAmount += booking.Amount;
                     wallet.SenderWalletNavigation.AvalaibleAmount += booking.Amount;
                     wallet.SenderWalletNavigation.Amount += booking.Amount;
+                    wallet.SenderWalletNavigation.PendingAmount += booking.Amount;
 
                     wallet.ReceiverWalletNavigation.LastBalanceUpdate = DateTime.UtcNow.AddHours(7);
                     wallet.ReceiverWalletNavigation.PendingAmount -= booking.Amount;
@@ -2300,13 +2300,13 @@ namespace Services.Implementations
                 else
                 {
                     // Xử lý hủy booking mà không hoàn tiền
-                    wallet.Status = (int)VNPayType.CANCELLED;
+                    wallet.Status = (int)VNPayType.APPROVE;
+                    //update wallet for sender and receiver     
                     wallet.SenderWalletNavigation.LastBalanceUpdate = DateTime.UtcNow.AddHours(7);
                     wallet.SenderWalletNavigation.PendingAmount += booking.Amount;
-                    wallet.SenderWalletNavigation.AvalaibleAmount += booking.Amount;
-                    wallet.SenderWalletNavigation.Amount += booking.Amount;
-
+                    wallet.ReceiverWalletNavigation.Amount += booking.Amount;
                     wallet.ReceiverWalletNavigation.LastBalanceUpdate = DateTime.UtcNow.AddHours(7);
+                    wallet.ReceiverWalletNavigation.AvalaibleAmount += booking.Amount;
                     wallet.ReceiverWalletNavigation.PendingAmount -= booking.Amount;
                     booking.BookingNavigation.Status = (int)BookingEnum.Cancelled;
 
@@ -2322,7 +2322,7 @@ namespace Services.Implementations
                     book.Status = (int)BookingEnum.Cancelled;
                     _context.Bookings.Update(book);
                 }
-
+                await _context.SaveChangesAsync();
                 return new OkResult();
             }
             catch (Exception ex)

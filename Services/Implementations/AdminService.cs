@@ -28,8 +28,9 @@ namespace Services.Implementations
     {
         private readonly Dictionary<string, TutorSubscriptionSetting> _subscriptions;
         private readonly Dictionary<string, StudentSubscriptionSetting> _studentSubscriptions;
-        public AdminService(ODTutorContext odContext, IMapper mapper) : base(odContext, mapper)
-        {
+        private readonly ICloudFireStoreService _cloudFireStoreService;
+        public AdminService(ODTutorContext odContext, IMapper mapper, ICloudFireStoreService cloudFireStoreService) : base(odContext, mapper)
+        {   
             _subscriptions = new Dictionary<string, TutorSubscriptionSetting>();
             _subscriptions["mienPhi"] = _tutorSubscriptionConfiguration.GetSection("mienPhi").Get<TutorSubscriptionSetting>();
             _subscriptions["traiNghiem"] = _tutorSubscriptionConfiguration.GetSection("traiNghiem").Get<TutorSubscriptionSetting>();
@@ -38,6 +39,7 @@ namespace Services.Implementations
             _studentSubscriptions = new Dictionary<string, StudentSubscriptionSetting>();
             _studentSubscriptions["mienPhi"] = _studentSubscriptionConfiguration.GetSection("mienPhi").Get<StudentSubscriptionSetting>();
             _studentSubscriptions["thanhVien"] = _studentSubscriptionConfiguration.GetSection("thanhVien").Get<StudentSubscriptionSetting>();
+            _cloudFireStoreService = cloudFireStoreService;
         }
         public async Task<ActionResult<List<User>>> GetAllUsers()
         {
@@ -1411,6 +1413,43 @@ namespace Services.Implementations
             int secondNumber = random.Next(100, 1000); // Số ngẫu nhiên từ 100 đến 999
 
             return $"#SUB{firstNumber}{secondNumber}";
+        }
+
+        public async Task<IActionResult> CreateAndSaveSubscriptionInFireStore(TutorSubscriptionRequest setting)
+        {
+            try
+            {
+                // Tạo danh sách mô tả từ yêu cầu
+                List<string> mutualDescriptions = setting.MutualDescriptions?.ToList() ?? new List<string>();
+                List<string> privateDescriptions = setting.PrivateDescriptions?.ToList() ?? new List<string>();
+
+                // Tạo đối tượng TutorSubscriptionSetting
+                TutorSubscriptionSetting subscriptionSetting = new TutorSubscriptionSetting()
+                {
+                    Name = GenerateRandomCode(), // Tạo mã ngẫu nhiên
+                    TutorNameSubscription = setting.TutorNameSubscription,
+                    Description = setting.Description, // Ensure this is included if it's part of the request
+                    Price = setting.Price,
+                    Type = setting.Types,
+                    CreatedAt = DateTime.UtcNow, // Sử dụng UTC cho thời gian chính xác
+                    Status = (int)TutorSubscriptionStatusEnum.Inactive,
+                    NumberOfUser = 0, // Ensure this matches the property name in the class
+                    DeployAt = null, // Ensure this matches the property name in the class
+                    MutualDescriptions = mutualDescriptions,
+                    PrivateDescriptions = privateDescriptions
+                };
+
+                // Lưu đối tượng vào Firestore
+                await _cloudFireStoreService.SetAsync("TutorSubscriptions", subscriptionSetting.Name, subscriptionSetting);
+
+                // Trả về đối tượng đã tạo dưới dạng JsonResult
+                return new JsonResult(subscriptionSetting);
+            }
+            catch (Exception ex)
+            {
+                // Trả về lỗi với thông báo chi tiết
+                return new StatusCodeResult(StatusCodes.Status500InternalServerError);
+            }
         }
 
     }

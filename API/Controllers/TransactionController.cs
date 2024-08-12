@@ -937,5 +937,26 @@ namespace API.Controllers
             if ((IActionResult)result.Result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
             throw new Exception("Lỗi không xác định");
         }
+
+        /// <summary>
+        /// Hủy Booking Version 2 
+        /// </summary>
+        [HttpPost("cancel-booking")]
+        public async Task<IActionResult> CancleBookingVersion2 (Guid walletTransactionId)
+        {
+            var result = await _transactionService.CancelBooking(walletTransactionId);
+            if (result is StatusCodeResult statusCodeResult)
+            {
+                return statusCodeResult;
+            }
+            else if (result is JsonResult jsonResult)
+            {
+                return jsonResult;
+            }
+            else
+            {
+                return new StatusCodeResult(500);
+            }
+        }
     }
 }
