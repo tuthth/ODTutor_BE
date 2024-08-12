@@ -8,6 +8,9 @@ using Services.Implementations;
 using Services.Interfaces;
 using FirebaseAdmin;
 using Google.Apis.Auth.OAuth2;
+using Serilog;
+using Serilog.Formatting.Json;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace API
 {
@@ -54,12 +57,31 @@ namespace API
                            .AllowAnyHeader();
                 });
             });
+            builder.Services.AddRateLimiter(options =>
+            {
+                options.AddFixedWindowLimiter(policyName: "default", options =>
+                {
+                    options.PermitLimit = 100;
+                    options.Window = TimeSpan.FromMinutes(5);
+                    options.QueueProcessingOrder = System.Threading.RateLimiting.QueueProcessingOrder.OldestFirst;
+                    options.QueueLimit = 100;
+                });
+                options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+            });
             builder.Services.AddAuthentication().AddGoogle(options =>
             {
                 options.ClientId = builder.Configuration["Google:ClientId"];
                 options.ClientSecret = builder.Configuration["Google:ClientSecret"];
             });
-
+            builder.Host.UseSerilog((ctx, config) => 
+            {
+                config.WriteTo.Console().MinimumLevel.Information();
+                config.WriteTo.File(
+                    path: AppDomain.CurrentDomain.BaseDirectory + "logs/log~.txt",
+                    rollingInterval: RollingInterval.Day,
+                    rollOnFileSizeLimit: true,
+                    formatter: new JsonFormatter()).MinimumLevel.Information();
+            });
 
             builder.Services.AddSwagger();
                 
@@ -74,7 +96,7 @@ namespace API
             app.UseCors("AllowAll");
             app.UseMiddleware(typeof(ProcessCrudExceptions));
             app.UseHttpsRedirection();
-
+            app.UseSerilogRequestLogging();
          
             app.UseAuthentication();
             app.UseAuthorization();
