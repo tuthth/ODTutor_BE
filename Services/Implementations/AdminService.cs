@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using FirebaseAdmin.Messaging;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -28,8 +29,8 @@ namespace Services.Implementations
     {
         private readonly Dictionary<string, TutorSubscriptionSetting> _subscriptions;
         private readonly Dictionary<string, StudentSubscriptionSetting> _studentSubscriptions;
-        private readonly ICloudFireStoreService _cloudFireStoreService;
-        public AdminService(ODTutorContext odContext, IMapper mapper, ICloudFireStoreService cloudFireStoreService) : base(odContext, mapper)
+        private readonly IFirebaseRealtimeDatabaseService _cloudFireStoreService;
+        public AdminService(ODTutorContext odContext, IMapper mapper, IFirebaseRealtimeDatabaseService cloudFireStoreService) : base(odContext, mapper)
         {   
             _subscriptions = new Dictionary<string, TutorSubscriptionSetting>();
             _subscriptions["mienPhi"] = _tutorSubscriptionConfiguration.GetSection("mienPhi").Get<TutorSubscriptionSetting>();
@@ -385,7 +386,7 @@ namespace Services.Implementations
                 throw new Exception(ex.ToString());
             }
         }
-        public async Task<ActionResult<List<Notification>>> GetNotifications()
+        public async Task<ActionResult<List<Models.Entities.Notification>>> GetNotifications()
         {
             try
             {
@@ -401,7 +402,7 @@ namespace Services.Implementations
                 throw new Exception(ex.ToString());
             }
         }
-        public async Task<ActionResult<List<Notification>>> GetNotificationsByUserId(Guid id)
+        public async Task<ActionResult<List<Models.Entities.Notification>>> GetNotificationsByUserId(Guid id)
         {
             try
             {
@@ -1277,7 +1278,7 @@ namespace Services.Implementations
             await File.WriteAllTextAsync(path, json);
         }
 
-        // Get All Tutor Subscription and Paging 
+     /*   // Get All Tutor Subscription and Paging 
         public async Task<PageResults<TutorSubscriptionSetting>> GetAllTutorSubscription(PagingRequest pagingRequest)
         {
             try
@@ -1298,7 +1299,7 @@ namespace Services.Implementations
             }
         }
 
-        // Create New Tutor Subscription
+      *//*  // Create New Tutor Subscription
         public async Task<IActionResult> CreateTutorSubscription(TutorSubscriptionRequest setting)
         {
             try
@@ -1403,7 +1404,7 @@ namespace Services.Implementations
             {
                 throw new CrudException(HttpStatusCode.InternalServerError, "Internal Server Error", "");
             }
-        }
+        }*/
 
         // Generate Tutor Subscription
         private static string GenerateRandomCode()
@@ -1419,10 +1420,6 @@ namespace Services.Implementations
         {
             try
             {
-                // Tạo danh sách mô tả từ yêu cầu
-                List<string> mutualDescriptions = setting.MutualDescriptions?.ToList() ?? new List<string>();
-                List<string> privateDescriptions = setting.PrivateDescriptions?.ToList() ?? new List<string>();
-
                 // Tạo đối tượng TutorSubscriptionSetting
                 TutorSubscriptionSetting subscriptionSetting = new TutorSubscriptionSetting()
                 {
@@ -1434,13 +1431,10 @@ namespace Services.Implementations
                     CreatedAt = DateTime.UtcNow, // Sử dụng UTC cho thời gian chính xác
                     Status = (int)TutorSubscriptionStatusEnum.Inactive,
                     NumberOfUser = 0, // Ensure this matches the property name in the class
-                    DeployAt = null, // Ensure this matches the property name in the class
-                    MutualDescriptions = mutualDescriptions,
-                    PrivateDescriptions = privateDescriptions
+                    DeployAt = DateTime.UtcNow, // Ensure this matches the property name in the class
                 };
-
                 // Lưu đối tượng vào Firestore
-                await _cloudFireStoreService.SetAsync("TutorSubscriptions", subscriptionSetting.Name, subscriptionSetting);
+                await _cloudFireStoreService.SetAsync<TutorSubscriptionSetting>($"tutorsubscription/{subscriptionSetting.Name}", subscriptionSetting);
 
                 // Trả về đối tượng đã tạo dưới dạng JsonResult
                 return new JsonResult(subscriptionSetting);
@@ -1451,6 +1445,5 @@ namespace Services.Implementations
                 return new StatusCodeResult(StatusCodes.Status500InternalServerError);
             }
         }
-
     }
 }

@@ -17,7 +17,5 @@ namespace Settings.Subscription
         public DateTime CreatedAt { get; set; }
         public DateTime? DeployAt { get; set; } // Ensure this matches the property name in the method
         public int? NumberOfUser { get; set; } // Ensure this matches the property name in the method
-        public List<string> MutualDescriptions { get; set; }
-        public List<string> PrivateDescriptions { get; set; }
     }
 }

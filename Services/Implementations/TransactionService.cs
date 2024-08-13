@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+﻿    using AutoMapper;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
@@ -2294,8 +2294,6 @@ namespace Services.Implementations
                     wallet.ReceiverWalletNavigation.LastBalanceUpdate = DateTime.UtcNow.AddHours(7);
                     wallet.ReceiverWalletNavigation.PendingAmount -= booking.Amount;
                     booking.BookingNavigation.Status = (int)BookingEnum.Cancelled;
-
-                    await SendNotificationAndEmail(sender, receiver, "Giao dịch booking của bạn đã được hủy bỏ. Mã giao dịch: " + wallet.WalletTransactionId);
                 }
                 else
                 {
@@ -2309,8 +2307,6 @@ namespace Services.Implementations
                     wallet.ReceiverWalletNavigation.AvalaibleAmount += booking.Amount;
                     wallet.ReceiverWalletNavigation.PendingAmount -= booking.Amount;
                     booking.BookingNavigation.Status = (int)BookingEnum.Cancelled;
-
-                    await SendNotificationAndEmail(sender, receiver, "Giao dịch booking của bạn đã được hủy bỏ. Mã giao dịch: " + wallet.WalletTransactionId);
                 }
                 
                 _context.WalletTransactions.Update(wallet);
@@ -2322,6 +2318,23 @@ namespace Services.Implementations
                     book.Status = (int)BookingEnum.Cancelled;
                     _context.Bookings.Update(book);
                 }
+                // Set available for slot again based on StudyTime
+                TimeSpan bookingTime = new TimeSpan(book.StudyTime.Value.Hour, book.StudyTime.Value.Minute, 0);
+                // Find the tutor available slot
+                DateTime bookingDate = book.StudyTime.Value.Date;
+                var tutorDateAvailables = _context.TutorDateAvailables
+                    .Where(x => x.TutorID == book.TutorId && x.Date.Date == bookingDate)
+                    .Select(x => x.TutorDateAvailableID)
+                    .ToList();
+                if (tutorDateAvailables == null)
+                {
+                    return new StatusCodeResult(452);
+                }
+                var tutorSlotAvailables = _context.TutorSlotAvailables
+                    .Where(x => tutorDateAvailables.Contains(x.TutorDateAvailable.TutorDateAvailableID) && x.StartTime == bookingTime)
+                    .FirstOrDefault();
+                tutorSlotAvailables.IsBooked = false;
+                tutorSlotAvailables.Status = (Int32)TutorSlotAvailabilityEnum.Available;
                 await _context.SaveChangesAsync();
                 return new OkResult();
             }
@@ -2331,7 +2344,7 @@ namespace Services.Implementations
             }
         }
 
-        // Send Notification 
+/*        // Send Notification 
         private async Task SendNotificationAndEmail(User sender, User receiver, string content)
         {
             await _appExtension.SendMail(new MailContent()
@@ -2370,7 +2383,7 @@ namespace Services.Implementations
 
             await _firebaseRealtimeDatabaseService.UpdateAsync<Models.Entities.Notification>($"notifications/{sender.Id}/{notification1.NotificationId}", notification1);
             await _firebaseRealtimeDatabaseService.UpdateAsync<Models.Entities.Notification>($"notifications/{receiver.Id}/{notification2.NotificationId}", notification2);
-        }
+        }*/
 
 
     }

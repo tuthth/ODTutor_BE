@@ -62,11 +62,11 @@ namespace Services.Interfaces
         Task<IActionResult> UpdateStudentSubscription(StudentSubscriptionSetting setting, int choice);
         Task AcceptTutorSubject(Guid tutorSubjectId);
         Task DenyTutorSubject(Guid tutorSubjectId);
-        Task<PageResults<TutorSubscriptionSetting>> GetAllTutorSubscription(PagingRequest pagingRequest);
+/*        Task<PageResults<TutorSubscriptionSetting>> GetAllTutorSubscription(PagingRequest pagingRequest);
         Task<IActionResult> CreateTutorSubscription(TutorSubscriptionRequest setting);
         Task<IActionResult> UpdateTutorSubscriptionStatus(string name);
         Task<IActionResult> UpdateTutorSubscription(TutorSubscriptionRequest setting, string name);
-        Task<IActionResult> RemoveTutorSubscription(string name);
+        Task<IActionResult> RemoveTutorSubscription(string name);*/
         Task<IActionResult> CreateAndSaveSubscriptionInFireStore(TutorSubscriptionRequest setting);
 
     }

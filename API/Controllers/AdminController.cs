@@ -751,7 +751,7 @@ namespace API.Controllers
         /// <summary>
         /// Lấy hết danh sách các tutorSub and Paging
         /// </summary>
-        [HttpGet("get-all-tutor-subscriptions")]
+/*        [HttpGet("get-all-tutor-subscriptions")]
         public async Task<ActionResult<PageResults<TutorSubscriptionSetting>>> GetAllTutorSubscriptions(int page, int pageSize)
         {
             var request = new PagingRequest
@@ -801,7 +801,7 @@ namespace API.Controllers
         {
             await _adminService.RemoveTutorSubscription(name);
             return Ok();
-        }
+        }*/
 
         /// <summary>
         /// Create Tutor Subscription 

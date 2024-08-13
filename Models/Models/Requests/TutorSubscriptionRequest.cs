@@ -12,7 +12,5 @@ namespace Models.Models.Requests
         public String Description { get; set; }
         public decimal Price { get; set; }
         public int Types { get; set; }
-        public List<String> MutualDescriptions { get; set; }
-        public List<String> PrivateDescriptions { get; set; }
     }
 }
