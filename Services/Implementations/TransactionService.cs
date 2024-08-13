@@ -2344,46 +2344,117 @@ namespace Services.Implementations
             }
         }
 
-/*        // Send Notification 
-        private async Task SendNotificationAndEmail(User sender, User receiver, string content)
+        // Cancle When not accept the change schedule 
+        public async Task<IActionResult> CancelBookingWhenNotAcceptWhenChangeSchedule(Guid walletTransactionId)
         {
-            await _appExtension.SendMail(new MailContent()
+            try
             {
-                To = sender.Email,
-                Subject = "Xác nhận giao dịch",
-                Body = content
-            });
-            await _appExtension.SendMail(new MailContent()
-            {
-                To = receiver.Email,
-                Subject = "Xác nhận giao dịch",
-                Body = content
-            });
+                // Lấy thông tin giao dịch ví từ database
+                var wallet = await _context.WalletTransactions.FirstOrDefaultAsync(w => w.WalletTransactionId == walletTransactionId);
+                if (wallet == null)
+                {
+                    return new StatusCodeResult(404);
+                }
 
-            var notification1 = new Models.Entities.Notification
-            {
-                NotificationId = Guid.NewGuid(),
-                Title = "Giao dịch booking",
-                Content = content,
-                UserId = sender.Id,
-                CreatedAt = DateTime.UtcNow.AddHours(7),
-                Status = (int)NotificationEnum.UnRead
-            };
-            var notification2 = new Models.Entities.Notification
-            {
-                NotificationId = Guid.NewGuid(),
-                Title = "Giao dịch booking",
-                Content = content,
-                UserId = receiver.Id,
-                CreatedAt = DateTime.UtcNow.AddHours(7),
-                Status = (int)NotificationEnum.UnRead
-            };
-            _context.Notifications.Add(notification1);
-            _context.Notifications.Add(notification2);
+                // Lấy thông tin booking tương ứng
+                var booking = await _context.BookingTransactions
+                    .Include(b => b.BookingNavigation)
+                    .FirstOrDefaultAsync(b => b.BookingTransactionId == walletTransactionId);
+                if (booking == null)
+                {
+                    return new StatusCodeResult(404);
+                }
 
-            await _firebaseRealtimeDatabaseService.UpdateAsync<Models.Entities.Notification>($"notifications/{sender.Id}/{notification1.NotificationId}", notification1);
-            await _firebaseRealtimeDatabaseService.UpdateAsync<Models.Entities.Notification>($"notifications/{receiver.Id}/{notification2.NotificationId}", notification2);
-        }*/
+                // Xác định người gửi và người nhận
+                var sender = await _context.Users.Include(u => u.WalletNavigation).FirstOrDefaultAsync(u => u.WalletNavigation.WalletId == wallet.SenderWalletId);
+                var receiver = await _context.Users.Include(u => u.WalletNavigation).FirstOrDefaultAsync(u => u.WalletNavigation.WalletId == wallet.ReceiverWalletId);
+
+                // Cập nhật trạng thái giao dịch ví và booking
+                    // Xử lý hoàn tiền
+                    wallet.Status = (int)VNPayType.APPROVE;
+                    wallet.SenderWalletNavigation.LastBalanceUpdate = DateTime.UtcNow.AddHours(7);
+                    wallet.SenderWalletNavigation.AvalaibleAmount += booking.Amount;
+                    wallet.SenderWalletNavigation.Amount += booking.Amount;
+                    wallet.SenderWalletNavigation.PendingAmount += booking.Amount;
+
+                    wallet.ReceiverWalletNavigation.LastBalanceUpdate = DateTime.UtcNow.AddHours(7);
+                    wallet.ReceiverWalletNavigation.PendingAmount -= booking.Amount;
+                    booking.BookingNavigation.Status = (int)BookingEnum.Cancelled;
+
+                _context.WalletTransactions.Update(wallet);
+                _context.BookingTransactions.Update(booking);
+
+                var book = await _context.Bookings.FirstOrDefaultAsync(b => b.BookingId == booking.BookingId);
+                if (book != null)
+                {
+                    book.Status = (int)BookingEnum.Cancelled;
+                    _context.Bookings.Update(book);
+                }
+                // Set available for slot again based on StudyTime
+                TimeSpan bookingTime = new TimeSpan(book.StudyTime.Value.Hour, book.StudyTime.Value.Minute, 0);
+                // Find the tutor available slot
+                DateTime bookingDate = book.StudyTime.Value.Date;
+                var tutorDateAvailables = _context.TutorDateAvailables
+                    .Where(x => x.TutorID == book.TutorId && x.Date.Date == bookingDate)
+                    .Select(x => x.TutorDateAvailableID)
+                    .ToList();
+                if (tutorDateAvailables == null)
+                {
+                    return new StatusCodeResult(452);
+                }
+                var tutorSlotAvailables = _context.TutorSlotAvailables
+                    .Where(x => tutorDateAvailables.Contains(x.TutorDateAvailable.TutorDateAvailableID) && x.StartTime == bookingTime)
+                    .FirstOrDefault();
+                tutorSlotAvailables.IsBooked = false;
+                tutorSlotAvailables.Status = (Int32)TutorSlotAvailabilityEnum.Available;
+                await _context.SaveChangesAsync();
+                return new OkResult();
+            }
+            catch (Exception ex)
+            {
+                return new StatusCodeResult(500);
+            }
+        }
+        /*        // Send Notification 
+                private async Task SendNotificationAndEmail(User sender, User receiver, string content)
+                {
+                    await _appExtension.SendMail(new MailContent()
+                    {
+                        To = sender.Email,
+                        Subject = "Xác nhận giao dịch",
+                        Body = content
+                    });
+                    await _appExtension.SendMail(new MailContent()
+                    {
+                        To = receiver.Email,
+                        Subject = "Xác nhận giao dịch",
+                        Body = content
+                    });
+
+                    var notification1 = new Models.Entities.Notification
+                    {
+                        NotificationId = Guid.NewGuid(),
+                        Title = "Giao dịch booking",
+                        Content = content,
+                        UserId = sender.Id,
+                        CreatedAt = DateTime.UtcNow.AddHours(7),
+                        Status = (int)NotificationEnum.UnRead
+                    };
+                    var notification2 = new Models.Entities.Notification
+                    {
+                        NotificationId = Guid.NewGuid(),
+                        Title = "Giao dịch booking",
+                        Content = content,
+                        UserId = receiver.Id,
+                        CreatedAt = DateTime.UtcNow.AddHours(7),
+                        Status = (int)NotificationEnum.UnRead
+                    };
+                    _context.Notifications.Add(notification1);
+                    _context.Notifications.Add(notification2);
+
+                    await _firebaseRealtimeDatabaseService.UpdateAsync<Models.Entities.Notification>($"notifications/{sender.Id}/{notification1.NotificationId}", notification1);
+                    await _firebaseRealtimeDatabaseService.UpdateAsync<Models.Entities.Notification>($"notifications/{receiver.Id}/{notification2.NotificationId}", notification2);
+                }*/
 
 
     }

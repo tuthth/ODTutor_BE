@@ -958,5 +958,26 @@ namespace API.Controllers
                 return new StatusCodeResult(500);
             }
         }
+
+        /// <summary>
+        /// Canle When Tutor or Student not accept
+        /// </summary>
+        [HttpDelete("cancel-booking-in-change-schedule")]
+        public async Task<IActionResult> CancelBookingInChangeSchedule(Guid walletTransactionId)
+        {
+            var result = await _transactionService.CancelBookingWhenNotAcceptWhenChangeSchedule(walletTransactionId);
+            if (result is StatusCodeResult statusCodeResult)
+            {
+                return statusCodeResult;
+            }
+            else if (result is JsonResult jsonResult)
+            {
+                return jsonResult;
+            }
+            else
+            {
+                return new StatusCodeResult(500);
+            }
+        }
     }
 }
