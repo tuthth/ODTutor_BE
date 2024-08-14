@@ -2173,8 +2173,7 @@ namespace Services.Implementations
                     wallet.ReceiverWalletNavigation.PendingAmount -= booking.Amount;
                     wallet.ReceiverWalletNavigation.AvalaibleAmount += booking.Amount;
                     wallet.ReceiverWalletNavigation.Amount += booking.Amount;
-
-                    booking.BookingNavigation.Status = (int)VNPayType.APPROVE;
+                    booking.Status = (int)VNPayType.APPROVE;
                     _context.BookingTransactions.Update(booking);
                     _context.WalletTransactions.Update(wallet);
                     await _appExtension.SendMail(new MailContent()
