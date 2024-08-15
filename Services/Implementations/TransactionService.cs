@@ -2292,6 +2292,7 @@ namespace Services.Implementations
 
                     wallet.ReceiverWalletNavigation.LastBalanceUpdate = DateTime.UtcNow.AddHours(7);
                     wallet.ReceiverWalletNavigation.PendingAmount -= booking.Amount;
+                    booking.Status = (int)VNPayType.APPROVE;
                     booking.BookingNavigation.Status = (int)BookingEnum.Cancelled;
                 }
                 else
@@ -2305,6 +2306,7 @@ namespace Services.Implementations
                     wallet.ReceiverWalletNavigation.LastBalanceUpdate = DateTime.UtcNow.AddHours(7);
                     wallet.ReceiverWalletNavigation.AvalaibleAmount += booking.Amount;
                     wallet.ReceiverWalletNavigation.PendingAmount -= booking.Amount;
+                    booking.Status = (int)VNPayType.APPROVE;
                     booking.BookingNavigation.Status = (int)BookingEnum.Cancelled;
                 }
                 
