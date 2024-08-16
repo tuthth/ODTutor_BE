@@ -2177,8 +2177,7 @@ namespace Services.Implementations
                     wallet.ReceiverWalletNavigation.Amount += (booking.Amount - (booking.Amount * percentageOfTutor) / 100);
                     booking.Status = (int)VNPayType.APPROVE;
                     // Send money from tutor to admin based on percentage of tutor
-                    var adminWallet = await _context.Wallets.FirstOrDefaultAsync(w => w.UserId == Guid.Parse("E91703BF-5651-4F9A-5D51-08DC93FF5629"));
-                    adminWallet.LastBalanceUpdate = DateTime.UtcNow.AddHours(7);
+                    var adminWallet = await _context.Wallets.FirstOrDefaultAsync(w => w.UserId == Guid.Parse("D71B17CC-7997-4B23-2ADC-08DC93FF561F"));
                     adminWallet.AvalaibleAmount += (booking.Amount * percentageOfTutor) / 100;
                     adminWallet.Amount += (booking.Amount * percentageOfTutor) / 100;
                     // Create wallet transaction for admin
