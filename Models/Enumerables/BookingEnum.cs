@@ -15,5 +15,6 @@ namespace Models.Enumerables
         Success = 4,
         WaittingConfirmRescheduleForStudent = 5,
         WaittingConfirmRescheduleForTutor = 6,
+        Reported = 7,
     }
 }

@@ -150,5 +150,59 @@ namespace API.Controllers
             if ((IActionResult)result.Result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
             throw new Exception("Lỗi không xác định");
         }
+
+        /// <summary>
+        /// Create report for booking
+        /// </summary>
+        [HttpPost("create/booking-report")]
+        public async Task<IActionResult> CreateReportBooking(ReportRequest reportRequest)
+        {
+            var result = await _reportService.CreateReportBooking(reportRequest);
+            if (result is IActionResult actionResult)
+            {
+                if (actionResult is StatusCodeResult statusCodeResult)
+                {
+                    if (statusCodeResult.StatusCode == 404) return Ok(new { Message = "Không tìm thấy báo cáo" });
+                    if (statusCodeResult.StatusCode == 201) return StatusCode(StatusCodes.Status201Created, new { Message = "Tạo báo cáo thành công" });
+                }
+            }
+            if (result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
+            throw new Exception("Lỗi không xác định");
+        }
+
+        /// <summary>
+        /// Ban account tutor for 7 days(1), 30 days(2), 90 days(3), lifetime(4)
+        /// </summary>
+        [HttpPost("action/booking-report")]
+        public async Task<IActionResult> MakeActionReportBooking(ReportAction action)
+        {
+            var result = await _reportService.MakeActionReportBooking(action);
+            if (result is IActionResult actionResult)
+            {
+                if (actionResult is StatusCodeResult statusCodeResult)
+                {
+                    if (statusCodeResult.StatusCode == 404) return Ok(new { Message = "Không tìm thấy báo cáo" });
+                    if (statusCodeResult.StatusCode == 409) return StatusCode(StatusCodes.Status409Conflict, "Chỉ chấp thuận các report đã được xử lý");
+                    if (statusCodeResult.StatusCode == 200) return StatusCode(StatusCodes.Status200OK, "Xử lý báo cáo thành công");
+                }
+            }
+            if (result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
+            throw new Exception("Lỗi không xác định");
+        }
+
+        /// <summary>
+        /// Get Report Booking
+        /// </summary>
+        [HttpGet("get/all-booking-report")]
+        public async Task<ActionResult<PageResults<ReportResponse>>> GetAllReportBookingReport(int Page, int PageSize)
+        {   
+            var request = new PagingRequest
+            {
+                Page = Page,
+                PageSize = PageSize
+            };
+            var result = await _reportService.GetAllReportBookingReport(request);
+            return Ok(result);
+        }
     }
 }

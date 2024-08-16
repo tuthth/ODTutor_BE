@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Models.Entities;
 using Models.Models.Requests;
+using Models.Models.Views;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,5 +19,8 @@ namespace Services.Interfaces
         Task<ActionResult<Report>> GetReport(Guid id);
         Task<ActionResult<List<Report>>> GetReportsByUserId(Guid id);
         Task<ActionResult<List<Report>>> GetReportsByReporterId(Guid id);
+        Task<IActionResult> MakeActionReportBooking(ReportAction action);
+        Task<IActionResult> CreateReportBooking(ReportRequest reportRequest);
+        Task<PageResults<ReportResponse>> GetAllReportBookingReport(PagingRequest request);
     }
 }

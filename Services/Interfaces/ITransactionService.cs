@@ -56,5 +56,6 @@ namespace Services.Interfaces
         Task<ActionResult<List<WalletTransaction>>> GetAllSubscriptionTransactions();
         Task<IActionResult> CancelBooking(Guid walletTransactionId);
         Task<IActionResult> CancelBookingWhenNotAcceptWhenChangeSchedule(Guid walletTransactionId);
+        Task<IActionResult> RefundMoneyForUser(Guid bookingId);
     }
 }

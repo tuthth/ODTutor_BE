@@ -2463,5 +2463,82 @@ namespace Services.Implementations
             }
             return response;
         }
+
+
+        // Refund money to sender when it is reported 
+        public async Task<IActionResult> RefundMoneyForUser(Guid bookingId)
+        {
+            try
+            {
+                // Get BoookinTransaction From BookingId 
+                var bookingTransaction = await _context.BookingTransactions.FirstOrDefaultAsync(b => b.BookingId == bookingId);
+                var walletTransactionId = bookingTransaction.BookingTransactionId;
+                var books = await _context.Bookings.FirstOrDefaultAsync(b => b.BookingId == bookingId);
+                var tutor = await _context.Tutors
+                    .Include(t => t.UserNavigation)
+                    .FirstOrDefaultAsync(t => t.TutorId == books.TutorId);
+                // Lấy thông tin giao dịch ví từ database
+                var wallet = await _context.WalletTransactions.FirstOrDefaultAsync(w => w.WalletTransactionId == walletTransactionId);
+                if (wallet == null)
+                {
+                    return new StatusCodeResult(404);
+                }
+
+                // Lấy thông tin booking tương ứng
+                var booking = await _context.BookingTransactions
+                    .Include(b => b.BookingNavigation)
+                    .FirstOrDefaultAsync(b => b.BookingTransactionId == walletTransactionId);
+                if (booking == null)
+                {
+                    return new StatusCodeResult(404);
+                }
+
+                // Xác định người gửi và người nhận
+                var sender = await _context.Users.Include(u => u.WalletNavigation).FirstOrDefaultAsync(u => u.WalletNavigation.WalletId == wallet.SenderWalletId);
+                var receiver = await _context.Users.Include(u => u.WalletNavigation).FirstOrDefaultAsync(u => u.WalletNavigation.WalletId == wallet.ReceiverWalletId);
+
+                // Cập nhật trạng thái giao dịch ví và booking
+                // Xử lý hoàn tiền
+                wallet.Status = (int)VNPayType.APPROVE;
+                wallet.SenderWalletNavigation.LastBalanceUpdate = DateTime.UtcNow.AddHours(7);
+                wallet.SenderWalletNavigation.AvalaibleAmount += booking.Amount;
+                wallet.SenderWalletNavigation.Amount += booking.Amount;
+                wallet.SenderWalletNavigation.PendingAmount += booking.Amount;
+
+                wallet.ReceiverWalletNavigation.LastBalanceUpdate = DateTime.UtcNow.AddHours(7);
+                wallet.ReceiverWalletNavigation.PendingAmount -= booking.Amount;
+                booking.BookingNavigation.Status = (int)BookingEnum.Cancelled;
+
+                booking.Status = (int)VNPayType.CANCELLED;
+                _context.WalletTransactions.Update(wallet);
+                _context.BookingTransactions.Update(booking);
+
+                var book = await _context.Bookings.FirstOrDefaultAsync(b => b.BookingId == booking.BookingId);
+                if (book != null)
+                {
+                    book.Status = (int)BookingEnum.Cancelled;
+                    _context.Bookings.Update(book);
+                }
+                // Create TutorAction for admin
+                var tutorAction = new TutorAction()
+                {
+                    TutorActionId = Guid.NewGuid(),
+                    TutorId = tutor.UserNavigation.Id,
+                    ModeratorId = Guid.Parse("3E4B355D-3D60-4A2A-2ADD-08DC93FF561F"),
+                    CreateAt = DateTime.UtcNow.AddHours(7),
+                    ReponseDate = DateTime.UtcNow.AddHours(7),
+                    Description = "Hoàn tiền cho người dùng",
+                    ActionType = (Int32)TutorActionTypeEnum.ReportBooking,
+                    Status = (Int32)TutorActionEnum.Accept
+                };
+                _context.TutorActions.Add(tutorAction);
+                await _context.SaveChangesAsync();
+                return new OkResult();
+            }
+            catch (Exception ex)
+            {
+                return new StatusCodeResult(500);
+            }
+        }
     }
 }

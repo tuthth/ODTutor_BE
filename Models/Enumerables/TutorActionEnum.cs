@@ -18,5 +18,6 @@ namespace Models.Enumerables
     {
         TutorRegister = 1,
         TutorRegisterSubject = 2,
+        ReportBooking = 3,
     }
 }
