@@ -967,6 +967,9 @@ namespace Services.Implementations
                 {
                     return new StatusCodeResult(404);
                 }
+                // Find total time booking in finished booking 
+                var totalSlotInFinsihedBooking = bookings.Where(x => x.Status == (Int32)BookingEnum.Finished).Count();
+
                 foreach (var booking in bookings)
                 {
                     BookingHistoryResponse bookingHistory = new BookingHistoryResponse();
@@ -986,19 +989,35 @@ namespace Services.Implementations
                     bookingHistory.SubjectName = booking.TutorSubjectNavigation.SubjectNavigation.Title;
                     bookingHistory.StudyTime = booking.StudyTime;
                     bookingHistory.IsRated = booking.isRated;
+                    bookingHistory.totalFinisedTimeBooking = totalSlotInFinsihedBooking;
+                    if (bookingHistory.totalFinisedTimeBooking < 10)
+                    {
+                        bookingHistory.percentageOfTutor = 10;
+                    }
+                    else if (bookingHistory.totalFinisedTimeBooking >= 10 && bookingHistory.totalFinisedTimeBooking < 20)
+                    {
+                        bookingHistory.percentageOfTutor = 8;
+                    } else if (bookingHistory.totalFinisedTimeBooking >= 20 && bookingHistory.totalFinisedTimeBooking < 30)
+                    {
+                        bookingHistory.percentageOfTutor = 6;
+                    } else
+                    {
+                        bookingHistory.percentageOfTutor = 5;
+                    }
+                    bookingHistory.finalFeeOfTutor = bookingHistory.TotalPrice - (bookingHistory.TotalPrice * bookingHistory.percentageOfTutor / 100);
                     if (booking.isRated == true)
-                    {
-                        TutorRating tutorRating = _context.TutorRatings.FirstOrDefault(tr => tr.BookingId == booking.BookingId);
-                        bookingHistory.RatePoints = tutorRating.RatePoints;
-                        bookingHistory.Content = tutorRating.Content;
-                        bookingHistory.DateRating = tutorRating.CreatedAt;
-                    }
-                    else
-                    {
-                        bookingHistory.RatePoints = null;
-                        bookingHistory.Content = "";
-                        bookingHistory.DateRating = null;
-                    }
+                        {
+                            TutorRating tutorRating = _context.TutorRatings.FirstOrDefault(tr => tr.BookingId == booking.BookingId);
+                            bookingHistory.RatePoints = tutorRating.RatePoints;
+                            bookingHistory.Content = tutorRating.Content;
+                            bookingHistory.DateRating = tutorRating.CreatedAt;
+                        }
+                        else
+                        {
+                            bookingHistory.RatePoints = null;
+                            bookingHistory.Content = "";
+                            bookingHistory.DateRating = null;
+                        }
                     bookingHistory.BookingTransactionId = booking.BookingTransactionNavigation.BookingTransactionId;
                     bookingHistory.BookingTransactionDate = booking.BookingTransactionNavigation.CreatedAt;
                     bookingHistory.BookingTransactionStatus = booking.BookingTransactionNavigation.Status;

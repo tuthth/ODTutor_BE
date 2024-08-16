@@ -29,5 +29,10 @@ namespace Models.Models.Views
         public string? Content { get; set; }
         public DateTime? DateRating { get; set; }
         public int? BookingTransactionStatus { get; set; }
+
+        // Fee 
+        public int? percentageOfTutor { get; set; }
+        public int? totalFinisedTimeBooking { get; set; }
+        public decimal? finalFeeOfTutor { get; set; }
     }
 }
