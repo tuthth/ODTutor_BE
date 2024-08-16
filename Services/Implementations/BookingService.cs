@@ -1071,6 +1071,7 @@ namespace Services.Implementations
                     }
                     wallet.Status = (Int32)VNPayType.CANCELLED;
                     var bookingTransaction = _context.BookingTransactions.FirstOrDefault(b => b.BookingTransactionId == wallet.WalletTransactionId);
+                    bookingTransaction.Status = (Int32)VNPayType.CANCELLED;
                     var sender = await _context.Users.Include(c => c.WalletNavigation).FirstOrDefaultAsync(u => u.WalletNavigation.WalletId == wallet.SenderWalletId);
                     var receiver = await _context.Users.Include(c => c.WalletNavigation).FirstOrDefaultAsync(u => u.WalletNavigation.WalletId == wallet.ReceiverWalletId);
                     //update wallet for sender and receiver

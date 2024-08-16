@@ -2171,9 +2171,29 @@ namespace Services.Implementations
                     wallet.SenderWalletNavigation.PendingAmount += booking.Amount;
                     wallet.ReceiverWalletNavigation.LastBalanceUpdate = DateTime.UtcNow.AddHours(7);
                     wallet.ReceiverWalletNavigation.PendingAmount -= booking.Amount;
-                    wallet.ReceiverWalletNavigation.AvalaibleAmount += booking.Amount;
-                    wallet.ReceiverWalletNavigation.Amount += booking.Amount;
+                    // Caculate rose fee for Admin and Tutor based on number of finished bookings of tutor
+                    int percentageOfTutor = GetTutorPercentageOfTutorByUserId(booking.ReceiverWalletNavigation.UserId);
+                    wallet.ReceiverWalletNavigation.AvalaibleAmount += (booking.Amount - (booking.Amount * percentageOfTutor)/100) ;
+                    wallet.ReceiverWalletNavigation.Amount += (booking.Amount - (booking.Amount * percentageOfTutor) / 100);
                     booking.Status = (int)VNPayType.APPROVE;
+                    // Send money from tutor to admin based on percentage of tutor
+                    var adminWallet = await _context.Wallets.FirstOrDefaultAsync(w => w.UserId == Guid.Parse("E91703BF-5651-4F9A-5D51-08DC93FF5629"));
+                    adminWallet.LastBalanceUpdate = DateTime.UtcNow.AddHours(7);
+                    adminWallet.AvalaibleAmount += (booking.Amount * percentageOfTutor) / 100;
+                    adminWallet.Amount += (booking.Amount * percentageOfTutor) / 100;
+                    // Create wallet transaction for admin
+                    var walletTransactionForAdmin = new WalletTransaction
+                    {
+                        WalletTransactionId = Guid.NewGuid(),
+                        SenderWalletId = booking.ReceiverWalletId,
+                        ReceiverWalletId = adminWallet.WalletId,
+                        Amount = (booking.Amount * percentageOfTutor) / 100,
+                        CreatedAt = DateTime.UtcNow.AddHours(7),
+                        Status = (int)VNPayType.APPROVE,
+                        Note = "Hoa hồng từ giao dịch của buổi học" + booking.BookingNavigation.BookingId + " của gia sư " + booking.ReceiverWalletNavigation.UserNavigation.Name
+                    };
+                    _context.WalletTransactions.Add(walletTransactionForAdmin);
+                    _context.Wallets.Update(adminWallet);
                     _context.BookingTransactions.Update(booking);
                     _context.WalletTransactions.Update(wallet);
                     await _appExtension.SendMail(new MailContent()
@@ -2292,7 +2312,7 @@ namespace Services.Implementations
 
                     wallet.ReceiverWalletNavigation.LastBalanceUpdate = DateTime.UtcNow.AddHours(7);
                     wallet.ReceiverWalletNavigation.PendingAmount -= booking.Amount;
-                    booking.Status = (int)VNPayType.APPROVE;
+                    booking.Status = (int)VNPayType.CANCELLED;
                     booking.BookingNavigation.Status = (int)BookingEnum.Cancelled;
                 }
                 else
@@ -2382,6 +2402,7 @@ namespace Services.Implementations
                     wallet.ReceiverWalletNavigation.PendingAmount -= booking.Amount;
                     booking.BookingNavigation.Status = (int)BookingEnum.Cancelled;
 
+                booking.Status = (int)VNPayType.CANCELLED;
                 _context.WalletTransactions.Update(wallet);
                 _context.BookingTransactions.Update(booking);
 
@@ -2416,47 +2437,31 @@ namespace Services.Implementations
                 return new StatusCodeResult(500);
             }
         }
-        /*        // Send Notification 
-                private async Task SendNotificationAndEmail(User sender, User receiver, string content)
-                {
-                    await _appExtension.SendMail(new MailContent()
-                    {
-                        To = sender.Email,
-                        Subject = "Xác nhận giao dịch",
-                        Body = content
-                    });
-                    await _appExtension.SendMail(new MailContent()
-                    {
-                        To = receiver.Email,
-                        Subject = "Xác nhận giao dịch",
-                        Body = content
-                    });
 
-                    var notification1 = new Models.Entities.Notification
-                    {
-                        NotificationId = Guid.NewGuid(),
-                        Title = "Giao dịch booking",
-                        Content = content,
-                        UserId = sender.Id,
-                        CreatedAt = DateTime.UtcNow.AddHours(7),
-                        Status = (int)NotificationEnum.UnRead
-                    };
-                    var notification2 = new Models.Entities.Notification
-                    {
-                        NotificationId = Guid.NewGuid(),
-                        Title = "Giao dịch booking",
-                        Content = content,
-                        UserId = receiver.Id,
-                        CreatedAt = DateTime.UtcNow.AddHours(7),
-                        Status = (int)NotificationEnum.UnRead
-                    };
-                    _context.Notifications.Add(notification1);
-                    _context.Notifications.Add(notification2);
-
-                    await _firebaseRealtimeDatabaseService.UpdateAsync<Models.Entities.Notification>($"notifications/{sender.Id}/{notification1.NotificationId}", notification1);
-                    await _firebaseRealtimeDatabaseService.UpdateAsync<Models.Entities.Notification>($"notifications/{receiver.Id}/{notification2.NotificationId}", notification2);
-                }*/
-
-
+        // Find total booking finished of tutor and show the rose percentage for admin and tutor
+        public int GetTutorPercentageOfTutorByUserId (Guid userId)
+        {
+            int response = 0;
+            var tutor = _context.Tutors.FirstOrDefault(t => t.UserId == userId);
+            if (tutor == null)
+            {
+                return 0;
+            }
+            var totalEndBooking = _context.Bookings.Where(b => b.TutorId == tutor.TutorId && b.Status == (int)BookingEnum.Finished).Count();
+            if (totalEndBooking < 10)
+            {
+                 response = 10;
+            } else if (totalEndBooking >= 10 && totalEndBooking < 20)
+            {
+                response = 8; 
+            } else if (totalEndBooking >= 20 && totalEndBooking < 30)
+            {
+                response = 6;
+            } else
+            {
+                response = 5;
+            }
+            return response;
+        }
     }
 }
