@@ -12,6 +12,6 @@ namespace Models.Entities
         public Guid ReportId { get; set; }
         public string ImageURL{ get; set; }
 
-        public virtual Report ReportNavigation { get; set; }
+        public virtual Report? ReportNavigation { get; set; }
     }
 }

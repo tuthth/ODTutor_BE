@@ -110,8 +110,9 @@ namespace Services.Implementations
             report.ReportId = Guid.NewGuid();
             report.Type = (Int32)ReportStatusEnum.Booking;
             // Check have image or not 
+            List<ReportImages> images = new List<ReportImages>();
             if (reportRequest.ImageURLs != null)
-            {
+            {       
                 foreach (var item in reportRequest.ImageURLs)
                 {
                     var reportImage = new ReportImages()
@@ -120,11 +121,11 @@ namespace Services.Implementations
                         ReportId = report.ReportId,
                         ImageURL = item
                     };
-                    report.ReportImages.Add(reportImage);
+                    images.Add(reportImage);
                 }
             }
             report.Status = (Int32)ReportEnum.Processing;
-
+            _context.ReportImages.AddRange(images);
             _context.Reports.Add(report);
             var notification1 = new NotificationDTO()
             {
@@ -519,6 +520,11 @@ namespace Services.Implementations
                 List<ReportResponse> reportResponses = new List<ReportResponse>();
                 foreach (var item in reports)
                 {
+                    // Find Tutor of Report 
+                    var tutor = _context.Bookings
+                        .Include(x => x.TutorNavigation)
+                        .Include(x => x.TutorNavigation.UserNavigation)
+                        .FirstOrDefault(x => x.BookingId == item.TargetId);
                     ReportResponse reportResponse = new ReportResponse()
                     {
                         ReportId = item.ReportId,
@@ -526,6 +532,8 @@ namespace Services.Implementations
                         SenderId = item.SenderUserId,
                         SenderName = item.UserNavigation.Name,
                         SenderAvatar = item.UserNavigation.ImageUrl,
+                        TutorName = tutor.TutorNavigation.UserNavigation.Name,
+                        TutorAvatar = tutor.TutorNavigation.UserNavigation.ImageUrl,
                         Content = item.Content,
                         CreatedAt = item.CreatedAt,
                         Status = item.Status,
