@@ -968,10 +968,14 @@ namespace Services.Implementations
                     return new StatusCodeResult(404);
                 }
                 // Find total time booking in finished booking 
-                var totalSlotInFinsihedBooking = bookings.Where(x => x.Status == (Int32)BookingEnum.Finished).Count();
 
                 foreach (var booking in bookings)
                 {
+                    // Find total time booking in finished booking 
+                    var totalSlotInFinsihedBooking = bookings
+                        .Where(x => x.CreatedAt < booking.CreatedAt)
+                        .Where(x => x.Status == (Int32)BookingEnum.Finished)
+                        .Count();
                     BookingHistoryResponse bookingHistory = new BookingHistoryResponse();
                     bookingHistory.BookingId = booking.BookingId;
                     bookingHistory.CreateAt = booking.CreatedAt;

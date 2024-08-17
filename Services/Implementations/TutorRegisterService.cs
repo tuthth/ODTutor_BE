@@ -1156,6 +1156,7 @@ namespace Services.Implementations
                         StartTime = date.timeinDate.FirstOrDefault().StartTime, // Lấy StartTime từ thời gian đầu tiên trong ngày
                         EndTime = date.timeinDate.LastOrDefault().EndTime // Lấy EndTime từ thời gian cuối cùng trong ngày
                     };
+
                     await _context.TutorDateAvailables.AddAsync(tutorDateAvailable);
                     await _context.SaveChangesAsync();
 
@@ -1163,13 +1164,8 @@ namespace Services.Implementations
                     foreach (var time in date.timeinDate)
                     {
                         TimeSpan currentSlotStartTime = time.StartTime;
-                        while (currentSlotStartTime < time.EndTime)
+                        while (currentSlotStartTime <= time.EndTime)
                         {
-                            var slotEndTime = currentSlotStartTime.Add(TimeSpan.FromHours(1));
-                            if (slotEndTime > time.EndTime)
-                            {
-                                slotEndTime= time.EndTime;
-                            }
                             TutorSlotAvailable tutorSlotAvailable = new TutorSlotAvailable
                             {
                                 TutorSlotAvailableID = Guid.NewGuid(),
@@ -1181,11 +1177,9 @@ namespace Services.Implementations
                             };
                             await _context.TutorSlotAvailables.AddAsync(tutorSlotAvailable);
                             await _context.SaveChangesAsync();
-                            currentSlotStartTime = slotEndTime;
-                            if (currentSlotStartTime >= time.EndTime)
-                            {
-                                break;
-                            }
+
+                            // Increment the start time by one hour for the next slot
+                            currentSlotStartTime = currentSlotStartTime.Add(TimeSpan.FromHours(1));
                         }
                     }
                 }
