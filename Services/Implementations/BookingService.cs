@@ -589,6 +589,10 @@ namespace Services.Implementations
                     throw new CrudException(HttpStatusCode.NotFound, "Tutor date not found", "");
                 }
 
+                // Change status of new time of booking
+                tutorSlotAvailable.IsBooked = true;
+                tutorSlotAvailable.Status = (Int32)TutorSlotAvailabilityEnum.NotAvailable;
+                _context.TutorSlotAvailables.Update(tutorSlotAvailable);
                 // Kết hợp ngày và giờ để tạo ra DateTime mới
                 DateTime newTime = new DateTime(
                     tutorDateAvailable.Date.Year,

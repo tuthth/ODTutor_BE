@@ -2469,7 +2469,7 @@ namespace Services.Implementations
         {
             try
             {
-                // Get BoookinTransaction From BookingId 
+                // Get BoookingTransaction From BookingId 
                 var bookingTransaction = await _context.BookingTransactions.FirstOrDefaultAsync(b => b.BookingId == bookingId);
                 var walletTransactionId = bookingTransaction.BookingTransactionId;
                 var books = await _context.Bookings.FirstOrDefaultAsync(b => b.BookingId == bookingId);

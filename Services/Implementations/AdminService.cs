@@ -1445,5 +1445,52 @@ namespace Services.Implementations
                 return new StatusCodeResult(StatusCodes.Status500InternalServerError);
             }
         }
+
+        // get all certificate type
+        public async Task<ActionResult<List<CertificateTypeView>>> getallCertificate()
+        {
+            try
+            {
+                var certificates = await _context.CertificateTypes.ToListAsync();
+                if (certificates == null)
+                {
+                    return new StatusCodeResult(404);
+                }
+                List<CertificateTypeView> response = new List<CertificateTypeView>();
+                foreach (var certificate in certificates)
+                {
+                    CertificateTypeView certificateTypeView = new CertificateTypeView();
+                    certificateTypeView.CertificateTypeId = certificate.CertificateTypeId;
+                    certificateTypeView.Name = certificate.Name;
+                    response.Add(certificateTypeView);
+                }
+                return response;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.ToString());
+            }
+        }
+
+/*        // Create New Certificate Type
+        public async Task<IActionResult> CreateCertificateType(CertificateTypeRequest setting)
+        {
+            try
+            {
+                CertificateType certificateType = new CertificateType()
+                {
+                    Name = setting.Name,
+                    CreatedAt = DateTime.Now,
+                    Status = (Int32)CertificateTypeEnum.Active
+                };
+                _context.CertificateTypes.Add(certificateType);
+                _context.SaveChanges();
+                return new JsonResult(certificateType);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.ToString());
+            }
+        }*/
     }
 }
