@@ -1472,25 +1472,5 @@ namespace Services.Implementations
             }
         }
 
-/*        // Create New Certificate Type
-        public async Task<IActionResult> CreateCertificateType(CertificateTypeRequest setting)
-        {
-            try
-            {
-                CertificateType certificateType = new CertificateType()
-                {
-                    Name = setting.Name,
-                    CreatedAt = DateTime.Now,
-                    Status = (Int32)CertificateTypeEnum.Active
-                };
-                _context.CertificateTypes.Add(certificateType);
-                _context.SaveChanges();
-                return new JsonResult(certificateType);
-            }
-            catch (Exception ex)
-            {
-                throw new Exception(ex.ToString());
-            }
-        }*/
     }
 }

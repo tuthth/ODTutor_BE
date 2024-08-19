@@ -646,7 +646,7 @@ namespace Services.Implementations
                 Tutor tutor = await _context.Tutors.Where(x => x.TutorId == tutorID).FirstOrDefaultAsync();
                 if (user == null || tutor == null)
                 {
-                    throw new CrudException(HttpStatusCode.OK, "Tutor not found", "");
+                    response = [];
                 }
                 List<TutorCertificate> tutorCertificateList = await _context.TutorCertificates.Where(x => x.TutorId == tutorID).ToListAsync();
                 foreach (var cert in tutorCertificateList)
@@ -664,7 +664,7 @@ namespace Services.Implementations
                 }
                 if (response.Count == 0)
                 {
-                    throw new CrudException(HttpStatusCode.OK, "Không ghi nhận chứng chỉ từ gia sư", "");
+                    response = [];
                 }
                 return response;
             }
@@ -688,7 +688,7 @@ namespace Services.Implementations
                 Tutor tutor = await _context.Tutors.Where(x => x.TutorId == tutorID).FirstOrDefaultAsync();
                 if (user == null || tutor == null)
                 {
-                    throw new CrudException(HttpStatusCode.OK, "Tutor not found", "");
+                    response = [];
                 }
                 List<TutorExperience> tutorExperiencesList = await _context.TutorExperiences.Where(x => x.TutorId == tutorID).ToListAsync();
                 foreach (var experience in tutorExperiencesList)
@@ -706,7 +706,7 @@ namespace Services.Implementations
                 }
                 if (response.Count == 0)
                 {
-                    throw new CrudException(HttpStatusCode.OK, "Không ghi nhận kinh nghiệm từ gia sư", "");
+                    response = [];
                 }
                 return response;
             }
