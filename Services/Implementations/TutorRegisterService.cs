@@ -58,9 +58,12 @@ namespace Services.Implementations
                 tutor.Status = (Int32)TutorEnum.Inprocessing; // "2" is InProcessing
                 tutor.CreateAt = DateTime.UtcNow.AddHours(7);
                 tutor.UpdateAt = DateTime.UtcNow.AddHours(7);
-                tutor.HasBoughtExperiencedPackage = false;
                 tutor.CountMessageChat = 0;
                 tutor.HasBoughtSubscription = false;
+                tutor.SubcriptionStartDate = null;
+                tutor.SubcriptionEndDate = null;
+                tutor.HasBoughtExperiencedPackage = false;
+                tutor.SubcriptionType = (Int32)TutorPackageEnum.Standard;
                 _context.Tutors.Add(tutor);
                 // Add Tutor Subject List
                 List<TutorSubject> tutorSubject = new List<TutorSubject>();
@@ -540,7 +543,6 @@ namespace Services.Implementations
                 // Change the Status Of Tutor
                 Tutor tutor = _context.Tutors.FirstOrDefault(t => t.TutorId == tutorAction.TutorId);
                 tutor.Status = (Int32)TutorEnum.Active;
-                await _context.SaveChangesAsync();
 
                 // Create a notification for Tutor
                 NotificationDTO notification = new NotificationDTO();
@@ -580,6 +582,7 @@ namespace Services.Implementations
                 // Change the Status Of Tutor
                 Tutor tutor = _context.Tutors.FirstOrDefault(t => t.TutorId == tutorAction.TutorId);
                 tutor.Status = (Int32)TutorEnum.Denny;
+                tutor.CreateAt = DateTime.UtcNow.AddHours(7).Date;
                 var tutorCertificate = _context.TutorCertificates.Where(x => x.TutorId == tutorAction.TutorId).ToList();
                 _context.TutorCertificates.RemoveRange(tutorCertificate);
                 var tutorExperience = _context.TutorExperiences.Where(x => x.TutorId == tutorAction.TutorId).ToList();
