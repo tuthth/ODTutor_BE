@@ -101,7 +101,7 @@ namespace Services.Implementations
             var sender = _context.Users.FirstOrDefault(x => x.Id == reportRequest.SenderUserId);
             var target = _context.Bookings
                 .Include(x => x.TutorNavigation)
-                .Include(x=> x.TutorNavigation.UserNavigation)
+                .Include(x => x.TutorNavigation.UserNavigation)
                 .FirstOrDefault(x => x.BookingId == reportRequest.TargetId);
             target.Status = (Int32)BookingEnum.Reported;
             var tutor = _context.Users.FirstOrDefault(x => x.Id == target.TutorNavigation.UserNavigation.Id);
@@ -112,7 +112,7 @@ namespace Services.Implementations
             // Check have image or not 
             List<ReportImages> images = new List<ReportImages>();
             if (reportRequest.ImageURLs != null)
-            {       
+            {
                 foreach (var item in reportRequest.ImageURLs)
                 {
                     var reportImage = new ReportImages()
@@ -252,7 +252,7 @@ namespace Services.Implementations
                 ModeratorId = Guid.Parse("3E4B355D-3D60-4A2A-2ADD-08DC93FF561F"),
                 CreateAt = DateTime.UtcNow.AddHours(7),
                 ReponseDate = DateTime.UtcNow.AddHours(7),
-                Description= " Xử lý hành vi vi phạm của người dùng",
+                Description = " Xử lý hành vi vi phạm của người dùng",
                 ActionType = (Int32)TutorActionTypeEnum.ReportBooking,
                 Status = (Int32)TutorActionEnum.Accept
             };
@@ -372,7 +372,7 @@ namespace Services.Implementations
 
             if (report.Status != (Int32)ReportEnum.Finished) return new StatusCodeResult(409);
             DateTime finishedTime = DateTime.UtcNow.AddHours(7);
-            if(action.Status == (Int32)ReportActionEnum.SevenDays)
+            if (action.Status == (Int32)ReportActionEnum.SevenDays)
             {
                 finishedTime = finishedTime.AddDays(7);
                 target.Status = 1;
@@ -506,17 +506,17 @@ namespace Services.Implementations
         }
 
         // Get Report Booking By Status and Paging 
-        public async Task<PageResults<ReportResponse>> GetAllReportBookingReport (PagingRequest request)
+        public async Task<PageResults<ReportResponse>> GetAllReportBookingReport(PagingRequest request)
         {
             try
             {
                 var reports = _context.Reports
-              .Include(x => x.ReportImages)
-              .Include(x => x.UserNavigation)
-              .Where(x => x.Type == (Int32)ReportStatusEnum.Booking)
-              .Where(x => x.Status == (Int32)ReportEnum.Processing)
-              .OrderByDescending(x => x.CreatedAt)
-              .ToList();
+               .Include(x => x.ReportImages)
+               .Include(x => x.UserNavigation)
+               .Where(x => x.Type == (Int32)ReportStatusEnum.Booking)
+               .Where(x => x.Status == (Int32)ReportEnum.Processing)
+               .OrderByDescending(x => x.CreatedAt)
+               .ToList();
                 List<ReportResponse> reportResponses = new List<ReportResponse>();
                 foreach (var item in reports)
                 {
@@ -545,6 +545,51 @@ namespace Services.Implementations
                 var pagingBookingReport = PagingHelper<ReportResponse>.Paging(reportResponses, request.Page, request.PageSize);
                 return pagingBookingReport;
             }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.ToString());
+            }
+        }
+
+        // Get Response Detail by Report Id 
+        public async Task<ActionResult<ReportDetailResponse>> GetReportDetailByReportId(Guid reportId)
+        {
+            try
+            {
+                var reports = _context.Reports
+               .Include(x => x.ReportImages)
+               .Include(x => x.UserNavigation)
+               .FirstOrDefault(x => x.ReportId == reportId);
+
+                var booking = _context.Bookings
+                       .Include(x => x.TutorNavigation)
+                       .Include(x => x.TutorNavigation.UserNavigation)
+                       .FirstOrDefault(x => x.BookingId == reports.TargetId);
+                ReportDetailResponse reportDetailResponse = new ReportDetailResponse();
+                reportDetailResponse.ReportId = reports.ReportId;
+                reportDetailResponse.BookingId = reports.TargetId;
+                reportDetailResponse.SenderName = reports.UserNavigation.Name;
+                reportDetailResponse.SenderAvatar = reports.UserNavigation.ImageUrl;
+                reportDetailResponse.TutorName = booking.TutorNavigation.UserNavigation.Name;
+                reportDetailResponse.TutorAvatar = booking.TutorNavigation.UserNavigation.ImageUrl;
+                reportDetailResponse.CreatedAt = reports.CreatedAt;
+                reportDetailResponse.Content = reports.Content;
+                reportDetailResponse.Status = reports.Status;
+                reportDetailResponse.Type = reports.Type;
+                reportDetailResponse.Images = reports.ReportImages.Select(x => x.ImageURL).ToList();
+                reportDetailResponse.BookingCreateAt = booking.CreatedAt;
+                reportDetailResponse.BookingContent = booking.BookingContent;
+                reportDetailResponse.BookingMessage = booking.Message;
+                reportDetailResponse.TotalPrice = booking.TotalPrice;
+                reportDetailResponse.StudyTime = booking.StudyTime;
+                reportDetailResponse.RescheduledTime = booking.RescheduledTime;
+                reportDetailResponse.IsRescheduled = booking.IsRescheduled;
+                reportDetailResponse.Description = booking.Description;
+                reportDetailResponse.GoogleMeetUrl = booking.GoogleMeetUrl;
+                reportDetailResponse.IsRated = booking.isRated;
+                return reportDetailResponse;
+            }
+
             catch (Exception ex)
             {
                 throw new Exception(ex.ToString());

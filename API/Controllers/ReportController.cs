@@ -204,5 +204,15 @@ namespace API.Controllers
             var result = await _reportService.GetAllReportBookingReport(request);
             return Ok(result);
         }
+
+        /// <summary>
+        /// Get Report Detail 
+        /// </summary>
+        [HttpGet("get/detail/{reportId}")]
+        public async Task<ActionResult<ReportDetailResponse>> GetReportDetailByReportId(Guid reportId)
+        {
+            var result = await _reportService.GetReportDetailByReportId(reportId);
+            return Ok(result);
+        }
     }
 }

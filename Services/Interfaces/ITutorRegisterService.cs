@@ -41,5 +41,6 @@ namespace Services.Interfaces
         Task<IActionResult> BlockOrUnBlockTutorByTutorID(Guid tutorId);
         Task<ActionResult<List<SubjectView>>> GetAllSubjectWithoutTutorSubject(Guid tutorID);
         Task<IActionResult> ChangeStatusForAllTutorSubject();
+        Task<ActionResult<List<TutorStep5ResponseVer2>>> GetTutorStep5RegisterResponse(Guid TutorId);
     }   
 }

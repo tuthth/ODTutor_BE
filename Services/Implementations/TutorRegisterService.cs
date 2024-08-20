@@ -1454,7 +1454,79 @@ namespace Services.Implementations
             }
         }
 
+        /*  // Get Tutor Calendar By Date And Time Duration ( 0, 1, 2, 3, 4, 5, 6) ( Monday - > Sunday)
+          public async Task<ActionResult<List<TutorStep5ResponseVer2>>> GetTutorStep5RegisterReponse (Guid TutorId)
+          {
+              var tutorDateAvailable = await _context.TutorDateAvailables.Where(x => x.TutorID == TutorId).ToListAsync();
+              var tutorSlotAvailable = await _context.TutorSlotAvailables.Where(x => x.TutorID == TutorId).ToListAsync();
+              List<TutorStep5ResponseVer2> response = new List<TutorStep5ResponseVer2>();
+              foreach (var date in tutorDateAvailable)
+              {
+                  var slot = tutorSlotAvailable.Where(x => x.TutorDateAvailableID == date.TutorDateAvailableID).ToList();
+                  response.Add(new TutorStep5ResponseVer2
+                  {
+                      DayOfWeek = date.DayOfWeek,
+                      TimeDuration = slot
+                  });
+              }
 
+
+          }*/
+
+        public async Task<ActionResult<List<TutorStep5ResponseVer2>>> GetTutorStep5RegisterResponse(Guid TutorId)
+        {
+            var tutorDateAvailable = await _context.TutorDateAvailables
+                .Where(x => x.TutorID == TutorId)
+                .ToListAsync();
+
+            var tutorSlotAvailable = await _context.TutorSlotAvailables
+                .Where(x => x.TutorID == TutorId)
+                .OrderBy(x => x.StartTime)
+                .ToListAsync();
+
+            List<TutorStep5ResponseVer2> response = new List<TutorStep5ResponseVer2>();
+
+            foreach (var date in tutorDateAvailable)
+            {
+                var slots = tutorSlotAvailable
+                    .Where(x => x.TutorDateAvailableID == date.TutorDateAvailableID)
+                    .OrderBy(x => x.StartTime)
+                    .ToList();
+
+                var groupedTimeSlots = new Dictionary<string, string>();
+                if (slots.Any())
+                {
+                    string startTime = slots.First().StartTime.ToString(@"hh\:mm");
+                    string endTime = startTime;
+
+                    for (int i = 1; i < slots.Count; i++)
+                    {
+                        var currentSlotTime = slots[i].StartTime.ToString(@"hh\:mm");
+
+                        if (TimeSpan.Parse(currentSlotTime) == TimeSpan.Parse(endTime).Add(TimeSpan.FromHours(1)))
+                        {
+                            endTime = currentSlotTime;
+                        }
+                        else
+                        {
+                            groupedTimeSlots.Add(startTime, endTime);
+
+                            startTime = currentSlotTime;
+                            endTime = currentSlotTime;
+                        }
+                    }
+                    groupedTimeSlots.Add(startTime, endTime);
+                }
+
+                response.Add(new TutorStep5ResponseVer2
+                {
+                    DayOfWeek = date.DayOfWeek,
+                    Date = date.Date,
+                    TimeDuration = groupedTimeSlots
+                });
+            }
+            return response;
+        }
 
     }
 }

@@ -396,6 +396,16 @@ namespace API.Controllers
             var response = await _tutorRegisterService.ChangeStatusForAllTutorSubject();
             return response;
         }
+
+        /// <summary>
+        /// Get Schedule Tutor Step 5
+        /// </summary>
+        [HttpGet("get/tutor-step5-ver2/{tutorId}")]
+        public async Task<ActionResult<List<TutorStep5ResponseVer2>>> getTutorStep5RegisterResponse(Guid TutorId)
+        {
+            var result = await _tutorRegisterService.GetTutorStep5RegisterResponse(TutorId);
+            return result;
+        }
     }
 }
 

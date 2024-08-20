@@ -22,5 +22,6 @@ namespace Services.Interfaces
         Task<IActionResult> MakeActionReportBooking(ReportAction action);
         Task<IActionResult> CreateReportBooking(ReportRequest reportRequest);
         Task<PageResults<ReportResponse>> GetAllReportBookingReport(PagingRequest request);
+        Task<ActionResult<ReportDetailResponse>> GetReportDetailByReportId(Guid reportId);
     }
 }
