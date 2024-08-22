@@ -68,6 +68,8 @@ namespace Services.Interfaces
         Task<IActionResult> UpdateTutorSubscription(TutorSubscriptionRequest setting, string name);
         Task<IActionResult> RemoveTutorSubscription(string name);*/
         Task<IActionResult> CreateAndSaveSubscriptionInFireStore(TutorSubscriptionRequest setting);
+        Task<IActionResult> CreateSubscriptionByAdmin(TutorSubscriptionRequest tutorSubscription);
+        Task<ActionResult<List<TutorSubscriptionViewResponse>>> getAllTutorSubscription();
 
     }
 }

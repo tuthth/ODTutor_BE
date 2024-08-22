@@ -410,7 +410,9 @@ namespace Services.Implementations
         {
             try
             {
-                var bookings = await _context.Bookings.ToListAsync();
+                var bookings = await _context.Bookings
+                    .Include(b => b.TutorSubjectNavigation.SubjectNavigation)
+                    .ToListAsync();
                 if (bookings == null)
                 {
                     return new StatusCodeResult(404);
@@ -428,6 +430,7 @@ namespace Services.Implementations
             {
                 var booking = await _context.Bookings
                     .Include(b => b.BookingTransactionNavigation)
+                    .Include(b => b.TutorSubjectNavigation.SubjectNavigation)
                     .FirstOrDefaultAsync(c => c.BookingId == id);
                 if (booking == null)
                 {
@@ -446,6 +449,7 @@ namespace Services.Implementations
             {
                 var bookings = await _context.Bookings
                     .Include(b => b.BookingTransactionNavigation)
+                    .Include(b=> b.TutorSubjectNavigation.SubjectNavigation)
                     .Where(c => c.StudentId == id).ToListAsync();
                 if (bookings == null)
                 {

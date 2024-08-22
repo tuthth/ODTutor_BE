@@ -1,4 +1,4 @@
-﻿    using AutoMapper;
+﻿using AutoMapper;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
@@ -468,9 +468,9 @@ namespace Services.Implementations
                     tutor.HasBoughtSubscription = true;
                     // Format startDate
                     DateTime startTimeDate = DateTime.UtcNow.AddHours(7);
-                    
+
                     // Định dạng ngày và giờ 
-                    string formatStartTimeDate  = startTimeDate.ToString("dd-MM-yyyy") + " 00:00:00";
+                    string formatStartTimeDate = startTimeDate.ToString("dd-MM-yyyy") + " 00:00:00";
                     tutor.SubcriptionStartDate = DateTime.ParseExact(formatStartTimeDate, "dd-MM-yyyy HH:mm:ss", null);
 
                     // Format endDate 
@@ -901,7 +901,7 @@ namespace Services.Implementations
             {
                 if (choice == (Int32)UpdateTransactionType.Booking)
                 {
-                    wallet.Status = (int)VNPayType.APPROVE; 
+                    wallet.Status = (int)VNPayType.APPROVE;
                     var booking = _context.BookingTransactions.FirstOrDefault(b => b.BookingTransactionId == wallet.WalletTransactionId);
                     booking.Status = (int)VNPayType.APPROVE;
 
@@ -2093,7 +2093,7 @@ namespace Services.Implementations
             }
         }
         // Get Transaction By UserId and Paging
-        public async Task<ActionResult<PageResults<WalletTransactionViewVersion2>>>GetCourseTransactionsByUserIdPaging(Guid userId, PagingRequest request)
+        public async Task<ActionResult<PageResults<WalletTransactionViewVersion2>>> GetCourseTransactionsByUserIdPaging(Guid userId, PagingRequest request)
         {
             try
             {
@@ -2115,12 +2115,12 @@ namespace Services.Implementations
                         Note = c.Note,
                     })
                     .ToListAsync();
-                if(walletTransactionsList == null || !walletTransactionsList.Any())
+                if (walletTransactionsList == null || !walletTransactionsList.Any())
                 {
                     return new StatusCodeResult(404);
-                } 
+                }
                 var pagingWalletTransactions = PagingHelper<WalletTransactionViewVersion2>.Paging(walletTransactionsList, request.Page, request.PageSize);
-                if(pagingWalletTransactions == null)
+                if (pagingWalletTransactions == null)
                 {
                     return new StatusCodeResult(400);
                 }
@@ -2173,7 +2173,7 @@ namespace Services.Implementations
                     wallet.ReceiverWalletNavigation.PendingAmount -= booking.Amount;
                     // Caculate rose fee for Admin and Tutor based on number of finished bookings of tutor
                     int percentageOfTutor = GetTutorPercentageOfTutorByUserId(booking.ReceiverWalletNavigation.UserId);
-                    wallet.ReceiverWalletNavigation.AvalaibleAmount += (booking.Amount - (booking.Amount * percentageOfTutor)/100) ;
+                    wallet.ReceiverWalletNavigation.AvalaibleAmount += (booking.Amount - (booking.Amount * percentageOfTutor) / 100);
                     wallet.ReceiverWalletNavigation.Amount += (booking.Amount - (booking.Amount * percentageOfTutor) / 100);
                     booking.Status = (int)VNPayType.APPROVE;
                     // Send money from tutor to admin based on percentage of tutor
@@ -2244,7 +2244,7 @@ namespace Services.Implementations
             try
             {
                 var list = await _context.WalletTransactions.OrderByDescending(c => c.CreatedAt).Where(c => c.Note.Contains("Nâng cấp tài khoản") && c.SenderWalletId == walletId).ToListAsync();
-                if(list == null)
+                if (list == null)
                 {
                     return new StatusCodeResult(404);
                 }
@@ -2258,10 +2258,10 @@ namespace Services.Implementations
         public async Task<ActionResult<List<WalletTransaction>>> GetAllSubscriptionTransactions()
         {
             Guid adminWallet = Guid.Parse("E91703BF-5651-4F9A-5D51-08DC93FF5629");
-           try
+            try
             {
                 var list = await _context.WalletTransactions.OrderByDescending(c => c.CreatedAt).Where(c => c.Note.Contains("Nâng cấp tài khoản") && c.ReceiverWalletId == adminWallet).ToListAsync();
-                if(list == null)
+                if (list == null)
                 {
                     return new StatusCodeResult(404);
                 }
@@ -2328,7 +2328,7 @@ namespace Services.Implementations
                     booking.Status = (int)VNPayType.APPROVE;
                     booking.BookingNavigation.Status = (int)BookingEnum.Cancelled;
                 }
-                
+
                 _context.WalletTransactions.Update(wallet);
                 _context.BookingTransactions.Update(booking);
 
@@ -2390,16 +2390,18 @@ namespace Services.Implementations
                 var receiver = await _context.Users.Include(u => u.WalletNavigation).FirstOrDefaultAsync(u => u.WalletNavigation.WalletId == wallet.ReceiverWalletId);
 
                 // Cập nhật trạng thái giao dịch ví và booking
-                    // Xử lý hoàn tiền
-                    wallet.Status = (int)VNPayType.APPROVE;
-                    wallet.SenderWalletNavigation.LastBalanceUpdate = DateTime.UtcNow.AddHours(7);
-                    wallet.SenderWalletNavigation.AvalaibleAmount += booking.Amount;
-                    wallet.SenderWalletNavigation.Amount += booking.Amount;
-                    wallet.SenderWalletNavigation.PendingAmount += booking.Amount;
+                // Xử lý hoàn tiền
+                wallet.Status = (int)VNPayType.CANCELLED;
+                wallet.Note = "Hủy booking do không chấp nhận thay đổi lịch học";
+                wallet.SenderWalletNavigation.LastBalanceUpdate = DateTime.UtcNow.AddHours(7);
+                wallet.SenderWalletNavigation.AvalaibleAmount += booking.Amount;
+                wallet.SenderWalletNavigation.Amount += booking.Amount;
+                wallet.SenderWalletNavigation.PendingAmount += booking.Amount;
 
-                    wallet.ReceiverWalletNavigation.LastBalanceUpdate = DateTime.UtcNow.AddHours(7);
-                    wallet.ReceiverWalletNavigation.PendingAmount -= booking.Amount;
-                    booking.BookingNavigation.Status = (int)BookingEnum.Cancelled;
+                wallet.ReceiverWalletNavigation.LastBalanceUpdate = DateTime.UtcNow.AddHours(7);
+                wallet.ReceiverWalletNavigation.PendingAmount -= booking.Amount;
+
+                booking.BookingNavigation.Status = (int)BookingEnum.Cancelled;
 
                 booking.Status = (int)VNPayType.CANCELLED;
                 _context.WalletTransactions.Update(wallet);
@@ -2438,7 +2440,7 @@ namespace Services.Implementations
         }
 
         // Find total booking finished of tutor and show the rose percentage for admin and tutor
-        public int GetTutorPercentageOfTutorByUserId (Guid userId)
+        public int GetTutorPercentageOfTutorByUserId(Guid userId)
         {
             int response = 0;
             var tutor = _context.Tutors.FirstOrDefault(t => t.UserId == userId);
@@ -2449,14 +2451,17 @@ namespace Services.Implementations
             var totalEndBooking = _context.Bookings.Where(b => b.TutorId == tutor.TutorId && b.Status == (int)BookingEnum.Finished).Count();
             if (totalEndBooking < 10)
             {
-                 response = 10;
-            } else if (totalEndBooking >= 10 && totalEndBooking < 20)
+                response = 10;
+            }
+            else if (totalEndBooking >= 10 && totalEndBooking < 20)
             {
-                response = 8; 
-            } else if (totalEndBooking >= 20 && totalEndBooking < 30)
+                response = 8;
+            }
+            else if (totalEndBooking >= 20 && totalEndBooking < 30)
             {
                 response = 6;
-            } else
+            }
+            else
             {
                 response = 5;
             }

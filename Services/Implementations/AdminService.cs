@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.Blazor;
 using Models.Entities;
 using Models.Enumerables;
 using Models.Models.Emails;
@@ -1472,5 +1473,75 @@ namespace Services.Implementations
             }
         }
 
+        // Create new subscription and save in cloud firestore realtime databse 
+        public async Task<IActionResult> CreateSubscriptionByAdmin (TutorSubscriptionRequest tutorSubscription)
+        {   
+            List<SubscriptionDetail> detail = new List<SubscriptionDetail>();
+            foreach (var item in tutorSubscription.PackageDescriptions)
+            {
+                SubscriptionDetail subscriptionDetail1 = new SubscriptionDetail()
+                {
+                    Description = item,
+                };
+                detail.Add(subscriptionDetail1);
+            }
+            TutorSubscription subscriptionDetail = new TutorSubscription()
+            {
+                Id = Guid.NewGuid(),
+                TutorNameSubscription = tutorSubscription.TutorNameSubscription,
+                Description = tutorSubscription.Description,
+                Price = tutorSubscription.Price,
+                Types = tutorSubscription.Types,
+                CreatedDate = DateTime.Now,
+                SubscriptionDetails = detail,
+                NumberOfSubscriptions = 0,
+                Status = (int)TutorSubscriptionStatusEnum.Inactive,
+            };
+            _cloudFireStoreService.SetAsync<TutorSubscription>($"subscription/{subscriptionDetail.Id}", subscriptionDetail);
+            return new StatusCodeResult(200);
+        }
+
+        // Get All Subscription from real-time database
+        public async Task<ActionResult<List<TutorSubscriptionViewResponse>>> getAllTutorSubscription()
+        {
+            try
+            {
+                // Giả sử GetAsync trả về một Dictionary với ID là key và TutorSubscription là giá trị
+                var subscriptionDict = await _cloudFireStoreService.GetAsync<Dictionary<string, TutorSubscription>>("subscription");
+
+                if (subscriptionDict == null || !subscriptionDict.Any())
+                {
+                    return new StatusCodeResult(404);
+                }
+
+                // Chuyển đổi Dictionary thành List<TutorSubscription>
+                var subscriptions = subscriptionDict.Values.ToList();
+
+                List<TutorSubscriptionViewResponse> response = new List<TutorSubscriptionViewResponse>();
+
+                foreach (var subscription in subscriptions)
+                {
+                    TutorSubscriptionViewResponse tutorSubscriptionViewResponse = new TutorSubscriptionViewResponse
+                    {
+                        Id = subscription.Id,
+                        TutorNameSubscription = subscription.TutorNameSubscription,
+                        Description = subscription.Description,
+                        Price = subscription.Price,
+                        Types = subscription.Types,
+                        CreatedDate = subscription.CreatedDate,
+                        NumberOfSubscriptions = subscription.NumberOfSubscriptions,
+                        Status = subscription.Status
+                    };
+
+                    response.Add(tutorSubscriptionViewResponse);
+                }
+
+                return response;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.ToString());
+            }
+        }
     }
 }

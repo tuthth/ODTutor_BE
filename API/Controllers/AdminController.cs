@@ -812,6 +812,26 @@ namespace API.Controllers
             await _adminService.CreateAndSaveSubscriptionInFireStore(tutorSubscriptionSetting);
             return Ok();
         }
+
+        ///<summary>
+        /// Create Subscription By Admin
+        /// </summary>
+        [HttpPost("create-subscription")]
+        public async Task<IActionResult> CreateSubscription([FromBody] TutorSubscriptionRequest subscriptionRequest)
+        {
+            await _adminService.CreateSubscriptionByAdmin(subscriptionRequest);
+            return Ok();
+        }
+
+        /// <summary>
+        /// Get All Subscription
+        /// </summary>
+        [HttpGet("get-all-subscriptions")]
+        public async Task<ActionResult<List<TutorSubscriptionViewResponse>>> getAllSubscription()
+        {
+            var result = await _adminService.getAllTutorSubscription();
+            return Ok(result);
+        }
     }
 }
     

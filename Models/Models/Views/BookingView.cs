@@ -25,5 +25,6 @@ namespace Models.Models.Views
         public DateTime? RescheduledTime { get; set; }
         public bool IsRescheduled { get; set; }
         public bool IsRated { get; set; }
+        public string? SubjectName { get; set; }
     }
 }
