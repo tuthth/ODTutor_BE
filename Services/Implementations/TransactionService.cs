@@ -2162,7 +2162,10 @@ namespace Services.Implementations
 
                 foreach (var booking in bookingTransactions)
                 {
-                    var wallet = await _context.WalletTransactions.FirstOrDefaultAsync(w => w.WalletTransactionId == booking.BookingTransactionId);
+                    var wallet = await _context.WalletTransactions
+                    .Include(w => w.SenderWalletNavigation)
+                    .Include(w => w.ReceiverWalletNavigation)
+                    .FirstOrDefaultAsync(w => w.WalletTransactionId == booking.BookingTransactionId);
                     if (wallet == null)
                     {
                         return new StatusCodeResult(204);

@@ -607,9 +607,9 @@ namespace Services.Implementations
         }
 
         // Handle Report Booking 
-        public async Task<IActionResult> HandleReportOfTutor (Guid ReportId, Guid ApprovalId)
+        public async Task<IActionResult> HandleReportOfTutor(Guid ReportId, Guid ApprovalId)
         {
-            
+
             var report = _context.Reports.FirstOrDefault(x => x.ReportId == ReportId);
             if (report == null) return new StatusCodeResult(404);
             var bookingg = _context.Bookings
@@ -631,11 +631,15 @@ namespace Services.Implementations
                         var bookingTransaction = await _context.BookingTransactions.FirstOrDefaultAsync(b => b.BookingId == bookingg.BookingId);
                         var walletTransactionId = bookingTransaction.BookingTransactionId;
                         var books = await _context.Bookings.FirstOrDefaultAsync(b => b.BookingId == bookingg.BookingId);
+                        books.Status = (int)BookingEnum.Cancelled;
                         var tutor = await _context.Tutors
                             .Include(t => t.UserNavigation)
                             .FirstOrDefaultAsync(t => t.TutorId == books.TutorId);
                         // Lấy thông tin giao dịch ví từ database
-                        var wallet = await _context.WalletTransactions.FirstOrDefaultAsync(w => w.WalletTransactionId == walletTransactionId);
+                        var wallet = await _context.WalletTransactions
+                            .Include(w => w.SenderWalletNavigation)
+                            .Include(w => w.ReceiverWalletNavigation)
+                            .FirstOrDefaultAsync(w => w.WalletTransactionId == walletTransactionId);
                         if (wallet == null)
                         {
                             return new StatusCodeResult(404);
@@ -808,7 +812,7 @@ namespace Services.Implementations
         }
 
         // Deny Report Booking 
-        public async Task<IActionResult> DenyReportOfTutor (Guid ReportId, Guid ApprovalId)
+        public async Task<IActionResult> DenyReportOfTutor(Guid ReportId, Guid ApprovalId)
         {
             try
             {
@@ -819,6 +823,7 @@ namespace Services.Implementations
                     .Include(x => x.TutorNavigation)
                     .Include(x => x.TutorNavigation.UserNavigation)
                     .FirstOrDefault(x => x.BookingId == report.TargetId);
+                bookingg.Status = (int)BookingEnum.Cancelled;
                 // Get BoookingTransaction From BookingId
                 var booking = await _context.BookingTransactions.FirstOrDefaultAsync(b => b.BookingId == bookingg.BookingId);
                 var walletTransactionId = booking.BookingTransactionId;
@@ -827,7 +832,10 @@ namespace Services.Implementations
                     .Include(t => t.UserNavigation)
                     .FirstOrDefaultAsync(t => t.TutorId == books.TutorId);
                 // Lấy thông tin giao dịch ví từ database
-                var wallet = await _context.WalletTransactions.FirstOrDefaultAsync(w => w.WalletTransactionId == walletTransactionId);
+                var wallet = await _context.WalletTransactions
+                    .Include(w => w.SenderWalletNavigation)
+                    .Include(w => w.ReceiverWalletNavigation)
+                    .FirstOrDefaultAsync(w => w.WalletTransactionId == walletTransactionId);
                 if (wallet == null)
                 {
                     return new StatusCodeResult(404);
@@ -856,22 +864,11 @@ namespace Services.Implementations
                     Status = (int)VNPayType.APPROVE,
                     Note = "Hoa hồng từ giao dịch của buổi học" + booking.BookingNavigation.BookingId + " của gia sư " + booking.ReceiverWalletNavigation.UserNavigation.Name
                 };
+                _context.Bookings.Update(bookingg);
                 _context.WalletTransactions.Add(walletTransactionForAdmin);
                 _context.Wallets.Update(adminWallet);
                 _context.BookingTransactions.Update(booking);
                 _context.WalletTransactions.Update(wallet);
-                await _appExtension.SendMail(new MailContent()
-                {
-                    To = booking.SenderWalletNavigation.UserNavigation.Email,
-                    Subject = "Xác nhận giao dịch",
-                    Body = "Giao dịch booking của bạn đã hoàn thành. Mã giao dịch: " + wallet.WalletTransactionId
-                });
-                await _appExtension.SendMail(new MailContent()
-                {
-                    To = booking.ReceiverWalletNavigation.UserNavigation.Email,
-                    Subject = "Xác nhận giao dịch",
-                    Body = "Giao dịch booking của bạn đã hoàn thành. Mã giao dịch: " + wallet.WalletTransactionId
-                });
                 var notification1 = new NotificationDTO
                 {
                     NotificationId = Guid.NewGuid(),

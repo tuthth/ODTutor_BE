@@ -219,7 +219,7 @@ namespace API.Controllers
         /// <summary>
         /// Handele report of tutor ( ApprovalId is MODERATORID)
         /// </summary>
-        [HttpPost("handle-report/{ReportId}/{ApprovalId}")]
+        [HttpPost("handle-report")]
         public async Task<IActionResult> HandleReportOfTutor(Guid ReportId, Guid ApprovalId)
         {
             var result = await _reportService.HandleReportOfTutor(ReportId, ApprovalId);
@@ -239,7 +239,7 @@ namespace API.Controllers
         /// <summary>
         /// Deny report of tutor ( ApprovalId is MODERATORID)
         /// </summary>
-        [HttpPost("deny-report/{ReportId}/{ApprovalId}")]
+        [HttpPost("deny-report")]
         public async Task<IActionResult> DenyReportOfTutor(Guid ReportId, Guid ApprovalId)
         {
             var result = await _reportService.DenyReportOfTutor(ReportId, ApprovalId);
