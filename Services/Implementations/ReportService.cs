@@ -596,6 +596,7 @@ namespace Services.Implementations
                     .Where(x => x.TargetId == booking.TutorId)
                     .Where(x => x.Status == (Int32)ReportEnum.Finished)
                     .Count();
+                reportDetailResponse.NumberOfTutorReport = numberOfTutorReport;
                 return reportDetailResponse;
             }
 
