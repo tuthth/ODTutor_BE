@@ -32,6 +32,7 @@ namespace Models.Models.Views
         public bool? IsRated { get; set; }
         public int? BookingStatus { get; set; }
         // Report Detail
+        public string ? SubjectName { get; set; }
         public int? NumberOfTutorReport { get; set; }
     }
 }

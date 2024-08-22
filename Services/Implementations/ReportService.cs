@@ -565,6 +565,8 @@ namespace Services.Implementations
                 var booking = _context.Bookings
                        .Include(x => x.TutorNavigation)
                        .Include(x => x.TutorNavigation.UserNavigation)
+                       .Include(x => x.TutorSubjectNavigation)
+                       .Include(x => x.TutorSubjectNavigation.SubjectNavigation)
                        .FirstOrDefault(x => x.BookingId == reports.TargetId);
                 ReportDetailResponse reportDetailResponse = new ReportDetailResponse();
                 reportDetailResponse.ReportId = reports.ReportId;
@@ -588,6 +590,7 @@ namespace Services.Implementations
                 reportDetailResponse.Description = booking.Description;
                 reportDetailResponse.GoogleMeetUrl = booking.GoogleMeetUrl;
                 reportDetailResponse.IsRated = booking.isRated;
+                reportDetailResponse.SubjectName = booking.TutorSubjectNavigation.SubjectNavigation.Title;
                 // Check number of report of tutor
                 var numberOfTutorReport = _context.Reports
                     .Where(x => x.TargetId == booking.TutorId)
