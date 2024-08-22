@@ -1521,6 +1521,11 @@ namespace Services.Implementations
 
                 foreach (var subscription in subscriptions)
                 {
+                    // Chuyển đổi SubscriptionDetails từ List<Object> sang List<string>
+                    var subscriptionDetails = subscription.SubscriptionDetails
+                        .Select(detail => detail.Description)
+                        .ToList();
+
                     TutorSubscriptionViewResponse tutorSubscriptionViewResponse = new TutorSubscriptionViewResponse
                     {
                         Id = subscription.Id,
@@ -1530,7 +1535,8 @@ namespace Services.Implementations
                         Types = subscription.Types,
                         CreatedDate = subscription.CreatedDate,
                         NumberOfSubscriptions = subscription.NumberOfSubscriptions,
-                        Status = subscription.Status
+                        Status = subscription.Status,
+                        SubscriptionDetails = subscriptionDetails // Gán danh sách string vào đây
                     };
 
                     response.Add(tutorSubscriptionViewResponse);

@@ -15,7 +15,7 @@ namespace Models.Models.Views
         public int NumberOfSubscriptions { get; set; }
         public int Status { get; set; }
         public string TutorNameSubscription { get; set; }
-        public String Description { get; set; }
+        public string Description { get; set; }
         public decimal Price { get; set; }
         public int Types { get; set; }
         public List<TutorDataBoughtSubscription>? tutorDataBoughtSubscriptions { get; set; }
