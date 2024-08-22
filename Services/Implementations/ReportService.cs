@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Models.Entities;
 using Models.Enumerables;
+using Models.Migrations;
 using Models.Models.Emails;
 using Models.Models.Requests;
 using Models.Models.Views;
@@ -587,6 +588,11 @@ namespace Services.Implementations
                 reportDetailResponse.Description = booking.Description;
                 reportDetailResponse.GoogleMeetUrl = booking.GoogleMeetUrl;
                 reportDetailResponse.IsRated = booking.isRated;
+                // Check number of report of tutor
+                var numberOfTutorReport = _context.Reports
+                    .Where(x => x.TargetId == booking.TutorId)
+                    .Where(x => x.Status == (Int32)ReportEnum.Finished)
+                    .Count();
                 return reportDetailResponse;
             }
 
@@ -594,6 +600,345 @@ namespace Services.Implementations
             {
                 throw new Exception(ex.ToString());
             }
+        }
+
+        // Handle Report Booking 
+        public async Task<IActionResult> HandleReportOfTutor (Guid ReportId, Guid ApprovalId)
+        {
+            
+            var report = _context.Reports.FirstOrDefault(x => x.ReportId == ReportId);
+            if (report == null) return new StatusCodeResult(404);
+            var bookingg = _context.Bookings
+                .Include(x => x.TutorNavigation)
+                .Include(x => x.TutorNavigation.UserNavigation)
+                .FirstOrDefault(x => x.BookingId == report.TargetId);
+            // Check Number of Report of Tutor
+            var numberOfTutorReport = _context.Reports
+                .Where(x => x.TargetId == bookingg.TutorId)
+                .Where(x => x.Status == (Int32)ReportEnum.Finished)
+                .Count();
+            // Switchcase for handle report
+            switch (numberOfTutorReport)
+            {
+                case 0:
+                    {
+                        // Refund money for student
+                        // Get BoookingTransaction From BookingId 
+                        var bookingTransaction = await _context.BookingTransactions.FirstOrDefaultAsync(b => b.BookingId == bookingg.BookingId);
+                        var walletTransactionId = bookingTransaction.BookingTransactionId;
+                        var books = await _context.Bookings.FirstOrDefaultAsync(b => b.BookingId == bookingg.BookingId);
+                        var tutor = await _context.Tutors
+                            .Include(t => t.UserNavigation)
+                            .FirstOrDefaultAsync(t => t.TutorId == books.TutorId);
+                        // Lấy thông tin giao dịch ví từ database
+                        var wallet = await _context.WalletTransactions.FirstOrDefaultAsync(w => w.WalletTransactionId == walletTransactionId);
+                        if (wallet == null)
+                        {
+                            return new StatusCodeResult(404);
+                        }
+
+                        // Lấy thông tin booking tương ứng
+                        var booking = await _context.BookingTransactions
+                            .Include(b => b.BookingNavigation)
+                            .FirstOrDefaultAsync(b => b.BookingTransactionId == walletTransactionId);
+                        if (booking == null)
+                        {
+                            return new StatusCodeResult(404);
+                        }
+
+                        // Xác định người gửi và người nhận
+                        var sender = await _context.Users.Include(u => u.WalletNavigation).FirstOrDefaultAsync(u => u.WalletNavigation.WalletId == wallet.SenderWalletId);
+                        var receiver = await _context.Users.Include(u => u.WalletNavigation).FirstOrDefaultAsync(u => u.WalletNavigation.WalletId == wallet.ReceiverWalletId);
+
+                        // Cập nhật trạng thái giao dịch ví và booking
+                        // Xử lý hoàn tiền
+                        wallet.Status = (int)VNPayType.CANCELLED;
+                        wallet.SenderWalletNavigation.LastBalanceUpdate = DateTime.UtcNow.AddHours(7);
+                        wallet.SenderWalletNavigation.AvalaibleAmount += booking.Amount;
+                        wallet.SenderWalletNavigation.Amount += booking.Amount;
+                        wallet.SenderWalletNavigation.PendingAmount += booking.Amount;
+
+                        wallet.ReceiverWalletNavigation.LastBalanceUpdate = DateTime.UtcNow.AddHours(7);
+                        wallet.ReceiverWalletNavigation.PendingAmount -= booking.Amount;
+                        booking.BookingNavigation.Status = (int)BookingEnum.Cancelled;
+
+                        booking.Status = (int)VNPayType.CANCELLED;
+                        _context.WalletTransactions.Update(wallet);
+                        _context.BookingTransactions.Update(booking);
+
+                        var book = await _context.Bookings.FirstOrDefaultAsync(b => b.BookingId == booking.BookingId);
+                        if (book != null)
+                        {
+                            book.Status = (int)BookingEnum.Cancelled;
+                            _context.Bookings.Update(book);
+                        }
+                        // Gửi thông báo cho người gửi
+                        var notification = new NotificationDTO
+                        {
+                            NotificationId = Guid.NewGuid(),
+                            UserId = sender.Id,
+                            Title = "Yêu cầu xử lý báo cáo của bạn đã được chấp nhận",
+                            Content = "Chúng tôi đã xem xét và xử lý báo cáo của bạn. Tiền của bạn đã được hoàn trả vui lòng kiểm tra lại nếu có gì sai sót hãy liên hệ với chúng tôi. Cảm ơn bạn đã sử dụng dịch vụ",
+                            CreatedAt = DateTime.UtcNow.AddHours(7),
+                            Status = 0
+                        };
+                        Notification notificationx = _mapper.Map<Notification>(notification);
+                        _context.Notifications.Add(notificationx);
+                        _firebaseRealtimeDatabaseService.SetAsync<NotificationDTO>($"notifications/{notification.UserId}/{notification.NotificationId}", notification);
+                        // Gửi thông báo cho tutor 
+                        var notification1 = new NotificationDTO
+                        {
+                            NotificationId = Guid.NewGuid(),
+                            UserId = tutor.UserNavigation.Id,
+                            Title = "Thông báo nhắc nhở",
+                            Content = "Chúng tôi đã nhận được một phản hồi không tốt liên quan đến dịch vụ của bạn. Nếu chúng tôi nhận được một sự phản hồi không tốt chính đáng với với tài khoản này vào lần sau bạn sẽ bị cấm sử dụng dịch vụ như quy định. Hãy sắp xếp công việc và thời gian nhé!",
+                            CreatedAt = DateTime.UtcNow.AddHours(7),
+                            Status = 0
+                        };
+                        // Create Tutor Action 
+                        var tutorAction = new TutorAction()
+                        {
+                            TutorActionId = Guid.NewGuid(),
+                            TutorId = tutor.TutorId,
+                            ModeratorId = ApprovalId,
+                            CreateAt = DateTime.UtcNow.AddHours(7),
+                            ReponseDate = DateTime.UtcNow.AddHours(7),
+                            Description = " Xử lý hành vi vi phạm của người dùng",
+                            ActionType = (Int32)TutorActionTypeEnum.ReportBooking,
+                            Status = (Int32)TutorActionEnum.Accept
+                        };
+                        await _context.SaveChangesAsync();
+                        break;
+                    }
+                case 1:
+                    // Refund money for student
+                    // Get BoookingTransaction From BookingId
+                    var bookingTransactionVer2 = await _context.BookingTransactions.FirstOrDefaultAsync(b => b.BookingId == bookingg.BookingId);
+                    var walletTransactionIdVer2 = bookingTransactionVer2.BookingTransactionId;
+                    var booksVer2 = await _context.Bookings.FirstOrDefaultAsync(b => b.BookingId == bookingg.BookingId);
+                    var tutorVer2 = await _context.Tutors
+                        .Include(t => t.UserNavigation)
+                        .FirstOrDefaultAsync(t => t.TutorId == booksVer2.TutorId);
+                    // Lấy thông tin giao dịch ví từ database
+                    var walletVer2 = await _context.WalletTransactions.FirstOrDefaultAsync(w => w.WalletTransactionId == walletTransactionIdVer2);
+                    if (walletVer2 == null)
+                    {
+                        return new StatusCodeResult(404);
+                    }
+
+                    // Lấy thông tin booking tương ứng
+                    var bookingVer2 = await _context.BookingTransactions
+                        .Include(b => b.BookingNavigation)
+                        .FirstOrDefaultAsync(b => b.BookingTransactionId == walletTransactionIdVer2);
+                    if (bookingVer2 == null)
+                    {
+                        return new StatusCodeResult(404);
+                    }
+
+                    // Xác định người gửi và người nhận
+                    var senderVer2 = await _context.Users.Include(u => u.WalletNavigation).FirstOrDefaultAsync(u => u.WalletNavigation.WalletId == walletVer2.SenderWalletId);
+                    var receiverVer2 = await _context.Users.Include(u => u.WalletNavigation).FirstOrDefaultAsync(u => u.WalletNavigation.WalletId == walletVer2.ReceiverWalletId);
+
+                    // Cập nhật trạng thái giao dịch ví và booking
+                    // Xử lý hoàn tiền
+                    walletVer2.Status = (int)VNPayType.CANCELLED;
+                    walletVer2.SenderWalletNavigation.LastBalanceUpdate = DateTime.UtcNow.AddHours(7);
+                    walletVer2.SenderWalletNavigation.AvalaibleAmount += bookingVer2.Amount;
+                    walletVer2.SenderWalletNavigation.Amount += bookingVer2.Amount;
+                    walletVer2.SenderWalletNavigation.PendingAmount += bookingVer2.Amount;
+
+                    walletVer2.ReceiverWalletNavigation.LastBalanceUpdate = DateTime.UtcNow.AddHours(7);
+                    walletVer2.ReceiverWalletNavigation.PendingAmount -= bookingVer2.Amount;
+                    bookingVer2.BookingNavigation.Status = (int)BookingEnum.Cancelled;
+
+                    bookingVer2.Status = (int)VNPayType.CANCELLED;
+                    _context.WalletTransactions.Update(walletVer2);
+                    _context.BookingTransactions.Update(bookingVer2);
+
+                    var bookVer2 = await _context.Bookings.FirstOrDefaultAsync(b => b.BookingId == bookingVer2.BookingId);
+                    if (bookVer2 != null)
+                    {
+                        bookVer2.Status = (int)BookingEnum.Cancelled;
+                        _context.Bookings.Update(bookVer2);
+                    }
+                    // Gửi thông báo cho người gửi
+                    var notificationVer2 = new NotificationDTO
+                    {
+                        NotificationId = Guid.NewGuid(),
+                        UserId = senderVer2.Id,
+                        Title = "Yêu cầu xử lý báo cáo của bạn đã được chấp nhận",
+                        Content = "Chúng tôi đã xem xét và xử lý báo cáo của bạn. Tiền của bạn đã được hoàn trả vui lòng kiểm tra lại nếu có gì sai sót hãy liên hệ với chúng tôi. Cảm ơn bạn đã sử dụng dịch vụ",
+                        CreatedAt = DateTime.UtcNow.AddHours(7),
+                        Status = 0
+                    };
+                    Notification notificationxVer2 = _mapper.Map<Notification>(notificationVer2);
+                    _context.Notifications.Add(notificationxVer2);
+                    _firebaseRealtimeDatabaseService.SetAsync<NotificationDTO>($"notifications/{notificationVer2.UserId}/{notificationVer2.NotificationId}", notificationVer2);
+                    // Block account tutor in 7 days
+                    var userTutor = _context.Users.FirstOrDefault(x => x.Id == tutorVer2.UserId);
+                    userTutor.Banned = true;
+                    userTutor.BanExpiredAt = DateTime.UtcNow.AddHours(7).AddDays(7).Date; // Thiết lập thời gian là 00:00:00
+                    _context.Users.Update(userTutor);
+                    await _context.SaveChangesAsync();
+                    // Create Tutor Action 
+                    var tutorActionVer2 = new TutorAction()
+                    {
+                        TutorActionId = Guid.NewGuid(),
+                        TutorId = tutorVer2.TutorId,
+                        ModeratorId = ApprovalId,
+                        CreateAt = DateTime.UtcNow.AddHours(7),
+                        ReponseDate = DateTime.UtcNow.AddHours(7),
+                        Description = " Xử lý hành vi vi phạm của người dùng",
+                        ActionType = (Int32)TutorActionTypeEnum.ReportBooking,
+                        Status = (Int32)TutorActionEnum.Accept
+                    };
+                    await _context.SaveChangesAsync();
+                    break;
+            }
+            // Update Report Status
+            report.Status = (Int32)ReportEnum.Finished;
+            _context.Reports.Update(report);
+            await _context.SaveChangesAsync();
+            return new StatusCodeResult(200);
+
+        }
+
+        // Deny Report Booking 
+        public async Task<IActionResult> DenyReportOfTutor (Guid ReportId, Guid ApprovalId)
+        {
+            try
+            {
+                // Send Money to Tutor 
+                var report = _context.Reports.FirstOrDefault(x => x.ReportId == ReportId);
+                if (report == null) return new StatusCodeResult(404);
+                var bookingg = _context.Bookings
+                    .Include(x => x.TutorNavigation)
+                    .Include(x => x.TutorNavigation.UserNavigation)
+                    .FirstOrDefault(x => x.BookingId == report.TargetId);
+                // Get BoookingTransaction From BookingId
+                var booking = await _context.BookingTransactions.FirstOrDefaultAsync(b => b.BookingId == bookingg.BookingId);
+                var walletTransactionId = booking.BookingTransactionId;
+                var books = await _context.Bookings.FirstOrDefaultAsync(b => b.BookingId == bookingg.BookingId);
+                var tutor = await _context.Tutors
+                    .Include(t => t.UserNavigation)
+                    .FirstOrDefaultAsync(t => t.TutorId == books.TutorId);
+                // Lấy thông tin giao dịch ví từ database
+                var wallet = await _context.WalletTransactions.FirstOrDefaultAsync(w => w.WalletTransactionId == walletTransactionId);
+                if (wallet == null)
+                {
+                    return new StatusCodeResult(404);
+                }
+                wallet.Status = (int)VNPayType.APPROVE;
+                wallet.SenderWalletNavigation.PendingAmount += booking.Amount;
+                wallet.ReceiverWalletNavigation.LastBalanceUpdate = DateTime.UtcNow.AddHours(7);
+                wallet.ReceiverWalletNavigation.PendingAmount -= booking.Amount;
+                // Caculate rose fee for Admin and Tutor based on number of finished bookings of tutor
+                int percentageOfTutor = GetTutorPercentageOfTutorByUserId(booking.ReceiverWalletNavigation.UserId);
+                wallet.ReceiverWalletNavigation.AvalaibleAmount += (booking.Amount - (booking.Amount * percentageOfTutor) / 100);
+                wallet.ReceiverWalletNavigation.Amount += (booking.Amount - (booking.Amount * percentageOfTutor) / 100);
+                booking.Status = (int)VNPayType.APPROVE;
+                // Send money from tutor to admin based on percentage of tutor
+                var adminWallet = await _context.Wallets.FirstOrDefaultAsync(w => w.UserId == Guid.Parse("D71B17CC-7997-4B23-2ADC-08DC93FF561F"));
+                adminWallet.AvalaibleAmount += (booking.Amount * percentageOfTutor) / 100;
+                adminWallet.Amount += (booking.Amount * percentageOfTutor) / 100;
+                // Create wallet transaction for admin
+                var walletTransactionForAdmin = new WalletTransaction
+                {
+                    WalletTransactionId = Guid.NewGuid(),
+                    SenderWalletId = booking.ReceiverWalletId,
+                    ReceiverWalletId = adminWallet.WalletId,
+                    Amount = (booking.Amount * percentageOfTutor) / 100,
+                    CreatedAt = DateTime.UtcNow.AddHours(7),
+                    Status = (int)VNPayType.APPROVE,
+                    Note = "Hoa hồng từ giao dịch của buổi học" + booking.BookingNavigation.BookingId + " của gia sư " + booking.ReceiverWalletNavigation.UserNavigation.Name
+                };
+                _context.WalletTransactions.Add(walletTransactionForAdmin);
+                _context.Wallets.Update(adminWallet);
+                _context.BookingTransactions.Update(booking);
+                _context.WalletTransactions.Update(wallet);
+                await _appExtension.SendMail(new MailContent()
+                {
+                    To = booking.SenderWalletNavigation.UserNavigation.Email,
+                    Subject = "Xác nhận giao dịch",
+                    Body = "Giao dịch booking của bạn đã hoàn thành. Mã giao dịch: " + wallet.WalletTransactionId
+                });
+                await _appExtension.SendMail(new MailContent()
+                {
+                    To = booking.ReceiverWalletNavigation.UserNavigation.Email,
+                    Subject = "Xác nhận giao dịch",
+                    Body = "Giao dịch booking của bạn đã hoàn thành. Mã giao dịch: " + wallet.WalletTransactionId
+                });
+                var notification1 = new NotificationDTO
+                {
+                    NotificationId = Guid.NewGuid(),
+                    Title = "Giao dịch booking",
+                    Content = "Giao dịch booking của bạn đã hoàn thành. Mã giao dịch: " + wallet.WalletTransactionId,
+                    UserId = booking.SenderWalletNavigation.UserId,
+                    CreatedAt = DateTime.UtcNow.AddHours(7)
+                };
+                var notification2 = new NotificationDTO
+                {
+                    NotificationId = Guid.NewGuid(),
+                    Title = "Giao dịch booking",
+                    Content = "Giao dịch booking của bạn đã hoàn thành. Mã giao dịch: " + wallet.WalletTransactionId,
+                    UserId = booking.ReceiverWalletNavigation.UserId,
+                    CreatedAt = DateTime.UtcNow.AddHours(7)
+                };
+
+                Models.Entities.Notification notification1x = _mapper.Map<Models.Entities.Notification>(notification1);
+                Models.Entities.Notification notification2x = _mapper.Map<Models.Entities.Notification>(notification2);
+                _context.Notifications.Add(notification1x);
+                _context.Notifications.Add(notification2x);
+                _firebaseRealtimeDatabaseService.UpdateAsync<NotificationDTO>($"notifications/{notification1.UserId}/{notification1.NotificationId}", notification1);
+                _firebaseRealtimeDatabaseService.UpdateAsync<NotificationDTO>($"notifications/{notification2.UserId}/{notification2.NotificationId}", notification2);
+                // Create Tutor Action
+                var tutorAction = new TutorAction()
+                {
+                    TutorActionId = Guid.NewGuid(),
+                    TutorId = tutor.TutorId,
+                    ModeratorId = ApprovalId,
+                    CreateAt = DateTime.UtcNow.AddHours(7),
+                    ReponseDate = DateTime.UtcNow.AddHours(7),
+                    Description = " Từ chối xử lý hành vi vi phạm của người dùng vì không có đủ bằng chứng",
+                    ActionType = (Int32)TutorActionTypeEnum.ReportBooking,
+                    Status = (Int32)TutorActionEnum.Reject
+                };
+                await _context.SaveChangesAsync();
+                return new StatusCodeResult(200);
+            }
+            catch (Exception ex)
+            {
+                return new StatusCodeResult(500);
+            }
+        }
+
+        // Find total booking finished of tutor and show the rose percentage for admin and tutor
+        public int GetTutorPercentageOfTutorByUserId(Guid userId)
+        {
+            int response = 0;
+            var tutor = _context.Tutors.FirstOrDefault(t => t.UserId == userId);
+            if (tutor == null)
+            {
+                return 0;
+            }
+            var totalEndBooking = _context.Bookings.Where(b => b.TutorId == tutor.TutorId && b.Status == (int)BookingEnum.Finished).Count();
+            if (totalEndBooking < 10)
+            {
+                response = 10;
+            }
+            else if (totalEndBooking >= 10 && totalEndBooking < 20)
+            {
+                response = 8;
+            }
+            else if (totalEndBooking >= 20 && totalEndBooking < 30)
+            {
+                response = 6;
+            }
+            else
+            {
+                response = 5;
+            }
+            return response;
         }
     }
 }

@@ -2303,7 +2303,7 @@ namespace Services.Implementations
                 if (booking.BookingNavigation.StudyTime.Value.AddHours(-12) > DateTime.UtcNow.AddHours(7))
                 {
                     // Xử lý hoàn tiền
-                    wallet.Status = (int)VNPayType.APPROVE;
+                    wallet.Status = (int)VNPayType.CANCELLED;
                     wallet.SenderWalletNavigation.LastBalanceUpdate = DateTime.UtcNow.AddHours(7);
                     wallet.SenderWalletNavigation.AvalaibleAmount += booking.Amount;
                     wallet.SenderWalletNavigation.Amount += booking.Amount;

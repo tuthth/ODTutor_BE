@@ -23,5 +23,7 @@ namespace Services.Interfaces
         Task<IActionResult> CreateReportBooking(ReportRequest reportRequest);
         Task<PageResults<ReportResponse>> GetAllReportBookingReport(PagingRequest request);
         Task<ActionResult<ReportDetailResponse>> GetReportDetailByReportId(Guid reportId);
+        Task<IActionResult> HandleReportOfTutor(Guid ReportId, Guid ApprovalId);
+        Task<IActionResult> DenyReportOfTutor(Guid ReportId, Guid ApprovalId);
     }
 }

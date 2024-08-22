@@ -31,5 +31,7 @@ namespace Models.Models.Views
         public string? GoogleMeetUrl { get; set; }
         public bool? IsRated { get; set; }
         public int? BookingStatus { get; set; }
+        // Report Detail
+        public int? NumberOfTutorReport { get; set; }
     }
 }

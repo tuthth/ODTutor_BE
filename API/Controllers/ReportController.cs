@@ -214,5 +214,46 @@ namespace API.Controllers
             var result = await _reportService.GetReportDetailByReportId(reportId);
             return Ok(result);
         }
+
+
+        /// <summary>
+        /// Handele report of tutor ( ApprovalId is MODERATORID)
+        /// </summary>
+        [HttpPost("handle-report/{ReportId}/{ApprovalId}")]
+        public async Task<IActionResult> HandleReportOfTutor(Guid ReportId, Guid ApprovalId)
+        {
+            var result = await _reportService.HandleReportOfTutor(ReportId, ApprovalId);
+            if (result is IActionResult actionResult)
+            {
+                if (actionResult is StatusCodeResult statusCodeResult)
+                {
+                    if (statusCodeResult.StatusCode == 404) return Ok(new { Message = "Không tìm thấy báo cáo" });
+                    if (statusCodeResult.StatusCode == 409) return StatusCode(StatusCodes.Status409Conflict, "Chỉ chấp thuận các report đã được xử lý");
+                    if (statusCodeResult.StatusCode == 200) return StatusCode(StatusCodes.Status200OK, "Xử lý báo cáo thành công");
+                }
+            }
+            if (result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
+            throw new Exception("Lỗi không xác định");
+        }
+
+        /// <summary>
+        /// Deny report of tutor ( ApprovalId is MODERATORID)
+        /// </summary>
+        [HttpPost("deny-report/{ReportId}/{ApprovalId}")]
+        public async Task<IActionResult> DenyReportOfTutor(Guid ReportId, Guid ApprovalId)
+        {
+            var result = await _reportService.DenyReportOfTutor(ReportId, ApprovalId);
+            if (result is IActionResult actionResult)
+            {
+                if (actionResult is StatusCodeResult statusCodeResult)
+                {
+                    if (statusCodeResult.StatusCode == 404) return Ok(new { Message = "Không tìm thấy báo cáo" });
+                    if (statusCodeResult.StatusCode == 409) return StatusCode(StatusCodes.Status409Conflict, "Chỉ chấp thuận các report đã được xử lý");
+                    if (statusCodeResult.StatusCode == 200) return StatusCode(StatusCodes.Status200OK, "Xử lý báo cáo thành công");
+                }
+            }
+            if (result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
+            throw new Exception("Lỗi không xác định");
+        }
     }
 }
