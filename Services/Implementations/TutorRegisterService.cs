@@ -583,6 +583,8 @@ namespace Services.Implementations
                 Tutor tutor = _context.Tutors.FirstOrDefault(t => t.TutorId == tutorAction.TutorId);
                 tutor.Status = (Int32)TutorEnum.Denny;
                 tutor.CreateAt = DateTime.UtcNow.AddHours(7).Date;
+                // Add 7 days to the current date
+                tutor.UpdateAt = DateTime.UtcNow.AddHours(7).AddDays(7).Date;
                 var tutorCertificate = _context.TutorCertificates.Where(x => x.TutorId == tutorAction.TutorId).ToList();
                 _context.TutorCertificates.RemoveRange(tutorCertificate);
                 var tutorExperience = _context.TutorExperiences.Where(x => x.TutorId == tutorAction.TutorId).ToList();
