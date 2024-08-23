@@ -187,5 +187,15 @@ namespace API.Controllers
             var response = await _tutorDataService.GetTutorSubject(tutorId);
             return response;
         }
+
+        /// <summary>
+        ///  Get Messages Count Today
+        ///  </summary>
+        [HttpGet("get/messages-count-today/{userId}")]
+        public async Task<int> GetMessagesCountToday(string userId)
+        {
+            var response = await _tutorDataService.GetMessagesCountToday(userId);
+            return response;
+        }
     }
 }

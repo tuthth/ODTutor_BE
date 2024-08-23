@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Google.Cloud.Firestore;
 using Grpc.Core;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -18,9 +19,11 @@ using System.Threading.Tasks;
 namespace Services.Implementations
 {
     public class TutorDataService : BaseService, ITutorDataService
-    {
-        public TutorDataService(ODTutorContext context, IMapper mapper) : base(context, mapper)
+    {   
+        private ICloudFireStoreService _cloudFireStoreService;
+        public TutorDataService(ODTutorContext context, IMapper mapper, ICloudFireStoreService cloudFireStoreService) : base(context, mapper)
         {
+            _cloudFireStoreService = cloudFireStoreService;
         }
 
         // Get All Tutors Version 1
@@ -707,6 +710,44 @@ namespace Services.Implementations
             }
         }
 
+
+        public async Task<int> GetMessagesCountToday(string userId)
+        {
+            // Chuyển đổi thời gian sang UTC sau khi đã xác định thời gian bắt đầu và kết thúc của ngày
+            var startOfDay = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(DateTime.UtcNow.Date, "SE Asia Standard Time").ToUniversalTime();
+            var endOfDay = startOfDay.AddDays(1).AddTicks(-1).ToUniversalTime();
+
+            CollectionReference chatsRef = _cloudFireStoreService.GetCollectionReference("chats");
+            Query query = chatsRef
+                .WhereGreaterThanOrEqualTo("createAt", Timestamp.FromDateTime(startOfDay))
+                .WhereLessThanOrEqualTo("createAt", Timestamp.FromDateTime(endOfDay));
+
+            QuerySnapshot querySnapshot = await query.GetSnapshotAsync();
+
+            int messageCount = 0;
+
+            foreach (DocumentSnapshot documentSnapshot in querySnapshot.Documents)
+            {
+                var messages = documentSnapshot.GetValue<List<Dictionary<string, object>>>("messages");
+
+                if (messages != null)
+                {
+                    foreach (var message in messages)
+                    {
+                        var senderId = message["senderId"].ToString();
+                        var createdAtTimestamp = (Timestamp)message["createdAt"];
+                        var messageCreatedAt = createdAtTimestamp.ToDateTime().ToUniversalTime();
+
+                        if (senderId == userId && messageCreatedAt >= startOfDay && messageCreatedAt <= endOfDay)
+                        {
+                            messageCount++;
+                        }
+                    }
+                }
+            }
+
+            return messageCount;
+        }
 
     }
 }

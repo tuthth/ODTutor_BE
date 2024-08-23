@@ -84,5 +84,10 @@ namespace Services.Implementations
                 return default(T);
             }
         }
+
+        public CollectionReference GetCollectionReference(string collectionName)
+        {
+            return _firestoreDb.Collection(collectionName);
+        }
     }
 }

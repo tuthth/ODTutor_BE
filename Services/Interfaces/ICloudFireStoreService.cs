@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Google.Cloud.Firestore;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -13,5 +14,6 @@ namespace Services.Interfaces
         Task<bool> RemoveData(string collectionName, string documentName);
         Task<List<T>> GetCollectionAsync<T>(string collectionName);
         Task<T> GetDocumentAsync<T>(string collectionName, string documentId);
+        CollectionReference GetCollectionReference(string collectionName);
     }
 }
