@@ -2433,6 +2433,16 @@ namespace Services.Implementations
                     .FirstOrDefault();
                 tutorSlotAvailables.IsBooked = false;
                 tutorSlotAvailables.Status = (Int32)TutorSlotAvailabilityEnum.Available;
+                // Set available for slot again based on RescheduleTime
+                if (book.RescheduledTime != null)
+                {
+                    TimeSpan rescheduleTime = new TimeSpan(book.RescheduledTime.Value.Hour, book.RescheduledTime.Value.Minute, 0);
+                    var tutorSlotAvailablesReschedule = _context.TutorSlotAvailables
+                        .Where(x => tutorDateAvailables.Contains(x.TutorDateAvailable.TutorDateAvailableID) && x.StartTime == rescheduleTime)
+                        .FirstOrDefault();
+                    tutorSlotAvailablesReschedule.IsBooked = false;
+                    tutorSlotAvailablesReschedule.Status = (Int32)TutorSlotAvailabilityEnum.Available;
+                }
                 await _context.SaveChangesAsync();
                 return new OkResult();
             }
