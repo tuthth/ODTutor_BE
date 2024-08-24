@@ -488,9 +488,13 @@ namespace Services.Implementations
                     throw new CrudException(HttpStatusCode.NotFound, "Tutor Not Found", "");
                 }
 
-                var tutorSubjects = _context.TutorSubjects.Where(ts => ts.TutorId == tutorId).Select(ts => ts.SubjectId).ToList();
+                var tutorSubjects = _context.TutorSubjects
+                    .Where(ts => ts.TutorId == tutorId).Select(ts => ts.SubjectId).ToList();
                 var studentRequests = _context.StudentRequests
-                    .Where(sr => tutorSubjects.Contains(sr.SubjectId) && sr.Status == (int)StudentRequestEnum.Pending)
+                                        .Include(sr => sr.StudentNavigation)
+                    .Include(sr => sr.StudentNavigation.UserNavigation)
+                    .Include(sr => sr.StudentNavigation.UserNavigation.TutorNavigation)
+                    .Where(sr => tutorSubjects.Contains(sr.SubjectId) && sr.Status == (int)StudentRequestEnum.Pending && sr.StudentNavigation.UserNavigation.TutorNavigation.TutorId != tutorId)
                     .ToList();
                 if (studentRequests.Count == 0)
                 {
@@ -521,8 +525,11 @@ namespace Services.Implementations
                 else if (tutor.SubcriptionType == 2 || tutor.SubcriptionType == 1)
                 {
                     var studentRequestVip = _context.StudentRequests
+                    .Include(sr => sr.StudentNavigation)
+                    .Include(sr => sr.StudentNavigation.UserNavigation)
+                    .Include(sr => sr.StudentNavigation.UserNavigation.TutorNavigation)
                     .OrderByDescending(sr => sr.CreatedAt)
-                    .Where(sr => sr.Status == (Int32)StudentRequestEnum.Pending)
+                    .Where(sr => sr.Status == (Int32)StudentRequestEnum.Pending && sr.StudentNavigation.UserNavigation.TutorNavigation.TutorId != tutorId)
                     .ToList();
                     foreach (var item in studentRequestVip)
                     {
