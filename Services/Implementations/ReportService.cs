@@ -941,5 +941,16 @@ namespace Services.Implementations
             }
             return response;
         }
+
+        // Get Report By TargetId
+        public async Task<ActionResult<Report>> GetReportByTargetId (Guid id)
+        {
+            var report = await _context.Reports.FirstOrDefaultAsync(c => c.TargetId == id);
+            if (report == null)
+            {
+                return new StatusCodeResult(404);
+            }
+            return report;
+        }
     }
 }

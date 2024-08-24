@@ -51,7 +51,7 @@ namespace Services.Implementations
             return Guid.Empty;
         }
 
-        // Login Version 2
+/*        // Login Version 2
         public async Task<LoginAccountResponse> LoginV2(LoginRequest loginRequest)
         {
             try
@@ -76,7 +76,14 @@ namespace Services.Implementations
                 {
                     throw new CrudException(HttpStatusCode.BadRequest, "Email or Password is incorrect", "");
                 }
-                var response = GenerateJwtTokenV2(user);
+                if(loginRequest.Email == _configuration["AdminAccount:EmailAdmin"] && loginRequest.Password == _configuration["AdminAccount:PasswordAdmin"])
+                {
+                    var response = GenerateJwtTokenAdmin(user);
+                }
+                else
+                {
+                    var response = GenerateJwtTokenV2(user);
+                }
                 response.studentID = user.StudentNavigation.StudentId;  
                 return response;
             }
@@ -88,8 +95,58 @@ namespace Services.Implementations
             {
                 throw new CrudException(HttpStatusCode.InternalServerError, ex.Message, "");
             }
-        }
+        }*/
+        // Login Version 2
+        public async Task<LoginAccountResponse> LoginV2(LoginRequest loginRequest)
+        {
+            try
+            {
+                // Kiểm tra tài khoản người dùng
+                var user = _context.Users.FirstOrDefault(u => u.Email == loginRequest.Email);
+                if (user == null)
+                {
+                    throw new CrudException(HttpStatusCode.OK, "User not found", "");
+                }
+                if (!user.Active)
+                {
+                    throw new CrudException(HttpStatusCode.Conflict, "User is not active in system", "");
+                }
+                if (user.Banned)
+                {
+                    throw new CrudException(HttpStatusCode.Forbidden, "User is banned", "");
+                }
 
+                // Kiểm tra mật khẩu hoặc Google ID
+                bool isPasswordValid = _appExtension.VerifyPasswordHash(loginRequest.Password, user.Password);
+                bool isGoogleIDValid = user.GoogleId == loginRequest.Password;
+                if (!isPasswordValid && !isGoogleIDValid)
+                {
+                    throw new CrudException(HttpStatusCode.BadRequest, "Email or Password is incorrect", "");
+                }
+
+                // Tạo JWT token dựa trên loại tài khoản
+                LoginAccountResponse response;
+                if (loginRequest.Email == _configuration["AdminAccount:EmailAdmin"] && loginRequest.Password == _configuration["AdminAccount:PasswordAdmin"])
+                {
+                    response = GenerateJwtTokenAdmin(user);
+                }
+                else
+                {
+                    response = GenerateJwtTokenV2(user);
+                    response.studentID = user.StudentNavigation.StudentId;
+                }
+
+                return response;
+            }
+            catch (CrudException ex)
+            {
+                throw ex;
+            }
+            catch (Exception ex)
+            {
+                throw new CrudException(HttpStatusCode.InternalServerError, ex.Message, "");
+            }
+        }
         // Login By Admin Email
         public async Task<LoginAccountResponse> LoginByAdmin(LoginRequest loginRequest)
         {
@@ -317,7 +374,7 @@ namespace Services.Implementations
                 new Claim("TutorStatus", tutorInfo.Status.ToString()),
                 new Claim(ClaimTypes.Role, "Tutor")
             }),
-                    Expires = DateTime.UtcNow.AddHours(7).AddHours(1),
+                    Expires = DateTime.UtcNow.AddHours(7).AddHours(2),
                     SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
                 };
             }
@@ -348,17 +405,19 @@ namespace Services.Implementations
             var key = Encoding.ASCII.GetBytes(_configuration["AppSettings:SecretKey"]);
             var tokenHandler = new JwtSecurityTokenHandler();
             var secretKeyBytes = Encoding.UTF8.GetBytes(_jwtSetting.SecretKey);
+            var moderator = findModerator(user.Id);
             var tokenDescriptor = new SecurityTokenDescriptor();
                 tokenDescriptor = new SecurityTokenDescriptor
                 {
                     Subject = new ClaimsIdentity(new[]
                     {
                 new Claim("UserId", user.Id.ToString()),
+                new Claim("ModeratorId",moderator.ModeratorId.ToString()),
                 new Claim(ClaimTypes.Name, user.Username ?? string.Empty),
                 new Claim(ClaimTypes.Email, user.Email ?? string.Empty),
                 new Claim(ClaimTypes.Role, "Admin")
             }),
-                    Expires = DateTime.UtcNow.AddHours(7).AddHours(1),
+                    Expires = DateTime.UtcNow.AddHours(7).AddHours(2),
                     SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
                 };
             var token = tokenHandler.CreateToken(tokenDescriptor);
@@ -367,6 +426,7 @@ namespace Services.Implementations
             {
                 accessToken = accessToken,
                 userId = user.Id,
+                moderatorID = moderator.ModeratorId,
                 role = "Admin",
             };
             return response;

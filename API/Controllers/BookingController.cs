@@ -13,10 +13,12 @@ namespace API.Controllers
     public class BookingController : ControllerBase
     {
         private readonly IBookingService _bookingService;
+        private readonly IReportService _reportService;
         private readonly IMapper _mapper;
 
-        public BookingController(IBookingService bookingService, IMapper mapper)
+        public BookingController(IBookingService bookingService,IReportService reportService, IMapper mapper)
         {
+            _reportService = reportService;
             _bookingService = bookingService;
             _mapper = mapper;
         }
@@ -28,6 +30,11 @@ namespace API.Controllers
             if (result is ActionResult<List<Booking>> bookings && result.Value != null)
             {
                 var bookingViews = _mapper.Map<List<BookingView>>(bookings.Value);
+                foreach (var booking in bookingViews)
+                {   
+                    var reportCount = await _reportService.GetReportByTargetId(booking.BookingId);
+                    booking.IsReported = reportCount.Value != null;
+                }
                 var bookingIn30Days = bookingViews.Where(b => b.CreatedAt >= DateTime.UtcNow.AddHours(7).AddDays(-30)).ToList();
                 var bookingInPrevious30Days = bookingViews.Where(b => b.CreatedAt < DateTime.UtcNow.AddHours(7).AddDays(-30) && b.CreatedAt >= DateTime.UtcNow.AddHours(7).AddDays(-60)).ToList();
                 var percentageChange = bookingInPrevious30Days.Count == 0 ? 0 : (bookingIn30Days.Count - bookingInPrevious30Days.Count) / bookingInPrevious30Days.Count * 100;
@@ -48,6 +55,9 @@ namespace API.Controllers
             if (result is ActionResult<Booking> booking && result.Value != null)
             {
                 var bookingView = _mapper.Map<BookingView>(booking.Value);
+                    var reportCount = await _reportService.GetReportByTargetId(bookingView.BookingId);
+                    bookingView.IsReported = reportCount.Value != null;
+                
                 return Ok(bookingView);
             }
             if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
@@ -65,7 +75,11 @@ namespace API.Controllers
             if (result is ActionResult<List<Booking>> bookings && result.Value != null)
             {
                 var bookingViews = _mapper.Map<List<BookingView>>(bookings.Value);
-
+                foreach (var booking in bookingViews)
+                {
+                    var reportCount = await _reportService.GetReportByTargetId(booking.BookingId);
+                    booking.IsReported = reportCount.Value != null;
+                }
                 var bookingIn30Days = bookingViews.Where(b => b.CreatedAt >= DateTime.UtcNow.AddHours(7).AddDays(-30)).ToList();
                 var bookingInPrevious30Days = bookingViews.Where(b => b.CreatedAt < DateTime.UtcNow.AddHours(7).AddDays(-30) && b.CreatedAt >= DateTime.UtcNow.AddHours(7).AddDays(-60)).ToList();
                 var percentageChange = bookingInPrevious30Days.Count == 0 ? 0 : (bookingIn30Days.Count - bookingInPrevious30Days.Count) / bookingInPrevious30Days.Count * 100;
@@ -86,6 +100,11 @@ namespace API.Controllers
             if (result is ActionResult<List<Booking>> bookings && result.Value != null)
             {
                 var bookingViews = _mapper.Map<List<BookingView>>(bookings.Value);
+                foreach (var booking in bookingViews)
+                {
+                    var reportCount = await _reportService.GetReportByTargetId(booking.BookingId);
+                    booking.IsReported = reportCount.Value != null;
+                }
                 var bookingIn30Days = bookingViews.Where(b => b.CreatedAt >= DateTime.UtcNow.AddHours(7).AddDays(-30)).ToList();
                 var bookingInPrevious30Days = bookingViews.Where(b => b.CreatedAt < DateTime.UtcNow.AddHours(7).AddDays(-30) && b.CreatedAt >= DateTime.UtcNow.AddHours(7).AddDays(-60)).ToList();
                 var percentageChange = bookingInPrevious30Days.Count == 0 ? 0 : (bookingIn30Days.Count - bookingInPrevious30Days.Count) / bookingInPrevious30Days.Count * 100;
