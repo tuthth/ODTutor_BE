@@ -1549,5 +1549,43 @@ namespace Services.Implementations
                 throw new Exception(ex.ToString());
             }
         }
+
+        // Get Each Subscription by Id
+        public async Task<ActionResult<TutorSubscriptionViewResponse>> getTutorSubscriptionById(Guid id)
+        {
+            try
+            {
+                var subscription = await _cloudFireStoreService.GetAsync<TutorSubscription>($"subscription/{id}");
+
+                if (subscription == null)
+                {
+                    return new StatusCodeResult(404);
+                }
+
+                // Chuyển đổi SubscriptionDetails từ List<Object> sang List<string>
+                var subscriptionDetails = subscription.SubscriptionDetails
+                    .Select(detail => detail.Description)
+                    .ToList();
+
+                TutorSubscriptionViewResponse tutorSubscriptionViewResponse = new TutorSubscriptionViewResponse
+                {
+                    Id = subscription.Id,
+                    TutorNameSubscription = subscription.TutorNameSubscription,
+                    Description = subscription.Description,
+                    Price = subscription.Price,
+                    Types = subscription.Types,
+                    CreatedDate = subscription.CreatedDate,
+                    NumberOfSubscriptions = subscription.NumberOfSubscriptions,
+                    Status = subscription.Status,
+                    SubscriptionDetails = subscriptionDetails // Gán danh sách string vào đây
+                };
+
+                return tutorSubscriptionViewResponse;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.ToString());
+            }
+        }
     }
 }

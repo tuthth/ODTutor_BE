@@ -832,6 +832,16 @@ namespace API.Controllers
             var result = await _adminService.getAllTutorSubscription();
             return Ok(result);
         }
+
+        /// <summary>
+        /// Get Subscription By ID
+        /// </summary>
+        [HttpGet("get-subscription/{subscriptionID}")]
+        public async Task<ActionResult<TutorSubscriptionViewResponse>> getSubscriptionByID(Guid subscriptionID)
+        {
+            var result = await _adminService.getTutorSubscriptionById(subscriptionID);
+            return Ok(result);
+        }
     }
 }
     

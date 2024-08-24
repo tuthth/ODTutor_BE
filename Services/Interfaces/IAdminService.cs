@@ -70,6 +70,7 @@ namespace Services.Interfaces
         Task<IActionResult> CreateAndSaveSubscriptionInFireStore(TutorSubscriptionRequest setting);
         Task<IActionResult> CreateSubscriptionByAdmin(TutorSubscriptionRequest tutorSubscription);
         Task<ActionResult<List<TutorSubscriptionViewResponse>>> getAllTutorSubscription();
+        Task<ActionResult<TutorSubscriptionViewResponse>> getTutorSubscriptionById(Guid id);
 
     }
 }
