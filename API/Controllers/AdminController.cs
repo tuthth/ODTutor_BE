@@ -842,6 +842,16 @@ namespace API.Controllers
             var result = await _adminService.getTutorSubscriptionById(subscriptionID);
             return Ok(result);
         }
+
+        /// <summary>
+        /// Create Student Subscription
+        /// </summary>
+        [HttpPost("create-student-subscriptions")]
+        public async Task<IActionResult> CreateStudentSubscriptions([FromBody] StudentSubscriptionRequest studentSubscriptionSetting)
+        {
+            await _adminService.CreateStudentSubscriptionByAdmin(studentSubscriptionSetting);
+            return Ok();
+        }
     }
 }
     

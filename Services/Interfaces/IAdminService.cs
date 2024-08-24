@@ -71,6 +71,7 @@ namespace Services.Interfaces
         Task<IActionResult> CreateSubscriptionByAdmin(TutorSubscriptionRequest tutorSubscription);
         Task<ActionResult<List<TutorSubscriptionViewResponse>>> getAllTutorSubscription();
         Task<ActionResult<TutorSubscriptionViewResponse>> getTutorSubscriptionById(Guid id);
+        Task<IActionResult> CreateStudentSubscriptionByAdmin(StudentSubscriptionRequest studentSubscription);
 
     }
 }

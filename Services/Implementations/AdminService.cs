@@ -1501,6 +1501,34 @@ namespace Services.Implementations
             return new StatusCodeResult(200);
         }
 
+        // Create Student Subscription And Save in Cloud FireStore Realtime Database
+        public async Task<IActionResult> CreateStudentSubscriptionByAdmin(StudentSubscriptionRequest studentSubscription)
+        {
+            List<StudentSubscriptionDetail> detail = new List<StudentSubscriptionDetail>();
+            foreach (var item in studentSubscription.PackageDescriptions)
+            {
+                StudentSubscriptionDetail subscriptionDetail1 = new StudentSubscriptionDetail()
+                {
+                    Description = item,
+                };
+                detail.Add(subscriptionDetail1);
+            }
+            StudentSubscription subscriptionDetail = new StudentSubscription()
+            {
+                Id = Guid.NewGuid(),
+                StudentNameSubscription = studentSubscription.StudentNameSubscription,
+                Description = studentSubscription.Description,
+                Price = studentSubscription.Price,
+                Types = studentSubscription.Types,
+                CreatedDate = DateTime.Now,
+                SubscriptionDetails = detail,
+                NumberOfSubscriptions = 0,
+                Status = (int)TutorSubscriptionStatusEnum.Inactive,
+            };
+            _cloudFireStoreService.SetAsync<StudentSubscription>($"studentSubscription/{subscriptionDetail.Id}", subscriptionDetail);
+            return new StatusCodeResult(200);
+        }
+
         // Get All Subscription from real-time database
         public async Task<ActionResult<List<TutorSubscriptionViewResponse>>> getAllTutorSubscription()
         {
