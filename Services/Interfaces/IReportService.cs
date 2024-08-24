@@ -25,5 +25,6 @@ namespace Services.Interfaces
         Task<ActionResult<ReportDetailResponse>> GetReportDetailByReportId(Guid reportId);
         Task<IActionResult> HandleReportOfTutor(Guid ReportId, Guid ApprovalId);
         Task<IActionResult> DenyReportOfTutor(Guid ReportId, Guid ApprovalId);
+        Task<ActionResult<Report>> GetReportByTargetId(Guid id);
     }
 }

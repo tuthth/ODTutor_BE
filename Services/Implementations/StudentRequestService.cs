@@ -494,7 +494,7 @@ namespace Services.Implementations
                                         .Include(sr => sr.StudentNavigation)
                     .Include(sr => sr.StudentNavigation.UserNavigation)
                     .Include(sr => sr.StudentNavigation.UserNavigation.TutorNavigation)
-                    .Where(sr => tutorSubjects.Contains(sr.SubjectId) && sr.Status == (int)StudentRequestEnum.Pending && sr.StudentNavigation.UserNavigation.TutorNavigation.TutorId != tutorId)
+                    .Where(sr => tutorSubjects.Contains(sr.SubjectId) && sr.Status == (int)StudentRequestEnum.Pending && sr.StudentNavigation.UserNavigation.TutorNavigation.TutorId != tutorId )
                     .ToList();
                 if (studentRequests.Count == 0)
                 {
