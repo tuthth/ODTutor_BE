@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Models.Entities;
 
@@ -11,9 +12,11 @@ using Models.Entities;
 namespace Models.Migrations
 {
     [DbContext(typeof(ODTutorContext))]
-    partial class ODTutorContextModelSnapshot : ModelSnapshot
+    [Migration("20240824070222_Add_Subject_Name_Into_StudentRequest")]
+    partial class Add_Subject_Name_Into_StudentRequest
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

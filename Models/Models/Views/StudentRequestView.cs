@@ -13,6 +13,7 @@ namespace Models.Models.Views
         public Guid SubjectId { get; set; }
         public DateTime CreatedAt { get; set; }
         public string? Message { get; set; }
+        public string? SubjectName { get; set; }
         public int Status { get; set; }
     }
 }

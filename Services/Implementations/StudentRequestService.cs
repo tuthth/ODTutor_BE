@@ -51,6 +51,15 @@ namespace Services.Implementations
                 return new StatusCodeResult(404);
             }
             var studentRequest = _mapper.Map<StudentRequest>(request);
+            
+            if (subject.SubjectId == Guid.Parse("B03D7A6B-1C16-4C7A-BB68-DBFC317917B6"))
+            {
+                studentRequest.SubjectName = request.SubjectName;
+            }
+            else
+            {
+                studentRequest.SubjectName = subject.Title;
+            }
             studentRequest.CreatedAt = DateTime.UtcNow.AddHours(7);
             studentRequest.StudentRequestId = Guid.NewGuid();
             studentRequest.Status = (Int32)StudentRequestEnum.Pending;

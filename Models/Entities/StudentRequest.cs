@@ -14,7 +14,7 @@ namespace Models.Entities
         public DateTime CreatedAt { get; set; }
         public string? Message { get; set; }
         public int Status { get; set; }
-
+        public string ? SubjectName { get; set; }
         public virtual Student StudentNavigation { get; set; }
         public virtual Subject SubjectNavigation { get; set; }
     }
