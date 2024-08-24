@@ -521,6 +521,7 @@ namespace Services.Implementations
                 else if (tutor.SubcriptionType == 2 || tutor.SubcriptionType == 1)
                 {
                     var studentRequestVip = _context.StudentRequests
+                    .OrderByDescending(sr => sr.CreatedAt)
                     .Where(sr => sr.Status == (Int32)StudentRequestEnum.Pending)
                     .ToList();
                     foreach (var item in studentRequestVip)
