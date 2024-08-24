@@ -512,7 +512,8 @@ namespace Services.Implementations
                             SubjectId = item.SubjectId,
                             CreatedAt = item.CreatedAt,
                             Message = item.Message,
-                            Status = item.Status
+                            Status = item.Status,
+                            SubjectName = item.SubjectName
                         };
                         studentRequestViews.Add(studentRequestView1);
                     }
@@ -531,7 +532,8 @@ namespace Services.Implementations
                             SubjectId = item.SubjectId,
                             CreatedAt = item.CreatedAt,
                             Message = item.Message,
-                            Status = item.Status
+                            Status = item.Status,
+                            SubjectName = item.SubjectName
                         };
                         studentRequestViews.Add(studentRequestView);
                     }
