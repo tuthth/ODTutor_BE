@@ -669,6 +669,7 @@ namespace Services.Implementations
                 return new StatusCodeResult(500);
             }
         }
+
         public async Task<IActionResult> CreateDepositVnPayBooking(BookingTransactionCreate transactionCreate)
         {
             var user = _httpContextAccessor.HttpContext.User?.Claims?.FirstOrDefault(c => c.Type == "UserId")?.Value;
@@ -802,6 +803,7 @@ namespace Services.Implementations
                 Status = transaction.Status
             });
         }
+
         public async Task<IActionResult> CreateDepositVnPayCourse(CourseTransactionCreate transactionCreate)
         {
             var findUser = _context.Users.Include(u => u.WalletNavigation).FirstOrDefault(u => u.WalletNavigation.WalletId == transactionCreate.SenderId);
@@ -883,6 +885,7 @@ namespace Services.Implementations
                 Status = transaction.Status
             });
         }
+
         public async Task<IActionResult> UpdateTransaction(Guid walletTransactionId, int choice, int updateStatus)
         {
             var wallet = await _context.WalletTransactions.FirstOrDefaultAsync(w => w.WalletTransactionId == walletTransactionId);
@@ -2329,7 +2332,9 @@ namespace Services.Implementations
                     wallet.ReceiverWalletNavigation.AvalaibleAmount += booking.Amount;
                     wallet.ReceiverWalletNavigation.PendingAmount -= booking.Amount;
                     booking.Status = (int)VNPayType.APPROVE;
-                    booking.BookingNavigation.Status = (int)BookingEnum.Cancelled;
+                    booking.BookingNavigation.Status = (int)BookingEnum.Cancelled;  
+
+                    // Send Money Tax to Admin 
                 }
 
                 _context.WalletTransactions.Update(wallet);
