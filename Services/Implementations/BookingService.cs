@@ -449,7 +449,7 @@ namespace Services.Implementations
             {
                 var bookings = await _context.Bookings
                     .Include(b => b.BookingTransactionNavigation)
-                    .Include(b=> b.TutorSubjectNavigation.SubjectNavigation)
+                    .Include(b => b.TutorSubjectNavigation.SubjectNavigation)
                     .Where(c => c.StudentId == id).ToListAsync();
                 if (bookings == null)
                 {
@@ -714,18 +714,18 @@ namespace Services.Implementations
                 }
                 booking.Status = (Int32)BookingEnum.Success;
 
-                // Update Old Slot
+                // Cập nhật Slot cũ
                 UpdateTutorSlotAvailability(bookingId, booking.StudyTime.Value, false);
 
-                // Update Booking StudyTime to RescheduledTime
+                // Cập nhật thời gian học từ StudyTime thành RescheduledTime
                 booking.StudyTime = booking.RescheduledTime;
 
-                // Update New Slot
+                // Cập nhật Slot mới
                 UpdateTutorSlotAvailability(bookingId, booking.RescheduledTime.Value, true);
 
                 _context.Bookings.Update(booking);
 
-                // Create a new notification for student and tutor
+                // Tạo notification cho học sinh và gia sư
                 var student = _context.Users
                     .Include(x => x.StudentNavigation)
                     .FirstOrDefault(x => x.StudentNavigation.StudentId == booking.StudentId);
@@ -736,6 +736,7 @@ namespace Services.Implementations
                 {
                     throw new CrudException(HttpStatusCode.NotFound, "Student or Tutor not found", "");
                 }
+
                 NotificationDTO notification = new NotificationDTO();
                 notification.NotificationId = Guid.NewGuid();
                 notification.UserId = student.Id;
@@ -745,7 +746,8 @@ namespace Services.Implementations
                 notification.Status = (Int32)NotificationEnum.UnRead;
                 Notification noti = _mapper.Map<Notification>(notification);
                 _context.Notifications.Add(noti);
-                // Lưu notification vào firestore
+
+                // Lưu notification vào Firestore
                 _firebaseRealtimeDatabaseService.SetAsync<NotificationDTO>($"notifications/{notification.UserId}/{notification.NotificationId}", notification);
 
                 NotificationDTO notification2 = new NotificationDTO();
@@ -754,27 +756,29 @@ namespace Services.Implementations
                 notification2.Title = "Xác nhận dời lịch học";
                 notification2.Content = "Thời gian học đã xác nhận thay đổi vui lòng kiểm tra lại trong lịch dạy của bạn";
                 notification2.CreatedAt = DateTime.UtcNow.AddHours(7);
-                notification.Status = (Int32)NotificationEnum.UnRead;
+                notification2.Status = (Int32)NotificationEnum.UnRead;
                 Notification noti2 = _mapper.Map<Notification>(notification2);
                 _context.Notifications.Add(noti2);
-                // Lưu notification vào firestore
+
+                // Lưu notification vào Firestore
                 _firebaseRealtimeDatabaseService.SetAsync<NotificationDTO>($"notifications/{notification2.UserId}/{notification2.NotificationId}", notification2);
 
-                // Send confirm email to student and tutor 
+                // Gửi email xác nhận cho học sinh và gia sư
                 await _appExtension.SendMail(new MailContent()
                 {
                     To = student.Email,
                     Subject = "Xác nhận dời lịch học",
-                    Body = ". Thời gian học đã xác nhận thay đổi vui lòng kiểm tra lại trong học phần của bạn"
+                    Body = "Thời gian học đã xác nhận thay đổi vui lòng kiểm tra lại trong học phần của bạn."
                 });
                 await _appExtension.SendMail(new MailContent()
                 {
                     To = tutor.Email,
                     Subject = "Xác nhận dời lịch học",
-                    Body = ". Thời gian học đã xác nhận thay đổi vui lòng kiểm tra lại trong lịch dạy của bạn"
+                    Body = "Thời gian học đã xác nhận thay đổi vui lòng kiểm tra lại trong lịch dạy của bạn."
                 });
+
                 await _context.SaveChangesAsync();
-                return new OkObjectResult("Confirm reschedule booking successfully");
+                return new OkObjectResult("Xác nhận dời lịch học thành công");
             }
             catch (CrudException ex)
             {
@@ -812,11 +816,11 @@ namespace Services.Implementations
                 throw new CrudException(HttpStatusCode.InternalServerError, ex.Message, "");
             }
         }
-        // UPdate gia sư lịch học
+        // Cập nhật slot của gia sư
         private void UpdateTutorSlotAvailability(Guid bookingId, DateTime dateTime, bool isBooked)
         {
             var booking = _context.Bookings.FirstOrDefault(x => x.BookingId == bookingId);
-            DateTime bookingDate = booking.StudyTime.Value.Date;
+            DateTime bookingDate = dateTime.Date;
             var tutorDateAvailables = _context.TutorDateAvailables
                 .Where(x => x.TutorID == booking.TutorId && x.Date.Date == bookingDate)
                 .Select(x => x.TutorDateAvailableID)
@@ -826,8 +830,8 @@ namespace Services.Implementations
                 throw new CrudException(HttpStatusCode.NotFound, "Tutor date available not found", "");
             }
 
-            // Changre status slot 
-            TimeSpan bookingTime = new TimeSpan(booking.StudyTime.Value.Hour, booking.StudyTime.Value.Minute, 0);
+            // Thay đổi trạng thái slot 
+            TimeSpan bookingTime = new TimeSpan(dateTime.Hour, dateTime.Minute, 0);
             var tutorSlotAvailables = _context.TutorSlotAvailables
                 .Where(x => tutorDateAvailables.Contains(x.TutorDateAvailable.TutorDateAvailableID) && x.StartTime == bookingTime)
                 .FirstOrDefault();
@@ -835,8 +839,9 @@ namespace Services.Implementations
             {
                 throw new CrudException(HttpStatusCode.NotFound, "Tutor slot available not found", "");
             }
-            tutorSlotAvailables.IsBooked = !tutorSlotAvailables.IsBooked;
-            if (tutorSlotAvailables.Status == (Int32)TutorSlotAvailabilityEnum.Available)
+
+            tutorSlotAvailables.IsBooked = isBooked;
+            if (isBooked)
             {
                 tutorSlotAvailables.Status = (Int32)TutorSlotAvailabilityEnum.NotAvailable;
             }
@@ -1009,27 +1014,29 @@ namespace Services.Implementations
                     else if (bookingHistory.totalFinisedTimeBooking >= 10 && bookingHistory.totalFinisedTimeBooking < 20)
                     {
                         bookingHistory.percentageOfTutor = 8;
-                    } else if (bookingHistory.totalFinisedTimeBooking >= 20 && bookingHistory.totalFinisedTimeBooking < 30)
+                    }
+                    else if (bookingHistory.totalFinisedTimeBooking >= 20 && bookingHistory.totalFinisedTimeBooking < 30)
                     {
                         bookingHistory.percentageOfTutor = 6;
-                    } else
+                    }
+                    else
                     {
                         bookingHistory.percentageOfTutor = 5;
                     }
                     bookingHistory.finalFeeOfTutor = bookingHistory.TotalPrice - (bookingHistory.TotalPrice * bookingHistory.percentageOfTutor / 100);
                     if (booking.isRated == true)
-                        {
-                            TutorRating tutorRating = _context.TutorRatings.FirstOrDefault(tr => tr.BookingId == booking.BookingId);
-                            bookingHistory.RatePoints = tutorRating.RatePoints;
-                            bookingHistory.Content = tutorRating.Content;
-                            bookingHistory.DateRating = tutorRating.CreatedAt;
-                        }
-                        else
-                        {
-                            bookingHistory.RatePoints = null;
-                            bookingHistory.Content = "";
-                            bookingHistory.DateRating = null;
-                        }
+                    {
+                        TutorRating tutorRating = _context.TutorRatings.FirstOrDefault(tr => tr.BookingId == booking.BookingId);
+                        bookingHistory.RatePoints = tutorRating.RatePoints;
+                        bookingHistory.Content = tutorRating.Content;
+                        bookingHistory.DateRating = tutorRating.CreatedAt;
+                    }
+                    else
+                    {
+                        bookingHistory.RatePoints = null;
+                        bookingHistory.Content = "";
+                        bookingHistory.DateRating = null;
+                    }
                     bookingHistory.BookingTransactionId = booking.BookingTransactionNavigation.BookingTransactionId;
                     bookingHistory.BookingTransactionDate = booking.BookingTransactionNavigation.CreatedAt;
                     bookingHistory.BookingTransactionStatus = booking.BookingTransactionNavigation.Status;
