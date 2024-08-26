@@ -12,6 +12,7 @@ namespace Models.Models.Requests
         public Guid TutorId { get; set; }
         public Guid TutorSlotAvalaibleID { get; set; }
         public Guid TutorSubjectID { get; set; }
+        public string? BookingContent { get; set; }
     }
     public class UpdateBookingRequestV2 : BookingRequestV2
     {

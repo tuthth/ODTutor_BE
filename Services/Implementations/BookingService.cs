@@ -152,6 +152,9 @@ namespace Services.Implementations
                 }
                 DateTime studyTime = new DateTime(tutorSlot.TutorDateAvailable.Date.Year, tutorSlot.TutorDateAvailable.Date.Month, tutorSlot.TutorDateAvailable.Date.Day, tutorSlot.StartTime.Hours, tutorSlot.StartTime.Minutes, tutorSlot.StartTime.Seconds);
                 var booking = _mapper.Map<Booking>(bookingRequest);
+                var tutorSubject = _context.TutorSubjects
+                    .Include(x => x.SubjectNavigation)
+                    .FirstOrDefault(x => x.TutorSubjectId == bookingRequest.TutorSubjectID);
                 booking.StudyTime = studyTime;
                 booking.BookingId = Guid.NewGuid();
                 booking.CreatedAt = DateTime.UtcNow.AddHours(7);
@@ -161,6 +164,14 @@ namespace Services.Implementations
                 booking.GoogleMeetUrl = "";
                 booking.Message = "";
                 booking.Description = "Lịch học của học sinh " + student.Name + " với gia sư " + tutor.Name;
+                if(tutorSubject == null)
+                {
+                    booking.BookingContent = tutorSubject.SubjectNavigation.Title;
+                }
+                else
+                {
+                    booking.BookingContent = bookingRequest.BookingContent;
+                }
                 response.BookingId = booking.BookingId;
                 _context.Bookings.Add(booking);
                 await _context.SaveChangesAsync();
