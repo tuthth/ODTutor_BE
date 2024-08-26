@@ -1699,5 +1699,29 @@ namespace Services.Implementations
                 throw new Exception(ex.ToString());
             }
         }
+
+        // Get User Role By UserId 
+        public async Task<string> GetUserRoleByUserId (Guid id)
+        {   
+            string response = "";
+            var user = await _context.Users.FirstOrDefaultAsync(c => c.Id == id);
+            var tutor = await _context.Tutors.FirstOrDefaultAsync(c => c.UserId == id);
+            var moderator = await _context.Moderators.FirstOrDefaultAsync(c => c.UserId == id);
+            if (user.Email == _configuration["AdminAccount:EmailAdmin"])
+            {
+                response = "Admin";
+            } else if (tutor != null)
+            {
+                response = " Student";
+            }else if (moderator != null)
+            {
+                response = "Moderator";
+            }
+            else
+            {
+                response = "Tutor";
+            }
+            return response;
+        }
     }
 }

@@ -29,6 +29,12 @@ namespace API.Controllers
             if (result is ActionResult<List<User>> users && result.Value != null)
             {
                 var userViews = _mapper.Map<List<UserView>>(users.Value);
+                // Gán vai trò cho từng user
+                foreach (var userView in userViews)
+                {
+                    userView.UserRole = await _adminService.GetUserRoleByUserId(userView.Id);
+                }
+
                 return Ok(userViews);
             }
             if ((IActionResult)result.Result is StatusCodeResult statusCodeResult)
