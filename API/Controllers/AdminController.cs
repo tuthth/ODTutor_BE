@@ -898,6 +898,16 @@ namespace API.Controllers
             await _adminService.ActiveTutorSubscription(subscriptionID);
             return Ok();
         }
+
+        ///<summary>
+        /// Get All Student Subscription
+        /// </summary>
+        [HttpGet("get-all-student-subscriptions")]
+        public async Task<ActionResult<List<StudentSubscriptionViewResponse>>> getAllStudentSubscription()
+        {
+            var result = await _adminService.getAllStudentSubscription();
+            return Ok(result);
+        }
     }
 }
     
