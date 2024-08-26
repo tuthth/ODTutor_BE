@@ -1615,5 +1615,89 @@ namespace Services.Implementations
                 throw new Exception(ex.ToString());
             }
         }
+
+        // Ban account User 
+        public async Task<IActionResult> BanUser(Guid userId)
+        {
+            try
+            {
+                var user = await _context.Users.FirstOrDefaultAsync(c => c.Id == userId);
+                if (user == null)
+                {
+                    return new StatusCodeResult(404);
+                }
+                user.Banned = true;
+                user.BanExpiredAt = DateTime.Now.AddYears(1);
+                _context.Users.Update(user);
+                _context.SaveChanges();
+                return new StatusCodeResult(200);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.ToString());
+            }
+        }
+
+        // UnBanned Account User
+        public async Task<IActionResult> UnBanUser(Guid userId)
+        {
+            try
+            {
+                var user = await _context.Users.FirstOrDefaultAsync(c => c.Id == userId);
+                if (user == null)
+                {
+                    return new StatusCodeResult(404);
+                }
+                user.Banned = false;
+                user.BanExpiredAt = null;
+                _context.Users.Update(user);
+                _context.SaveChanges();
+                return new StatusCodeResult(200);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.ToString());
+            }
+        }
+
+        // Inactive Tutor Subscription 
+        public async Task<IActionResult> InactiveTutorSubscription(Guid id)
+        {
+            try
+            {
+                var subscription = await _cloudFireStoreService.GetAsync<TutorSubscription>($"subscription/{id}");
+                if (subscription == null)
+                {
+                    return new StatusCodeResult(404);
+                }
+                subscription.Status = (int)TutorSubscriptionStatusEnum.Inactive;
+                _cloudFireStoreService.SetAsync<TutorSubscription>($"subscription/{id}", subscription);
+                return new StatusCodeResult(200);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.ToString());
+            }
+        }
+
+        // Active Tutor Subscription
+        public async Task<IActionResult> ActiveTutorSubscription(Guid id)
+        {
+            try
+            {
+                var subscription = await _cloudFireStoreService.GetAsync<TutorSubscription>($"subscription/{id}");
+                if (subscription == null)
+                {
+                    return new StatusCodeResult(404);
+                }
+                subscription.Status = (int)TutorSubscriptionStatusEnum.Active;
+                _cloudFireStoreService.SetAsync<TutorSubscription>($"subscription/{id}", subscription);
+                return new StatusCodeResult(200);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.ToString());
+            }
+        }
     }
 }
