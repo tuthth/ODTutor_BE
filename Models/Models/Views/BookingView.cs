@@ -27,5 +27,6 @@ namespace Models.Models.Views
         public bool? IsRated { get; set; }
         public bool? IsReported { get; set; }
         public string? SubjectName { get; set; }
+        public string? BookingContent { get; set; }
     }
 }
