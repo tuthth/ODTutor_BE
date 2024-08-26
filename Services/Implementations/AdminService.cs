@@ -1723,5 +1723,54 @@ namespace Services.Implementations
             }
             return response;
         }
+
+        // Get All Student Subscription of User 
+        public async Task<ActionResult<List<StudentSubscriptionViewResponse>>> getAllStudentSubscription()
+        {
+            try
+            {
+                // Giả sử GetAsync trả về một Dictionary với ID là key và TutorSubscription là giá trị
+                var subscriptionDict = await _cloudFireStoreService.GetAsync<Dictionary<string, StudentSubscription>>("studentSubscription");
+
+                if (subscriptionDict == null || !subscriptionDict.Any())
+                {
+                    return new StatusCodeResult(404);
+                }
+
+                // Chuyển đổi Dictionary thành List<TutorSubscription>
+                var subscriptions = subscriptionDict.Values.ToList();
+
+                List<StudentSubscriptionViewResponse> response = new List<StudentSubscriptionViewResponse>();
+
+                foreach (var subscription in subscriptions)
+                {
+                    // Chuyển đổi SubscriptionDetails từ List<Object> sang List<string>
+                    var subscriptionDetails = subscription.SubscriptionDetails
+                        .Select(detail => detail.Description)
+                        .ToList();
+
+                    StudentSubscriptionViewResponse studentSubscriptionViewResponse = new StudentSubscriptionViewResponse
+                    {
+                        Id = subscription.Id,
+                        StudentNameSubscription = subscription.StudentNameSubscription,
+                        Description = subscription.Description,
+                        Price = subscription.Price,
+                        Types = subscription.Types,
+                        CreatedDate = subscription.CreatedDate,
+                        NumberOfSubscriptions = subscription.NumberOfSubscriptions,
+                        Status = subscription.Status,
+                        SubscriptionDetails = subscriptionDetails
+                    };
+
+                    response.Add(studentSubscriptionViewResponse);
+                }
+
+                return response;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.ToString());
+            }
+        }
     }
 }
