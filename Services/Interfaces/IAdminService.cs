@@ -72,6 +72,10 @@ namespace Services.Interfaces
         Task<ActionResult<List<TutorSubscriptionViewResponse>>> getAllTutorSubscription();
         Task<ActionResult<TutorSubscriptionViewResponse>> getTutorSubscriptionById(Guid id);
         Task<IActionResult> CreateStudentSubscriptionByAdmin(StudentSubscriptionRequest studentSubscription);
+        Task<IActionResult> BanUser(Guid userId);
+        Task<IActionResult> UnBanUser(Guid userId);
+        Task<IActionResult> InactiveTutorSubscription(Guid id);
+        Task<IActionResult> ActiveTutorSubscription(Guid id);
 
     }
 }

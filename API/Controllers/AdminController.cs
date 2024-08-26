@@ -852,6 +852,46 @@ namespace API.Controllers
             await _adminService.CreateStudentSubscriptionByAdmin(studentSubscriptionSetting);
             return Ok();
         }
+
+        /// <summary>
+        /// Ban account user 
+        /// </summary>
+        [HttpPost("ban-account")]
+        public async Task<IActionResult> BanAccount([FromBody] Guid userId)
+        {
+            await _adminService.BanUser(userId);
+            return Ok();
+        }
+
+        /// <summary>
+        /// Unban account user
+        /// </summary>
+        [HttpPost("unban-account")]
+        public async Task<IActionResult> UnbanAccount([FromBody] Guid userId)
+        {
+            await _adminService.UnBanUser(userId);
+            return Ok();
+        }
+
+        /// <summary>
+        /// Inactive Tutor Subscription 
+        /// </summary>
+        [HttpPost("inactive-tutor-subscriptions")]
+        public async Task<IActionResult> InactiveTutorSubscriptions([FromBody] Guid subscriptionID)
+        {
+            await _adminService.InactiveTutorSubscription(subscriptionID);
+            return Ok();
+        }
+
+        /// <summary>
+        /// Active Tutor Subscription 
+        /// </summary>
+        [HttpPost("active-tutor-subscriptions")]
+        public async Task<IActionResult> ActiveTutorSubscriptions([FromBody] Guid subscriptionID)
+        {
+            await _adminService.ActiveTutorSubscription(subscriptionID);
+            return Ok();
+        }
     }
 }
     
