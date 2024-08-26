@@ -76,6 +76,7 @@ namespace Services.Interfaces
         Task<IActionResult> UnBanUser(Guid userId);
         Task<IActionResult> InactiveTutorSubscription(Guid id);
         Task<IActionResult> ActiveTutorSubscription(Guid id);
+        Task<string> GetUserRoleByUserId(Guid id);
 
     }
 }

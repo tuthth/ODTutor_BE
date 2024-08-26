@@ -23,5 +23,6 @@ namespace Models.Models.Views
         public Boolean IsPremium { get; set; }
         public Boolean Banned { get; set; }
         public DateTime? BanExpiredAt { get; set; }
+        public string ? UserRole { get; set; }
     }
 }
