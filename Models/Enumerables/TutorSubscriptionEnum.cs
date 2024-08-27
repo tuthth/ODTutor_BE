@@ -18,8 +18,8 @@ namespace Models.Enumerables
         // Status of the subscription
         public enum TutorSubscriptionStatusEnum
         {
-            Active = 0,
-            Inactive = 1,
+            Active = 1,
+            Inactive = 0,
         }
     }
 }

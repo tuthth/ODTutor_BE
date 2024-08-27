@@ -78,6 +78,9 @@ namespace Services.Interfaces
         Task<IActionResult> ActiveTutorSubscription(Guid id);
         Task<string> GetUserRoleByUserId(Guid id);
         Task<ActionResult<List<StudentSubscriptionViewResponse>>> getAllStudentSubscription();
+        Task<ActionResult<StudentSubscriptionViewResponse>> getStudentSubscriptionById(Guid id);
+        Task<IActionResult> ActiveStudentSubscription(Guid id);
+        Task<IActionResult> InactiveStudentSubscription(Guid id);
 
     }
 }

@@ -1772,5 +1772,83 @@ namespace Services.Implementations
                 throw new Exception(ex.ToString());
             }
         }
+
+        // Get Each Student Subscription by Id
+        public async Task<ActionResult<StudentSubscriptionViewResponse>> getStudentSubscriptionById(Guid id)
+        {
+            try
+            {
+                var subscription = await _cloudFireStoreService.GetAsync<StudentSubscription>($"studentSubscription/{id}");
+
+                if (subscription == null)
+                {
+                    return new StatusCodeResult(404);
+                }
+
+                // Chuyển đổi SubscriptionDetails từ List<Object> sang List<string>
+                var subscriptionDetails = subscription.SubscriptionDetails
+                    .Select(detail => detail.Description)
+                    .ToList();
+
+                StudentSubscriptionViewResponse studentSubscriptionViewResponse = new StudentSubscriptionViewResponse
+                {
+                    Id = subscription.Id,
+                    StudentNameSubscription = subscription.StudentNameSubscription,
+                    Description = subscription.Description,
+                    Price = subscription.Price,
+                    Types = subscription.Types,
+                    CreatedDate = subscription.CreatedDate,
+                    NumberOfSubscriptions = subscription.NumberOfSubscriptions,
+                    Status = subscription.Status,
+                    SubscriptionDetails = subscriptionDetails
+                };
+
+                return studentSubscriptionViewResponse;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.ToString());
+            }
+        }
+
+        // Active Student Subscription
+        public async Task<IActionResult> ActiveStudentSubscription(Guid id)
+        {
+            try
+            {
+                var subscription = await _cloudFireStoreService.GetAsync<StudentSubscription>($"studentSubscription/{id}");
+                if (subscription == null)
+                {
+                    return new StatusCodeResult(404);
+                }
+                subscription.Status = (int)TutorSubscriptionStatusEnum.Active;
+                _cloudFireStoreService.SetAsync<StudentSubscription>($"studentSubscription/{id}", subscription);
+                return new StatusCodeResult(200);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.ToString());
+            }
+        }
+
+        // InActive Student Subscription 
+        public async Task<IActionResult> InactiveStudentSubscription(Guid id)
+        {
+            try
+            {
+                var subscription = await _cloudFireStoreService.GetAsync<StudentSubscription>($"studentSubscription/{id}");
+                if (subscription == null)
+                {
+                    return new StatusCodeResult(404);
+                }
+                subscription.Status = (int)TutorSubscriptionStatusEnum.Inactive;
+                _cloudFireStoreService.SetAsync<StudentSubscription>($"studentSubscription/{id}", subscription);
+                return new StatusCodeResult(200);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.ToString());
+            }
+        }
     }
 }

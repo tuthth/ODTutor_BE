@@ -59,6 +59,7 @@ namespace Services.Implementations
             }
             var subject = _mapper.Map<Subject>(subjectRequest);
             subject.SubjectId = Guid.NewGuid();
+            subject.Status = true;
             _context.Subjects.Add(subject);
             await _context.SaveChangesAsync();
             return new StatusCodeResult(200);
@@ -116,6 +117,19 @@ namespace Services.Implementations
             {
                 throw new Exception(ex.ToString());
             }
+        }
+
+        // Active and InActive Subject By Subject ID
+        public async Task<IActionResult> ActiveAndInActiveSubject(Guid subjectId)
+        {
+            var subject = await _context.Subjects.FirstOrDefaultAsync(x => x.SubjectId == subjectId);
+            if (subject == null)
+            {
+                return new StatusCodeResult(404);
+            }
+            subject.Status = !subject.Status;
+            await _context.SaveChangesAsync();
+            return new StatusCodeResult(200);
         }
     }
 }

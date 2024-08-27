@@ -120,5 +120,24 @@ namespace API.Controllers
             if ((IActionResult)result.Result is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
             throw new Exception("Lỗi không xác định");
         }
+
+        /// <summary>
+        /// Active or Inactive subject 
+        /// </summary>
+        [HttpPost("active-inactive/{subjectId}")]
+        public async Task<IActionResult> ActiveAndInActiveSubject(Guid subjectId)
+        {
+            var result = await _subjectService.ActiveAndInActiveSubject(subjectId);
+            if (result is IActionResult actionResult)
+            {
+                if (actionResult is StatusCodeResult statusCodeResult)
+                {
+                    if (statusCodeResult.StatusCode == 404) { return NotFound(new { Message = "Không tìm thấy môn học" }); }
+                    if (statusCodeResult.StatusCode == 200) { return Ok(new { Message = "Cập nhật trạng thái môn học thành công" }); }
+                }
+                if (actionResult is Exception exception) return StatusCode(StatusCodes.Status500InternalServerError, new { Message = exception.ToString() });
+            }
+            throw new Exception("Lỗi không xác định");
+        }
     }
 }

@@ -13,5 +13,6 @@ namespace Models.Models.Views
         public string Title { get; set; }
         public string Content { get; set; }
         public string Note { get; set; }
+        public bool? Status { get; set; }
     }
 }

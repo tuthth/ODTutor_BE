@@ -13,6 +13,7 @@ namespace Models.Entities
         public string Title { get; set; }
         public string Content { get; set; }
         public string Note {  get; set; }
+        public bool? Status { get;set; } = true;
 
         public virtual ICollection<TutorSubject> TutorSubjectNavigation { get; set; }
         public virtual ICollection<StudentRequest>? StudentRequestsNavigation { get; set; }

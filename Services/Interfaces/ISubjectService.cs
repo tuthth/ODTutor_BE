@@ -18,5 +18,6 @@ namespace Services.Interfaces
         Task<ActionResult<List<Subject>>> GetAllSubjects();
         Task<ActionResult<Subject>> GetSubject(Guid id);
         Task<ActionResult<TutorSubjectResponse>> GetTutorSubject(Guid tutorSubjectId);
+        Task<IActionResult> ActiveAndInActiveSubject(Guid subjectId);
     }
 }

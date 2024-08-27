@@ -907,7 +907,37 @@ namespace API.Controllers
         {
             var result = await _adminService.getAllStudentSubscription();
             return Ok(result);
-        } 
+        }
+
+        /// <summary>
+        /// Get Each Student Subscription By ID
+        /// </summary>
+        [HttpGet("get-student-subscription/{subscriptionID}")]
+        public async Task<ActionResult<StudentSubscriptionViewResponse>> getStudentSubscriptionByID(Guid subscriptionID)
+        {
+            var result = await _adminService.getStudentSubscriptionById(subscriptionID);
+            return Ok(result);
+        }
+
+        /// <summary>
+        /// Active Student Subscription
+        /// </summary>
+        [HttpPost("active-student-subscriptions")]
+        public async Task<IActionResult> ActiveStudentSubscriptions([FromBody] Guid subscriptionID)
+        {
+            await _adminService.ActiveStudentSubscription(subscriptionID);
+            return Ok();
+        }
+
+        /// <summary>
+        /// Inactive Student Subscription
+        /// </summary>
+        [HttpPost("inactive-student-subscriptions")]
+        public async Task<IActionResult> InactiveStudentSubscriptions([FromBody] Guid subscriptionID)
+        {
+            await _adminService.InactiveStudentSubscription(subscriptionID);
+            return Ok();
+        }
     }
 }
     
