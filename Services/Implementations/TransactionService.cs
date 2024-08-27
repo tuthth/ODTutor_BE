@@ -2234,10 +2234,11 @@ namespace Services.Implementations
                     Models.Entities.Notification notification2x = _mapper.Map<Models.Entities.Notification>(notification2);
                     _context.Notifications.Add(notification1x);
                     _context.Notifications.Add(notification2x);
-                    _firebaseRealtimeDatabaseService.UpdateAsync<NotificationDTO>($"notifications/{notification1.UserId}/{notification1.NotificationId}", notification1);
-                    _firebaseRealtimeDatabaseService.UpdateAsync<NotificationDTO>($"notifications/{notification2.UserId}/{notification2.NotificationId}", notification2);
-                    await _context.SaveChangesAsync();
+                    await _firebaseRealtimeDatabaseService.UpdateAsync<NotificationDTO>($"notifications/{notification1.UserId}/{notification1.NotificationId}", notification1);
+                    await _firebaseRealtimeDatabaseService.UpdateAsync<NotificationDTO>($"notifications/{notification2.UserId}/{notification2.NotificationId}", notification2);
+                    
                 }
+                await _context.SaveChangesAsync();
                 return new StatusCodeResult(200);
             }
             catch (Exception ex)
