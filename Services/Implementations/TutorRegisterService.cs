@@ -976,7 +976,7 @@ namespace Services.Implementations
                     tutorSubject.TutorId = request.TutorId;
                     tutorSubject.SubjectId = subjectID;
                     tutorSubject.CreatedAt = DateTime.UtcNow.AddHours(7);
-                    tutorSubject.Status = (Int32)TutorSubjectEnum.InProgress;
+                    tutorSubject.Status = (Int32)TutorSubjectEnum.Available;
                     tutorSubjects.Add(tutorSubject);
                 }
                 // Kiểm tra tutor có bị trùng môn đăng kí không
@@ -1099,25 +1099,14 @@ namespace Services.Implementations
                 {
                     throw new CrudException(HttpStatusCode.NotFound, "Không tìm thấy môn học của gia sư", "");
                 }
-                if(tutorSubject.Status == (Int32)TutorSubjectEnum.InProgress)
-                {
-                    throw new CrudException(HttpStatusCode.Forbidden, "Môn học đang trong quá trình xử lý, không thể xóa", "");
-                }
-                if(tutorSubject.Status == (Int32)TutorSubjectEnum.Banned)
-                {
-                    TimeSpan timeRemaining = tutorSubject.ExpeireAt.Value - DateTime.UtcNow.AddHours(7);
-                    throw new CrudException(HttpStatusCode.Conflict, "Môn học vẫn trong thời gian khóa vui lòng quay trở lại sau" + timeRemaining, "");
-                }
                 if (tutorSubject.Status == (Int32)TutorSubjectEnum.NotAvailable)
                 {   
 
                     tutorSubject.Status = (Int32)TutorSubjectEnum.Available;
                 }
                 else if (tutorSubject.Status == (Int32)TutorSubjectEnum.Available)
-                {   
-                    
-                    tutorSubject.Status = (Int32)TutorSubjectEnum.Banned;
-                    tutorSubject.ExpeireAt = DateTime.UtcNow.AddHours(7).AddDays(14);
+                {     
+                    tutorSubject.Status = (Int32)TutorSubjectEnum.NotAvailable;
                 }
                 await _context.SaveChangesAsync();
                 throw new CrudException(HttpStatusCode.OK, "Cập nhật trạng thái môn học thành công", "");
