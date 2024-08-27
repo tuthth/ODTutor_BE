@@ -1712,14 +1712,14 @@ namespace Services.Implementations
                 response = "Admin";
             } else if (tutor != null)
             {
-                response = " Student";
+                response = " Tutor";
             }else if (moderator != null)
             {
                 response = "Moderator";
             }
             else
             {
-                response = "Tutor";
+                response = "Student";
             }
             return response;
         }
