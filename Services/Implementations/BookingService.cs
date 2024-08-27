@@ -1175,5 +1175,24 @@ namespace Services.Implementations
         }
 
 
+        // Get ReportId From BookingID 
+        public async Task<ActionResult<Guid>> GetReportIdFromBookingId(Guid bookingId)
+        {
+            try
+            {
+                var report = _context.Reports.FirstOrDefault(x => x.TargetId == bookingId);
+                if (report == null)
+                {
+                    return new StatusCodeResult(404);
+                }
+                return report.ReportId;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.ToString());
+            }
+        }
+
+
     }
 }

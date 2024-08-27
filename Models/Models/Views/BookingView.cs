@@ -12,6 +12,7 @@ namespace Models.Models.Views
         public Guid StudentId { get; set; }
         public Guid TutorId { get; set; }
         public Guid TutorSubjectId { get; set; }
+        public Guid? ReportId { get; set; }
         public DateTime CreatedAt { get; set; }
         public TimeSpan Duration { get; set; }
         public DateTime ActualEndTime { get; set; }
