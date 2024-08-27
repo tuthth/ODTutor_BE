@@ -710,12 +710,12 @@ namespace Services.Implementations
             }
         }
 
-
+        // Count Message Chat of User 
         public async Task<int> GetMessagesCountToday(string userId)
         {
-            // Chuyển đổi thời gian sang UTC sau khi đã xác định thời gian bắt đầu và kết thúc của ngày
-            var startOfDay = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(DateTime.UtcNow.Date, "SE Asia Standard Time").ToUniversalTime();
-            var endOfDay = startOfDay.AddDays(1).AddTicks(-1).ToUniversalTime();
+            // Lấy thời gian bắt đầu và kết thúc của ngày hiện tại theo UTC
+            var startOfDay = DateTime.UtcNow.Date;
+            var endOfDay = startOfDay.AddDays(1).AddTicks(-1);
 
             CollectionReference chatsRef = _cloudFireStoreService.GetCollectionReference("chats");
             Query query = chatsRef
