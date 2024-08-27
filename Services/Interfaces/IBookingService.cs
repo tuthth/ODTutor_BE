@@ -35,5 +35,6 @@ namespace Services.Interfaces
         Task<IActionResult> UpdateFinishBookingOfAllBooking();
         Task<ActionResult<PageResults<BookingHistoryResponse>>> GetBookingHistoryTutor(Guid tutorId, PagingRequest request);
         Task<IActionResult> CheckBookingIsRequiredChangeSchedule();
+        Task<ActionResult<Guid>> GetReportIdFromBookingId(Guid bookingId);
     }
 }

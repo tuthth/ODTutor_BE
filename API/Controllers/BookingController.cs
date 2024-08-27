@@ -77,8 +77,19 @@ namespace API.Controllers
                 var bookingViews = _mapper.Map<List<BookingView>>(bookings.Value);
                 foreach (var booking in bookingViews)
                 {
-                    var reportCount = await _reportService.GetReportByTargetId(booking.BookingId);
-                    booking.IsReported = reportCount.Value != null;
+                    // Lấy Report bằng TargetId (BookingId)
+                    var reportResult = await _reportService.GetReportByTargetId(booking.BookingId);
+
+                    if (reportResult.Value != null)
+                    {
+                        booking.ReportId = reportResult.Value.ReportId; // Gán ReportId từ Report vào BookingView
+                        booking.IsReported = true;
+                    }
+                    else
+                    {
+                        booking.ReportId = null; // Hoặc Guid.Empty nếu bạn muốn giữ định dạng Guid
+                        booking.IsReported = false;
+                    }
                 }
                 var bookingIn30Days = bookingViews.Where(b => b.CreatedAt >= DateTime.UtcNow.AddHours(7).AddDays(-30)).ToList();
                 var bookingInPrevious30Days = bookingViews.Where(b => b.CreatedAt < DateTime.UtcNow.AddHours(7).AddDays(-30) && b.CreatedAt >= DateTime.UtcNow.AddHours(7).AddDays(-60)).ToList();
